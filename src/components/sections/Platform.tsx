@@ -1,46 +1,32 @@
-import {
-  Activity,
-  ArrowRight,
-  Bell,
-  ChartCandlestick,
-  Code,
-  FileText,
-  Filter,
-  FlaskConical,
-  GitBranch,
-  Table2,
-  Timer,
-} from 'lucide-react'
-import type { LucideIcon } from 'lucide-react'
+import { ArrowRight } from 'lucide-react'
 
 import Button from '../ui/Button'
-import MediaPlaceholder from '../ui/MediaPlaceholder'
+import MediaSection from '../ui/MediaSection'
 import Reveal from '../ui/Reveal'
-import SectionShell from '../ui/SectionShell'
 
 import {
   platformCta,
   platformEyebrow,
   platformHeading,
   platformMediaAlt,
-  platformMediaLabel,
   platformSubheading,
   tools,
 } from '../../data/platform'
 
-/** Icon names come from design-system/thinqprofit/pages/landing.md §8, Platform row. */
-const iconMap: Record<string, LucideIcon> = {
-  'candlestick-chart': ChartCandlestick,
-  'table-2': Table2,
-  filter: Filter,
-  bell: Bell,
-  timer: Timer,
-  'git-branch': GitBranch,
-  'flask-conical': FlaskConical,
-  code: Code,
-  'file-text': FileText,
-  activity: Activity,
-}
+/**
+ * Art-directed rag. MediaSection honours `\n` at ≥768px only, so this is a
+ * desktop-only instruction — below that the headline re-rags to the viewport.
+ *
+ * The break isolates "ten seconds" on its own line, because that phrase is the
+ * entire claim. Derived from the copy string rather than retyped, so a deck edit
+ * can never leave a stale headline on the page: if the phrase moves, `replace`
+ * no-ops and the raw string renders unbroken.
+ *
+ * The longest resulting line, "ten seconds", sets ~5.2em in Inter Medium at the
+ * display tracking — comfortably inside the 9em measure, so none of the three
+ * lines can re-rag by accident as the clamp resizes the type.
+ */
+const headline = platformHeading.replace(' ten seconds ', '\nten seconds\n')
 
 interface PlatformProps {
   /** Anchor target. Matches the nav's Platform link. */
@@ -48,95 +34,88 @@ interface PlatformProps {
 }
 
 /**
- * §6 Platform & tools.
+ * §6 Platform & tools — full-bleed, copy overlaid on the media.
  *
- * Deliberately not the Products card grid: a sticky terminal panel on the left,
- * a dense divided spec list on the right. Rows shift background on hover —
- * no lift transform (landing.md §5).
+ * Replaces the boxed layout this section used to run: a sticky faux-macOS
+ * terminal panel beside a numbered spec list. The window chrome, the 01–10
+ * ordinals and the per-row icon tiles are all gone. Three separate decorations
+ * competing over a ten-item list is what made the section read as a template,
+ * and none of them survive being set on top of a moving plate. What is left is
+ * the thing that does: bare text on hairlines.
+ *
+ * The ten `tool.body` descriptions do not come along. At `height="tall"` with
+ * copy in the right 46%, the headline/body/CTA stack already spends ~400px of
+ * the 800px frame; ten two-to-four-line descriptions need ~500px more and would
+ * be clipped by the section's `overflow-hidden`. The capability names carry the
+ * breadth claim on their own — the descriptions belong on the tour page the CTA
+ * points at, not compressed to four-line slivers here.
+ *
+ * Media is briefed but unshot, so MediaBackdrop renders its pending field. That
+ * is intentional: it carries the same darkness as the eventual clip
+ * (motion-brief §5.2 — a macro rack-focus across dark glass, no rendered UI),
+ * so contrast can be judged now rather than after the asset lands
+ * (motion-brief §7 rule 7).
+ *
+ * Constraints honoured:
+ *  - no green or red anywhere; the palette here is white on ink (landing.md §10)
+ *  - indigo `accent` is the only CTA colour. The tour button goes solid rather
+ *    than keeping its old `secondary` outline — `border-border` (#334155) is
+ *    invisible against the plate, so an outline button would read as bare text.
+ *  - nothing sits behind blur or glass. The scrim is a flat radial pinned at
+ *    z-index -1 behind live text; row copy at `text-white/80` clears ~9:1.
  */
 export default function Platform({ id = 'platform' }: PlatformProps) {
   return (
-    <SectionShell
+    <MediaSection
       id={id}
-      eyebrow={platformEyebrow}
-      heading={platformHeading}
-      subheading={platformSubheading}
-      centered={false}
-      tone="raised"
+      height="tall"
+      place="right"
+      anchor="center"
+      scrim={0.86}
+      scrimAt="68% 50%"
+      label={platformEyebrow}
+      headline={headline}
+      measure="9em"
+      body={platformSubheading}
+      actions={
+        <Button href="#" aria-label={platformCta}>
+          {platformCta}
+          <ArrowRight className="h-4 w-4" strokeWidth={1.5} aria-hidden="true" />
+        </Button>
+      }
+      media={{ alt: platformMediaAlt }}
     >
-      <div className="grid gap-10 lg:grid-cols-12 lg:gap-12">
-        {/* Terminal panel — sticks while the spec list scrolls past it. */}
-        <div className="lg:col-span-5">
-          <Reveal>
-            <div className="lg:sticky lg:top-24">
-              <div className="rounded-2xl border border-border-soft bg-surface/40 p-3">
-                {/* Decorative window chrome, so the placeholder reads as a terminal. */}
-                <div aria-hidden="true" className="flex items-center gap-1.5 px-2 pb-3 pt-1">
-                  <span className="h-2 w-2 rounded-full bg-border" />
-                  <span className="h-2 w-2 rounded-full bg-border" />
-                  <span className="h-2 w-2 rounded-full bg-border" />
-                  <span className="ml-3 h-px flex-1 bg-border-soft" />
-                </div>
-                <MediaPlaceholder
-                  kind="image"
-                  aspect="aspect-video lg:aspect-[4/5]"
-                  label={platformMediaLabel}
-                  alt={platformMediaAlt}
-                />
-              </div>
+      {/* One reveal for the whole block, not ten staggered rows. A per-item
+          stagger across a ten-item list reads as an entrance animation playing
+          at the reader; the list should simply arrive with the copy it belongs
+          to, one beat behind it. */}
+      <Reveal delay={120} className="mt-10 w-full">
+        {/* Row-major fill, so the visual order matches the DOM order a screen
+            reader announces. Capped at the same 34em as the body copy above it
+            so the two blocks share a right edge instead of the list sprawling
+            to the full 46% column on a wide display.
 
-              <div className="mt-6 hidden lg:block">
-                <Button href="#" variant="secondary" aria-label={platformCta}>
-                  {platformCta}
-                  <ArrowRight className="h-4 w-4" strokeWidth={1.5} aria-hidden="true" />
-                </Button>
-              </div>
-            </div>
-          </Reveal>
-        </div>
-
-        {/* Spec list — one tool per row, hairline separated. */}
-        <div className="lg:col-span-7">
-          <ol className="divide-y divide-border-soft border-y border-border-soft">
-            {tools.map((tool, index) => {
-              const Icon = iconMap[tool.icon] ?? Activity
-              return (
-                <li key={tool.title}>
-                  {/* Stagger capped at 240ms — nothing waits past ~250ms (landing.md §6). */}
-                  <Reveal delay={Math.min(index, 4) * 60}>
-                    <div className="flex items-start gap-4 rounded-lg px-2 py-5 transition-colors duration-200 hover:bg-surface/60 sm:px-3">
-                      <span className="mt-0.5 grid h-9 w-9 shrink-0 place-items-center rounded-lg border border-border-soft bg-surface text-accent-soft">
-                        <Icon className="h-[18px] w-[18px]" strokeWidth={1.5} aria-hidden="true" />
-                      </span>
-
-                      <div className="min-w-0 flex-1">
-                        <h3 className="text-lg font-semibold leading-[1.4] text-fg">
-                          {tool.title}
-                        </h3>
-                        <p className="mt-1.5 text-base leading-relaxed text-fg-muted">{tool.body}</p>
-                      </div>
-
-                      <span
-                        aria-hidden="true"
-                        className="tabular hidden shrink-0 pt-1 text-xs font-medium tracking-widest text-fg-muted sm:block"
-                      >
-                        {String(index + 1).padStart(2, '0')}
-                      </span>
-                    </div>
-                  </Reveal>
-                </li>
-              )
-            })}
-          </ol>
-
-          <div className="mt-8 lg:hidden">
-            <Button href="#" variant="secondary" fullWidth aria-label={platformCta}>
-              {platformCta}
-              <ArrowRight className="h-4 w-4" strokeWidth={1.5} aria-hidden="true" />
-            </Button>
-          </div>
-        </div>
-      </div>
-    </SectionShell>
+            `text-base`, not a 15px step: `em` resolves against each element's
+            own font size, so 34em on a 15px list is 510px against the body's
+            544px — the shared right edge this cap exists for only lines up if
+            both blocks are set at 16px. It is also the page's body-copy floor.
+            At 16px the longest name ("Baskets & multi-leg") still clears the
+            157px column the 46% rail leaves at 768px, so nothing wraps and the
+            block stays well inside the section's fixed height. */}
+        <ul
+          aria-label="Platform capabilities"
+          className="grid max-w-[34em] grid-cols-1 gap-x-8 sm:grid-cols-2 sm:gap-x-10"
+        >
+          {tools.map((tool) => (
+            <li
+              key={tool.title}
+              className="border-t border-white/15 py-3 text-base leading-snug text-white/80"
+            >
+              {tool.title}
+            </li>
+          ))}
+        </ul>
+      </Reveal>
+    </MediaSection>
   )
 }

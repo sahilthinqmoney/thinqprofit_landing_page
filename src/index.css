@@ -61,6 +61,15 @@
     font-feature-settings: 'tnum';
   }
 
+  /*
+   * Snap rails (the media-card row) scroll horizontally by design. The bar is
+   * suppressed because the cards are 86vw on touch, so the next card's edge is
+   * always visible and does the affording instead.
+   */
+  .rail::-webkit-scrollbar {
+    display: none;
+  }
+
   :focus-visible {
     outline: 2px solid var(--color-accent-soft);
     outline-offset: 2px;

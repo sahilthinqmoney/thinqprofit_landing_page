@@ -32,7 +32,20 @@ interface PricingProps {
  * A rate card should look like a rate card: real tables, tabular numerals, the
  * statutory pass-through line pinned under the brokerage figures where it can't
  * be missed. Every [placeholder] is left literal — see src/data/pricing.ts.
+ *
+ * Width behaviour — the page container now runs to 1664px, which is more than a
+ * two-column rate card can spend. `RATE_CARD_MEASURE` (1344px, the exact content
+ * width of a 1440 laptop) is the widest these blocks get: past that a Segment /
+ * Brokerage row is mostly the gap between the two values, and a plan card is
+ * mostly padding. The extra room goes into cell padding instead — px-5 → px-7
+ * and taller rows — so the tables breathe rather than stretch. Every block on
+ * the section shares the measure so their left and right edges line up.
  */
+const RATE_CARD_MEASURE = 'mx-auto w-full max-w-[84rem]'
+
+/** Row padding shared by both data tables so they read as one rate card. */
+const CELL_X = 'px-5 sm:px-6 lg:px-7'
+
 export default function Pricing({ id = 'pricing' }: PricingProps) {
   return (
     <SectionShell
@@ -42,11 +55,11 @@ export default function Pricing({ id = 'pricing' }: PricingProps) {
       subheading={pricingSubheading}
       tone="raised"
     >
-      <div className="grid gap-6 lg:grid-cols-12">
+      <div className={`grid gap-6 lg:grid-cols-12 lg:gap-8 ${RATE_CARD_MEASURE}`}>
         {/* ---------------- Brokerage rate card ---------------- */}
         <Reveal className="min-w-0 lg:col-span-7">
           <div className="overflow-hidden rounded-2xl border border-border bg-surface/70">
-            <div className="flex items-center gap-2.5 border-b border-border-soft px-5 py-4">
+            <div className={`flex items-center gap-2.5 border-b border-border-soft py-4 ${CELL_X}`}>
               <Receipt className="h-4 w-4 text-accent-soft" strokeWidth={1.5} aria-hidden="true" />
               <h3 className="text-lg font-semibold leading-[1.4] text-fg">
                 {brokerageColumns.rate}
@@ -55,7 +68,9 @@ export default function Pricing({ id = 'pricing' }: PricingProps) {
 
             {/* Scrolls inside itself on narrow screens — the page never does. */}
             <div className="overflow-x-auto">
-              <table className="w-full min-w-[28rem] border-collapse text-left text-sm">
+              {/* text-base, matching the Support table — both are data tables and
+                  the page must not show two of them at two sizes. */}
+              <table className="w-full min-w-[26rem] border-collapse text-left text-base">
                 <caption className="sr-only">
                   Brokerage by market segment. All amounts are unverified placeholders.
                 </caption>
@@ -63,13 +78,13 @@ export default function Pricing({ id = 'pricing' }: PricingProps) {
                   <tr className="border-b border-border-soft">
                     <th
                       scope="col"
-                      className="px-5 py-3 text-xs font-medium uppercase tracking-[0.14em] text-fg-muted"
+                      className={`py-3 text-xs font-medium uppercase tracking-[0.14em] text-fg-muted ${CELL_X}`}
                     >
                       {brokerageColumns.segment}
                     </th>
                     <th
                       scope="col"
-                      className="px-5 py-3 text-right text-xs font-medium uppercase tracking-[0.14em] text-fg-muted"
+                      className={`py-3 text-right text-xs font-medium uppercase tracking-[0.14em] text-fg-muted ${CELL_X}`}
                     >
                       {brokerageColumns.rate}
                     </th>
@@ -83,11 +98,16 @@ export default function Pricing({ id = 'pricing' }: PricingProps) {
                     >
                       <th
                         scope="row"
-                        className="whitespace-nowrap px-5 py-3.5 font-normal text-fg"
+                        className={`whitespace-nowrap py-4 align-top font-normal text-fg lg:py-5 ${CELL_X}`}
                       >
                         {row.segment}
                       </th>
-                      <td className="tabular whitespace-nowrap px-5 py-3.5 text-right font-medium text-fg">
+                      {/* Not nowrap: at text-base the longest placeholder rate is
+                          ~48 characters, and forcing it onto one line pushed the
+                          table into its own scrollbar on a 1024 desktop. */}
+                      <td
+                        className={`tabular py-4 text-right align-top font-medium text-fg lg:py-5 ${CELL_X}`}
+                      >
                         <CopyText source={row.rate} as="span" />
                       </td>
                     </tr>
@@ -99,10 +119,10 @@ export default function Pricing({ id = 'pricing' }: PricingProps) {
             {/* Always-visible statutory pass-through line. Do not collapse this.
                 The rate-card link is inline inside the sentence, exactly as the
                 deck writes it — matches Disclosure's `note` treatment. */}
-            <div className="border-t border-border bg-surface-raised/40 px-5 py-4">
+            <div className={`border-t border-border bg-surface-raised/40 py-4 ${CELL_X}`}>
               <CopyText
                 source={statutoryLine}
-                className="text-xs leading-relaxed text-fg-muted"
+                className="max-w-[68ch] text-xs leading-relaxed text-fg-muted"
               />
             </div>
           </div>
@@ -111,27 +131,28 @@ export default function Pricing({ id = 'pricing' }: PricingProps) {
         {/* ---------------- Account charges ---------------- */}
         <Reveal delay={60} className="min-w-0 lg:col-span-5">
           <div className="h-full rounded-2xl border border-border-soft bg-surface/40">
-            <div className="flex items-center gap-2.5 border-b border-border-soft px-5 py-4">
+            <div className={`flex items-center gap-2.5 border-b border-border-soft py-4 ${CELL_X}`}>
               <Wallet className="h-4 w-4 text-accent-soft" strokeWidth={1.5} aria-hidden="true" />
               <h3 className="text-lg font-semibold leading-[1.4] text-fg">
                 {accountChargesHeading}
               </h3>
             </div>
 
-            <div className="px-5 pb-5">
+            <div className={`pb-5 ${CELL_X}`}>
               <div className="flex items-baseline justify-between gap-4 border-b border-border-soft py-3 text-xs font-medium uppercase tracking-[0.14em] text-fg-muted">
                 <span>{accountChargeColumns.item}</span>
                 <span>{accountChargeColumns.amount}</span>
               </div>
 
+              {/* text-base rows, same size and rhythm as the brokerage table. */}
               <dl>
                 {accountCharges.map((charge) => (
                   <div
                     key={charge.item}
-                    className="flex items-baseline justify-between gap-4 border-b border-border-soft/60 py-3.5 last:border-b-0"
+                    className="flex items-baseline justify-between gap-4 border-b border-border-soft/60 py-4 last:border-b-0 lg:py-5"
                   >
-                    <dt className="text-sm leading-snug text-fg-muted">{charge.item}</dt>
-                    <dd className="tabular shrink-0 text-sm font-medium text-fg">
+                    <dt className="text-base leading-snug text-fg">{charge.item}</dt>
+                    <dd className="tabular shrink-0 text-base font-medium text-fg">
                       <CopyText source={charge.amount} as="span" />
                     </dd>
                   </div>
@@ -143,32 +164,38 @@ export default function Pricing({ id = 'pricing' }: PricingProps) {
       </div>
 
       {/* ---------------- Plan tiers ---------------- */}
-      <div className="mt-14 sm:mt-16">
+      <div className={`mt-14 sm:mt-16 ${RATE_CARD_MEASURE}`}>
         <Reveal>
-          <h3 className="text-center text-xs font-medium uppercase tracking-[0.2em] text-fg-muted">
-            {plansHeading}
-          </h3>
+          {/* Matches SectionShell's eyebrow treatment (plain 16px fg-muted), not
+              the tracked micro-caps this used to wear. Those are now reserved
+              for table column headers, which is the only place on the section
+              where a 12px label still reads as a label rather than as shrunken
+              body copy. */}
+          <h3 className="text-center text-base text-fg-muted">{plansHeading}</h3>
         </Reveal>
 
-        <div className="mt-8 grid gap-5 md:grid-cols-3">
+        {/* Held to the same measure as the tables: three cards across 1664px are
+            ~540px each and read as mostly padding. At 1344 they land near 430px,
+            which a four-line feature list actually fills. */}
+        <div className="mt-8 grid gap-5 md:grid-cols-3 lg:gap-6">
           {plans.map((plan, index) => (
             <Reveal key={plan.name} delay={index * 60} className="h-full">
               {/* `highlighted` is a design emphasis only — no "most popular"
                   badge, which would be an unsubstantiated claim. */}
               <div
-                className={`flex h-full flex-col rounded-2xl border p-6 transition-colors duration-200 ${
+                className={`flex h-full flex-col rounded-2xl border p-6 transition-colors duration-200 lg:p-7 ${
                   plan.highlighted
                     ? 'border-accent bg-surface'
                     : 'border-border-soft bg-surface/40 hover:border-border hover:bg-surface'
                 }`}
               >
-                <h4 className="text-base font-semibold text-fg">{plan.name}</h4>
+                <h4 className="text-lg font-semibold leading-[1.4] text-fg">{plan.name}</h4>
 
                 <p className="mt-3 flex flex-wrap items-baseline gap-x-1.5">
                   <CopyText
                     source={plan.price}
                     as="span"
-                    className="tabular text-2xl font-medium leading-none text-fg"
+                    className="tabular text-2xl font-medium leading-none text-fg lg:text-3xl"
                   />
                   {plan.cadence && (
                     <span className="text-sm text-fg-muted">{plan.cadence}</span>
@@ -177,7 +204,7 @@ export default function Pricing({ id = 'pricing' }: PricingProps) {
 
                 <p className="mt-3 text-base leading-relaxed text-fg-muted">{plan.blurb}</p>
 
-                <ul className="mt-5 flex-1 space-y-2.5 border-t border-border-soft pt-5">
+                <ul className="mt-5 flex-1 space-y-3 border-t border-border-soft pt-5">
                   {plan.features.map((feature) => (
                     <li key={feature} className="flex items-start gap-2.5 text-base text-fg-muted">
                       <Check
@@ -206,8 +233,8 @@ export default function Pricing({ id = 'pricing' }: PricingProps) {
       </div>
 
       {/* ---------------- Fine print ---------------- */}
-      <div className="mt-10 border-t border-border-soft pt-6">
-        <Disclosure tone="note" className="mx-auto max-w-2xl text-center">
+      <div className={`mt-10 border-t border-border-soft pt-6 ${RATE_CARD_MEASURE}`}>
+        <Disclosure tone="note" className="mx-auto max-w-[68ch] text-center">
           {finePrint}
         </Disclosure>
       </div>

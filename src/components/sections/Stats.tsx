@@ -6,9 +6,9 @@ import { stats } from '../../data/social'
 /**
  * §13 Stats band.
  *
- * Deliberately NOT a SectionShell — no heading, no eyebrow. This is punctuation
- * between Learn (§11) and Testimonials (§12): five figures on hairlines, and
- * nothing else competing for attention.
+ * Deliberately NOT a SectionShell and deliberately NOT full-height — no heading,
+ * no eyebrow. This is punctuation between Learn (§11) and Testimonials (§12):
+ * five figures on hairlines, and nothing else competing for attention.
  *
  * Values carry `.tabular` at weight 500 so the digits sit on a fixed advance
  * width (design-system/thinqprofit/pages/landing.md §3).
@@ -18,6 +18,12 @@ import { stats } from '../../data/social'
  *
  * Layout: 2-up on mobile, 5-across from lg. Hairlines are drawn per cell rather
  * than with a gap trick so the rules reflow correctly when the grid wraps.
+ *
+ * Sizing across the wide container: at 1344–1664px each cell is 270–330px, so
+ * the figure steps up to 36/44px and the band deepens with it. Without that the
+ * five values read as small islands stranded on a very long rule. The steps are
+ * capped so the widest value, `[₹X crore+]` (~5.1em), still clears the cell's
+ * inner width at every breakpoint and never has to break.
  */
 export default function Stats() {
   return (
@@ -45,18 +51,18 @@ export default function Stats() {
               <Reveal
                 key={stat.label}
                 delay={Math.min(index, 3) * 60}
-                className={`grid justify-items-center gap-2 px-3 py-9 text-center sm:px-5 lg:py-11 ${rules}`}
+                className={`grid justify-items-center gap-2.5 px-3 py-9 text-center sm:px-5 lg:px-4 lg:py-12 xl:gap-3 xl:px-6 xl:py-14 2xl:py-16 ${rules}`}
               >
                 {/* dt before dd in the DOM for correct <dl> semantics. The figure
                     sits on top visually via explicit grid rows, so reading order
                     and DOM order stay identical (WCAG 1.3.2). */}
-                <dt className="row-start-2 text-xs font-medium uppercase leading-snug tracking-[0.14em] text-fg-muted">
+                <dt className="row-start-2 text-xs font-medium uppercase leading-snug tracking-[0.14em] text-fg-muted xl:text-[0.8125rem]">
                   {stat.label}
                 </dt>
                 <CopyText
                   as="dd"
                   source={stat.value}
-                  className="tabular row-start-1 text-xl font-medium leading-none tracking-tight text-fg sm:text-2xl lg:text-3xl"
+                  className="tabular row-start-1 text-2xl font-medium leading-none tracking-tight text-fg sm:text-3xl xl:text-4xl 2xl:text-[2.75rem]"
                 />
               </Reveal>
             )

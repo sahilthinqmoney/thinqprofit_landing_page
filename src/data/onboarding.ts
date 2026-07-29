@@ -10,6 +10,43 @@ import type { OnboardingStep } from '../types'
  * be mistaken for a published figure.
  */
 
+/**
+ * Section copy. Previously hardcoded in the component — the outlier on a page
+ * that keeps every string in `src/data/`.
+ *
+ * `\n` in `heading` is an art-directed break, honoured by MediaSection at
+ * ≥768px only; below that the headline re-rags naturally.
+ */
+export interface OnboardingCopy {
+  eyebrow: string
+  heading: string
+  subheading: string
+  cta: string
+  /**
+   * Brief for the still that sits behind this section — motion-brief §5.6,
+   * constrained by §7. Until the asset lands, MediaBackdrop renders it as the
+   * pending field's label, which is intentional: the copy can be judged for
+   * contrast now.
+   */
+  mediaAlt: string
+}
+
+export const onboardingCopy: OnboardingCopy = {
+  eyebrow: 'Getting started',
+  /*
+   * Three lines, not two. The copy column is 46% of the frame, so "Open an
+   * account before" overruns it and re-wraps on its own — stranding "before"
+   * alone on line two. Breaking it deliberately keeps the three lines close to
+   * equal length instead.
+   */
+  heading: 'Open an account\nbefore your chai\ngets cold',
+  subheading:
+    'Fully online, Aadhaar-based, and no branch visit — assuming your KYC details are current.',
+  cta: 'Start account opening',
+  mediaAlt:
+    'Three luminous nodes linking one after another along a single path in an ink-navy void, indigo fading to cyan, each link settling before the next begins. Unhurried, right of frame; the left stays dark. No interface, no numbers, no green or red.',
+}
+
 export const steps: OnboardingStep[] = [
   {
     title: 'Verify yourself',
@@ -28,7 +65,7 @@ export const steps: OnboardingStep[] = [
   },
 ]
 
-/** Requirements strip — rendered as a chip row behind the label "You'll need:". */
+/** Requirements — flowed into a single comma-separated line under the steps. */
 export const requirements: string[] = [
   'PAN card',
   'Aadhaar linked to your mobile number',

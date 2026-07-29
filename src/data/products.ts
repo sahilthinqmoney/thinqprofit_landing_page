@@ -35,6 +35,22 @@ export const featuredProductIds: readonly string[] = ['stocks-etfs', 'futures-op
  */
 export const riskDisclosureIds: readonly string[] = ['futures-options']
 
+/**
+ * Double-width tiles on the wide (xl) four-column bento: the two lead cards plus
+ * the two remaining disclosure carriers, i.e. every card that has to hold a
+ * disclosure block as well as three bullets.
+ *
+ * The spans pack to exact rows of four in the order `products` is declared —
+ * `2+2 / 2+1+1 / 1+1+2` — and to exact rows of six at `lg` (`3+3 / 2+2+2 /
+ * 2+2+2`). Reordering the array or this list leaves a hole in the grid.
+ */
+export const wideTileIds: readonly string[] = [
+  'stocks-etfs',
+  'futures-options',
+  'mutual-funds',
+  'baskets',
+]
+
 export const products: Product[] = [
   {
     id: 'stocks-etfs',

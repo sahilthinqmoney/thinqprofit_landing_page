@@ -1,15 +1,3 @@
-import {
-  Banknote,
-  Boxes,
-  ChartPie,
-  ChevronRight,
-  Gem,
-  Landmark,
-  Layers,
-  Rocket,
-  TrendingUp,
-} from 'lucide-react'
-import type { LucideIcon } from 'lucide-react'
 import type { Product } from '../../types'
 import {
   featuredProductIds,
@@ -17,154 +5,193 @@ import {
   productsSection,
   riskDisclosureIds,
 } from '../../data/products'
+import Button from '../ui/Button'
 import CopyText from '../ui/CopyText'
 import Disclosure from '../ui/Disclosure'
+import MediaCard, { MediaCardRail } from '../ui/MediaCard'
 import Reveal from '../ui/Reveal'
 import SectionShell from '../ui/SectionShell'
 
 /**
- * design-system/thinqprofit/pages/landing.md §8 — Products row, Lucide, 1.5px stroke.
- * Keys are the icon NAME strings in src/data/products.ts; values are the canonical
- * lucide components (`ChartPie`, not the deprecated `PieChart` alias).
+ * §5 Products — the half-width-cards module.
+ *
+ * Deliberately asymmetric, and the asymmetry is the design: the two segments
+ * that carry the business (Stocks & ETFs, F&O) get full-height media cards
+ * with their copy sitting *on* the art, and the other six get a hairline
+ * ledger of quiet rows. The previous version rendered all eight as bordered
+ * boxes with icon tiles and 01–08 ordinals, which said every product matters
+ * exactly the same amount — a bento grid standing in for a point of view.
+ *
+ * No icon-in-a-box anywhere here. On a media card an icon tile competes with
+ * the art it is sitting on; on a ledger row it inflates a one-line fact into
+ * a widget. The heading is left-aligned (`centered={false}`) for the same
+ * reason the grid is gone — the page had settled into centred slab after
+ * centred slab.
  */
-const iconMap: Record<string, LucideIcon> = {
-  'trending-up': TrendingUp,
-  layers: Layers,
-  'pie-chart': ChartPie,
-  rocket: Rocket,
-  gem: Gem,
-  banknote: Banknote,
-  landmark: Landmark,
-  boxes: Boxes,
-}
-
-/** Bullets carrying a ₹ amount or a figure get tabular numerals. */
-const hasNumerals = (text: string) => /[₹\d]/.test(text)
 
 /**
- * Bento rows: 2 feature cards, then two rows of 3. Stagger restarts per row so
- * the 60ms cascade reads left-to-right instead of trailing off. (§6 Motion.)
+ * Art direction per featured product — docs/motion-brief.md §5.1: 3–4s silent
+ * seamless loops, one abstract motif each, all shot in the same ink-navy void.
+ * Each string is the brief while the clip is outstanding (MediaBackdrop prints
+ * it into the placeholder field) and becomes the asset's real alt text after,
+ * so it describes the motif rather than naming a file.
+ *
+ * Lives here rather than in src/data/products.ts because it is art direction,
+ * not copy, and that file is the copy deck's mirror.
+ *
+ * §7 is baked in: no numbers, no tickers, no chart forms, no green or red, and
+ * no upward motion — the motifs rotate, orbit and interleave, never climb.
  */
-const revealDelay = (index: number) => (index < 2 ? index : (index - 2) % 3) * 60
-
-interface ProductCardProps {
-  product: Product
-  featured: boolean
-  ordinal: number
+const MEDIA_BRIEF: Record<string, string> = {
+  'stocks-etfs':
+    'Stocks and ETFs — a cluster of thin translucent navy plates suspended in a dark void, rotating slowly, each catching an indigo rim light as it turns.',
+  'futures-options':
+    'Futures and options — two interlocking luminous rings on offset axes turning in opposite directions, cyan filaments tracing where they intersect.',
 }
 
-function ProductCard({ product, featured, ordinal }: ProductCardProps) {
-  const Icon = iconMap[product.icon] ?? Layers
-  const isRisk = riskDisclosureIds.includes(product.id)
+/** The ink-navy void every asset in the library shares (motion-brief §5). */
+const VOID = '#0F172A'
+
+type WithDisclosure = Product & { disclosure: string }
+
+const hasDisclosure = (product: Product): product is WithDisclosure =>
+  Boolean(product.disclosure)
+
+/**
+ * Fine print for the two media cards.
+ *
+ * The F&O derivatives warning is legally required and has to be live text at
+ * 4.5:1 (copy deck §20, landing.md §9). It therefore renders here, on the page
+ * background, rather than inside the MediaCard: type over a video plate has no
+ * guaranteed contrast ratio, and the card's scrim is precisely the "behind a
+ * blur or glass" treatment disclosures are forbidden to sit in. The product
+ * name labels each one so the association survives the move out of the card.
+ */
+function FeaturedFinePrint({ items }: { items: WithDisclosure[] }) {
+  if (items.length === 0) return null
 
   return (
-    <article
-      aria-labelledby={`product-${product.id}`}
-      className={[
-        'group relative flex h-full flex-col overflow-hidden rounded-2xl p-6',
-        'transition-colors duration-200',
-        featured ? 'border border-border bg-surface sm:p-7' : 'border border-border-soft bg-surface/70',
-        'hover:border-accent/40 hover:bg-surface-raised',
-        'focus-within:border-accent/40 focus-within:bg-surface-raised',
-      ].join(' ')}
-    >
-      {/* Hairline that marks the two lead cards. Decorative only. */}
-      {featured && (
-        <span
-          aria-hidden="true"
-          className="pointer-events-none absolute inset-x-0 top-0 h-px bg-linear-to-r from-accent via-accent/30 to-transparent"
-        />
-      )}
+    <div className="mt-8 space-y-6 sm:mt-10">
+      {items.map((product) => (
+        <div key={product.id} className="max-w-[68ch]">
+          <p className="text-xs font-medium uppercase tracking-[0.14em] text-fg-muted">
+            {product.title}
+          </p>
+          <Disclosure
+            tone={riskDisclosureIds.includes(product.id) ? 'risk' : 'note'}
+            className="tabular mt-2"
+          >
+            {product.disclosure}
+          </Disclosure>
+        </div>
+      ))}
+    </div>
+  )
+}
 
-      <div className="flex items-start justify-between gap-4">
-        <span
-          className={`grid shrink-0 place-items-center rounded-xl border border-border-soft bg-bg text-accent-soft ${
-            featured ? 'h-11 w-11' : 'h-10 w-10'
-          }`}
+/**
+ * One ledger row: name — description — link. No card, no border box, no
+ * ordinal, no bullet dots. The hairlines between rows are the only structure,
+ * which is what lets six of these read as a list of facts instead of six more
+ * objects competing with the two cards above.
+ */
+function LedgerRow({ product }: { product: Product }) {
+  return (
+    <li className="py-6 sm:py-7">
+      {/* The link is stretched across this box so the whole row is a target —
+          but only this box. The disclosure below sits outside it and stays
+          selectable, which live regulatory text has to be. */}
+      <div className="group relative grid items-baseline gap-x-10 gap-y-2 md:grid-cols-[minmax(0,14rem)_minmax(0,1fr)_auto]">
+        <h3 className="text-lg font-medium leading-snug text-fg sm:text-xl">{product.title}</h3>
+
+        <CopyText source={product.body} className="text-base leading-relaxed text-fg-muted" />
+
+        <a
+          href={product.href}
+          className="inline-flex min-h-11 items-center gap-1.5 self-center text-sm font-medium text-accent-soft transition-colors duration-200 after:absolute after:inset-0 hover:text-fg md:justify-self-end"
         >
-          <Icon className="h-5 w-5" strokeWidth={1.5} aria-hidden="true" />
-        </span>
-        {/* Caption role (§3): decorative index, muted — never fg-subtle. */}
-        <span
-          aria-hidden="true"
-          className="tabular pt-1 text-xs font-medium tracking-[0.18em] text-fg-muted"
-        >
-          {String(ordinal).padStart(2, '0')}
-        </span>
+          {product.cta}
+          <span
+            aria-hidden="true"
+            className="transition-transform duration-200 group-hover:translate-x-0.5"
+          >
+            &rarr;
+          </span>
+        </a>
       </div>
 
-      {/* H3 role (§3): 1.125rem / 1.4 / 600. The two lead cards get one step up. */}
-      <h3
-        id={`product-${product.id}`}
-        className={`mt-5 font-semibold leading-[1.4] text-fg ${featured ? 'text-xl' : 'text-lg'}`}
-      >
-        {product.title}
-      </h3>
-      <CopyText source={product.body} className="mt-2.5 text-base leading-relaxed text-fg-muted" />
-
-      <ul className="mt-5 space-y-3 border-t border-border-soft pt-5">
-        {product.bullets.map((bullet) => (
-          <li key={bullet} className="flex items-start gap-2.5">
-            {/* Offset tracks the 16px/1.625 first line box so the dot sits on the caps. */}
-            <span aria-hidden="true" className="mt-2 h-1 w-1 shrink-0 rounded-full bg-accent-soft" />
-            <CopyText
-              as="span"
-              source={bullet}
-              className={`text-base leading-relaxed text-fg-muted ${hasNumerals(bullet) ? 'tabular' : ''}`}
-            />
-          </li>
-        ))}
-      </ul>
-
       {product.disclosure && (
-        <Disclosure
-          tone={isRisk ? 'risk' : 'note'}
-          className={isRisk ? 'tabular mt-5' : 'tabular mt-5 border-t border-border-soft pt-4'}
-        >
+        <Disclosure tone="note" className="tabular mt-3 max-w-[68ch]">
           {product.disclosure}
         </Disclosure>
       )}
-
-      <div className="mt-auto pt-5">
-        <a
-          href={product.href}
-          className="inline-flex min-h-11 items-center gap-1.5 rounded-full text-sm font-medium text-accent-soft transition-colors duration-200 hover:text-fg"
-        >
-          {product.cta}
-          <ChevronRight
-            className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-0.5"
-            strokeWidth={1.5}
-            aria-hidden="true"
-          />
-        </a>
-      </div>
-    </article>
+    </li>
   )
 }
 
 export default function Products() {
+  const featured = products.filter((product) => featuredProductIds.includes(product.id))
+  const rest = products.filter((product) => !featuredProductIds.includes(product.id))
+
   return (
     <SectionShell
       id="products"
       eyebrow={productsSection.eyebrow}
       heading={productsSection.heading}
       subheading={productsSection.subheading}
+      scale="lead"
+      centered={false}
     >
-      <div className="grid grid-cols-1 gap-4 sm:gap-5 md:grid-cols-2 lg:grid-cols-6">
-        {products.map((product, index) => {
-          const featured = featuredProductIds.includes(product.id)
+      <Reveal>
+        {/*
+          The rail has to reach the viewport edge. The half-visible next card
+          IS the affordance that says "this scrolls"; inside Container's gutter
+          it reads as an inset carousel and loses the bleed entirely.
 
-          return (
-            <Reveal
-              key={product.id}
-              delay={revealDelay(index)}
-              className={`h-full ${featured ? 'md:col-span-2 lg:col-span-3' : 'lg:col-span-2'}`}
-            >
-              <ProductCard product={product} featured={featured} ordinal={index + 1} />
-            </Reveal>
-          )
-        })}
-      </div>
+          Container exposes no escape hatch, so cancel its gutter with a
+          matching negative margin. The scale below is Container's own
+          (px-5 sm:px-6 lg:px-8 xl:px-12) and has to be kept in step with it.
+
+          Deliberately NOT `w-screen` / `100vw`: those measure the viewport
+          *including* the scrollbar, so on any desktop with a classic scrollbar
+          the row overhangs by ~15px and drops a horizontal scrollbar onto the
+          whole document. Cancelling the gutter gives an exact viewport-width
+          row up to Container's 1760px cap, and beyond that the rail stays
+          aligned with the heading — which is the right answer on an ultrawide
+          anyway. MediaCardRail re-applies its own inner gutter, so the cards
+          still breathe at the edges.
+        */}
+        <div className="-mx-5 sm:-mx-6 lg:-mx-8 xl:-mx-12">
+          <MediaCardRail>
+            {featured.map((product) => (
+              <MediaCard
+                key={product.id}
+                title={product.title}
+                body={product.body}
+                media={{ alt: MEDIA_BRIEF[product.id] ?? product.title, tone: VOID }}
+                action={
+                  <Button href={product.href} variant="primary" size="md">
+                    {product.cta}
+                  </Button>
+                }
+              />
+            ))}
+          </MediaCardRail>
+        </div>
+      </Reveal>
+
+      <FeaturedFinePrint items={featured.filter(hasDisclosure)} />
+
+      {/* The quiet half. One reveal for the whole ledger rather than six
+          staggered ones — a cascade would make the rows perform, and the point
+          of them is that they don't. */}
+      <Reveal>
+        <ul className="mt-16 divide-y divide-border-soft border-y border-border-soft sm:mt-20">
+          {rest.map((product) => (
+            <LedgerRow key={product.id} product={product} />
+          ))}
+        </ul>
+      </Reveal>
     </SectionShell>
   )
 }

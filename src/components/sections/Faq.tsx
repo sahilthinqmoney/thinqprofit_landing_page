@@ -1,4 +1,4 @@
-import { AlertTriangle, ChevronDown } from 'lucide-react'
+import { ChevronDown, TriangleAlert } from 'lucide-react'
 import SectionShell from '../ui/SectionShell'
 import Reveal from '../ui/Reveal'
 import CopyText from '../ui/CopyText'
@@ -43,7 +43,7 @@ function FaqAnswer({ entry }: { entry: FaqEntry }) {
   return (
     <div className="rounded-xl border border-warning/30 bg-warning/5 p-4 sm:p-5">
       <p className="flex items-start gap-2 text-base font-semibold leading-relaxed text-warning">
-        <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0" strokeWidth={1.5} aria-hidden="true" />
+        <TriangleAlert className="mt-0.5 h-5 w-5 shrink-0" strokeWidth={1.5} aria-hidden="true" />
         Not answered yet — pending a business decision
       </p>
 
@@ -75,47 +75,80 @@ function FaqAnswer({ entry }: { entry: FaqEntry }) {
   )
 }
 
+/**
+ * One ledger row. `index` is the position in the full list, so the numbering
+ * stays 01–12 regardless of which column the row lands in.
+ */
+function FaqRow({ entry, index, delay }: { entry: FaqEntry; index: number; delay: number }) {
+  const pending = isResearchFaq(entry) && publishesResearch === null
+
+  return (
+    <Reveal delay={delay}>
+      <details className="group border-b border-border-soft">
+        <summary className="flex min-h-11 cursor-pointer list-none items-start gap-4 rounded-lg py-5 pr-1 xl:py-7 [&::-webkit-details-marker]:hidden">
+          <span
+            aria-hidden="true"
+            className="tabular mt-1 w-6 shrink-0 text-xs font-medium text-fg-muted transition-colors duration-200 group-open:text-accent-soft"
+          >
+            {String(index + 1).padStart(2, '0')}
+          </span>
+
+          <div className="flex flex-1 flex-wrap items-center gap-x-3 gap-y-2">
+            <h3 className="text-lg font-semibold leading-[1.4] text-fg">{entry.question}</h3>
+            {pending && (
+              <span className="rounded-full border border-warning/30 bg-warning/10 px-2.5 py-0.5 text-xs font-medium uppercase tracking-[0.12em] text-warning">
+                Answer pending
+              </span>
+            )}
+          </div>
+
+          <ChevronDown
+            className="mt-0.5 h-5 w-5 shrink-0 text-fg-muted transition-transform duration-200 group-open:rotate-180"
+            strokeWidth={1.5}
+            aria-hidden="true"
+          />
+        </summary>
+
+        {/* Answers stay on a readable measure even when the row itself is wider. */}
+        <div className="max-w-[68ch] pb-6 pl-10 pr-1">
+          <FaqAnswer entry={entry} />
+        </div>
+      </details>
+    </Reveal>
+  )
+}
+
+/**
+ * Twelve rows in a single column read as a very long, very thin list once the
+ * page container passes ~1300px, so from `xl` the ledger splits into two
+ * columns that each keep their own top rule. Numbering runs down column one
+ * then column two, which is how a split list is read.
+ */
+const COLUMN_SIZE = Math.ceil(faqs.length / 2)
+
+const faqColumns = [
+  { id: 'faq-column-1', offset: 0, entries: faqs.slice(0, COLUMN_SIZE) },
+  { id: 'faq-column-2', offset: COLUMN_SIZE, entries: faqs.slice(COLUMN_SIZE) },
+]
+
 export default function Faq() {
   return (
     <SectionShell id="faq" heading="Questions worth asking" centered={false}>
-      <div className="max-w-4xl border-t border-border-soft">
-        {faqs.map((faq, index) => {
-          const pending = isResearchFaq(faq) && publishesResearch === null
-
-          return (
-            <Reveal key={faq.question} delay={index < 5 ? index * 60 : 0}>
-              <details className="group border-b border-border-soft">
-                <summary className="flex min-h-11 cursor-pointer list-none items-start gap-4 rounded-lg py-5 pr-1 [&::-webkit-details-marker]:hidden">
-                  <span
-                    aria-hidden="true"
-                    className="tabular mt-1 w-6 shrink-0 text-xs font-medium text-fg-muted transition-colors duration-200 group-open:text-accent-soft"
-                  >
-                    {String(index + 1).padStart(2, '0')}
-                  </span>
-
-                  <div className="flex flex-1 flex-wrap items-center gap-x-3 gap-y-2">
-                    <h3 className="text-lg font-semibold leading-[1.4] text-fg">{faq.question}</h3>
-                    {pending && (
-                      <span className="rounded-full border border-warning/30 bg-warning/10 px-2.5 py-0.5 text-xs font-medium uppercase tracking-[0.12em] text-warning">
-                        Answer pending
-                      </span>
-                    )}
-                  </div>
-
-                  <ChevronDown
-                    className="mt-0.5 h-5 w-5 shrink-0 text-fg-muted transition-transform duration-200 group-open:rotate-180"
-                    strokeWidth={1.5}
-                    aria-hidden="true"
-                  />
-                </summary>
-
-                <div className="max-w-2xl pb-6 pl-10 pr-1">
-                  <FaqAnswer entry={faq} />
-                </div>
-              </details>
-            </Reveal>
-          )
-        })}
+      {/* Capped at 1440 rather than left to run to the full 1664 — past that a
+          question sits a very long way from its own chevron. */}
+      <div className="max-w-4xl border-t border-border-soft xl:grid xl:max-w-[1440px] xl:grid-cols-2 xl:gap-x-16 xl:border-t-0">
+        {faqColumns.map((column) => (
+          <div key={column.id} className="xl:border-t xl:border-border-soft">
+            {column.entries.map((faq, position) => (
+              <FaqRow
+                key={faq.question}
+                entry={faq}
+                index={column.offset + position}
+                delay={position < 5 ? position * 60 : 0}
+              />
+            ))}
+          </div>
+        ))}
       </div>
     </SectionShell>
   )

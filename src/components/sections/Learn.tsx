@@ -1,15 +1,5 @@
-import {
-  ArrowRight,
-  BookOpen,
-  ChartCandlestick,
-  Footprints,
-  PiggyBank,
-  Receipt,
-  ShieldAlert,
-} from 'lucide-react'
-import type { LucideIcon } from 'lucide-react'
+import { ArrowRight } from 'lucide-react'
 import Button from '../ui/Button'
-import CopyText from '../ui/CopyText'
 import Disclosure from '../ui/Disclosure'
 import Reveal from '../ui/Reveal'
 import SectionShell from '../ui/SectionShell'
@@ -18,118 +8,140 @@ import { formats, learnDisclaimer, tracks } from '../../data/learn'
 /**
  * §11 ThinqProfit Learn.
  *
- * A course ledger, not a card grid. Products (§5) is a bento of bordered cards
- * and Platform (§6) is a tools list beside a sticky media panel; a syllabus is
- * neither — it is an ordered sequence you read top to bottom, so it renders as
- * numbered rows hung off a continuous vertical spine, with the level/duration
- * cell right-aligned like a ledger column.
+ * A staircase, not a card grid and not a divided row list. The five tracks are a
+ * path — first trade through to filing taxes — so each rung steps one tread to
+ * the right of the one above it, joined by a hairline riser. Read top to bottom
+ * the spine descends diagonally across the section, which is the one thing
+ * neither of the treatments this section has previously worn could say:
+ * Products (§5) is a bleeding media rail over a three-column row list, Platform
+ * (§6) is a bare two-column name list on a plate. Sequence is Learn's content,
+ * so sequence is its layout.
  *
- * Deliberately no card chrome and no media panel: this is the one text-led
- * section on a page that is otherwise dense with framed visuals, which is what
- * keeps it from reading as a re-skin of the two sections around it.
+ * Nothing here is boxed except the aside, which holds the formats, the single
+ * CTA and the mandatory advisory-boundary disclaimer. No per-row icons and no
+ * bordered tiles: Products and Platform both shed theirs in the same pass, and
+ * five decorative glyphs would put the chrome back on the quietest section on
+ * the page. The stair geometry and the ordinals carry the sequence on their own.
+ *
+ * Below `md` the treads collapse to zero and the rungs stack against one
+ * straight spine — a staircase needs width to read as one, and 375px has none.
  */
 interface LearnProps {
   id?: string
 }
 
-const trackIcons: Record<string, LucideIcon> = {
-  footprints: Footprints,
-  'chart-candlestick': ChartCandlestick,
-  'shield-alert': ShieldAlert,
-  'piggy-bank': PiggyBank,
-  receipt: Receipt,
-}
+/**
+ * Stair geometry, index-addressed. Rung n is offset by n treads; the riser that
+ * joins it back to rung n−1 is exactly one tread wide (`md:w-11` = 2.75rem,
+ * `2xl:w-16` = 4rem), so the two always meet whatever the breakpoint.
+ *
+ * Margin, not padding: the left hairline has to travel with the rung, and
+ * padding sits inside the border. The `2xl` step widens because the container
+ * does — at 1664px a 44px tread reads as a typo rather than as a stair.
+ */
+const rungOffset: string[] = [
+  '',
+  'md:ml-[2.75rem] 2xl:ml-[4rem]',
+  'md:ml-[5.5rem] 2xl:ml-[8rem]',
+  'md:ml-[8.25rem] 2xl:ml-[12rem]',
+  'md:ml-[11rem] 2xl:ml-[16rem]',
+]
 
 export default function Learn({ id = 'learn' }: LearnProps) {
+  const lastIndex = tracks.length - 1
+
   return (
     <SectionShell
       id={id}
       eyebrow="Learn"
       heading="Understand the trade before you place it"
       subheading="Free, open to everyone, and written in the language people actually use — no account required."
-      tone="raised"
     >
-      {/* ------------------------------------------------------------------ */}
-      {/* Track ledger                                                        */}
-      {/* ------------------------------------------------------------------ */}
-      <ol className="divide-y divide-border-soft border-y border-border-soft">
-        {tracks.map((track, index) => {
-          const Icon = trackIcons[track.icon] ?? BookOpen
+      {/* 8/4 rather than 50/50: the ladder needs the run, and the aside is a
+          short list plus one button — at half of 1664px it would be a very wide
+          box holding four lines. */}
+      <div className="grid gap-12 lg:grid-cols-12 lg:gap-10 xl:gap-14">
+        {/* ---------------------------------------------------------------- */}
+        {/* The path — five rungs, each one tread further along               */}
+        {/* ---------------------------------------------------------------- */}
+        <ol className="lg:col-span-8">
+          {tracks.map((track, index) => {
+            const isLast = index === lastIndex
 
-          return (
-            <li key={track.title}>
-              {/* Stagger capped at 3 steps so nothing waits past 180ms (§6). */}
-              <Reveal delay={Math.min(index, 3) * 60}>
-                <a
-                  href="#"
-                  className="group grid grid-cols-[2.25rem_1fr] items-start gap-x-4 rounded-lg py-6 sm:grid-cols-[3.5rem_1fr] sm:gap-x-6 sm:py-7"
-                >
-                  {/* Rail: ordinal over glyph, no bordered tile — the tiles are
-                      Products' and Platform's chrome, and reusing them is what
-                      made this section read as a re-skin. */}
-                  <div className="flex flex-col items-start gap-2.5 pt-0.5" aria-hidden="true">
-                    <span className="tabular text-xl font-semibold leading-none tracking-tight text-fg-muted transition-colors duration-200 group-hover:text-accent-soft sm:text-2xl">
-                      {String(index + 1).padStart(2, '0')}
-                    </span>
-                    <Icon className="h-[18px] w-[18px] text-accent-soft" strokeWidth={1.5} />
-                  </div>
-
-                  {/* Spine: the left hairline runs the full row height, so the
-                      rows join into one continuous rule down the section. */}
-                  <div className="min-w-0 border-l border-border-soft pl-4 transition-colors duration-200 group-hover:border-accent/50 sm:pl-6">
-                    <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1.5">
-                      <h3 className="text-lg font-semibold leading-[1.4] text-fg transition-colors duration-200 group-hover:text-accent-soft">
-                        {track.title}
-                      </h3>
-                      {/* Level/duration is not in the copy deck — it renders as
-                          an unfilled placeholder rather than an invented value. */}
-                      <CopyText as="span" source={track.marker} className="text-sm leading-relaxed" />
-                    </div>
-                    <p className="mt-2 text-base leading-relaxed text-fg-muted">{track.body}</p>
-                  </div>
-                </a>
-              </Reveal>
-            </li>
-          )
-        })}
-      </ol>
-
-      {/* ------------------------------------------------------------------ */}
-      {/* Formats                                                             */}
-      {/* ------------------------------------------------------------------ */}
-      <Reveal delay={120}>
-        <div className="mt-10">
-          <h3 className="text-lg font-semibold leading-[1.4] text-fg">Formats</h3>
-          <ul className="mt-4 flex flex-wrap gap-2.5">
-            {formats.map((format) => (
+            return (
               <li
-                key={format}
-                className="inline-flex items-start gap-2.5 rounded-xl border border-border-soft bg-surface/60 px-3.5 py-2.5 text-base leading-relaxed text-fg-muted"
+                key={track.title}
+                className={`relative border-l border-border-soft ${rungOffset[index] ?? ''}`}
               >
-                <span
-                  aria-hidden="true"
-                  className="mt-[0.6875rem] h-1 w-1 shrink-0 rounded-full bg-accent-soft"
-                />
-                {format}
-              </li>
-            ))}
-          </ul>
-        </div>
-      </Reveal>
+                {/* Riser: joins this rung's spine back to the previous one. It
+                    sits in the margin the offset opens up, so it needs no width
+                    of its own in the flow. */}
+                {index > 0 && (
+                  <span
+                    aria-hidden="true"
+                    className="absolute left-0 top-0 hidden h-px -translate-x-full bg-border-soft md:block md:w-11 2xl:w-16"
+                  />
+                )}
 
-      {/* CTA + advisory-boundary disclaimer. The disclaimer is a regulatory
-          statement, not decoration — it renders as live text at 4.5:1. */}
-      <Reveal delay={180}>
-        <div className="mt-10 flex flex-col gap-5 border-t border-border-soft pt-8 sm:flex-row sm:items-center sm:justify-between sm:gap-10">
-          <Button href="#" size="lg" className="self-start sm:self-auto">
-            Start learning — free
-            <ArrowRight className="h-4 w-4" strokeWidth={1.5} aria-hidden="true" />
-          </Button>
-          <Disclosure tone="note" className="sm:max-w-md">
-            {learnDisclaimer}
-          </Disclosure>
-        </div>
-      </Reveal>
+                {/* Stagger capped at 180ms — nothing waits past ~250ms (§6). */}
+                <Reveal
+                  delay={Math.min(index, 3) * 60}
+                  className={`pl-5 sm:pl-7 2xl:pl-9 ${isLast ? 'pb-1' : 'pb-10 2xl:pb-12'}`}
+                >
+                  {/* Decorative: the <ol> already carries the sequence, and the
+                      stair states it a second time visually. */}
+                  <span aria-hidden="true" className="tabular text-sm text-fg-muted">
+                    {String(index + 1).padStart(2, '0')}
+                  </span>
+
+                  <h3 className="mt-2 text-lg font-medium leading-snug text-fg sm:text-xl">
+                    {track.title}
+                  </h3>
+                  {/* The rung is wide; the line is not. Running prose stays
+                      inside a readable measure however far the stair travels. */}
+                  <p className="mt-2 max-w-[62ch] text-base leading-relaxed text-fg-muted 2xl:text-lg">
+                    {track.body}
+                  </p>
+                </Reveal>
+              </li>
+            )
+          })}
+        </ol>
+
+        {/* ---------------------------------------------------------------- */}
+        {/* Formats, the one CTA, and the advisory boundary                   */}
+        {/* ---------------------------------------------------------------- */}
+        <Reveal delay={120} className="lg:col-span-4">
+          <div className="rounded-2xl border border-border bg-surface/70 p-6 2xl:p-8">
+            <h3 className="text-base font-medium leading-snug text-fg">Formats</h3>
+
+            {/* Hairline rows rather than pill chips — four bordered chips here
+                would read as four more cards on a page that has enough. */}
+            <ul className="mt-4 border-t border-border-soft">
+              {formats.map((format) => (
+                <li
+                  key={format}
+                  className="border-b border-border-soft py-3 text-base leading-relaxed text-fg-muted"
+                >
+                  {format}
+                </li>
+              ))}
+            </ul>
+
+            <div className="mt-7">
+              <Button href="#" size="lg">
+                Start learning — free
+                <ArrowRight className="h-4 w-4" strokeWidth={1.5} aria-hidden="true" />
+              </Button>
+              {/* Regulatory statement, not decoration — live text at 4.5:1,
+                  never behind blur (landing.md §9). */}
+              <Disclosure tone="note" className="mt-5">
+                {learnDisclaimer}
+              </Disclosure>
+            </div>
+          </div>
+        </Reveal>
+      </div>
     </SectionShell>
   )
 }

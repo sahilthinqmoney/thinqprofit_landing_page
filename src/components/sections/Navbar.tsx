@@ -78,6 +78,13 @@ const icons: Record<string, LucideIcon> = {
   UserPlus,
 }
 
+/**
+ * Bar height. Shared between the flex row and each trigger `<li>` so the hover
+ * strip always fills the bar and the panel's `top-full` anchor stays in step.
+ * Taller from `xl` up: at a 1344–1664px content width a 64px bar reads thin.
+ */
+const BAR_HEIGHT = 'h-16 xl:h-20'
+
 type MobileEntry =
   | { kind: 'menu'; key: string; menu: NavMegaMenu }
   | { kind: 'link'; key: string; link: NavItem }
@@ -95,6 +102,31 @@ function ItemIcon({ name }: { name: string }) {
   return <Icon className="h-4 w-4" strokeWidth={1.5} aria-hidden="true" />
 }
 
+/**
+ * Hand focus to the section a fragment link points at.
+ *
+ * Activating a menu link closes the menu on the same click that navigates, so
+ * React unmounts the focused anchor and focus falls to `<body>` — a keyboard
+ * user lands nowhere and has to tab from the top of the document again. Moving
+ * focus onto the target first means the anchor is no longer the active element
+ * when it unmounts, and the next Tab continues from the destination.
+ *
+ * The `tabindex` is temporary and removed on blur: these sections belong to
+ * other components and must not be left with attributes this file added.
+ * `preventScroll` leaves scrolling to the browser's own fragment handling,
+ * which index.css asks to be smooth.
+ */
+function focusFragmentTarget(href: string) {
+  if (!href.startsWith('#') || href.length < 2) return
+  const target = document.getElementById(href.slice(1))
+  if (!target) return
+  if (!target.hasAttribute('tabindex')) {
+    target.setAttribute('tabindex', '-1')
+    target.addEventListener('blur', () => target.removeAttribute('tabindex'), { once: true })
+  }
+  target.focus({ preventScroll: true })
+}
+
 interface MenuLinkProps {
   item: MenuItem
   onNavigate: () => void
@@ -105,7 +137,10 @@ function MenuLink({ item, onNavigate }: MenuLinkProps) {
   return (
     <a
       href={item.href}
-      onClick={onNavigate}
+      onClick={() => {
+        focusFragmentTarget(item.href)
+        onNavigate()
+      }}
       className="group flex min-h-11 items-start gap-3 rounded-xl px-3 py-2.5 transition-colors duration-200 hover:bg-surface-raised focus-visible:bg-surface-raised"
     >
       <span className="mt-0.5 grid h-8 w-8 shrink-0 place-items-center rounded-lg border border-border-soft bg-bg/60 text-fg-muted transition-colors duration-200 group-hover:border-accent/50 group-hover:text-accent-soft">
@@ -260,8 +295,31 @@ export default function Navbar() {
     if (!next || !event.currentTarget.contains(next)) setOpenMenu(null)
   }
 
+  /**
+   * Mouse-driven close, guarded.
+   *
+   * A menu opened with Enter must survive the pointer merely crossing the nav
+   * on its way somewhere else. If focus is still on the open trigger or inside
+   * its panel the keyboard owns the menu, and a stray `mouseleave` or a hover
+   * over a neighbouring link has no business dismissing it.
+   */
+  const closeMenuOnHover = useCallback(() => {
+    setOpenMenu((current) => {
+      if (!current) return current
+      const active = document.activeElement
+      const keyboardOwnsIt =
+        active !== null &&
+        (triggerRefs.current[current] === active || panelRefs.current[current]?.contains(active))
+      return keyboardOwnsIt ? current : null
+    })
+  }, [])
+
   const hoverOpen = (menuId: string | null) => (event: { pointerType: string }) => {
-    if (event.pointerType === 'mouse') setOpenMenu(menuId)
+    if (event.pointerType !== 'mouse') return
+    // Hovering another trigger is deliberate intent on a nav control, so it
+    // still switches; only the incidental closes are guarded.
+    if (menuId === null) closeMenuOnHover()
+    else setOpenMenu(menuId)
   }
 
   /**
@@ -314,143 +372,178 @@ export default function Navbar() {
         <Container>
           <div
             className="relative"
-            onMouseLeave={() => setOpenMenu(null)}
+            onMouseLeave={closeMenuOnHover}
             onBlur={onNavBlur}
           >
-            <div className="flex h-16 items-center justify-between gap-2">
-              {/* §2.1 wordmark — mark to the left of the text lockup */}
-              <a
-                href="#main"
-                aria-label={wordmarkAlt}
-                onPointerEnter={hoverOpen(null)}
-                className="flex shrink-0 items-center gap-2 rounded-full py-2 pr-2 transition-opacity duration-200 hover:opacity-90"
-              >
-                <span className="grid h-7 w-7 place-items-center rounded-lg bg-accent">
-                  <TrendingUp className="h-4 w-4 text-white" strokeWidth={1.5} aria-hidden="true" />
-                </span>
-                <span className="text-[0.9375rem] font-semibold tracking-tight text-fg lg:text-base">
-                  {wordmark}
-                </span>
-              </a>
+            <div className={`flex ${BAR_HEIGHT} items-center justify-between gap-2`}>
+              {/* Wordmark and the primary links travel together as one left
+                  cluster. Left as three `justify-between` groups, a 1664px bar
+                  strands the links mid-air with ~450px of nothing on either
+                  side; anchored to the wordmark they still read as one
+                  navigation object and the whole void collects on the right,
+                  where the actions terminate it. */}
+              <div className="flex min-w-0 items-center gap-2 lg:gap-6 xl:gap-10">
+                {/* §2.1 wordmark — mark to the left of the text lockup */}
+                <a
+                  href="#main"
+                  aria-label={wordmarkAlt}
+                  onPointerEnter={hoverOpen(null)}
+                  className="flex shrink-0 items-center gap-2 rounded-full py-2 pr-2 transition-opacity duration-200 hover:opacity-90"
+                >
+                  <span className="grid h-7 w-7 place-items-center rounded-lg bg-accent xl:h-9 xl:w-9">
+                    <TrendingUp
+                      className="h-4 w-4 text-white xl:h-5 xl:w-5"
+                      strokeWidth={1.5}
+                      aria-hidden="true"
+                    />
+                  </span>
+                  <span className="text-[0.9375rem] font-semibold tracking-tight text-fg lg:text-base xl:text-lg">
+                    {wordmark}
+                  </span>
+                </a>
 
-              {/* Desktop nav */}
-              <nav aria-label="Primary" className="hidden md:block">
-                <ul className="flex items-center lg:gap-1">
-                  {megaMenus.map((menu) => {
-                    const isOpen = openMenu === menu.id
-                    const panelId = `nav-panel-${menu.id}`
-                    return (
-                      <li
-                        key={menu.id}
-                        className={`flex h-16 items-center ${menu.wide ? 'static' : 'relative'}`}
-                        onPointerEnter={hoverOpen(menu.id)}
-                      >
-                        <button
-                          type="button"
-                          ref={(node) => {
-                            triggerRefs.current[menu.id] = node
-                          }}
-                          aria-expanded={isOpen}
-                          aria-controls={isOpen ? panelId : undefined}
-                          onClick={() => setOpenMenu(isOpen ? null : menu.id)}
-                          onKeyDown={(event) => onTriggerKeyDown(event, menu.id)}
-                          className={`inline-flex min-h-11 cursor-pointer items-center gap-1 rounded-full px-2 text-[0.8125rem] font-medium transition-colors duration-200 lg:px-3 lg:text-sm ${
-                            isOpen ? 'text-fg' : 'text-fg-muted hover:text-fg'
+                {/* Desktop nav */}
+                <nav aria-label="Primary" className="hidden md:block">
+                  <ul className="flex items-center lg:gap-1 xl:gap-2">
+                    {megaMenus.map((menu) => {
+                      const isOpen = openMenu === menu.id
+                      const panelId = `nav-panel-${menu.id}`
+                      // Local const so the narrowing survives into the click handler.
+                      const footer = menu.footer
+                      return (
+                        <li
+                          key={menu.id}
+                          className={`flex ${BAR_HEIGHT} items-center ${
+                            menu.wide ? 'static' : 'relative'
                           }`}
+                          onPointerEnter={hoverOpen(menu.id)}
                         >
-                          {menu.label}
-                          <ChevronDown
-                            className={`h-3.5 w-3.5 transition-transform duration-200 ${
-                              isOpen ? 'rotate-180' : ''
-                            }`}
-                            strokeWidth={1.5}
-                            aria-hidden="true"
-                          />
-                        </button>
-
-                        {isOpen && (
-                          <div
-                            id={panelId}
+                          <button
+                            type="button"
                             ref={(node) => {
-                              panelRefs.current[menu.id] = node
+                              triggerRefs.current[menu.id] = node
                             }}
-                            onKeyDown={(event) => onPanelKeyDown(event, menu.id)}
-                            className={`absolute top-full pt-3 ${
-                              menu.wide
-                                ? 'left-0 right-0'
-                                : 'left-0 w-80 max-w-[calc(100vw-3rem)]'
+                            aria-expanded={isOpen}
+                            aria-controls={isOpen ? panelId : undefined}
+                            onClick={() => setOpenMenu(isOpen ? null : menu.id)}
+                            onKeyDown={(event) => onTriggerKeyDown(event, menu.id)}
+                            className={`inline-flex min-h-11 cursor-pointer items-center gap-1 rounded-full px-1.5 text-[0.8125rem] font-medium transition-colors duration-200 lg:px-3 lg:text-sm xl:px-4 xl:text-[0.9375rem] ${
+                              isOpen ? 'text-fg' : 'text-fg-muted hover:text-fg'
                             }`}
                           >
-                            <div className="overflow-hidden rounded-2xl border border-border bg-surface shadow-2xl">
-                              <div
-                                className={`grid gap-x-6 gap-y-5 p-4 ${
-                                  menu.wide ? 'md:grid-cols-3' : ''
-                                }`}
-                              >
-                                {menu.columns.map((column) => (
-                                  <div key={column.heading || menu.id}>
-                                    {column.heading && (
-                                      <p className="mb-1 px-3 text-[0.6875rem] font-semibold uppercase tracking-[0.18em] text-fg-muted">
-                                        {column.heading}
-                                      </p>
-                                    )}
-                                    <ul>
-                                      {column.items.map((item) => (
-                                        <li key={item.label}>
-                                          <MenuLink
-                                            item={item}
-                                            onNavigate={() => setOpenMenu(null)}
-                                          />
-                                        </li>
-                                      ))}
-                                    </ul>
-                                  </div>
-                                ))}
+                            {menu.label}
+                            <ChevronDown
+                              className={`h-3.5 w-3.5 transition-transform duration-200 ${
+                                isOpen ? 'rotate-180' : ''
+                              }`}
+                              strokeWidth={1.5}
+                              aria-hidden="true"
+                            />
+                          </button>
+
+                          {isOpen && (
+                            /* The wide panel stretches with the container, but
+                               only up to a point: three columns of short links
+                               spread across 1664px read as an empty shelf. The
+                               cap keeps ~365px per column — wide enough that
+                               the longest description clears its `truncate`,
+                               narrow enough that the panel still looks like a
+                               menu rather than a section. */
+                            <div
+                              id={panelId}
+                              ref={(node) => {
+                                panelRefs.current[menu.id] = node
+                              }}
+                              onKeyDown={(event) => onPanelKeyDown(event, menu.id)}
+                              className={`absolute top-full pt-3 ${
+                                menu.wide
+                                  ? 'left-0 w-full max-w-[1200px]'
+                                  : 'left-0 w-80 max-w-[calc(100vw-3rem)] xl:w-96'
+                              }`}
+                            >
+                              <div className="overflow-hidden rounded-2xl border border-border bg-surface shadow-2xl">
+                                <div
+                                  className={`grid gap-x-6 gap-y-5 p-4 xl:gap-x-8 xl:p-5 ${
+                                    menu.wide ? 'md:grid-cols-3' : ''
+                                  }`}
+                                >
+                                  {menu.columns.map((column) => (
+                                    <div key={column.heading || menu.id}>
+                                      {column.heading && (
+                                        <p className="mb-1 px-3 text-[0.6875rem] font-semibold uppercase tracking-[0.18em] text-fg-muted">
+                                          {column.heading}
+                                        </p>
+                                      )}
+                                      <ul>
+                                        {column.items.map((item) => (
+                                          <li key={item.label}>
+                                            <MenuLink
+                                              item={item}
+                                              onNavigate={() => setOpenMenu(null)}
+                                            />
+                                          </li>
+                                        ))}
+                                      </ul>
+                                    </div>
+                                  ))}
+                                </div>
+
+                                {/* px matches the row text inset: panel padding
+                                    + the row's own px-3, at both scales. */}
+                                {footer && (
+                                  <p className="flex flex-wrap items-center gap-x-1.5 border-t border-border-soft bg-bg/40 px-7 py-3 text-xs text-fg-muted xl:px-8">
+                                    <span>{footer.text}</span>
+                                    <a
+                                      href={footer.href}
+                                      onClick={() => {
+                                        focusFragmentTarget(footer.href)
+                                        setOpenMenu(null)
+                                      }}
+                                      className="font-medium text-accent-soft underline decoration-accent-soft/40 underline-offset-4 transition-colors duration-200 hover:text-fg hover:decoration-fg/60"
+                                    >
+                                      {footer.linkLabel}
+                                    </a>
+                                    {footer.trailing && <span>{footer.trailing}</span>}
+                                  </p>
+                                )}
                               </div>
-
-                              {menu.footer && (
-                                <p className="flex flex-wrap items-center gap-x-1.5 border-t border-border-soft bg-bg/40 px-7 py-3 text-xs text-fg-muted">
-                                  <span>{menu.footer.text}</span>
-                                  <a
-                                    href={menu.footer.href}
-                                    onClick={() => setOpenMenu(null)}
-                                    className="font-medium text-accent-soft underline decoration-accent-soft/40 underline-offset-4 transition-colors duration-200 hover:text-fg hover:decoration-fg/60"
-                                  >
-                                    {menu.footer.linkLabel}
-                                  </a>
-                                  {menu.footer.trailing && <span>{menu.footer.trailing}</span>}
-                                </p>
-                              )}
                             </div>
-                          </div>
-                        )}
+                          )}
+                        </li>
+                      )
+                    })}
+
+                    {directLinks.map((link) => (
+                      <li key={link.label} className={`flex ${BAR_HEIGHT} items-center`}>
+                        <a
+                          href={link.href}
+                          onPointerEnter={hoverOpen(null)}
+                          className="inline-flex min-h-11 items-center rounded-full px-1.5 text-[0.8125rem] font-medium text-fg-muted transition-colors duration-200 hover:text-fg lg:px-3 lg:text-sm xl:px-4 xl:text-[0.9375rem]"
+                        >
+                          {link.label}
+                        </a>
                       </li>
-                    )
-                  })}
+                    ))}
+                  </ul>
+                </nav>
+              </div>
 
-                  {directLinks.map((link) => (
-                    <li key={link.label} className="flex h-16 items-center">
-                      <a
-                        href={link.href}
-                        onPointerEnter={hoverOpen(null)}
-                        className="inline-flex min-h-11 items-center rounded-full px-2 text-[0.8125rem] font-medium text-fg-muted transition-colors duration-200 hover:text-fg lg:px-3 lg:text-sm"
-                      >
-                        {link.label}
-                      </a>
-                    </li>
-                  ))}
-                </ul>
-              </nav>
-
-              {/* Desktop actions */}
+              {/* Desktop actions. gap-2 from lg up so the two 44px targets keep
+                  the 8px separation the touch-target rule asks for; 4px at md,
+                  where the bar is at its tightest and the pointer is a mouse. */}
               <div
-                className="hidden shrink-0 items-center gap-1 md:flex"
+                className="hidden shrink-0 items-center gap-1 md:flex lg:gap-2"
                 onPointerEnter={hoverOpen(null)}
               >
-                <Button href="#" variant="ghost" size="sm">
+                <Button href="#" variant="ghost" size="sm" className="xl:px-5">
                   {loginLabel}
                 </Button>
-                <Button href="#onboarding" variant="primary" size="sm">
+                <Button
+                  href="#onboarding"
+                  variant="primary"
+                  size="sm"
+                  className="xl:px-5"
+                >
                   {signupLabel}
                 </Button>
               </div>
@@ -519,7 +612,10 @@ export default function Navbar() {
                     <li key={entry.key}>
                       <a
                         href={entry.link.href}
-                        onClick={() => setMobileOpen(false)}
+                        onClick={() => {
+                          focusFragmentTarget(entry.link.href)
+                          setMobileOpen(false)
+                        }}
                         className="flex min-h-14 items-center py-4 text-base font-medium text-fg"
                       >
                         {entry.link.label}
@@ -530,6 +626,8 @@ export default function Navbar() {
 
                 const { menu } = entry
                 const expanded = openAccordion === menu.id
+                // Local const so the narrowing survives into the click handler.
+                const sheetFooter = menu.footer
                 return (
                   <li key={entry.key}>
                     <button
@@ -572,17 +670,20 @@ export default function Navbar() {
                           </div>
                         ))}
 
-                        {menu.footer && (
+                        {sheetFooter && (
                           <p className="mt-1 flex flex-wrap items-center gap-x-1.5 rounded-xl border border-border-soft bg-surface/60 px-3 py-3 text-xs text-fg-muted">
-                            <span>{menu.footer.text}</span>
+                            <span>{sheetFooter.text}</span>
                             <a
-                              href={menu.footer.href}
-                              onClick={() => setMobileOpen(false)}
+                              href={sheetFooter.href}
+                              onClick={() => {
+                                focusFragmentTarget(sheetFooter.href)
+                                setMobileOpen(false)
+                              }}
                               className="font-medium text-accent-soft underline decoration-accent-soft/40 underline-offset-4"
                             >
-                              {menu.footer.linkLabel}
+                              {sheetFooter.linkLabel}
                             </a>
-                            {menu.footer.trailing && <span>{menu.footer.trailing}</span>}
+                            {sheetFooter.trailing && <span>{sheetFooter.trailing}</span>}
                           </p>
                         )}
                       </div>

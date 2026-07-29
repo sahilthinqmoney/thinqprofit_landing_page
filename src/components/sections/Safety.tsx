@@ -24,17 +24,31 @@ const iconMap: Record<string, LucideIcon> = {
 }
 
 /**
- * §10 Safety & protection. Raised tone for contrast against Onboarding and the
- * mobile-app pitch either side of it. The pillars sit in a hairline grid rather
- * than detached cards — custody rules read better as a ledger than as marketing
- * tiles. The honest note gets its own warning-toned panel: the copy deck marks
- * it "keep this, do not soften it", so it is never rendered as fine print.
+ * §10 Safety & protection.
+ *
+ * `seamless`: Onboarding above is a full-bleed MediaSection, and a hairline
+ * ruled across the bottom of a photograph reads as a mistake. Base tone, because
+ * the mobile-app band below is a solid raised surface — two raised bands in a
+ * row and the boundary between them disappears.
+ *
+ * The pillars stay a 3×2 hairline grid at the wider container. 6×1 gives six
+ * 260px slivers whose titles wrap to three lines each; 2×3 gives 800px cells
+ * holding two lines of copy, which is a letterbox, not a card. 3×2 lands at
+ * 555px per cell at 1664px — a normal card measure — so the width goes into
+ * padding rather than into stretching the cells, and the icon loses its bordered
+ * tile: Products and Platform both dropped theirs, and a boxed glyph inside a
+ * boxed cell is chrome on chrome.
+ *
+ * The honest note is the most important line in the section — the deck marks it
+ * "keep this, do not soften it". It is capped well inside the container and set
+ * a step larger than the pillar titles. A 1664px-wide warning panel holding one
+ * 137-character sentence would be a thinner statement, not a louder one.
  */
 export default function Safety() {
   return (
     <SectionShell
       id="safety"
-      tone="raised"
+      seamless
       eyebrow="Safety"
       heading="Your money and your shares stay yours"
       subheading="Client assets sit where regulation says they should — not on our balance sheet."
@@ -53,12 +67,16 @@ export default function Safety() {
             >
               <Reveal
                 delay={Math.min(index, 3) * 60}
-                className="flex w-full flex-col gap-3 p-6"
+                className="flex w-full flex-col gap-3 p-6 lg:p-7 2xl:p-9"
               >
-                <span className="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-border-soft bg-bg/60">
-                  <Icon className="h-5 w-5 text-accent-soft" strokeWidth={1.5} aria-hidden="true" />
-                </span>
-                <h3 className="text-lg font-semibold leading-[1.4] text-fg">{pillar.title}</h3>
+                <Icon
+                  className="h-5 w-5 text-accent-soft"
+                  strokeWidth={1.5}
+                  aria-hidden="true"
+                />
+                <h3 className="text-lg font-medium leading-snug text-fg 2xl:text-xl">
+                  {pillar.title}
+                </h3>
                 <CopyText source={pillar.body} className="text-base leading-relaxed text-fg-muted" />
               </Reveal>
             </li>
@@ -66,18 +84,18 @@ export default function Safety() {
         })}
       </ul>
 
-      {/* Honest note — the most important line in this section. */}
+      {/* Honest note. */}
       <Reveal delay={120}>
-        <div className="mt-8 rounded-2xl border border-warning/30 border-l-4 border-l-warning bg-warning/5 p-6 sm:mt-10 sm:p-8">
-          <p className="flex items-center gap-2 text-xs font-medium uppercase tracking-[0.18em] text-warning">
+        <div className="mx-auto mt-10 max-w-3xl border-l-2 border-warning py-1 pl-6 sm:mt-14 sm:pl-8">
+          <p className="flex items-center gap-2 text-sm text-warning">
             <TriangleAlert className="h-4 w-4 shrink-0" strokeWidth={1.5} aria-hidden="true" />
             Honest note
           </p>
-          {/* Sized a step above the pillar H3 (18px) so it stays the loudest
-              line in the section — deck §10: "keep this, do not soften it". */}
+          {/* A step above the pillar titles so it stays the loudest line in the
+              section, and capped at ~58 characters at that size. */}
           <CopyText
             source={honestNote}
-            className="mt-3 max-w-3xl text-lg leading-relaxed text-warning sm:text-xl"
+            className="mt-3 text-xl leading-relaxed text-warning 2xl:text-2xl"
           />
         </div>
       </Reveal>

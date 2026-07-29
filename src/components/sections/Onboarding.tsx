@@ -1,117 +1,84 @@
-import { ArrowRight, Check, Clock, FileSignature, IdCard, Wallet } from 'lucide-react'
-import type { LucideIcon } from 'lucide-react'
-import SectionShell from '../ui/SectionShell'
 import Button from '../ui/Button'
 import CopyText from '../ui/CopyText'
+import MediaSection from '../ui/MediaSection'
 import Reveal from '../ui/Reveal'
-import { requirements, steps, timingNote } from '../../data/onboarding'
-
-/** Icon names live in the data file; the components are resolved here. */
-const iconMap: Record<string, LucideIcon> = {
-  'id-card': IdCard,
-  'file-signature': FileSignature,
-  wallet: Wallet,
-}
+import { onboardingCopy, requirements, steps, timingNote } from '../../data/onboarding'
 
 /**
- * §8 Onboarding — three numbered steps on a connecting rail (horizontal on
- * desktop, vertical on mobile), then the requirements checklist and the
- * activation-time note.
+ * §8 Onboarding — full-bleed, copy parked in the left 46% so it alternates
+ * against Platform, which sits right.
+ *
+ * What went: the numbered-circle rail, the connector line and the bordered
+ * requirements/CTA panel. Three bordered circles on a hairline rail is the
+ * house style of every generic AI landing page, and a card-in-a-card CTA panel
+ * re-boxes content the bleed section exists to un-box.
+ *
+ * What replaced it: the same three steps as a plain numbered sequence —
+ * tabular numeral, label, and a hairline `border-l` doing the separating that
+ * the rail used to do — and the requirements as one flowed line of text. The
+ * media carries the weight; the type stays quiet on top of it.
  */
 export default function Onboarding() {
   return (
-    <SectionShell
+    <MediaSection
       id="onboarding"
-      eyebrow="Getting started"
-      heading="Open an account before your chai gets cold"
-      subheading="Fully online, Aadhaar-based, and no branch visit — assuming your KYC details are current."
+      height="tall"
+      place="left"
+      anchor="center"
+      scrim={0.88}
+      /* Dense core sits under the copy column, not the middle of the frame. */
+      scrimAt="26% 50%"
+      /* 12em: at 10 the measure clipped "Open an account before" one word early
+         and stranded "before" alone on the second line. */
+      measure="12em"
+      label={onboardingCopy.eyebrow}
+      headline={onboardingCopy.heading}
+      body={onboardingCopy.subheading}
+      actions={
+        <Button href="#onboarding" size="lg">
+          {onboardingCopy.cta}
+        </Button>
+      }
+      /* Activation SLA is a service claim, so it is live text under the CTA —
+         never collapsed, never behind blur. CopyText keeps the unfilled [X]
+         visibly flagged, and the lift off /55 holds it above 4.5:1. */
+      finePrint={<CopyText source={timingNote} className="text-white/75" />}
+      media={{ alt: onboardingCopy.mediaAlt }}
     >
-      <div className="relative">
-        {/* Desktop rail: runs behind the number circles, step 1 through step 3. */}
-        <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 top-6 hidden md:block">
-          <div className="mx-[16.6%] h-px bg-border-soft" />
-        </div>
+      <ol className="mt-12 flex w-full max-w-[44em] flex-col gap-6 sm:flex-row sm:gap-0">
+        {steps.map((step, index) => (
+          <li
+            key={step.title}
+            className={
+              index === 0
+                ? 'sm:flex-1 sm:pr-6'
+                : 'border-white/15 sm:flex-1 sm:border-l sm:pl-6 sm:pr-6'
+            }
+          >
+            <Reveal delay={index * 60} className="flex items-baseline gap-3 sm:block">
+              <span className="text-[1.75rem] font-medium leading-none tabular text-white/35">
+                {index + 1}
+              </span>
+              <span className="block sm:mt-3">
+                <span className="block text-base leading-snug text-white/85">{step.title}</span>
+                {/* The detail line is the part a first-time account opener
+                    actually needs — which documents, what eSign does, how the
+                    first deposit works. Dropping it to keep the sequence tidy
+                    would trade the section's only substance for its looks. */}
+                <span className="mt-2 block text-[0.8125rem] leading-relaxed text-white/60">
+                  {step.body}
+                </span>
+              </span>
+            </Reveal>
+          </li>
+        ))}
+      </ol>
 
-        <ol className="grid gap-10 md:grid-cols-3 md:gap-8">
-          {steps.map((step, index) => {
-            const Icon = iconMap[step.icon] ?? IdCard
-            const isLast = index === steps.length - 1
-
-            return (
-              <li key={step.title} className="relative">
-                {/* Mobile rail segment, bleeding across the 2.5rem row gap. */}
-                {!isLast && (
-                  <span
-                    aria-hidden="true"
-                    className="absolute -bottom-10 left-6 top-14 w-px bg-border-soft md:hidden"
-                  />
-                )}
-
-                <Reveal delay={index * 60} className="flex gap-4 md:block">
-                  <span className="relative z-10 flex h-12 w-12 shrink-0 items-center justify-center rounded-full border border-accent/60 bg-bg text-base font-semibold tabular text-accent-soft">
-                    {index + 1}
-                  </span>
-
-                  <div className="md:mt-6">
-                    <div className="flex items-center gap-2">
-                      <Icon
-                        className="h-4 w-4 shrink-0 text-accent-soft"
-                        strokeWidth={1.5}
-                        aria-hidden="true"
-                      />
-                      <h3 className="text-lg font-semibold leading-[1.4] text-fg">{step.title}</h3>
-                    </div>
-                    <CopyText
-                      source={step.body}
-                      className="mt-2 max-w-sm text-base leading-relaxed text-fg-muted"
-                    />
-                  </div>
-                </Reveal>
-              </li>
-            )
-          })}
-        </ol>
-      </div>
-
-      <Reveal delay={180}>
-        <div className="mt-12 overflow-hidden rounded-2xl border border-border bg-surface/60">
-          {/* Requirements strip */}
-          <div className="flex flex-col gap-3 p-5 sm:flex-row sm:flex-wrap sm:items-center sm:gap-x-3 sm:gap-y-2 sm:p-6">
-            <span className="text-xs font-medium uppercase tracking-[0.16em] text-fg-muted">
-              {"You'll need:"}
-            </span>
-            <ul className="flex flex-wrap gap-2">
-              {requirements.map((item) => (
-                <li
-                  key={item}
-                  className="inline-flex items-center gap-1.5 rounded-full border border-border-soft bg-surface-raised px-3 py-1.5 text-sm text-fg"
-                >
-                  <Check
-                    className="h-3.5 w-3.5 shrink-0 text-accent-soft"
-                    strokeWidth={1.5}
-                    aria-hidden="true"
-                  />
-                  {item}
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          {/* Timing note + CTA */}
-          <div className="flex flex-col gap-5 border-t border-border-soft p-5 sm:flex-row sm:items-center sm:justify-between sm:gap-8 sm:p-6">
-            <p className="flex items-start gap-2 text-base leading-relaxed text-fg-muted">
-              <Clock className="mt-1 h-4 w-4 shrink-0" strokeWidth={1.5} aria-hidden="true" />
-              {/* Through CopyText so the unfilled [X] activation SLA reads as a
-                  placeholder, not as a published figure. */}
-              <CopyText as="span" source={timingNote} />
-            </p>
-            <Button href="#onboarding" size="lg" className="shrink-0">
-              Start account opening
-              <ArrowRight className="h-4 w-4" strokeWidth={1.5} aria-hidden="true" />
-            </Button>
-          </div>
-        </div>
+      <Reveal delay={180} className="w-full">
+        <p className="mt-8 max-w-[42em] text-[0.8125rem] leading-relaxed text-white/55">
+          {`You'll need: ${requirements.join(', ')}.`}
+        </p>
       </Reveal>
-    </SectionShell>
+    </MediaSection>
   )
 }

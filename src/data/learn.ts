@@ -4,52 +4,46 @@
  * Track titles and descriptions are verbatim. `learnDisclaimer` is the advisory
  * boundary statement: it must render as live text on the page, never as an
  * image and never behind a blur (landing.md §9).
+ *
+ * The tracks are an ordered path — First Steps through Taxes — and the section
+ * renders them as a staircase in that order. Order is content, so it lives here
+ * rather than being re-sorted in the component.
+ *
+ * No level, duration or difficulty field: the copy deck specifies none for any
+ * track, and a UI column that exists only to hold an invented value is a worse
+ * outcome than not having the column.
+ *
+ * `icon` is carried because the shared `LearnTrack` type requires it. The
+ * section no longer renders per-track glyphs — landing.md §8 assigns icon sets
+ * to Products, Platform and Safety only, and Learn's were an invention.
  */
 import type { LearnTrack } from '../types'
 
-/**
- * Local extension of `LearnTrack` — the shared type is owned elsewhere, and the
- * ledger layout needs one more column than it carries.
- *
- * `marker` is the level/duration cell in each row. The copy deck specifies no
- * level and no run-time for any track, so the value is an unfilled placeholder
- * in the deck's own square-bracket convention and renders through `CopyText` in
- * warning colour. Inventing "Beginner · 12 min" would be inventing copy.
- */
-export interface LearnTrackRow extends LearnTrack {
-  marker: string
-}
-
-export const tracks: LearnTrackRow[] = [
+export const tracks: LearnTrack[] = [
   {
     title: 'First Steps',
     body: "What a demat account is, how settlement works, what you're actually buying",
     icon: 'footprints',
-    marker: '[LEVEL · DURATION]',
   },
   {
     title: 'Reading the Market',
     body: 'Charts, volumes, order types, and what moves a price',
     icon: 'chart-candlestick',
-    marker: '[LEVEL · DURATION]',
   },
   {
     title: 'Derivatives, Carefully',
     body: 'How F&O works, what margin means, and how positions go wrong',
     icon: 'shield-alert',
-    marker: '[LEVEL · DURATION]',
   },
   {
     title: 'Funds & SIPs',
     body: 'Direct versus regular, expense ratios, and why the difference compounds',
     icon: 'piggy-bank',
-    marker: '[LEVEL · DURATION]',
   },
   {
     title: 'Taxes',
     body: 'STCG, LTCG, speculative income, and what your P&L statement means at filing time',
     icon: 'receipt',
-    marker: '[LEVEL · DURATION]',
   },
 ]
 

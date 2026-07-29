@@ -1,8 +1,5 @@
-import { BellRing, LayoutGrid, ScanFace, Smartphone, Star, WifiOff } from 'lucide-react'
-import type { LucideIcon } from 'lucide-react'
 import Button from '../ui/Button'
 import Container from '../ui/Container'
-import CopyText from '../ui/CopyText'
 import MediaPlaceholder from '../ui/MediaPlaceholder'
 import Reveal from '../ui/Reveal'
 import { appCopy, appFeatures } from '../../data/app'
@@ -10,131 +7,138 @@ import { appCopy, appFeatures } from '../../data/app'
 /**
  * §9 Mobile app.
  *
- * The one section where the App-Store treatment is allowed
- * (design-system/thinqprofit/pages/landing.md §1, conflict 3): device frame,
- * store badges and a scan-to-install block. Everywhere else the page runs the
- * Trust & Authority spine.
+ * The page's deliberate palette break: a flat raised-surface band sitting
+ * between two full-bleed media sections, so the eye gets one solid colour block
+ * between two photographic ones. It is intentionally NOT a `MediaSection` — a
+ * third consecutive image is exactly the monotony this beat exists to break.
  *
- * Store CTAs are secondary — the page has exactly one primary action, and it
- * isn't "download an app".
+ * The whole visual idea is the bottom crop. Copy is centred, the device sits
+ * below the CTAs and is cut off by the section's own bottom edge
+ * (`overflow-hidden` + a translate that pushes it past that edge). No side
+ * column, no floating device on a glow — the section frame does the work.
+ *
+ * Height is fixed at 880px from `md` up so the crop lands in the same place on
+ * every desktop rather than drifting with copy length; below 768px the section
+ * is content-sized, because a fixed height on a phone just clips words.
+ *
+ * Store CTAs stay secondary — the page has exactly one primary action, and it
+ * isn't "download an app" (landing.md §1, conflict 3).
  */
 interface MobileAppProps {
   id?: string
 }
 
-const featureIcons: Record<string, LucideIcon> = {
-  'scan-face': ScanFace,
-  'layout-grid': LayoutGrid,
-  'bell-ring': BellRing,
-  'wifi-off': WifiOff,
-}
-
 export default function MobileApp({ id = 'mobile-app' }: MobileAppProps) {
   return (
-    <section id={id} className="scroll-mt-24 border-t border-border-soft py-12 sm:py-16 lg:py-24">
+    <section
+      id={id}
+      className="relative flex min-h-svh scroll-mt-24 flex-col justify-center overflow-hidden bg-surface-raised"
+    >
+      {/* ------------------------------------------------------------------ */}
+      {/* Centred copy                                                        */}
+      {/* ------------------------------------------------------------------ */}
       <Container>
-        <div className="grid items-center gap-12 lg:grid-cols-2 lg:gap-16">
-          {/* ---------------------------------------------------------------- */}
-          {/* Copy column                                                      */}
-          {/* ---------------------------------------------------------------- */}
-          <div>
-            <Reveal>
-              <p className="text-xs font-medium uppercase tracking-[0.2em] text-accent-soft">
-                {appCopy.eyebrow}
-              </p>
-              <h2 className="mt-3 text-[clamp(1.75rem,3vw,2.5rem)] font-semibold leading-[1.15] tracking-[-0.015em] text-fg">
-                {appCopy.heading}
-              </h2>
-              <p className="mt-4 max-w-xl text-base leading-relaxed text-fg-muted">
-                {appCopy.body}
-              </p>
-            </Reveal>
+        {/* Wrapper is wider than the copy needs on purpose: the headline and
+            body carry their own measure caps, and the flowed feature line wants
+            the extra width so it settles on two lines instead of three. */}
+        <div className="mx-auto max-w-[56rem] pt-20 text-center">
+          <Reveal>
+            {/* Plain muted label, not an uppercase accent chip — the coloured
+                tracking-[0.2em] eyebrow is the generic-AI-page tell, and indigo
+                is reserved for the action, not for decoration. */}
+            <p className="text-base text-fg-muted">{appCopy.eyebrow}</p>
 
-            <Reveal delay={60}>
-              <ul className="mt-8 grid gap-3 sm:grid-cols-2">
-                {appFeatures.map((feature) => {
-                  const Icon = featureIcons[feature.icon] ?? Smartphone
-                  return (
-                    <li
-                      key={feature.label}
-                      className="flex items-start gap-3 rounded-xl border border-border-soft bg-surface/50 px-4 py-3"
-                    >
-                      <Icon
-                        className="mt-0.5 h-5 w-5 shrink-0 text-accent-soft"
-                        strokeWidth={1.5}
-                        aria-hidden="true"
-                      />
-                      <span className="text-base leading-relaxed text-fg-muted">{feature.label}</span>
-                    </li>
-                  )
-                })}
-              </ul>
-            </Reveal>
+            <h2 className="mx-auto mt-4 max-w-[13em] text-[clamp(2.5rem,5vw,3.5rem)] font-medium leading-[1.06] tracking-[-0.03em] text-fg">
+              {appCopy.heading}
+            </h2>
 
-            {/* Text-only store CTAs. lucide ships no brand marks — its `Apple`
-                glyph is a piece of fruit, not the Apple Inc. wordmark — and
-                Footer.tsx makes the same call for the social row. The deck's
-                labels name both stores unambiguously without a badge. */}
-            <Reveal delay={120}>
-              <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-                {appCopy.storeCtas.map((cta) => (
-                  <Button key={cta.label} href={cta.href} variant="secondary">
-                    {cta.label}
-                  </Button>
-                ))}
-              </div>
-            </Reveal>
+            <p className="mx-auto mt-5 max-w-[34em] text-base leading-relaxed text-fg-muted">
+              {appCopy.body}
+            </p>
+          </Reveal>
 
-            {/* Scan-to-install + store ratings. The bracketed values are
-                unfilled placeholders from the copy deck — do not substitute a
-                number that hasn't been pulled from the live store listing. */}
-            <Reveal delay={180}>
-              <div className="mt-6 flex flex-col items-start gap-4 rounded-2xl border border-border-soft bg-surface/40 p-4 sm:flex-row sm:items-center sm:gap-5">
-                {/* Sized by a wrapper, not a `w-*` on the placeholder itself —
-                    MediaPlaceholder carries `w-full`, and two width utilities on
-                    one element resolve by stylesheet order, not source order. */}
-                <div className="w-32 shrink-0 sm:w-36">
-                  <MediaPlaceholder
-                    kind="image"
-                    aspect="aspect-square"
-                    label="QR code to the ThinqProfit app listing"
-                    alt="QR code that opens the ThinqProfit app listing"
-                  />
-                </div>
-                <div className="min-w-0 flex-1">
-                  <p className="text-base font-medium leading-relaxed text-fg">{appCopy.qrLine}</p>
-                  <div className="mt-2 flex items-start gap-2 text-sm leading-relaxed text-fg-muted">
-                    <Star className="mt-1 h-4 w-4 shrink-0" strokeWidth={1.5} aria-hidden="true" />
-                    <CopyText source={appCopy.ratingLine} className="min-w-0 flex-1" />
-                  </div>
-                </div>
-              </div>
-            </Reveal>
-          </div>
-
-          {/* ---------------------------------------------------------------- */}
-          {/* Device frame                                                     */}
-          {/* ---------------------------------------------------------------- */}
+          {/* Features survive as one quiet flowed line. As bordered chips they
+              read as four more cards on a page that already has enough. */}
           <Reveal delay={60}>
-            <div className="relative mx-auto w-full max-w-[300px]">
-              <div
-                aria-hidden="true"
-                className="pointer-events-none absolute inset-x-6 inset-y-12 rounded-full bg-accent/10 blur-3xl"
-              />
-              <div className="relative rounded-[1.75rem] border border-border bg-surface p-2.5 shadow-2xl">
-                <div aria-hidden="true" className="mx-auto mb-2 h-1 w-12 rounded-full bg-border" />
-                <MediaPlaceholder
-                  kind="screen"
-                  aspect="aspect-[9/17]"
-                  label="ThinqProfit app — watchlist, order ticket and positions"
-                  alt="ThinqProfit app showing a watchlist with an open order ticket"
-                />
-                <div aria-hidden="true" className="mx-auto mt-2 h-1 w-20 rounded-full bg-border" />
-              </div>
+            {/* Inline `li`s, not flex items: this has to wrap as one run of
+                prose. As a flex row the separator is its own box, so a label
+                that wraps internally leaves its `·` stranded on the line above.
+                The separator is glued to the label it follows with a
+                non-breaking space, so a line can only ever break *after* it. */}
+            <ul className="mx-auto mt-6 max-w-[54rem] text-sm leading-relaxed text-fg-muted">
+              {appFeatures.map((feature, index) => (
+                <li key={feature.label} className="inline">
+                  {feature.label}
+                  {index < appFeatures.length - 1 && (
+                    <span aria-hidden="true" className="text-fg-subtle">
+                      {'\u00A0· '}
+                    </span>
+                  )}
+                </li>
+              ))}
+            </ul>
+          </Reveal>
+
+          {/* Text-only store CTAs. lucide ships no brand marks — its `Apple`
+              glyph is a piece of fruit, not the Apple Inc. wordmark — and
+              Footer.tsx makes the same call for the social row. The deck's
+              labels name both stores unambiguously without a badge. */}
+          <Reveal delay={120}>
+            <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
+              {appCopy.storeCtas.map((cta) => (
+                <Button key={cta.label} href={cta.href} variant="secondary">
+                  {cta.label}
+                </Button>
+              ))}
             </div>
           </Reveal>
         </div>
       </Container>
+
+      {/* ------------------------------------------------------------------ */}
+      {/* Device — centred, cropped by the section's bottom edge               */}
+      {/* ------------------------------------------------------------------ */}
+      {/* Outer div does the positioning only: from `md` it pins to the bottom of
+          the fixed 880px band, below that it is a normal flow row. It must stay
+          transform-free, or it would become the containing block for its own
+          absolute positioning. The negative margin is the mobile counterweight
+          to the crop translate below — that translate moves the device down
+          without moving its box, and without this the gap under the CTAs reads
+          as ~210px of dead band on a phone. */}
+      <div className="-mt-20 flex justify-center md:absolute md:inset-x-0 md:bottom-0 md:mt-0">
+        {/* The crop. `translate-y` shifts the device visually without changing
+            its layout box, so the section's bottom edge stays exactly where the
+            box ends and everything below it is clipped. The md/lg steps are
+            measured against the copy stack, not guessed: they hold the visible
+            slice at ~325px so the device never climbs into the CTA row — the
+            clearance runs 54px at 1280–1600 and widens below that. */}
+        <div className="w-[16rem] translate-y-[30%] sm:w-[17rem] md:w-[18rem] md:translate-y-[43%] lg:w-[20rem] lg:translate-y-[48.5%]">
+          <Reveal delay={180}>
+            {/* Minimal bezel: hairline border, large radius. No speaker pill, no
+                home indicator, no blurred accent glow behind it. */}
+            <div className="rounded-[2.25rem] border border-border bg-surface p-2">
+              {/* Wrapper clips the placeholder's own radius to the bezel's inner
+                  curve — two rounded-* utilities on one element resolve by
+                  stylesheet order, not source order. */}
+              <div className="overflow-hidden rounded-[1.75rem]">
+                {/* `pb` is scaffolding, not styling: MediaPlaceholder centres its
+                    brief in its own box, and roughly the lower 40% of that box is
+                    off-frame here, so the brief would be cut mid-sentence.
+                    Padding-bottom lifts it into the visible half. It leaves with
+                    the placeholder when the real screenshot lands — the reserved
+                    9/19 box is unchanged, so nothing shifts (CLS). */}
+                <MediaPlaceholder
+                  kind="screen"
+                  aspect="aspect-[9/19]"
+                  className="pb-[78%]"
+                  label="Screen stays dark — the real UI is composited in later. No prices, P&L or chart forms."
+                  alt="The ThinqProfit app running on a phone"
+                />
+              </div>
+            </div>
+          </Reveal>
+        </div>
+      </div>
     </section>
   )
 }

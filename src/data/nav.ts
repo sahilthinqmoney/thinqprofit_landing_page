@@ -66,8 +66,13 @@ export interface MenuFooter {
 
 /**
  * Local extension of `MegaMenu`: adds a stable `id` for ARIA wiring, a `wide`
- * flag (three-column panels span the container, single-column panels don't),
- * and a footer that can carry copy after the link.
+ * flag, and a footer that can carry copy after the link.
+ *
+ * `wide` marks the three-column panels. They track the container width but stop
+ * at a ceiling set in `Navbar` — past ~1200px three columns of short links stop
+ * looking like a menu and start looking like an empty shelf. Single-column
+ * panels (`wide: false`) are sized to their own content and anchored to their
+ * trigger instead.
  */
 export interface NavMegaMenu extends Omit<MegaMenu, 'footer'> {
   id: string

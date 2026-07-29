@@ -19,6 +19,16 @@ import Footer from './components/sections/Footer'
 /**
  * Section order follows design-system/thinqprofit/pages/landing.md §7
  * (Trust & Authority spine): proof at position 4, safety before the app pitch.
+ *
+ * Every section covers the full screen (`min-h-svh`, content vertically
+ * centred) — that is the brief. `svh` rather than `vh` so mobile browser chrome
+ * doesn't push a section past the fold, and `min-` rather than a fixed height so
+ * content-heavy sections (Products, Pricing, Footer) grow instead of clipping.
+ *
+ * The two deliberate exceptions are TrustStrip and Stats, which opt out with
+ * `fullHeight={false}`. Both are thin punctuation bands between sections rather
+ * than sections in their own right; giving them a full screen each would put a
+ * viewport of empty space around five registration codes.
  */
 export default function App() {
   return (

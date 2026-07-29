@@ -8,7 +8,11 @@ interface MediaPlaceholderProps {
   label: string
   /** Tailwind aspect ratio class, e.g. "aspect-video". */
   aspect?: string
-  /** Copy-deck alt text for the eventual asset — carried through so it isn't lost. */
+  /**
+   * Alt text the real asset will carry. Not announced while this is a
+   * placeholder — it would describe an image that isn't there yet — but kept on
+   * `data-pending-alt` so it survives to whoever swaps the asset in.
+   */
   alt?: string
   className?: string
 }
@@ -37,7 +41,8 @@ export default function MediaPlaceholder({
   return (
     <div
       role="img"
-      aria-label={alt ?? label}
+      aria-label={`Placeholder: ${label}`}
+      data-pending-alt={alt ?? label}
       className={`relative grid ${aspect} w-full place-items-center overflow-hidden rounded-2xl border border-dashed border-border bg-surface/60 ${className}`}
     >
       {/* Diagonal hatch so the box reads as "not final" at a glance. */}

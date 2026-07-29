@@ -1,71 +1,98 @@
-import { Check } from 'lucide-react'
 import Button from '../ui/Button'
-import Container from '../ui/Container'
 import CopyText from '../ui/CopyText'
 import Disclosure from '../ui/Disclosure'
-import Reveal from '../ui/Reveal'
+import MediaSection from '../ui/MediaSection'
 import { finalCta } from '../../data/footer'
 
 /**
- * §16 Final CTA. Copy verbatim from docs/landing-page-copy.md.
+ * §16 Final CTA — the page's closing full-bleed module. Copy verbatim from
+ * docs/landing-page-copy.md.
  *
- * Constraints honoured here:
- *  - indigo CTA, never green — landing.md §1 conflict 2
- *  - no urgency mechanics, no countdown — landing.md §10
- *  - the market-risk disclosure is live text directly beneath the CTA, at
- *    fg-muted (6.1:1), never behind a blur — landing.md §9
+ * Rebuilt on `MediaSection`: media edge to edge, copy centred on top of it.
+ * What went: the rounded-3xl panel (the only one on the page), both
+ * `blur-[120px]` accent blobs, and the row of bordered check-chips. A panel
+ * floating inside a `min-h-svh` box is the generic-SaaS closing move; the bleed
+ * is the Robinhood one, and it costs three fewer decorative layers.
+ *
+ * `height="mid"` (704px) is deliberately the shortest full-bleed band on the
+ * page — the hero takes 900, the mid-page sections 800. The close should land,
+ * not open another chapter.
+ *
+ * Constraints honoured:
+ *  - indigo CTA, never green — landing.md §1 conflict 2, §10
+ *  - no urgency mechanics, no countdown, no scarcity line — landing.md §10
+ *  - the market-risk disclosure is live text under the CTA, inside the section,
+ *    above the scrim and never behind a blur — landing.md §9, §10
  */
+
+/**
+ * Asset brief for the closing clip. No URL exists yet, so `MediaBackdrop`
+ * renders its pending field and prints this string — the layout is already
+ * final and the overlaid copy can be judged for contrast now.
+ *
+ * Written against docs/motion-brief.md §5 (one visual grammar for the whole
+ * library: ink-navy void, indigo→cyan light only) and §7 (no numbers or chart
+ * forms, no green or red, no upward motion as a promise, people composed and
+ * never celebrating). Note the dead zone moves: the hero reserves the left 45%,
+ * this section is centre-placed, so here it is the centre that stays dark.
+ */
+const closingClip =
+  'Closing loop, 8s, seamless. The hero subject at distance in the ink-navy void, seated and still, mid-thought — composed, never celebrating. One indigo-to-cyan band of light drifts laterally behind her and settles; nothing rises. Centre of frame stays dark and low-contrast for the centred copy. No numbers, tickers, candles or chart forms. No green, no red.'
+
 export default function FinalCta() {
-  const supportItems = finalCta.supportLine.split(' · ')
+  /**
+   * Art-directed break, applied to the deck string rather than a retyped copy
+   * of it, so the deck stays the single source. Two near-equal lines: a centred
+   * closing headline wants a square block, not a descending stair — and both
+   * halves clear the 9em measure, so neither re-wraps to a third line.
+   */
+  const headline = finalCta.heading.replace('what you', 'what\nyou')
+
+  /**
+   * The support line was three bordered pills. It is one quiet line now — three
+   * facts are worth a sentence, not three pieces of chrome. Still routed
+   * through `CopyText` because "[X]-hour activation" is an unfilled figure and
+   * has to stay visibly flagged wherever it appears.
+   */
+  const supportLine = finalCta.supportLine.split(' · ').join(', ')
 
   return (
-    <section id="final-cta" className="border-t border-border-soft py-12 sm:py-16 lg:py-24">
-      <Container>
-        <Reveal>
-          <div className="relative isolate overflow-hidden rounded-3xl border border-border bg-surface/70 px-6 py-12 text-center sm:px-10 sm:py-16 lg:px-16">
-            {/* Soft indigo glow. Decorative, sits behind the content. */}
-            <div aria-hidden="true" className="pointer-events-none absolute inset-0 -z-10">
-              <div className="absolute left-1/2 top-[-14rem] h-[26rem] w-[46rem] max-w-[150vw] -translate-x-1/2 rounded-full bg-accent/25 blur-[120px]" />
-              <div className="absolute bottom-[-12rem] left-[-6rem] h-[18rem] w-[18rem] rounded-full bg-accent-soft/10 blur-[100px]" />
-            </div>
-
-            {/* Same H2 scale as SectionShell — landing.md §3, no local override. */}
-            <h2 className="mx-auto max-w-3xl text-[clamp(1.75rem,3vw,2.5rem)] font-semibold leading-[1.15] tracking-[-0.015em] text-fg">
-              {finalCta.heading}
-            </h2>
-
-            <p className="mx-auto mt-4 max-w-xl text-base leading-relaxed text-fg-muted sm:text-lg">
-              {finalCta.subheading}
-            </p>
-
-            <div className="mt-8 flex flex-col items-stretch justify-center gap-3 sm:flex-row sm:items-center">
-              <Button href="#onboarding" size="lg">
-                {finalCta.primaryCta}
-              </Button>
-              <Button href="#support" variant="secondary" size="lg">
-                {finalCta.secondaryCta}
-              </Button>
-            </div>
-
-            <ul className="mt-8 flex flex-wrap items-center justify-center gap-x-2 gap-y-2 text-xs text-fg-muted sm:text-[0.8125rem]">
-              {supportItems.map((item) => (
-                <li
-                  key={item}
-                  className="inline-flex items-center gap-1.5 rounded-full border border-border-soft bg-bg/50 px-3 py-1.5"
-                >
-                  <Check className="h-3.5 w-3.5 shrink-0 text-accent-soft" strokeWidth={1.5} aria-hidden="true" />
-                  {/* "[X]-hour activation" carries an unfilled figure — flag it. */}
-                  <CopyText as="span" source={item} className="tabular" />
-                </li>
-              ))}
-            </ul>
-
-            <div className="mx-auto mt-10 max-w-2xl border-t border-border-soft pt-6">
-              <Disclosure>{finalCta.disclosure}</Disclosure>
-            </div>
-          </div>
-        </Reveal>
-      </Container>
-    </section>
+    <MediaSection
+      id="final-cta"
+      /**
+       * The backdrop and scrim sit at negative z-index. `relative` alone is not
+       * a stacking context, so without this they resolve against the root and
+       * paint behind App's opaque `bg-bg` wrapper — i.e. invisibly.
+       */
+      className="isolate"
+      height="mid"
+      place="center"
+      anchor="center"
+      scrim={0.75}
+      scrimAt="50% 50%"
+      measure="9em"
+      headline={headline}
+      body={finalCta.subheading}
+      actions={
+        <>
+          <Button href="#onboarding" size="lg">
+            {finalCta.primaryCta}
+          </Button>
+          <Button href="#support" variant="secondary" size="lg">
+            {finalCta.secondaryCta}
+          </Button>
+        </>
+      }
+      /**
+       * Live text, selectable, in normal flow above the scrim — nothing is
+       * layered over it. `Disclosure` sets its colour on its own element, so it
+       * overrides the slot's inherited white/55 by inheritance rather than
+       * racing it in the cascade, and holds above 4.5:1 on the scrimmed plate.
+       */
+      finePrint={<Disclosure>{finalCta.disclosure}</Disclosure>}
+      media={{ alt: closingClip }}
+    >
+      <CopyText source={supportLine} className="mt-6 text-sm leading-relaxed text-white/65" />
+    </MediaSection>
   )
 }

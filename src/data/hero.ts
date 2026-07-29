@@ -19,6 +19,17 @@ export const hero: HeroContent = {
     'Investments in the securities market are subject to market risk. Read all the related documents carefully before investing.',
 }
 
+/**
+ * The H1 as it is set, with art-directed line breaks.
+ *
+ * `hero.headline` stays the flat string for meta tags and anywhere the breaks
+ * would be wrong. Here the ragging is a design decision, not a consequence of
+ * whatever width the viewport happens to be — the same reason the H1's measure
+ * is expressed in `em` rather than pixels. Honoured at ≥768px only; below that
+ * the copy wraps naturally.
+ */
+export const heroHeadlineDisplay = 'Your money.\nYour market.\nOne app.'
+
 /** §3 "Hero visual — description for design", carried through to the placeholder. */
 export const heroMediaLabel =
   'App on a dark field, order ticket open over a Nifty 50 candlestick chart. Second card floating: holdings list with day change. No fabricated P&L figures — use neutral, obviously-illustrative numbers.'
