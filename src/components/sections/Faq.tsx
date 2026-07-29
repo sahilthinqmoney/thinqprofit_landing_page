@@ -13,8 +13,20 @@ import type { FaqEntry } from '../../data/faq'
  * attribute, which would force items closed when another opens. Comparing two
  * answers side by side is the whole point of an FAQ.
  *
- * Treated as a hairline ledger rather than another card grid: numbered rows,
- * one rule between each, answers indented under the question they belong to.
+ * The 01–12 ordinals are gone. Numbering is a claim about order, and these
+ * questions have none: "Where are my shares held?" is not the fourth step of
+ * anything, and a reader never returns to "question 09". All the ordinals did
+ * was give each row a second column to indent past. Without them the question
+ * starts at the container's left edge, the answer starts directly beneath it,
+ * and the section loses a whole column of chrome.
+ *
+ * What replaces the decoration is restraint applied to the parts that actually
+ * respond to the reader: a 56px minimum row with ~64px of vertical padding, so
+ * a closed list reads as a set of considered statements rather than a menu; a
+ * bottom hairline that lifts from `border-soft` to `border` when its row opens,
+ * which is how an open row is marked without a fill or a highlight; and a
+ * chevron that turns on `--ease-out-expo`, the same curve everything else on
+ * the page decelerates on.
  */
 
 /**
@@ -76,25 +88,21 @@ function FaqAnswer({ entry }: { entry: FaqEntry }) {
 }
 
 /**
- * One ledger row. `index` is the position in the full list, so the numbering
- * stays 01–12 regardless of which column the row lands in.
+ * One row. The hairline is on the <details> itself rather than on the summary,
+ * so it sits under the answer while the row is open and the rule always marks
+ * the end of the whole item.
  */
-function FaqRow({ entry, index, delay }: { entry: FaqEntry; index: number; delay: number }) {
+function FaqRow({ entry, delay }: { entry: FaqEntry; delay: number }) {
   const pending = isResearchFaq(entry) && publishesResearch === null
 
   return (
     <Reveal delay={delay}>
-      <details className="group border-b border-border-soft">
-        <summary className="flex min-h-11 cursor-pointer list-none items-start gap-4 rounded-lg py-5 pr-1 xl:py-7 [&::-webkit-details-marker]:hidden">
-          <span
-            aria-hidden="true"
-            className="tabular mt-1 w-6 shrink-0 text-xs font-medium text-fg-muted transition-colors duration-200 group-open:text-accent-soft"
-          >
-            {String(index + 1).padStart(2, '0')}
-          </span>
-
-          <div className="flex flex-1 flex-wrap items-center gap-x-3 gap-y-2">
-            <h3 className="text-lg font-semibold leading-[1.4] text-fg">{entry.question}</h3>
+      <details className="group border-b border-border-soft transition-colors duration-300 open:border-border hover:border-chrome-dim/40">
+        <summary className="flex min-h-14 cursor-pointer list-none items-start justify-between gap-6 py-7 sm:py-8 [&::-webkit-details-marker]:hidden">
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
+            <h3 className="text-lg font-medium leading-[1.4] text-fg sm:text-xl">
+              {entry.question}
+            </h3>
             {pending && (
               <span className="rounded-full border border-warning/30 bg-warning/10 px-2.5 py-0.5 text-xs font-medium uppercase tracking-[0.12em] text-warning">
                 Answer pending
@@ -102,15 +110,20 @@ function FaqRow({ entry, index, delay }: { entry: FaqEntry; index: number; delay
             )}
           </div>
 
+          {/* Rotates on the page's shared deceleration curve — a chevron that
+              snaps on `linear` is the one piece of an accordion everybody
+              notices when it is wrong. */}
           <ChevronDown
-            className="mt-0.5 h-5 w-5 shrink-0 text-fg-muted transition-transform duration-200 group-open:rotate-180"
+            className="mt-1 h-5 w-5 shrink-0 text-fg-muted transition-[transform,color] duration-500 group-hover:text-fg group-open:rotate-180 group-open:text-accent-soft"
+            style={{ transitionTimingFunction: 'var(--ease-out-expo)' }}
             strokeWidth={1.5}
             aria-hidden="true"
           />
         </summary>
 
-        {/* Answers stay on a readable measure even when the row itself is wider. */}
-        <div className="max-w-[68ch] pb-6 pl-10 pr-1">
+        {/* Answers stay on a readable measure even when the row itself is wider,
+            and keep clear of the chevron's column. */}
+        <div className="max-w-[68ch] pb-8 pr-8">
           <FaqAnswer entry={entry} />
         </div>
       </details>
@@ -119,22 +132,22 @@ function FaqRow({ entry, index, delay }: { entry: FaqEntry; index: number; delay
 }
 
 /**
- * Twelve rows in a single column read as a very long, very thin list once the
- * page container passes ~1300px, so from `xl` the ledger splits into two
- * columns that each keep their own top rule. Numbering runs down column one
- * then column two, which is how a split list is read.
+ * Twelve rows at this height read as a very long, very thin list once the page
+ * container passes ~1300px, so from `xl` the list splits into two columns that
+ * each keep their own top rule. Reading order runs down column one, then column
+ * two — and with the ordinals gone nothing has to be renumbered to say so.
  */
 const COLUMN_SIZE = Math.ceil(faqs.length / 2)
 
 const faqColumns = [
-  { id: 'faq-column-1', offset: 0, entries: faqs.slice(0, COLUMN_SIZE) },
-  { id: 'faq-column-2', offset: COLUMN_SIZE, entries: faqs.slice(COLUMN_SIZE) },
+  { id: 'faq-column-1', entries: faqs.slice(0, COLUMN_SIZE) },
+  { id: 'faq-column-2', entries: faqs.slice(COLUMN_SIZE) },
 ]
 
 export default function Faq() {
   return (
     <SectionShell id="faq" heading="Questions worth asking" centered={false}>
-      {/* Capped at 1440 rather than left to run to the full 1664 — past that a
+      {/* Capped at 1440 rather than left to run to the full 1760 — past that a
           question sits a very long way from its own chevron. */}
       <div className="max-w-4xl border-t border-border-soft xl:grid xl:max-w-[1440px] xl:grid-cols-2 xl:gap-x-16 xl:border-t-0">
         {faqColumns.map((column) => (
@@ -143,7 +156,6 @@ export default function Faq() {
               <FaqRow
                 key={faq.question}
                 entry={faq}
-                index={column.offset + position}
                 delay={position < 5 ? position * 60 : 0}
               />
             ))}

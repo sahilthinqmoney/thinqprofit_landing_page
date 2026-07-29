@@ -17,11 +17,30 @@ import { formats, learnDisclaimer, tracks } from '../../data/learn'
  * (§6) is a bare two-column name list on a plate. Sequence is Learn's content,
  * so sequence is its layout.
  *
- * Nothing here is boxed except the aside, which holds the formats, the single
- * CTA and the mandatory advisory-boundary disclaimer. No per-row icons and no
- * bordered tiles: Products and Platform both shed theirs in the same pass, and
- * five decorative glyphs would put the chrome back on the quietest section on
- * the page. The stair geometry and the ordinals carry the sequence on their own.
+ * NOTHING HERE IS BOXED. That was a deliberate call by a previous author and it
+ * still holds: no per-row icons, no bordered tiles, no cards. Products and
+ * Platform both shed theirs in the same pass, and five decorative glyphs would
+ * put the chrome back on the quietest section on the page. This revision extends
+ * the rule to the last hold-out — the formats/CTA column, which used to sit in a
+ * `rounded-2xl border` panel. A bordered box holding a hairline list, a button
+ * and a disclosure was the generic aside pattern, and it was also the only thing
+ * on the page that could put a bordered list inside a bordered box. It is now
+ * one horizontal rule and the content under it; proximity groups it, and the
+ * rule weights separate it from the ladder (`border-border` above the column,
+ * `border-border-soft` between its rows).
+ *
+ * The 01–05 ordinals stay, because here they are content rather than decoration:
+ * the tracks run in learning order, beginner through derivatives to taxes, and
+ * a reader landing mid-list needs to know they are partway along a path. So they
+ * are set to earn the room they take — Instrument Serif via `.display` at ~2×
+ * the track title, in `chrome-dim`, sharing a baseline with the title rather
+ * than stacked above it. Size and face carry the emphasis; the weight never
+ * moves. They stay `aria-hidden` because the `<ol>` already exposes position to
+ * assistive tech, and a visible numeral would have it announced twice.
+ *
+ * The advisory-boundary disclaimer is the section's one hard requirement: live
+ * text, `fg-muted` at 8.07:1, never behind a blur, sitting directly under the
+ * action it qualifies (landing.md §9).
  *
  * Below `md` the treads collapse to zero and the rungs stack against one
  * straight spine — a staircase needs width to read as one, and 375px has none.
@@ -53,9 +72,12 @@ export default function Learn({ id = 'learn' }: LearnProps) {
   return (
     <SectionShell
       id={id}
-      eyebrow="Learn"
       heading="Understand the trade before you place it"
       subheading="Free, open to everyone, and written in the language people actually use — no account required."
+      /* Left-flush: the content below is an asymmetric ladder anchored to the
+         left edge, and a centred heading over it leaves the two sharing no
+         common axis. Pricing, Testimonials and FAQ resolved the same way. */
+      centered={false}
     >
       {/* 8/4 rather than 50/50: the ladder needs the run, and the aside is a
           short list plus one button — at half of 1664px it would be a very wide
@@ -88,20 +110,32 @@ export default function Learn({ id = 'learn' }: LearnProps) {
                   delay={Math.min(index, 3) * 60}
                   className={`pl-5 sm:pl-7 2xl:pl-9 ${isLast ? 'pb-1' : 'pb-10 2xl:pb-12'}`}
                 >
-                  {/* Decorative: the <ol> already carries the sequence, and the
-                      stair states it a second time visually. */}
-                  <span aria-hidden="true" className="tabular text-sm text-fg-muted">
-                    {String(index + 1).padStart(2, '0')}
-                  </span>
+                  {/* `items-baseline`, so the serif ordinal and the sans title
+                      sit on one line rather than the numeral pushing the title
+                      down. The numeral overhangs that baseline on both sides,
+                      which is what makes it read as a chapter mark instead of a
+                      label — and it costs no extra height per rung, so all five
+                      still clear the fold on a laptop. */}
+                  <div className="flex items-baseline gap-4 sm:gap-5 2xl:gap-6">
+                    <span
+                      aria-hidden="true"
+                      className="display tabular shrink-0 leading-none text-chrome-dim text-[1.75rem] sm:text-[2rem] 2xl:text-[2.375rem]"
+                    >
+                      {String(index + 1).padStart(2, '0')}
+                    </span>
 
-                  <h3 className="mt-2 text-lg font-medium leading-snug text-fg sm:text-xl">
-                    {track.title}
-                  </h3>
-                  {/* The rung is wide; the line is not. Running prose stays
-                      inside a readable measure however far the stair travels. */}
-                  <p className="mt-2 max-w-[62ch] text-base leading-relaxed text-fg-muted 2xl:text-lg">
-                    {track.body}
-                  </p>
+                    <div className="min-w-0">
+                      <h3 className="text-lg font-medium leading-snug text-fg sm:text-xl 2xl:text-2xl">
+                        {track.title}
+                      </h3>
+                      {/* The rung is wide; the line is not. Running prose stays
+                          inside a readable measure however far the stair
+                          travels. */}
+                      <p className="mt-2 max-w-[62ch] text-base leading-relaxed text-fg-muted 2xl:text-lg">
+                        {track.body}
+                      </p>
+                    </div>
+                  </div>
                 </Reveal>
               </li>
             )
@@ -111,34 +145,43 @@ export default function Learn({ id = 'learn' }: LearnProps) {
         {/* ---------------------------------------------------------------- */}
         {/* Formats, the one CTA, and the advisory boundary                   */}
         {/* ---------------------------------------------------------------- */}
-        <Reveal delay={120} className="lg:col-span-4">
-          <div className="rounded-2xl border border-border bg-surface/70 p-6 2xl:p-8">
-            <h3 className="text-base font-medium leading-snug text-fg">Formats</h3>
+        {/* One rule across the top of the column and nothing else holding it.
+            `border-border` here against `border-border-soft` on the rows below
+            is the whole hierarchy: the heavier line says "different block", the
+            lighter ones only separate items. A horizontal rule also cannot be
+            mistaken for a sixth rung, which is what a `border-l` on this column
+            would have looked like next to the ladder. */}
+        <Reveal delay={120} className="border-t border-border pt-6 lg:col-span-4 2xl:pt-8">
+          <h3 className="text-base font-medium leading-snug text-fg">Formats</h3>
 
-            {/* Hairline rows rather than pill chips — four bordered chips here
-                would read as four more cards on a page that has enough. */}
-            <ul className="mt-4 border-t border-border-soft">
-              {formats.map((format) => (
-                <li
-                  key={format}
-                  className="border-b border-border-soft py-3 text-base leading-relaxed text-fg-muted"
-                >
-                  {format}
-                </li>
-              ))}
-            </ul>
+          {/* Hairline rows, not pill chips. A `rounded-*` bordered chip per
+              format would read as four more little cards on a page that has
+              enough of them, and these are four plain nouns — they need
+              separating, not containing. */}
+          <ul className="mt-4">
+            {formats.map((format) => (
+              <li
+                key={format}
+                className="border-t border-border-soft py-3 text-base leading-relaxed text-fg-muted"
+              >
+                {format}
+              </li>
+            ))}
+          </ul>
 
-            <div className="mt-7">
-              <Button href="#" size="lg">
-                Start learning — free
-                <ArrowRight className="h-4 w-4" strokeWidth={1.5} aria-hidden="true" />
-              </Button>
-              {/* Regulatory statement, not decoration — live text at 4.5:1,
-                  never behind blur (landing.md §9). */}
-              <Disclosure tone="note" className="mt-5">
-                {learnDisclaimer}
-              </Disclosure>
-            </div>
+          <div className="mt-8">
+            {/* No `trailing` well — that is reserved for the page's single
+                primary action, which the Hero holds. The arrow rides inline. */}
+            <Button href="#" size="lg">
+              Start learning — free
+              <ArrowRight className="h-4 w-4" strokeWidth={1.5} aria-hidden="true" />
+            </Button>
+            {/* Regulatory statement, not decoration — live text at 4.5:1,
+                never behind blur (landing.md §9). It sits under the CTA on
+                purpose: the boundary belongs next to the thing it qualifies. */}
+            <Disclosure tone="note" className="mt-5 max-w-[52ch]">
+              {learnDisclaimer}
+            </Disclosure>
           </div>
         </Reveal>
       </div>

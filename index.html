@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="theme-color" content="#0f172a" />
+    <meta name="theme-color" content="#0b0b0d" />
     <meta
       name="description"
       content="Open a free demat account with ThinqProfit. Trade stocks, ETFs, F&amp;O, commodities and mutual funds with flat-fee pricing and a platform built for speed."
@@ -46,10 +46,24 @@
       }
     </script>
 
+    <!--
+      Archivo for display, Instrument Sans for everything else. Two grotesks,
+      held apart by proportion rather than by flavour: Archivo is set narrow
+      (width 90) and Instrument Sans runs at full width, so the pair reads as a
+      decision instead of as two similar sans that got mixed up.
+
+      Both are variable, which is the point — the headline can respond, and the
+      width axis is what it responds on. Instrument Sans also carries true
+      tabular numerals for the rate card and the stat band.
+
+      Axis ranges are requested explicitly. Omit them and Google serves a static
+      instance at the default coordinate, and every `font-variation-settings`
+      declaration on the page silently does nothing.
+    -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,100..900&family=Instrument+Sans:ital,wdth,wght@0,75..100,400..700;1,75..100,400..700&display=swap"
       rel="stylesheet"
     />
 

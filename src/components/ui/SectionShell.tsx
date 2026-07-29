@@ -14,7 +14,6 @@ const SCALE = {
 
 interface SectionShellProps {
   id: string
-  eyebrow?: string
   heading: string
   subheading?: string
   children: ReactNode
@@ -44,15 +43,20 @@ interface SectionShellProps {
 }
 
 /**
- * Standard section wrapper for the text-and-data bands: eyebrow, H2,
- * subheading, then content.
+ * Standard section wrapper for the text-and-data bands: H2, subheading, then
+ * content.
+ *
+ * There is no eyebrow. A category label sitting above a heading ("Pricing"
+ * above "Priced plainly, in advance") is decoration wearing the costume of
+ * information — the heading already says what the section is, and the label
+ * only survives because it is easy to add. The headings here were rewritten to
+ * stand alone; nothing was lost with the labels.
  *
  * Sections that lead with imagery use `MediaSection` instead, which bleeds to
  * the viewport edge and overlays its copy on the asset.
  */
 export default function SectionShell({
   id,
-  eyebrow,
   heading,
   subheading,
   children,
@@ -74,8 +78,7 @@ export default function SectionShell({
     >
       <Container>
         <div className={`max-w-2xl ${centered ? 'mx-auto text-center' : ''}`}>
-          {eyebrow && <p className="text-base text-fg-muted">{eyebrow}</p>}
-          <h2 className={`mt-3 font-medium text-fg ${SCALE[scale]}`}>{heading}</h2>
+          <h2 className={`display text-fg ${SCALE[scale]}`}>{heading}</h2>
           {subheading && <p className="mt-4 text-base leading-relaxed text-fg-muted">{subheading}</p>}
         </div>
 

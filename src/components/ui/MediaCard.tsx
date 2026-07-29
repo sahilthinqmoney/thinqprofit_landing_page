@@ -47,7 +47,7 @@ export default function MediaCard({
           className="pointer-events-none absolute inset-x-0 top-0 h-2/3"
           style={{
             zIndex: -1,
-            backgroundImage: `linear-gradient(to bottom, rgba(15,23,42,${scrim}) 0%, rgba(15,23,42,${(scrim * 0.55).toFixed(3)}) 45%, rgba(15,23,42,0) 100%)`,
+            backgroundImage: `linear-gradient(to bottom, rgba(11,11,13,${scrim}) 0%, rgba(11,11,13,${(scrim * 0.55).toFixed(3)}) 45%, rgba(11,11,13,0) 100%)`,
           }}
         />
       )}
@@ -56,7 +56,7 @@ export default function MediaCard({
           card, which reads as a column squeezed into a space that was never
           short of room. */}
       <div className="max-w-[30em] p-8 sm:p-10 lg:p-12">
-        <h3 className="m-0 text-[clamp(1.75rem,2.6vw,2.5rem)] font-medium leading-[1.1] tracking-[-0.025em] text-white">
+        <h3 className="display m-0 text-[clamp(2rem,2.8vw,2.75rem)] leading-[1.06] text-fg">
           {title}
         </h3>
         <p className="mt-4 text-base leading-relaxed text-white/70">{body}</p>

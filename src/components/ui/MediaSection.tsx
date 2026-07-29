@@ -49,16 +49,17 @@ const ANCHOR = {
 } as const
 
 /**
- * Display steps. Weight 500, not 600 — at this size the extra weight is what
- * makes a headline read as a template rather than as art direction. Tracking
- * tightens as size grows, per the same curve Robinhood uses (-1px at 44px,
- * -2px at 72px).
+ * Display steps. Leading opens up as the size drops — a grotesk this tight
+ * needs the air at 2.25rem that it does not need at 5.75rem, where the line
+ * length itself does the separating. Tracking and the variable-axis coordinate
+ * come from `.display`; setting them per step would fight the optical sizing
+ * the face is already doing.
  */
 const SCALE = {
-  epic: 'text-[clamp(2.75rem,6.4vw,5.25rem)] leading-[1.02] tracking-[-0.035em]',
-  tall: 'text-[clamp(2.5rem,5vw,4.25rem)] leading-[1.05] tracking-[-0.032em]',
-  mid: 'text-[clamp(2.25rem,4.2vw,3.5rem)] leading-[1.08] tracking-[-0.028em]',
-  short: 'text-[clamp(2rem,3.6vw,3rem)] leading-[1.1] tracking-[-0.025em]',
+  epic: 'text-[clamp(3rem,7vw,5.75rem)] leading-[1.04]',
+  tall: 'text-[clamp(2.75rem,5.4vw,4.5rem)] leading-[1.07]',
+  mid: 'text-[clamp(2.5rem,4.6vw,3.75rem)] leading-[1.1]',
+  short: 'text-[clamp(2.25rem,3.8vw,3.25rem)] leading-[1.12]',
 } as const
 
 interface MediaSectionProps {
@@ -76,8 +77,6 @@ interface MediaSectionProps {
   scrim?: number
   /** Where the scrim's dense core sits. Put it under the copy, not the middle. */
   scrimAt?: string
-  /** Sits above the headline at 45% white. No coloured chip, no uppercase. */
-  label?: string
   /** `\n` is an art-directed line break, honoured at ≥768px only. */
   headline: string
   /**
@@ -121,7 +120,6 @@ export default function MediaSection({
   scale,
   scrim = 0.82,
   scrimAt = '32% 50%',
-  label,
   headline,
   measure = '11em',
   body,
@@ -155,16 +153,14 @@ export default function MediaSection({
               className="pointer-events-none absolute -inset-x-[20%] -bottom-[20%] -top-[25%]"
               style={{
                 zIndex: -1,
-                backgroundImage: `radial-gradient(58% 62% at ${scrimAt}, rgba(15,23,42,${scrim}) 0%, rgba(15,23,42,${(scrim * 0.72).toFixed(3)}) 44%, rgba(15,23,42,0) 100%)`,
+                backgroundImage: `radial-gradient(58% 62% at ${scrimAt}, rgba(11,11,13,${scrim}) 0%, rgba(11,11,13,${(scrim * 0.72).toFixed(3)}) 44%, rgba(11,11,13,0) 100%)`,
               }}
             />
           )}
 
           <div className={`flex flex-col items-start text-left ${PLACE[place]}`}>
-            {label && <p className="mb-5 text-base text-white/45">{label}</p>}
-
             <h2
-              className={`m-0 whitespace-normal font-medium text-white md:whitespace-pre-line ${SCALE[step]}`}
+              className={`display m-0 whitespace-normal text-fg md:whitespace-pre-line ${SCALE[step]}`}
               style={{ maxWidth: measure }}
             >
               {headline}

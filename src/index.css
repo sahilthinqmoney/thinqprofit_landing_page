@@ -1,42 +1,109 @@
 @import 'tailwindcss';
 
 /* ---------------------------------------------------------------------------
-   Design tokens — see design-system/thinqprofit/pages/landing.md
-   Overrides MASTER.md: dark palette (not the light one shipped alongside the
-   OLED style), indigo CTA (not green — green/red are reserved for market data).
+   Design tokens — gold & chrome
+   See design-system/thinqprofit/pages/landing.md
+
+   Every value below was contrast-checked against the ink base, not eyeballed.
+   Three constraints shaped the set:
+
+   1. Gold is the brand action. `white` on gold is 2.10:1 and fails outright, so
+      a gold fill ALWAYS carries ink text (`--color-on-accent`, 9.35:1).
+   2. Warning had to move off amber. Brand gold sits at hue 46°, amber #F59E0B
+      at 38° — 8° apart, which reads as one colour. A risk disclosure must never
+      look like a call to action on a broker page, so warning is now orange at
+      hue 25°, a 21° separation, and it always ships with an icon and a border
+      so it is never signalled by hue alone.
+   3. Gain/loss stay quarantined to market data. They appear on no button, no
+      badge, no link, no illustration.
    --------------------------------------------------------------------------- */
 @theme {
-  /* Surfaces */
-  --color-bg: #0f172a;
-  --color-surface: #1a2234;
-  --color-surface-raised: #222b3e;
+  /* Surfaces — neutral ink, a touch warm so gold doesn't read muddy on it */
+  --color-bg: #0b0b0d;
+  --color-surface: #141417;
+  --color-surface-raised: #1c1c21;
 
-  /* Text */
-  --color-fg: #f8fafc;
-  --color-fg-muted: #94a3b8;
-  --color-fg-subtle: #64748b;
+  /* Text — warm greys to sit with gold rather than fight it */
+  --color-fg: #f7f6f3; /* 18.20:1 */
+  --color-fg-muted: #a8a69f; /*  8.07:1 — body copy, disclosures */
+  --color-fg-subtle: #6e6c66; /*  3.75:1 — footer meta + legal fine print ONLY */
 
   /* Lines */
-  --color-border: #334155;
-  --color-border-soft: #263145;
+  --color-border: #2a2a30;
+  --color-border-soft: #1e1e23;
 
-  /* Brand action — indigo, never green */
-  --color-accent: #4f46e5;
-  --color-accent-hover: #6366f1;
-  --color-accent-soft: #a5b4fc;
+  /* Brand action — gold. Fill takes ink text, never white. */
+  --color-accent: #d4af37; /*  9.35:1 on bg */
+  --color-accent-hover: #e3c263;
+  --color-accent-soft: #e8d9a8; /* 13.97:1 — eyebrows, links, quiet accents */
+  --color-on-accent: #0b0b0d; /*  9.35:1 on gold */
 
-  /* Market data ONLY — never on buttons, badges, links or illustrations */
-  --color-gain: #22c55e;
-  --color-loss: #ef4444;
+  /* Chrome — platinum. Hairline highlights, metallic edges, secondary marks. */
+  --color-chrome: #c8ccd4; /* 12.21:1 */
+  --color-chrome-dim: #8a9099; /*  6.11:1 */
 
-  /* Risk disclosures, margin alerts */
-  --color-warning: #f59e0b;
+  /* Market data ONLY — never a button, badge, link or illustration */
+  --color-gain: #4ade80;
+  --color-loss: #f87171;
 
-  /* Type */
-  --font-sans: 'Inter', ui-sans-serif, system-ui, -apple-system, sans-serif;
+  /* Risk disclosures, margin alerts. Orange, deliberately NOT gold. */
+  --color-warning: #f97316; /*  7.02:1 */
+
+  /*
+   * Type. Both faces are variable; see `.display` for why that is structural
+   * rather than a nicety.
+   *
+   * The display face is a grotesk, not a serif, and that is a decision about
+   * what money looks like. High-contrast serifs — hairline strokes against
+   * thick stems — are the visual language of fashion and luxury goods. Low
+   * contrast, even colour and closed apertures are the language of
+   * infrastructure: wayfinding, instrument panels, timetables. A broker is
+   * infrastructure.
+   *
+   * Archivo comes out of exactly that tradition — a newspaper and signage
+   * grotesk. Its skeleton is square and quiet, which is what keeps it premium
+   * at 76px; faces with more personality in the letterforms turn cartoonish the
+   * moment they get large, because the quirk scales with the type.
+   */
+  --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-display: 'Archivo', var(--font-sans);
+
+  /*
+   * Motion. Exponential ease-out: fast departure, long settle. Nothing on this
+   * page uses `ease-in-out`, which reads mechanical because it decelerates and
+   * accelerates in equal measure — real objects do not.
+   */
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-out-soft: cubic-bezier(0.32, 0.72, 0, 1);
+
+  /*
+   * Shadows are tinted with the ink base, never neutral black. A pure-black
+   * shadow on a warm ground reads as a grey smudge; carrying the background
+   * hue is what makes an edge look lit rather than dirty. Each has an offset
+   * and a soft blur — a zero-offset halo is decoration, not depth.
+   */
+  --shadow-lifted: 0 1px 2px rgba(6, 6, 8, 0.5), 0 12px 32px -8px rgba(6, 6, 8, 0.65);
+  --shadow-deep: 0 2px 4px rgba(6, 6, 8, 0.55), 0 32px 64px -16px rgba(6, 6, 8, 0.75);
 
   /* Section rhythm */
   --spacing-section: 6rem;
+}
+
+/*
+ * Height of everything pinned above the hero: the announcement bar plus the
+ * nav. The hero subtracts it so its mandatory risk disclosure still lands
+ * inside the first viewport — a plain `100svh` hero pushes that rail below the
+ * fold by exactly this much. Declared outside `@theme` because it is a layout
+ * measurement, not a design token, and it changes with the nav's own scale.
+ */
+:root {
+  --header-stack: 6.75rem; /* 44px bar + 64px nav */
+}
+
+@media (min-width: 1280px) {
+  :root {
+    --header-stack: 7.75rem; /* nav grows to 80px from xl */
+  }
 }
 
 @layer base {
@@ -71,13 +138,123 @@
   }
 
   :focus-visible {
-    outline: 2px solid var(--color-accent-soft);
+    outline: 2px solid var(--color-accent);
     outline-offset: 2px;
   }
 
   ::selection {
     background: color-mix(in oklab, var(--color-accent) 45%, transparent);
-    color: #fff;
+    color: var(--color-fg);
+  }
+}
+
+@layer utilities {
+  /*
+   * Display type.
+   *
+   * `wdth: 90` is doing two jobs. It buys back the line length that trading
+   * copy eats — "Understand the trade before you place it" — so the size never
+   * has to drop, and size is what actually carries authority. It also holds the
+   * display face visibly apart from Instrument Sans at full width beneath it,
+   * so two grotesks on one page read as intentional.
+   *
+   * Weight 600, not 800. Heavy grotesks read as advertising. This sits where a
+   * headline is unmistakably the loudest thing on the page and still sounds
+   * like a statement rather than a shout.
+   *
+   * Tracking at -0.035em: a narrowed grotesk already has less sidebearing, so
+   * this is about as tight as it goes before the counters start closing up.
+   */
+  .display {
+    font-family: var(--font-display);
+    font-variation-settings:
+      'wdth' 90,
+      'wght' 600;
+    letter-spacing: -0.035em;
+    text-wrap: balance;
+  }
+
+  /*
+   * The hero's opening state. The headline settles *outward* — narrow and light
+   * to full width and weight — so the type resolves the way the field behind it
+   * resolves, rather than sliding in from somewhere.
+   *
+   * Transitioning `font-variation-settings` re-lays-out text every frame, so it
+   * is scoped hard: three short lines, desktop only, and only when motion is
+   * welcome. `Hero` gates the rest.
+   */
+  .display-settling {
+    font-variation-settings:
+      'wdth' 74,
+      'wght' 340;
+  }
+
+  @media (min-width: 768px) and (prefers-reduced-motion: no-preference) {
+    .display-flex {
+      transition: font-variation-settings 1100ms var(--ease-out-expo);
+    }
+  }
+
+  /*
+   * Film grain. Fixed and pointer-events-none so it never joins a scrolling
+   * layer — a noise texture inside a scroll container repaints every frame.
+   * Two overlaid SVG octaves at very low alpha: enough to break the flatness of
+   * a large ink field, not enough to read as texture on its own.
+   */
+  .grain::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    z-index: 60;
+    pointer-events: none;
+    opacity: 0.038;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.82' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  /*
+   * Chrome hairline — a brushed-metal edge, not a flat border. Used for the
+   * top rule of a section or the lip of a raised surface. Restraint matters:
+   * a metallic edge everywhere just reads as noise.
+   */
+  .rule-chrome {
+    background-image: linear-gradient(
+      90deg,
+      transparent 0%,
+      color-mix(in oklab, var(--color-chrome) 22%, transparent) 22%,
+      color-mix(in oklab, var(--color-chrome) 38%, transparent) 50%,
+      color-mix(in oklab, var(--color-chrome) 22%, transparent) 78%,
+      transparent 100%
+    );
+  }
+
+  /*
+   * Gold leaf — for display type only, never body copy or anything legal.
+   * A gradient on running text destroys its measured contrast.
+   */
+  .text-gold-leaf {
+    background-image: linear-gradient(
+      100deg,
+      var(--color-accent-soft) 0%,
+      var(--color-accent) 38%,
+      #f2e6bf 52%,
+      var(--color-accent) 66%,
+      var(--color-accent-soft) 100%
+    );
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  /* Brushed-metal surface for premium panels. Subtle by design. */
+  .surface-chrome {
+    background-image:
+      linear-gradient(
+        135deg,
+        color-mix(in oklab, var(--color-chrome) 7%, transparent) 0%,
+        transparent 42%,
+        color-mix(in oklab, var(--color-chrome) 4%, transparent) 100%
+      ),
+      linear-gradient(var(--color-surface), var(--color-surface));
   }
 }
 

@@ -1,4 +1,4 @@
-import { Check, Receipt, Wallet } from 'lucide-react'
+import { ArrowUpRight } from 'lucide-react'
 
 import Button from '../ui/Button'
 import CopyText from '../ui/CopyText'
@@ -15,7 +15,6 @@ import {
   finePrint,
   plans,
   plansHeading,
-  pricingEyebrow,
   pricingHeading,
   pricingSubheading,
   statutoryLine,
@@ -29,85 +28,114 @@ interface PricingProps {
 /**
  * §7 Pricing.
  *
- * A rate card should look like a rate card: real tables, tabular numerals, the
- * statutory pass-through line pinned under the brokerage figures where it can't
- * be missed. Every [placeholder] is left literal — see src/data/pricing.ts.
+ * A broker's rate card is a *document*, so this section is set like one rather
+ * than assembled out of panels. Nothing here is a bordered box except the single
+ * recommended tier — the structure is carried by rules, measure and type size,
+ * which is what a well-set price list has always used.
  *
- * Width behaviour — the page container now runs to 1664px, which is more than a
- * two-column rate card can spend. `RATE_CARD_MEASURE` (1344px, the exact content
- * width of a 1440 laptop) is the widest these blocks get: past that a Segment /
- * Brokerage row is mostly the gap between the two values, and a plan card is
- * mostly padding. The extra room goes into cell padding instead — px-5 → px-7
- * and taller rows — so the tables breathe rather than stretch. Every block on
- * the section shares the measure so their left and right edges line up.
+ * Three decisions worth keeping:
+ *
+ *  1. **One chrome hairline.** `.rule-chrome` opens the brokerage table and
+ *     appears nowhere else on the section. A metallic edge is a signal that this
+ *     is the primary document; put it on every block and it signals nothing.
+ *     Every rule below it is a plain `border-border-soft` hairline, and the
+ *     amounts sit on one right-hand optical axis so the eye can run the column.
+ *
+ *  2. **No three-tower plan grid.** Three equal cards is the most generic
+ *     pricing layout in existence, and it can only express a recommendation by
+ *     making one card taller. Instead the recommended tier is set large and
+ *     left-aligned in the section's one elevated panel, and the other two run
+ *     underneath it as compact ledger rows — the same treatment Products gives
+ *     its quiet half. Emphasis comes from scale and elevation, not from a badge:
+ *     there is deliberately no "Most popular" label, because a popularity claim
+ *     is a statistic and §13 only allows numbers we can substantiate.
+ *
+ *  3. **Placeholders stay flagged.** Every `[BRACKETED]` value in
+ *     src/data/pricing.ts is a compliance placeholder awaiting sign-off, so all
+ *     of them — rates, charges, plan prices, the GTT allowance — render through
+ *     `CopyText` and keep their warning-coloured, dotted-underlined treatment.
+ *     The statutory pass-through line is never collapsed and never sits behind
+ *     a blur.
+ *
+ * Width — Container runs to 1760px, which is more than a rate card can spend:
+ * past ~1344px a row is mostly the gap between its two values. `MEASURE` caps
+ * the document there and stays *left*-flush (no `mx-auto`) so its left edge
+ * lines up with the section heading, which is left-aligned too.
  */
-const RATE_CARD_MEASURE = 'mx-auto w-full max-w-[84rem]'
+const MEASURE = 'w-full max-w-[84rem]'
 
-/** Row padding shared by both data tables so they read as one rate card. */
-const CELL_X = 'px-5 sm:px-6 lg:px-7'
+/**
+ * Table column headers. Tracked micro-caps live here and nowhere else on the
+ * section — at 11px they only read as a label when they are labelling a column.
+ * `fg-muted` (8.07:1), never `fg-subtle`, which is reserved for legal meta.
+ */
+const COL_HEAD = 'pb-3 pt-5 text-[0.6875rem] font-medium uppercase tracking-[0.16em] text-fg-muted'
+
+/** Data cell. Generous height is the point: a rate card should not feel dense. */
+const CELL = 'py-5 align-baseline text-base lg:py-6'
+
+/** Serif sub-head. One step under the section H2 so it reads as a chapter, not a peer. */
+const SUB_HEAD = 'display text-2xl leading-tight text-fg sm:text-[1.75rem]'
 
 export default function Pricing({ id = 'pricing' }: PricingProps) {
+  // `highlighted` is the deck's own recommendation flag. Falling back to the
+  // first tier means a data edit that clears every flag degrades to "the
+  // cheapest tier is the featured one" rather than to an empty panel.
+  const primary = plans.find((plan) => plan.highlighted) ?? plans[0]
+  const secondary = plans.filter((plan) => plan !== primary)
+
   return (
     <SectionShell
       id={id}
-      eyebrow={pricingEyebrow}
       heading={pricingHeading}
       subheading={pricingSubheading}
       tone="raised"
+      scale="lead"
+      centered={false}
     >
-      <div className={`grid gap-6 lg:grid-cols-12 lg:gap-8 ${RATE_CARD_MEASURE}`}>
-        {/* ---------------- Brokerage rate card ---------------- */}
-        <Reveal className="min-w-0 lg:col-span-7">
-          <div className="overflow-hidden rounded-2xl border border-border bg-surface/70">
-            <div className={`flex items-center gap-2.5 border-b border-border-soft py-4 ${CELL_X}`}>
-              <Receipt className="h-4 w-4 text-accent-soft" strokeWidth={1.5} aria-hidden="true" />
-              <h3 className="text-lg font-semibold leading-[1.4] text-fg">
-                {brokerageColumns.rate}
-              </h3>
-            </div>
+      <div className={MEASURE}>
+        {/* ---------------------------------------------------------------- */}
+        {/* The rate card                                                     */}
+        {/* ---------------------------------------------------------------- */}
+        <div className="grid gap-y-16 lg:grid-cols-12 lg:gap-x-16">
+          {/* -------- Brokerage — the primary document -------- */}
+          <Reveal className="min-w-0 lg:col-span-7">
+            <h3 className={SUB_HEAD}>{brokerageColumns.rate}</h3>
+
+            {/* The section's only chrome hairline. See note 1 above. */}
+            <div aria-hidden="true" className="rule-chrome mt-5 h-px w-full" />
 
             {/* Scrolls inside itself on narrow screens — the page never does. */}
             <div className="overflow-x-auto">
-              {/* text-base, matching the Support table — both are data tables and
-                  the page must not show two of them at two sizes. */}
-              <table className="w-full min-w-[26rem] border-collapse text-left text-base">
+              <table className="w-full min-w-[20rem] border-collapse text-left">
                 <caption className="sr-only">
                   Brokerage by market segment. All amounts are unverified placeholders.
                 </caption>
                 <thead>
-                  <tr className="border-b border-border-soft">
-                    <th
-                      scope="col"
-                      className={`py-3 text-xs font-medium uppercase tracking-[0.14em] text-fg-muted ${CELL_X}`}
-                    >
+                  <tr>
+                    <th scope="col" className={COL_HEAD}>
                       {brokerageColumns.segment}
                     </th>
-                    <th
-                      scope="col"
-                      className={`py-3 text-right text-xs font-medium uppercase tracking-[0.14em] text-fg-muted ${CELL_X}`}
-                    >
+                    <th scope="col" className={`text-right ${COL_HEAD}`}>
                       {brokerageColumns.rate}
                     </th>
                   </tr>
                 </thead>
                 <tbody>
                   {brokerage.map((row) => (
-                    <tr
-                      key={row.segment}
-                      className="border-b border-border-soft/60 transition-colors duration-200 last:border-b-0 hover:bg-surface-raised/50"
-                    >
+                    // Rules sit on the row, not on the cells, so they run the
+                    // full measure of the table and collapse into one hairline.
+                    <tr key={row.segment} className="border-t border-border-soft">
                       <th
                         scope="row"
-                        className={`whitespace-nowrap py-4 align-top font-normal text-fg lg:py-5 ${CELL_X}`}
+                        className={`pr-8 font-normal text-fg sm:whitespace-nowrap ${CELL}`}
                       >
                         {row.segment}
                       </th>
-                      {/* Not nowrap: at text-base the longest placeholder rate is
-                          ~48 characters, and forcing it onto one line pushed the
+                      {/* Not nowrap: the longest placeholder rate is ~48
+                          characters and forcing it onto one line drops the
                           table into its own scrollbar on a 1024 desktop. */}
-                      <td
-                        className={`tabular py-4 text-right align-top font-medium text-fg lg:py-5 ${CELL_X}`}
-                      >
+                      <td className={`tabular text-right text-fg ${CELL}`}>
                         <CopyText source={row.rate} as="span" />
                       </td>
                     </tr>
@@ -116,125 +144,201 @@ export default function Pricing({ id = 'pricing' }: PricingProps) {
               </table>
             </div>
 
-            {/* Always-visible statutory pass-through line. Do not collapse this.
-                The rate-card link is inline inside the sentence, exactly as the
-                deck writes it — matches Disclosure's `note` treatment. */}
-            <div className={`border-t border-border bg-surface-raised/40 py-4 ${CELL_X}`}>
+            {/* Always-visible statutory pass-through line — do not collapse it.
+                Set as a footnote hanging off the closing rule of the table it
+                qualifies, with the rate-card link inline inside the sentence
+                exactly as the deck writes it. Plain surface, no blur. */}
+            <div className="border-t border-border pt-5">
               <CopyText
                 source={statutoryLine}
-                className="max-w-[68ch] text-xs leading-relaxed text-fg-muted"
+                className="max-w-[72ch] text-xs leading-relaxed text-fg-muted"
               />
             </div>
-          </div>
-        </Reveal>
+          </Reveal>
 
-        {/* ---------------- Account charges ---------------- */}
-        <Reveal delay={60} className="min-w-0 lg:col-span-5">
-          <div className="h-full rounded-2xl border border-border-soft bg-surface/40">
-            <div className={`flex items-center gap-2.5 border-b border-border-soft py-4 ${CELL_X}`}>
-              <Wallet className="h-4 w-4 text-accent-soft" strokeWidth={1.5} aria-hidden="true" />
-              <h3 className="text-lg font-semibold leading-[1.4] text-fg">
-                {accountChargesHeading}
-              </h3>
+          {/* -------- Account charges — the same setting, one step quieter -------- */}
+          <Reveal delay={80} className="min-w-0 lg:col-span-5">
+            <h3 className={SUB_HEAD}>{accountChargesHeading}</h3>
+
+            {/* A plain rule, not the chrome one: this table is the appendix. */}
+            <div aria-hidden="true" className="mt-5 h-px w-full bg-border" />
+
+            <div className="overflow-x-auto">
+              <table className="w-full min-w-[18rem] border-collapse text-left">
+                <caption className="sr-only">
+                  Account charges. All amounts are unverified placeholders.
+                </caption>
+                <thead>
+                  <tr>
+                    <th scope="col" className={COL_HEAD}>
+                      {accountChargeColumns.item}
+                    </th>
+                    <th scope="col" className={`text-right ${COL_HEAD}`}>
+                      {accountChargeColumns.amount}
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {accountCharges.map((charge) => (
+                    // `border-border-soft` colours every edge, so the closing
+                    // rule under the last row only needs its width set. The
+                    // brokerage table gets its closing rule from the statutory
+                    // footnote instead, so both tables end on a hairline.
+                    <tr key={charge.item} className="border-t border-border-soft last:border-b">
+                      <th scope="row" className={`pr-8 font-normal text-fg ${CELL}`}>
+                        {charge.item}
+                      </th>
+                      <td className={`tabular whitespace-nowrap text-right text-fg ${CELL}`}>
+                        <CopyText source={charge.amount} as="span" />
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
+          </Reveal>
+        </div>
 
-            <div className={`pb-5 ${CELL_X}`}>
-              <div className="flex items-baseline justify-between gap-4 border-b border-border-soft py-3 text-xs font-medium uppercase tracking-[0.14em] text-fg-muted">
-                <span>{accountChargeColumns.item}</span>
-                <span>{accountChargeColumns.amount}</span>
-              </div>
+        {/* ---------------------------------------------------------------- */}
+        {/* Plan tiers — one recommended tier, two ledger rows                 */}
+        {/* ---------------------------------------------------------------- */}
+        <div className="mt-20 sm:mt-24">
+          <Reveal>
+            {/* Chapter break: serif label with the rule running off it to the
+                measure's right edge. Cheaper than a panel and it actually
+                divides something. */}
+            <div className="flex items-center gap-6">
+              <h3 className={`shrink-0 ${SUB_HEAD}`}>{plansHeading}</h3>
+              <span aria-hidden="true" className="h-px flex-1 bg-border-soft" />
+            </div>
+          </Reveal>
 
-              {/* text-base rows, same size and rhythm as the brokerage table. */}
-              <dl>
-                {accountCharges.map((charge) => (
-                  <div
-                    key={charge.item}
-                    className="flex items-baseline justify-between gap-4 border-b border-border-soft/60 py-4 last:border-b-0 lg:py-5"
+          <Reveal delay={60}>
+            {/* The section's single elevated element. Elevation is the whole
+                recommendation mechanism here, so it is spent once and nowhere
+                else — the tables and the ledger rows below sit flat on the
+                section. (The gold CTA carries its own lift from Button.) */}
+            <div className="surface-chrome mt-8 rounded-2xl border border-accent/30 shadow-lifted">
+              <div className="grid gap-y-8 p-6 sm:p-8 lg:grid-cols-12 lg:gap-x-12 lg:p-10">
+                <div className="min-w-0 lg:col-span-5">
+                  {/* Set two full steps above the tiers below it. No badge — the
+                      size and the panel are the claim, and they are a design
+                      claim rather than a statistical one. */}
+                  <h4 className="display text-[clamp(2rem,3.4vw,2.75rem)] leading-[1.06] text-fg">
+                    {primary.name}
+                  </h4>
+
+                  <p className="mt-4 flex flex-wrap items-baseline gap-x-2">
+                    <CopyText
+                      source={primary.price}
+                      as="span"
+                      className="tabular text-2xl leading-none text-fg"
+                    />
+                    {primary.cadence && (
+                      <span className="text-sm text-fg-muted">{primary.cadence}</span>
+                    )}
+                  </p>
+
+                  <p className="mt-5 max-w-[32ch] text-base leading-relaxed text-fg-muted">
+                    {primary.blurb}
+                  </p>
+
+                  {/* The one trailing-well button in the section: this is the
+                      single primary action, and an arrow on all three would
+                      stop it meaning "this is the one". */}
+                  <Button
+                    href="#onboarding"
+                    className="mt-8"
+                    trailing={<ArrowUpRight className="h-4 w-4" strokeWidth={1.75} />}
+                    aria-label={`${primary.cta} — ${primary.name} plan`}
                   >
-                    <dt className="text-base leading-snug text-fg">{charge.item}</dt>
-                    <dd className="tabular shrink-0 text-base font-medium text-fg">
-                      <CopyText source={charge.amount} as="span" />
-                    </dd>
-                  </div>
-                ))}
-              </dl>
-            </div>
-          </div>
-        </Reveal>
-      </div>
+                    {primary.cta}
+                  </Button>
+                </div>
 
-      {/* ---------------- Plan tiers ---------------- */}
-      <div className={`mt-14 sm:mt-16 ${RATE_CARD_MEASURE}`}>
-        <Reveal>
-          {/* Matches SectionShell's eyebrow treatment (plain 16px fg-muted), not
-              the tracked micro-caps this used to wear. Those are now reserved
-              for table column headers, which is the only place on the section
-              where a 12px label still reads as a label rather than as shrunken
-              body copy. */}
-          <h3 className="text-center text-base text-fg-muted">{plansHeading}</h3>
-        </Reveal>
-
-        {/* Held to the same measure as the tables: three cards across 1664px are
-            ~540px each and read as mostly padding. At 1344 they land near 430px,
-            which a four-line feature list actually fills. */}
-        <div className="mt-8 grid gap-5 md:grid-cols-3 lg:gap-6">
-          {plans.map((plan, index) => (
-            <Reveal key={plan.name} delay={index * 60} className="h-full">
-              {/* `highlighted` is a design emphasis only — no "most popular"
-                  badge, which would be an unsubstantiated claim. */}
-              <div
-                className={`flex h-full flex-col rounded-2xl border p-6 transition-colors duration-200 lg:p-7 ${
-                  plan.highlighted
-                    ? 'border-accent bg-surface'
-                    : 'border-border-soft bg-surface/40 hover:border-border hover:bg-surface'
-                }`}
-              >
-                <h4 className="text-lg font-semibold leading-[1.4] text-fg">{plan.name}</h4>
-
-                <p className="mt-3 flex flex-wrap items-baseline gap-x-1.5">
-                  <CopyText
-                    source={plan.price}
-                    as="span"
-                    className="tabular text-2xl font-medium leading-none text-fg lg:text-3xl"
-                  />
-                  {plan.cadence && (
-                    <span className="text-sm text-fg-muted">{plan.cadence}</span>
-                  )}
-                </p>
-
-                <p className="mt-3 text-base leading-relaxed text-fg-muted">{plan.blurb}</p>
-
-                <ul className="mt-5 flex-1 space-y-3 border-t border-border-soft pt-5">
-                  {plan.features.map((feature) => (
-                    <li key={feature} className="flex items-start gap-2.5 text-base text-fg-muted">
-                      <Check
-                        className="mt-1 h-4 w-4 shrink-0 text-accent-soft"
-                        strokeWidth={1.5}
-                        aria-hidden="true"
-                      />
-                      <CopyText source={feature} as="span" className="leading-relaxed" />
+                {/* Features as hairline-separated rows, not a checklist. A tick
+                    glyph on every line is four icons saying the same word. */}
+                <ul className="min-w-0 border-t border-border-soft pt-2 lg:col-span-7 lg:border-l lg:border-t-0 lg:pl-12 lg:pt-0">
+                  {primary.features.map((feature, index) => (
+                    <li
+                      key={feature}
+                      className={`py-3.5 text-base leading-relaxed text-fg-muted ${
+                        index > 0 ? 'border-t border-border-soft' : ''
+                      }`}
+                    >
+                      <CopyText source={feature} as="span" />
                     </li>
                   ))}
                 </ul>
-
-                <Button
-                  href="#"
-                  variant={plan.highlighted ? 'primary' : 'secondary'}
-                  fullWidth
-                  className="mt-6"
-                  aria-label={`${plan.cta} — ${plan.name} plan`}
-                >
-                  {plan.cta}
-                </Button>
               </div>
-            </Reveal>
-          ))}
-        </div>
-      </div>
+            </div>
+          </Reveal>
 
-      {/* ---------------- Fine print ---------------- */}
-      <div className={`mt-10 border-t border-border-soft pt-6 ${RATE_CARD_MEASURE}`}>
-        <Disclosure tone="note" className="mx-auto max-w-[68ch] text-center">
+          {/* The other tiers. One reveal for the whole ledger rather than a
+              staggered cascade — a row that performs is competing with the
+              tier above it, and the point of these two is that they don't. */}
+          <Reveal delay={120}>
+            <ul className="mt-6 divide-y divide-border-soft border-y border-border-soft">
+              {secondary.map((plan) => (
+                <li key={plan.name}>
+                  {/* Baseline alignment across the strip: the tier name, the
+                      figure and the first line of the feature run all sit on
+                      one line, which is what makes four unequal columns read
+                      as a row rather than as four stacked things. */}
+                  <div className="grid items-baseline gap-x-10 gap-y-4 py-7 sm:py-8 md:grid-cols-[minmax(0,13rem)_minmax(0,8rem)_minmax(0,1fr)_auto]">
+                    <div className="min-w-0">
+                      <h4 className="display text-xl leading-tight text-fg sm:text-2xl">
+                        {plan.name}
+                      </h4>
+                      <p className="mt-1.5 text-sm leading-relaxed text-fg-muted">{plan.blurb}</p>
+                    </div>
+
+                    <CopyText source={plan.price} as="p" className="tabular text-base text-fg" />
+
+                    {/* Features flow as one line of prose here. As a bulleted
+                        column they would rebuild the tower this layout exists
+                        to avoid. Inline `li`s, with the separator glued to the
+                        label it follows by a non-breaking space so a line can
+                        only ever break *after* it. */}
+                    <ul className="min-w-0 text-sm leading-relaxed text-fg-muted">
+                      {plan.features.map((feature, index) => (
+                        <li key={feature} className="inline">
+                          <CopyText source={feature} as="span" />
+                          {index < plan.features.length - 1 && (
+                            <span aria-hidden="true" className="text-fg-subtle">
+                              {'\u00A0\u00B7 '}
+                            </span>
+                          )}
+                        </li>
+                      ))}
+                    </ul>
+
+                    <a
+                      href="#onboarding"
+                      className="group inline-flex min-h-11 items-center gap-1.5 self-center text-sm font-medium text-accent-soft transition-colors duration-200 hover:text-fg md:justify-self-end"
+                      aria-label={`${plan.cta} — ${plan.name} plan`}
+                    >
+                      {plan.cta}
+                      <span
+                        aria-hidden="true"
+                        className="transition-transform duration-200 ease-[var(--ease-out-soft)] group-hover:translate-x-0.5"
+                      >
+                        &rarr;
+                      </span>
+                    </a>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          </Reveal>
+        </div>
+
+        {/* ---------------------------------------------------------------- */}
+        {/* Fine print                                                        */}
+        {/* ---------------------------------------------------------------- */}
+        {/* Left-flush with everything above it, on the section's plain surface.
+            Live text, selectable, 8.07:1 — never a glass plate. */}
+        <Disclosure tone="note" className="mt-8 max-w-[68ch]">
           {finePrint}
         </Disclosure>
       </div>

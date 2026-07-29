@@ -50,7 +50,7 @@ const MEDIA_BRIEF: Record<string, string> = {
 }
 
 /** The ink-navy void every asset in the library shares (motion-brief §5). */
-const VOID = '#0F172A'
+const VOID = '#0B0B0D'
 
 type WithDisclosure = Product & { disclosure: string }
 
@@ -136,7 +136,6 @@ export default function Products() {
   return (
     <SectionShell
       id="products"
-      eyebrow={productsSection.eyebrow}
       heading={productsSection.heading}
       subheading={productsSection.subheading}
       scale="lead"

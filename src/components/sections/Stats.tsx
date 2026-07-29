@@ -1,72 +1,73 @@
 import Container from '../ui/Container'
-import Reveal from '../ui/Reveal'
 import CopyText from '../ui/CopyText'
+import Reveal from '../ui/Reveal'
 import { stats } from '../../data/social'
 
 /**
  * §13 Stats band.
  *
- * Deliberately NOT a SectionShell and deliberately NOT full-height — no heading,
- * no eyebrow. This is punctuation between Learn (§11) and Testimonials (§12):
- * five figures on hairlines, and nothing else competing for attention.
+ * Punctuation between Learn (§11) and Testimonials (§12), not a section: no
+ * SectionShell, no heading, no full height. Five figures, five labels, one rule.
  *
- * Values carry `.tabular` at weight 500 so the digits sit on a fixed advance
- * width (design-system/thinqprofit/pages/landing.md §3).
+ * Three things changed from the first cut, all of them subtractions:
  *
- * Every value is still a `[PLACEHOLDER]` in the deck, so each renders through
- * `CopyText` and reads as unfilled rather than as a published number.
+ *  1. The per-cell hairline grid is gone. Eleven internal rules to separate five
+ *     facts drew a table around data that is not tabular, and boxed each figure
+ *     in on four sides. Space does that job here; the only line left is the
+ *     seam above the band, and it is `.rule-chrome` — a brushed edge that fades
+ *     at both ends, which is the whole reason that utility exists and its only
+ *     use on the page.
  *
- * Layout: 2-up on mobile, 5-across from lg. Hairlines are drawn per cell rather
- * than with a gap trick so the rules reflow correctly when the grid wraps.
+ *  2. The uppercase `tracking-[0.14em]` micro-labels are gone. That treatment
+ *     had spread far enough across the page to stop reading as a decision, and
+ *     it costs legibility at 12px for no gain. The labels are sentence case at
+ *     14px in `fg-muted` (8.07:1) — quieter than the figure without shouting
+ *     about being a label.
  *
- * Sizing across the wide container: at 1344–1664px each cell is 270–330px, so
- * the figure steps up to 36/44px and the band deepens with it. Without that the
- * five values read as small islands stranded on a very long rule. The steps are
- * capped so the widest value, `[₹X crore+]` (~5.1em), still clears the cell's
- * inner width at every breakpoint and never has to break.
+ *  3. Centred text is now left-aligned. Tabular figures want a shared left edge;
+ *     centring them means the digits sit on a different axis in every cell.
+ *
+ * Type: sans, never `.display`. Instrument Sans has true tabular figures and
+ * Instrument Serif does not, and a band of numbers is exactly where a digit
+ * jumping its advance width would show. `.tabular` at weight 500, per
+ * design-system/thinqprofit/pages/landing.md §3.
+ *
+ * Sizing is bounded by the placeholders, not by the finished numbers. Every
+ * value here is still an unfilled deck token rendering through `CopyText`, so
+ * the widest thing this band has to hold is `[₹X crore+]` (~5.1em) — wider than
+ * any real figure that replaces it. The clamp tops out at 40px, which keeps that
+ * token inside its column at the tightest point of the 5-across grid (1024px,
+ * ~166px per column) and leaves the band correctly proportioned once the values
+ * shorten to real numbers rather than suddenly under-filled.
  */
 export default function Stats() {
   return (
-    <section
-      id="stats"
-      aria-label="ThinqProfit by the numbers"
-      className="border-t border-border-soft"
-    >
-      <Container>
-        <dl className="grid grid-cols-2 lg:grid-cols-5">
-          {stats.map((stat, index) => {
-            // Mobile (2 cols): no left rule on the first cell of each row,
-            // no top rule on the first row. Desktop (5 cols): a single row.
-            const rules = [
-              'border-border-soft',
-              index % 2 === 0 ? 'border-l-0' : 'border-l',
-              index < 2 ? 'border-t-0' : 'border-t',
-              index % 5 === 0 ? 'lg:border-l-0' : 'lg:border-l',
-              'lg:border-t-0',
-            ].join(' ')
+    <section id="stats" aria-label="ThinqProfit by the numbers">
+      {/* Full-bleed seam. Sits outside Container so it runs edge to edge and
+          fades out where the viewport does. */}
+      <div className="rule-chrome h-px w-full" aria-hidden="true" />
 
-            return (
-              // The Reveal element IS the grid cell: it keeps `dl > div > (dt, dd)`
-              // valid and gives each figure its own 60ms step, capped at 180ms.
-              <Reveal
-                key={stat.label}
-                delay={Math.min(index, 3) * 60}
-                className={`grid justify-items-center gap-2.5 px-3 py-9 text-center sm:px-5 lg:px-4 lg:py-12 xl:gap-3 xl:px-6 xl:py-14 2xl:py-16 ${rules}`}
-              >
-                {/* dt before dd in the DOM for correct <dl> semantics. The figure
-                    sits on top visually via explicit grid rows, so reading order
-                    and DOM order stay identical (WCAG 1.3.2). */}
-                <dt className="row-start-2 text-xs font-medium uppercase leading-snug tracking-[0.14em] text-fg-muted xl:text-[0.8125rem]">
-                  {stat.label}
-                </dt>
-                <CopyText
-                  as="dd"
-                  source={stat.value}
-                  className="tabular row-start-1 text-2xl font-medium leading-none tracking-tight text-fg sm:text-3xl xl:text-4xl 2xl:text-[2.75rem]"
-                />
-              </Reveal>
-            )
-          })}
+      <Container>
+        <dl className="grid grid-cols-2 gap-x-6 gap-y-10 py-12 sm:grid-cols-3 lg:grid-cols-5 lg:gap-x-8 lg:py-14">
+          {stats.map((stat, index) => (
+            // The Reveal element IS the grid cell: it keeps `dl > div > (dt, dd)`
+            // valid and gives each figure its own 60ms step, capped at 180ms.
+            <Reveal
+              key={stat.label}
+              delay={Math.min(index, 3) * 60}
+              className="grid min-w-0 content-start gap-y-2.5"
+            >
+              {/* dt before dd in the DOM for correct <dl> semantics; the figure
+                  sits on top visually via explicit grid rows, so reading order
+                  and DOM order stay identical (WCAG 1.3.2). */}
+              <dt className="row-start-2 text-sm leading-snug text-fg-muted">{stat.label}</dt>
+              <CopyText
+                as="dd"
+                source={stat.value}
+                className="tabular row-start-1 text-[clamp(1.75rem,2.2vw,2.5rem)] font-medium leading-[1.05] tracking-[-0.02em] text-fg"
+              />
+            </Reveal>
+          ))}
         </dl>
       </Container>
     </section>

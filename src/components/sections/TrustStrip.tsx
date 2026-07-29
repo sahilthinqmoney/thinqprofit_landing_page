@@ -1,4 +1,3 @@
-import { Boxes, Building2, Landmark, ShieldCheck, Vault } from 'lucide-react'
 import Container from '../ui/Container'
 import { registrations, trustLabel } from '../../data/hero'
 
@@ -7,29 +6,29 @@ import { registrations, trustLabel } from '../../data/hero'
  * "are you real" is answered before "what do you cost".
  *
  * Deliberately not a SectionShell and deliberately NOT full-height — this is a
- * thin band, and the label is a small uppercase rule rather than a display
- * heading, so nothing competes with the hero H1. No logos: we have none, and
- * typography is enough. Values stay in their [placeholder] form until compliance
- * supplies verified codes.
+ * thin band, and its label stays small so nothing competes with the hero H1.
+ * No logos: we have none, and typography is enough. Values stay in their
+ * [placeholder] form until compliance supplies verified codes.
+ *
+ * The label is sentence case, not uppercase with 0.22em tracking. That
+ * treatment was doing duty as *the* secondary type style in six different
+ * sections — eyebrows, table headers, footer column heads, stat labels — which
+ * made it a default rather than a decision. It is gone from all of them.
+ *
+ * The per-row icons are gone too. Five glyphs of equal weight beside five
+ * authority names added no information the names did not already carry, and
+ * repeated the icon-in-a-row pattern this pass removed everywhere else.
  *
  * Layout: stacked (label over a hairline, registrations beneath) up to lg. From
  * xl the label moves inline at the left and the five registrations take the
  * remaining width, so on a 1344–1664px container the band reads as one
  * considered horizontal rule of proof rather than five items adrift in space.
  *
- * No `font-mono` anywhere — Inter is the only face loaded, so a mono utility
- * would fall through to the OS monospace stack and render the registration
- * codes in a different typeface from every other glyph on the page. `.tabular`
- * gives the fixed-advance digits; tracking and weight do the distinguishing.
+ * No `font-mono` anywhere — only Instrument Sans and Instrument Serif are
+ * loaded, so a mono utility would fall through to the OS monospace stack and
+ * render the registration codes in a face that appears nowhere else on the
+ * page. `.tabular` gives the fixed-advance digits; weight does the rest.
  */
-const icons: Record<string, typeof ShieldCheck> = {
-  'shield-check': ShieldCheck,
-  landmark: Landmark,
-  'building-2': Building2,
-  boxes: Boxes,
-  vault: Vault,
-}
-
 export default function TrustStrip() {
   return (
     <section
@@ -43,7 +42,7 @@ export default function TrustStrip() {
             <div className="flex items-center gap-4 xl:shrink-0">
               <h2
                 id="registrations-label"
-                className="shrink-0 text-xs font-medium uppercase tracking-[0.22em] text-fg-muted"
+                className="shrink-0 text-sm text-fg-muted"
               >
                 {trustLabel}
               </h2>
@@ -53,28 +52,19 @@ export default function TrustStrip() {
             </div>
 
             <ul className="mt-4 grid grid-cols-1 sm:mt-6 sm:grid-cols-2 sm:gap-x-8 sm:gap-y-6 lg:grid-cols-5 lg:gap-x-6 xl:mt-0 xl:min-w-0 xl:flex-1">
-              {registrations.map((registration) => {
-                const Icon = icons[registration.icon] ?? ShieldCheck
-
-                return (
-                  <li
-                    key={registration.authority}
-                    className="flex items-baseline justify-between gap-4 border-t border-border-soft py-3 sm:block sm:border-l sm:border-t-0 sm:py-0 sm:pl-4 xl:pl-5"
-                  >
-                    <span className="flex min-w-0 items-center gap-1.5 text-[0.8125rem] font-medium leading-snug text-fg xl:gap-2 xl:text-sm">
-                      <Icon
-                        className="h-3.5 w-3.5 shrink-0 text-fg-muted xl:h-4 xl:w-4"
-                        strokeWidth={1.5}
-                        aria-hidden="true"
-                      />
-                      {registration.authority}
-                    </span>
-                    <span className="tabular shrink-0 text-xs font-medium leading-snug tracking-wide text-fg-muted sm:mt-1.5 sm:block xl:mt-2 xl:text-[0.8125rem]">
-                      {registration.value}
-                    </span>
-                  </li>
-                )
-              })}
+              {registrations.map((registration) => (
+                <li
+                  key={registration.authority}
+                  className="flex items-baseline justify-between gap-4 border-t border-border-soft py-3 sm:block sm:border-l sm:border-t-0 sm:py-0 sm:pl-4 xl:pl-5"
+                >
+                  <span className="min-w-0 text-[0.8125rem] font-medium leading-snug text-fg xl:text-sm">
+                    {registration.authority}
+                  </span>
+                  <span className="tabular shrink-0 text-xs leading-snug text-fg-muted sm:mt-1.5 sm:block xl:mt-2 xl:text-[0.8125rem]">
+                    {registration.value}
+                  </span>
+                </li>
+              ))}
             </ul>
           </div>
         </div>

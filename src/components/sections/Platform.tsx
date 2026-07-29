@@ -6,7 +6,6 @@ import Reveal from '../ui/Reveal'
 
 import {
   platformCta,
-  platformEyebrow,
   platformHeading,
   platformMediaAlt,
   platformSubheading,
@@ -73,7 +72,6 @@ export default function Platform({ id = 'platform' }: PlatformProps) {
       anchor="center"
       scrim={0.86}
       scrimAt="68% 50%"
-      label={platformEyebrow}
       headline={headline}
       measure="9em"
       body={platformSubheading}

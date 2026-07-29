@@ -31,7 +31,6 @@ export default function Onboarding() {
       /* 12em: at 10 the measure clipped "Open an account before" one word early
          and stranded "before" alone on the second line. */
       measure="12em"
-      label={onboardingCopy.eyebrow}
       headline={onboardingCopy.heading}
       body={onboardingCopy.subheading}
       actions={

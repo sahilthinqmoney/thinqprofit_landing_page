@@ -15,7 +15,7 @@ import { useEffect, useRef } from 'react'
  *  - loops seamlessly by construction — no seam to hide
  *
  * Constraints it must respect (design-system/thinqprofit/pages/landing.md):
- *  - indigo → cyan only. No green, no red: those are reserved for market data,
+ *  - gold → chrome only. No green, no red: those are reserved for market data,
  *    and a green shimmer in the hero teaches the wrong association on sight.
  *  - the left of frame stays dark and low-contrast — the H1 sits there.
  *  - reduced motion gets a single composed still, never a frozen blank.
@@ -44,9 +44,12 @@ interface Particle {
 const PARTICLE_COUNT_DESKTOP = 520
 const PARTICLE_COUNT_MOBILE = 220
 
-/** Indigo core → cyan highlight. Nothing else is permitted in here. */
-const COLOR_NEAR: [number, number, number] = [99, 102, 241] // indigo-ish  #6366F1
-const COLOR_FAR: [number, number, number] = [34, 211, 238] // cyan        #22D3EE
+/**
+ * Gold core → platinum chrome highlight. Nothing else is permitted in here:
+ * no green, no red — those belong to gain and loss.
+ */
+const COLOR_NEAR: [number, number, number] = [212, 175, 55] // gold     #D4AF37
+const COLOR_FAR: [number, number, number] = [200, 204, 212] // chrome   #C8CCD4
 
 function mix(a: number, b: number, t: number) {
   return a + (b - a) * t
@@ -165,7 +168,7 @@ export default function HeroCanvas({ className = '' }: HeroCanvasProps) {
 
       // A thin counter-rotating inner arc: reads as structure rather than a
       // scatter, and gives the composition an axis.
-      ctx.strokeStyle = `rgba(129, 140, 248, ${0.05 + order * 0.07})`
+      ctx.strokeStyle = `rgba(232, 217, 168, ${0.05 + order * 0.07})`
       ctx.lineWidth = 1
       ctx.beginPath()
       ctx.ellipse(cx, cy, radiusX * 0.62, radiusY * 0.62, -t * 0.06, 0, Math.PI * 2)
@@ -176,9 +179,9 @@ export default function HeroCanvas({ className = '' }: HeroCanvasProps) {
       const glowX = cx + Math.cos(t * 0.28) * radiusX * 0.55
       const glowY = cy + Math.sin(t * 0.28) * radiusY * 0.55
       const glow = ctx.createRadialGradient(glowX, glowY, 0, glowX, glowY, radiusX * 0.85)
-      glow.addColorStop(0, `rgba(99, 102, 241, ${(0.16 + order * 0.14) * fieldAlpha})`)
-      glow.addColorStop(0.55, 'rgba(79, 70, 229, 0.06)')
-      glow.addColorStop(1, 'rgba(15, 23, 42, 0)')
+      glow.addColorStop(0, `rgba(212, 175, 55, ${(0.15 + order * 0.13) * fieldAlpha})`)
+      glow.addColorStop(0.55, 'rgba(200, 204, 212, 0.05)')
+      glow.addColorStop(1, 'rgba(11, 11, 13, 0)')
       ctx.fillStyle = glow
       ctx.fillRect(0, 0, width, height)
 

@@ -10,37 +10,45 @@
 | # | Conflict in MASTER.md | Resolution |
 |---|----------------------|------------|
 | 1 | Style is `Dark Mode (OLED)` but the palette ships a light background (`#F8FAFC`) with dark foreground | Use the **Fintech/Crypto dark palette** (`colors.csv` → Fintech/Crypto): background `#0F172A`, foreground `#F8FAFC`. Dark is the brand mode. |
-| 2 | Accent/CTA is `#059669` (green) | **Do not use green as the brand/CTA colour.** On a trading platform green and red are semantically reserved for gain and loss. A green "Open free account" button next to a green day-change figure teaches the eye the wrong thing. CTA moves to indigo. |
+| 2 | Accent/CTA is `#059669` (green) | **Do not use green as the brand/CTA colour.** On a trading platform green and red are semantically reserved for gain and loss. A green "Open free account" button next to a green day-change figure teaches the eye the wrong thing. CTA is **gold** `#D4AF37` — outside the gain/loss vocabulary entirely, and it carries the premium register the brief asks for. |
 | 3 | Page pattern is `App Store Style Landing` | Spine is **Trust & Authority + Conversion** (`landing.csv` result 1). App-Store treatment is demoted to the Mobile App section only (§9 of the copy deck). **Why:** a SEBI-registered broker converts on credibility first; the app-store pattern assumes the user already trusts the brand. |
 | 4 | Product row matched `Financial Dashboard` | Correct for the in-app product, wrong for the marketing page. Marketing page follows `Banking/Traditional Finance` → Trust & Authority + Feature-Rich. |
 | 5 | Component specs use light cards (`background: #FFFFFF`) | Rewritten below for the dark surface set. |
 
 ---
 
-## 2. Colour tokens (dark, authoritative)
+## 2. Colour tokens (gold & chrome, dark)
 
-| Role | Hex | Token | Notes |
-|------|-----|-------|-------|
-| Background | `#0F172A` | `--color-bg` | Page base |
-| Surface | `#1A2234` | `--color-surface` | Cards, nav on scroll |
-| Surface raised | `#222B3E` | `--color-surface-raised` | Hover, popovers |
-| Foreground | `#F8FAFC` | `--color-fg` | Headings |
-| Foreground muted | `#94A3B8` | `--color-fg-muted` | Body copy — 6.1:1 on `#0F172A` ✓ |
-| Foreground subtle | `#64748B` | `--color-fg-subtle` | Legal/footer only, never body |
-| Border | `#334155` | `--color-border` | 1px hairlines |
-| **Accent / CTA** | `#4F46E5` | `--color-accent` | Indigo. Brand action colour. |
-| Accent hover | `#6366F1` | `--color-accent-hover` | |
-| Accent soft | `#A5B4FC` | `--color-accent-soft` | Eyebrows, links on dark |
-| **Gain** | `#22C55E` | `--color-gain` | **Reserved for market data only** |
-| **Loss** | `#EF4444` | `--color-loss` | **Reserved for market data only** |
-| Warning | `#F59E0B` | `--color-warning` | Risk disclosures, margin alerts |
+Premium register: near-black ink, gold as the single brand action, platinum chrome for metallic edges. Every value contrast-checked against the ink base.
+
+| Role | Hex | Token | Contrast on bg | Notes |
+|------|-----|-------|----------------|-------|
+| Background | `#0B0B0D` | `--color-bg` | — | Neutral ink, faintly warm so gold doesn't read muddy |
+| Surface | `#141417` | `--color-surface` | — | Cards, nav on scroll |
+| Surface raised | `#1C1C21` | `--color-surface-raised` | — | Hover, popovers |
+| Foreground | `#F7F6F3` | `--color-fg` | 18.20:1 | Warm white |
+| Foreground muted | `#A8A69F` | `--color-fg-muted` | 8.07:1 | Body copy, disclosures |
+| Foreground subtle | `#6E6C66` | `--color-fg-subtle` | 3.75:1 | Footer meta + legal fine print ONLY |
+| Border | `#2A2A30` | `--color-border` | — | |
+| Border soft | `#1E1E23` | `--color-border-soft` | — | |
+| **Accent (gold)** | `#D4AF37` | `--color-accent` | 9.35:1 | Brand action |
+| Accent hover | `#E3C263` | `--color-accent-hover` | — | |
+| Accent soft | `#E8D9A8` | `--color-accent-soft` | 13.97:1 | Eyebrows, links, quiet accents |
+| **On accent** | `#0B0B0D` | `--color-on-accent` | 9.35:1 on gold | Text on a gold fill |
+| **Chrome** | `#C8CCD4` | `--color-chrome` | 12.21:1 | Metallic hairlines, secondary marks |
+| Chrome dim | `#8A9099` | `--color-chrome-dim` | 6.11:1 | |
+| **Gain** | `#4ADE80` | `--color-gain` | 11.29:1 | **Market data only** |
+| **Loss** | `#F87171` | `--color-loss` | 7.11:1 | **Market data only** |
+| **Warning** | `#F97316` | `--color-warning` | 7.02:1 | Risk disclosures, margin alerts |
 
 **Hard rules**
-- `--color-gain` / `--color-loss` never appear on a button, badge, link, or illustration. Market data only.
-- Never signal gain/loss by colour alone — pair with `+`/`−` and an arrow glyph (`ux-guidelines.csv` → Accessibility / Color Only, severity High).
-- `--color-fg-subtle` (`#64748B`) is **3.9:1** on the page background. Legal fine print and footer meta only; never body text.
 
----
+- **A gold fill always carries ink text.** White on `#D4AF37` is **2.10:1** and fails outright. Any `bg-accent` element takes `text-on-accent`, never `text-white`.
+- **Warning is orange, not amber, and this is not a taste call.** Brand gold sits at hue 46°; amber `#F59E0B` at 38° — 8° apart, which the eye reads as one colour. A risk disclosure that looks like a call to action is a real hazard on a broker page. Warning moved to hue 25°, a 21° separation, and always ships with an icon and a border so it is never signalled by hue alone.
+- `--color-gain` / `--color-loss` never appear on a button, badge, link, or illustration. Market data only, never by colour alone — pair with `+`/`−` and an arrow.
+- `--color-fg-subtle` is **3.75:1**. Legal fine print and footer meta only; never body text, never a disclosure, never a form placeholder.
+- **Chrome is a seasoning, not a surface.** `.rule-chrome` on a section's top rule or a panel lip. Metallic edges everywhere read as noise, not luxury.
+- **`.text-gold-leaf` is for display type only.** A gradient on running text destroys its measured contrast — never on body copy, never on anything legal.
 
 ## 3. Typography
 

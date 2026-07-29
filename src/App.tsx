@@ -32,10 +32,17 @@ import Footer from './components/sections/Footer'
  */
 export default function App() {
   return (
-    <div className="min-h-screen bg-bg text-fg">
+    /*
+     * `grain` lays a fixed, pointer-events-none noise field over the whole
+     * document at ~4% opacity. A page this dark is mostly one flat ink value,
+     * and flat ink at scale reads as absence rather than as a surface; the
+     * grain gives it something to be. Fixed rather than in flow so it never
+     * repaints with a scrolling layer.
+     */
+    <div className="grain min-h-screen bg-bg text-fg">
       <a
         href="#main"
-        className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-100 focus:rounded-full focus:bg-accent focus:px-4 focus:py-2 focus:text-sm focus:text-white"
+        className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-100 focus:rounded-full focus:bg-accent focus:px-4 focus:py-2 focus:text-sm focus:text-on-accent"
       >
         Skip to content
       </a>
