@@ -1,0 +1,55 @@
+import type { ElementType } from 'react'
+import { tokenizeCopy } from '../../lib/copyTokens'
+
+interface CopyTextProps {
+  source: string
+  className?: string
+  /** Defaults to `p`; pass `span`/`dd`/`li` when the parent is already a block. */
+  as?: ElementType
+}
+
+/**
+ * Renders a copy-deck string with its `[PLACEHOLDERS]` visible and flagged in
+ * warning colour, so an unfilled value can never be mistaken for finished copy.
+ * Placeholders carry `tabular` because most resolve to figures.
+ *
+ * Every section renders deck strings through this, so a placeholder looks the
+ * same wherever it appears on the page.
+ */
+export default function CopyText({ source, className = '', as: Tag = 'p' }: CopyTextProps) {
+  return (
+    <Tag className={`break-words ${className}`}>
+      {tokenizeCopy(source).map((token, i) => {
+        if (token.kind === 'placeholder') {
+          return (
+            <span
+              key={i}
+              className="tabular text-warning underline decoration-warning/40 decoration-dotted underline-offset-4"
+            >
+              [{token.value}]
+            </span>
+          )
+        }
+        if (token.kind === 'strong') {
+          return (
+            <strong key={i} className="font-semibold text-fg">
+              {token.value}
+            </strong>
+          )
+        }
+        if (token.kind === 'link') {
+          return (
+            <a
+              key={i}
+              href={token.href}
+              className="rounded text-accent-soft underline underline-offset-4 transition-colors duration-200 hover:text-fg"
+            >
+              {token.value}
+            </a>
+          )
+        }
+        return <span key={i}>{token.value}</span>
+      })}
+    </Tag>
+  )
+}
