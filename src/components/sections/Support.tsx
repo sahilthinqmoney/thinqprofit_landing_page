@@ -6,11 +6,41 @@ import { escalationLine, supportChannels } from '../../data/faq'
 /**
  * §15 Support — "Real people, published hours".
  *
- * The copy deck ships this as a two-column table (Channel | Detail), so it is
- * rendered as one: a real <table> with column headers and a caption, not a card
- * grid. This is tabular data — five channels, one attribute each — and the
- * semantics are what let a screen reader announce "Phone, Detail: …" instead of
- * reading five unlabelled fragments.
+ * COMPOSITION — the page's one rule-free plate: a single elevated `.card`,
+ * narrower than the rail, holding the five channels as a board with nothing but
+ * space between the rows, and one line across it for the escalation route.
+ *
+ * That is a deliberate inversion of the section directly above it. FAQ is
+ * twelve rows and twelve hairlines with no surface under any of them; this is
+ * one surface with one hairline on it. Two consecutive sections both built out
+ * of ruled rows would read as the same object twice, so the rules moved to one
+ * of them and the elevation to the other. It is also why the row hover went:
+ * these rows are not targets, and a background change under a cursor on
+ * something you cannot click is an affordance that leads nowhere.
+ *
+ * The plate is `.card` — the page's single 28px radius, the inset top highlight
+ * that puts a light source above it, the tinted shadow that gives it somewhere
+ * to sit. It is not `.card-lift`. The lift is for a panel that is *one*
+ * interactive target; this one contains five channels and a grievance route and
+ * is a target for nothing, so it stays still. (Pricing's recommended tier makes
+ * the same call for the same reason.)
+ *
+ * It caps at 64rem inside the 84rem rail. Every other section on this stretch
+ * runs the rail edge to edge; capping the plate is what makes it read as an
+ * object sitting in a section rather than as the section's background. The left
+ * edge is still the rail's left edge, so the page's one left edge survives.
+ *
+ * ── The table has no header row ────────────────────────────────────────────
+ *
+ * The deck ships this as Channel | Detail and it is still a real <table> — five
+ * channels, one attribute each — but the visible "CHANNEL / DETAIL" head is
+ * gone. `scope="row"` on each channel name is what a screen reader actually
+ * needs ("Phone: [+91 XXXXX XXXXX], [Hours]"), and the caption carries the
+ * rest. What the visible head was adding was a row of 12px uppercase
+ * letter-spaced micro-type — a treatment that had spread across enough of this
+ * page to stop reading as a decision — sitting above five rows whose meaning
+ * nobody was ever going to mistake. Column widths come from a <colgroup>
+ * instead, which is what `table-fixed` reads first anyway.
  *
  * ── Which column is loud ──────────────────────────────────────────────────
  *
@@ -40,11 +70,22 @@ import { escalationLine, supportChannels } from '../../data/faq'
  * route is the row *after* the five support channels, in the same card, on a
  * shaded ground, which is exactly what "if none of the above resolved it" means.
  * Same pattern as the statutory pass-through line under the brokerage table in
- * Pricing.
+ * Pricing. It is also the plate's only internal rule, and it is spent on the
+ * one boundary in this section that means something.
+ *
+ * The published hours, the five channels and the escalation path (support desk
+ * → compliance officer → SEBI SCORES → Smart ODR, the last two named in
+ * Safety's grievance pillar and the footer) are regulatory content. Layout
+ * around them changes; they do not.
  */
 
-/** Cell padding, shared by the table and the escalation strip below it. */
-const CELL_X = 'px-5 sm:px-7 lg:px-8'
+/**
+ * Cell padding, shared by the table and the escalation strip below it, so the
+ * grievance route starts on the same left edge as the channel names above it.
+ * Opened a step to match the plate's 28px radius — a tight gutter inside a
+ * large corner radius is what makes a panel look like a screenshot of itself.
+ */
+const CELL_X = 'px-6 sm:px-8 lg:px-10'
 
 export default function Support() {
   return (
@@ -52,61 +93,62 @@ export default function Support() {
       id="support"
       tone="raised"
       heading="Real people, published hours"
-      subheading="No charge to talk to us, and no phone tree designed to make you give up."
+      subheading="No charge to talk to us, and no phone tree."
     >
-      <Reveal className="mx-auto w-full max-w-3xl lg:max-w-4xl">
-        <div className="overflow-hidden rounded-2xl border border-border bg-surface">
-          {/* table-fixed keeps the long placeholder email inside its cell at 375px */}
-          <table className="w-full table-fixed border-collapse text-left">
-            <caption className="sr-only">
-              Support channels and the hours each is staffed. Bracketed values are unverified
-              placeholders.
-            </caption>
+      <Reveal>
+        {/* `overflow-hidden` clips the escalation strip's tint to the card's own
+            28px corners. It does not touch the inset highlight, which is drawn
+            inside the element's own box. */}
+        <div className="card max-w-[64rem] overflow-hidden">
+          {/* The board's own top and bottom air. Kept on a wrapper rather than
+              on the first and last rows so every row keeps identical padding
+              and the five sit on one even rhythm. */}
+          <div className="py-8 sm:py-10 lg:py-12">
+            {/* table-fixed keeps the long placeholder email inside its cell at
+                375px; the widths come from the colgroup, which is what
+                `table-fixed` consults before it looks at any row. */}
+            <table className="w-full table-fixed border-collapse text-left">
+              <caption className="sr-only">
+                Support channels. Each row names a channel and gives the hours it is staffed or
+                the detail that applies to it. Bracketed values are unverified placeholders.
+              </caption>
 
-            <thead>
-              <tr className="border-b border-border">
-                <th
-                  scope="col"
-                  className={`w-32 py-3 text-xs font-medium uppercase tracking-[0.14em] text-fg-muted sm:w-48 lg:w-56 ${CELL_X}`}
-                >
-                  Channel
-                </th>
-                <th
-                  scope="col"
-                  className={`py-3 text-xs font-medium uppercase tracking-[0.14em] text-fg-muted ${CELL_X}`}
-                >
-                  Detail
-                </th>
-              </tr>
-            </thead>
+              <colgroup>
+                <col className="w-32 sm:w-44 lg:w-56" />
+                <col />
+              </colgroup>
 
-            <tbody>
-              {supportChannels.map((channel) => (
-                <tr
-                  key={channel.channel}
-                  className="border-b border-border-soft transition-colors duration-200 last:border-b-0 hover:bg-surface-raised/50"
-                >
-                  <th
-                    scope="row"
-                    className={`py-5 align-top text-base font-normal leading-snug text-fg-muted sm:py-6 ${CELL_X}`}
-                  >
-                    {channel.channel}
-                  </th>
+              <tbody>
+                {supportChannels.map((channel) => (
+                  // No rule, no stripe, no hover. Space separates these rows,
+                  // because the section directly above this one is already
+                  // built entirely out of ruled rows.
+                  <tr key={channel.channel}>
+                    <th
+                      scope="row"
+                      className={`py-4 align-baseline text-base font-normal leading-snug text-fg-muted sm:py-5 ${CELL_X}`}
+                    >
+                      {channel.channel}
+                    </th>
 
-                  <td className={`py-5 align-top sm:py-6 ${CELL_X}`}>
-                    <CopyText
-                      source={channel.detail}
-                      className="tabular text-base leading-relaxed text-fg sm:text-lg"
-                    />
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+                    <td className={`py-4 align-baseline sm:py-5 ${CELL_X}`}>
+                      <CopyText
+                        source={channel.detail}
+                        className="tabular text-base leading-relaxed text-fg sm:text-lg"
+                      />
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
 
           {/* The published grievance route. Live, selectable text on a flat
-              ground — never behind a blur, never shrunk to fine print. */}
-          <div className={`border-t border-border bg-surface-raised/40 py-5 sm:py-6 ${CELL_X}`}>
+              ground — never behind a blur, never shrunk to fine print. The one
+              rule inside the plate sits here, because this is the one place in
+              the section where the meaning changes: everything above it is a
+              way to reach us, this is what to do when that did not work. */}
+          <div className={`border-t border-border bg-surface-raised/40 py-6 sm:py-8 ${CELL_X}`}>
             <CopyText
               source={escalationLine}
               className="max-w-[68ch] text-base leading-relaxed text-fg"

@@ -1,18 +1,28 @@
 /**
- * §7 Pricing — copy from docs/landing-page-copy.md §7, verbatim.
+ * §7 Pricing — copy from docs/landing-page-copy.md §7.
  *
  * EVERY [SQUARE BRACKET] BELOW IS A DELIBERATE PLACEHOLDER. Do not fill these in
  * from memory or from a competitor's rate card. Under SEBI's true-to-label rules
  * the charges shown here must match what is actually levied, and exchange,
  * clearing and statutory charges must be passed through at actuals and shown
  * separately. Compliance signs off on this table verbatim before launch.
+ *
+ * The subheading, the tier blurbs and the tier feature lists are ordinary
+ * marketing copy and are kept short. `statutoryLine` and `finePrint` are not:
+ * they are regulatory wording and stay verbatim, as do every rate, charge and
+ * segment name in the two tables. Trimming the words *around* a placeholder is
+ * fine — `[N] free GTT orders per month` keeps its token either way.
+ *
+ * `CopyText` is a renderer, not a compliance marker: it flags the square-
+ * bracket tokens inside whatever string it is given. The tokens and the
+ * disclosures are the guard, not the wrapper.
+ *
+ * There is no eyebrow — see DESIGN.md §3.
  */
 import type { AccountCharge, BrokerageRow, Plan } from '../types'
 
-export const pricingEyebrow = 'Pricing'
 export const pricingHeading = 'Priced plainly, in advance'
-export const pricingSubheading =
-  'One rate card. No hidden platform fee, no charge for calling support, no surprise on the contract note.'
+export const pricingSubheading = 'One rate card. No platform fee, no surprise on the contract note.'
 
 /** Column headers for the brokerage rate card. */
 export const brokerageColumns = { segment: 'Segment', rate: 'Brokerage' } as const
@@ -74,11 +84,11 @@ export const plans: Plan[] = [
     name: 'Active',
     price: '[₹X/month]',
     cadence: '',
-    blurb: 'For traders who are in the market most days.',
+    blurb: 'For traders in the market most days.',
     features: [
       'Everything in Basic',
-      'Advanced option chain and strategy builder',
-      'Priority support queue',
+      'Option chain and strategy builder',
+      'Priority support',
       '[N] free GTT orders per month',
     ],
     cta: 'Open free account',
@@ -91,7 +101,7 @@ export const plans: Plan[] = [
     blurb: 'For high-frequency and systematic traders.',
     features: [
       'Everything in Active',
-      'API access with higher rate limits',
+      'Higher-limit API access',
       'Multi-chart desktop terminal',
       'Dedicated relationship manager',
     ],

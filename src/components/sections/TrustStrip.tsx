@@ -37,7 +37,11 @@ export default function TrustStrip() {
       className="border-y border-border-soft"
     >
       <Container>
-        <div className="py-7 sm:py-8 xl:py-9">
+        {/* The rail, matching `SectionShell`'s 84rem cap inside the same 1760px
+            Container. Without it this band runs to the Container edge while
+            every section above and below stops at 84rem, and on a wide display
+            the page's left edge visibly jogs at the hero/trust seam. */}
+        <div className="w-full max-w-[84rem] py-7 sm:py-8 xl:py-9">
           <div className="xl:flex xl:items-center xl:gap-8 2xl:gap-12">
             <div className="flex items-center gap-4 xl:shrink-0">
               <h2

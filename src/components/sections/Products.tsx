@@ -24,9 +24,9 @@ import SectionShell from '../ui/SectionShell'
  *
  * No icon-in-a-box anywhere here. On a media card an icon tile competes with
  * the art it is sitting on; on a ledger row it inflates a one-line fact into
- * a widget. The heading is left-aligned (`centered={false}`) for the same
- * reason the grid is gone — the page had settled into centred slab after
- * centred slab.
+ * a widget. The heading is left-aligned — `SectionShell` defaults that way now,
+ * for the same reason the grid is gone: the page had settled into centred slab
+ * after centred slab.
  */
 
 /**
@@ -71,7 +71,7 @@ function FeaturedFinePrint({ items }: { items: WithDisclosure[] }) {
   if (items.length === 0) return null
 
   return (
-    <div className="mt-8 space-y-6 sm:mt-10">
+    <div className="mt-10 space-y-8 sm:mt-12">
       {items.map((product) => (
         <div key={product.id} className="max-w-[68ch]">
           <p className="text-xs font-medium uppercase tracking-[0.14em] text-fg-muted">
@@ -97,7 +97,7 @@ function FeaturedFinePrint({ items }: { items: WithDisclosure[] }) {
  */
 function LedgerRow({ product }: { product: Product }) {
   return (
-    <li className="py-6 sm:py-7">
+    <li className="py-7 sm:py-8">
       {/* The link is stretched across this box so the whole row is a target —
           but only this box. The disclosure below sits outside it and stays
           selectable, which live regulatory text has to be. */}
@@ -139,7 +139,6 @@ export default function Products() {
       heading={productsSection.heading}
       subheading={productsSection.subheading}
       scale="lead"
-      centered={false}
     >
       <Reveal>
         {/*
@@ -185,7 +184,7 @@ export default function Products() {
           staggered ones — a cascade would make the rows perform, and the point
           of them is that they don't. */}
       <Reveal>
-        <ul className="mt-16 divide-y divide-border-soft border-y border-border-soft sm:mt-20">
+        <ul className="mt-20 divide-y divide-border-soft border-y border-border-soft sm:mt-24">
           {rest.map((product) => (
             <LedgerRow key={product.id} product={product} />
           ))}

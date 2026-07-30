@@ -57,7 +57,10 @@ export default function MediaBackdrop({
   image,
   video,
   poster,
-  tone = '#0b1220',
+  // The page background, not a blue-black. This is what shows in letterbox
+  // gaps and for the frame before the asset decodes, so any other value is a
+  // visible colour flash on load.
+  tone = '#08080a',
   className = '',
 }: MediaBackdropProps) {
   const videoRef = useRef<HTMLVideoElement>(null)

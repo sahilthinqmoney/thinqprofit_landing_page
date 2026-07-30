@@ -3,15 +3,25 @@ import type { SafetyPillar } from '../types'
 /**
  * §10 Safety & protection — docs/landing-page-copy.md
  *
- * Copy is verbatim. Icons follow design-system/thinqprofit/pages/landing.md §8
- * (Safety row): vault, split, key-round, shield-check, lock,
- * message-square-warning — in that order.
+ * Bodies are one sentence each. Where the deck's second sentence only restated
+ * the pillar's own title — "Account security" followed by "…session alerts when
+ * something signs in that shouldn't" — the tail is cut, because a title and a
+ * body that say the same thing twice make the reader do the work of noticing.
+ *
+ * Two are untouched, deliberately. The SEBI funds pillar and the grievance
+ * pillar are regulatory wording: segregation, settlement frequency, and the
+ * published escalation route (support desk → compliance officer → SEBI SCORES →
+ * Smart ODR). Those are verbatim and stay verbatim.
+ *
+ * Icons follow design-system/thinqprofit/pages/landing.md §8 (Safety row):
+ * vault, split, key-round, shield-check, lock, message-square-warning — in that
+ * order.
  */
 
 export const pillars: SafetyPillar[] = [
   {
     title: 'Shares in your demat account',
-    body: "Every share you buy is credited directly to your CDSL demat account, held in your name. We can't move them without your authorisation.",
+    body: 'Every share you buy is credited directly to your CDSL demat account, held in your name.',
     icon: 'vault',
   },
   {
@@ -21,17 +31,17 @@ export const pillars: SafetyPillar[] = [
   },
   {
     title: 'You authorise every debit',
-    body: 'Selling requires your explicit approval each time, through CDSL TPIN or a SEBI-approved equivalent. No blanket power of attorney.',
+    body: 'Approval runs through CDSL TPIN or a SEBI-approved equivalent, never a blanket power of attorney.',
     icon: 'key-round',
   },
   {
     title: 'Account security',
-    body: "Two-factor authentication on every login, TOTP support, device binding, and session alerts when something signs in that shouldn't.",
+    body: 'Two-factor authentication on every login, TOTP support, device binding, and session alerts.',
     icon: 'shield-check',
   },
   {
     title: 'Encryption and monitoring',
-    body: 'Data encrypted in transit and at rest, with continuous monitoring and independent security audits.',
+    body: 'Encrypted in transit and at rest, with independent security audits.',
     icon: 'lock',
   },
   {

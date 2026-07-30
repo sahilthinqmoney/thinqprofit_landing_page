@@ -19,7 +19,7 @@ import { finalCta } from '../../data/footer'
  * not open another chapter.
  *
  * Constraints honoured:
- *  - indigo CTA, never green — landing.md §1 conflict 2, §10
+ *  - gold CTA, never green — landing.md §1 conflict 2, §10
  *  - no urgency mechanics, no countdown, no scarcity line — landing.md §10
  *  - the market-risk disclosure is live text under the CTA, inside the section,
  *    above the scrim and never behind a blur — landing.md §9, §10
@@ -30,14 +30,15 @@ import { finalCta } from '../../data/footer'
  * renders its pending field and prints this string — the layout is already
  * final and the overlaid copy can be judged for contrast now.
  *
- * Written against docs/motion-brief.md §5 (one visual grammar for the whole
- * library: ink-navy void, indigo→cyan light only) and §7 (no numbers or chart
- * forms, no green or red, no upward motion as a promise, people composed and
- * never celebrating). Note the dead zone moves: the hero reserves the left 45%,
- * this section is centre-placed, so here it is the centre that stays dark.
+ * Written against docs/motion-brief.md §7 (no numbers or chart forms, no green
+ * or red, no upward motion as a promise, people composed and never
+ * celebrating), and against the gold-and-platinum world in docs/art-direction.md
+ * — not the indigo→cyan the brief originally specified, which predates the
+ * palette. Note the dead zone moves: the hero reserves the left 45%, this
+ * section is centre-placed, so here it is the centre that stays dark.
  */
 const closingClip =
-  'Closing loop, 8s, seamless. The hero subject at distance in the ink-navy void, seated and still, mid-thought — composed, never celebrating. One indigo-to-cyan band of light drifts laterally behind her and settles; nothing rises. Centre of frame stays dark and low-contrast for the centred copy. No numbers, tickers, candles or chart forms. No green, no red.'
+  'Closing loop, 8s, seamless. A single machined-aluminium form at rest in near-black, lit from high and behind so only its top edge catches. One warm gold reflection travels the length of that edge, laterally, and settles; nothing rises. Centre of frame stays dark and low-contrast for the centred copy. No numbers, tickers, candles or chart forms. No green, no red.'
 
 export default function FinalCta() {
   /**
@@ -71,6 +72,14 @@ export default function FinalCta() {
       scrim={0.75}
       scrimAt="50% 50%"
       measure="9em"
+      /*
+       * The page's one serif. Everything above this is set in Archivo; the
+       * closing statement changes register, which is the only way a second face
+       * earns its place. Newsreader at weight 380 — an old-style serif with
+       * moderate contrast, deliberately not the Didone that made an earlier
+       * pass read as a fashion masthead rather than a broker.
+       */
+      voice="serif"
       headline={headline}
       body={finalCta.subheading}
       actions={

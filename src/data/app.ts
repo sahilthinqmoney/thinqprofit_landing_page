@@ -40,7 +40,13 @@ export interface AppCopy {
 export const appCopy: AppCopy = {
   eyebrow: 'On the go',
   heading: 'The whole market, in your pocket',
-  body: 'Order entry, live charts, positions and funds — the mobile app does everything the web terminal does, minus the excuses. Biometric login, instant UPI funding, and alerts that arrive when they matter.',
+  /*
+   * The second sentence went entirely: biometric login and alerts are the first
+   * and third items of the feature line directly beneath this paragraph, so it
+   * was previewing a list the reader reaches two seconds later. "Minus the
+   * excuses" went with it — a joke is not a claim.
+   */
+  body: 'Order entry, live charts, positions and funds — everything the web terminal does.',
   storeCtas: [
     { label: 'Download on the App Store', href: '#' },
     { label: 'Get it on Google Play', href: '#' },
@@ -50,9 +56,15 @@ export const appCopy: AppCopy = {
     '[X.X] on the App Store · [X.X] on Google Play [TODO: use live ratings or delete this line]',
 }
 
+/**
+ * These set as one flowed `·` line in MobileApp, so each label has to read as a
+ * noun phrase rather than a sentence — the explanatory tails ("for your…",
+ * "Works on a… — orders queue and confirm") were what made the run of them
+ * scan as prose instead of as a list.
+ */
 export const appFeatures: AppFeature[] = [
   { label: 'Face ID and fingerprint login', icon: 'scan-face' },
-  { label: 'Widgets for your watchlist and holdings', icon: 'layout-grid' },
-  { label: 'Push alerts for orders, triggers and margin calls', icon: 'bell-ring' },
-  { label: 'Works on a patchy connection — orders queue and confirm', icon: 'wifi-off' },
+  { label: 'Watchlist and holdings widgets', icon: 'layout-grid' },
+  { label: 'Alerts for orders, triggers and margin calls', icon: 'bell-ring' },
+  { label: 'Order queuing on a patchy connection', icon: 'wifi-off' },
 ]

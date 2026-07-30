@@ -80,6 +80,15 @@ interface MediaSectionProps {
   /** `\n` is an art-directed line break, honoured at ≥768px only. */
   headline: string
   /**
+   * Which face the headline is set in.
+   *
+   * `serif` is reserved for the page's single editorial moment — the closing
+   * statement. A serif used once is a change of register and lands; a serif
+   * used in three places is just a second default. If you are reaching for this
+   * on a second section, the answer is no.
+   */
+  voice?: 'display' | 'serif'
+  /**
    * Measure in `em`, not `px` or `ch`, so the headline breaks in the same place
    * at every breakpoint instead of re-ragging as the clamp resizes it.
    */
@@ -121,6 +130,7 @@ export default function MediaSection({
   scrim = 0.82,
   scrimAt = '32% 50%',
   headline,
+  voice = 'display',
   measure = '11em',
   body,
   actions,
@@ -160,7 +170,9 @@ export default function MediaSection({
 
           <div className={`flex flex-col items-start text-left ${PLACE[place]}`}>
             <h2
-              className={`display m-0 whitespace-normal text-fg md:whitespace-pre-line ${SCALE[step]}`}
+              className={`m-0 whitespace-normal text-fg md:whitespace-pre-line ${
+                voice === 'serif' ? 'display-serif' : 'display'
+              } ${SCALE[step]}`}
               style={{ maxWidth: measure }}
             >
               {headline}

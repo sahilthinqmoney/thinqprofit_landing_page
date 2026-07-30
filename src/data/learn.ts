@@ -1,9 +1,15 @@
 /**
  * §11 ThinqProfit Learn — docs/landing-page-copy.md
  *
- * Track titles and descriptions are verbatim. `learnDisclaimer` is the advisory
- * boundary statement: it must render as live text on the page, never as an
- * image and never behind a blur (landing.md §9).
+ * Track titles are verbatim from the copy deck. The descriptions are cut down to
+ * one noun phrase each: the deck set every one as a list plus a trailing "and
+ * why/what it means" clause, which is the section explaining its own syllabus
+ * before anyone has asked for it. The titles plus the phrase are enough to pick
+ * a track, and picking a track is all this list has to do.
+ *
+ * `learnDisclaimer` is the advisory boundary statement and is VERBATIM — it must
+ * render as live text on the page, never as an image and never behind a blur
+ * (landing.md §9). Do not shorten it.
  *
  * The tracks are an ordered path — First Steps through Taxes — and the section
  * renders them as a staircase in that order. Order is content, so it lives here
@@ -22,27 +28,27 @@ import type { LearnTrack } from '../types'
 export const tracks: LearnTrack[] = [
   {
     title: 'First Steps',
-    body: "What a demat account is, how settlement works, what you're actually buying",
+    body: 'Demat accounts, settlement, ownership',
     icon: 'footprints',
   },
   {
     title: 'Reading the Market',
-    body: 'Charts, volumes, order types, and what moves a price',
+    body: 'Charts, volumes, order types',
     icon: 'chart-candlestick',
   },
   {
     title: 'Derivatives, Carefully',
-    body: 'How F&O works, what margin means, and how positions go wrong',
+    body: 'F&O, margin, and how positions go wrong',
     icon: 'shield-alert',
   },
   {
     title: 'Funds & SIPs',
-    body: 'Direct versus regular, expense ratios, and why the difference compounds',
+    body: 'Direct versus regular, expense ratios',
     icon: 'piggy-bank',
   },
   {
     title: 'Taxes',
-    body: 'STCG, LTCG, speculative income, and what your P&L statement means at filing time',
+    body: 'STCG, LTCG, speculative income, your P&L statement',
     icon: 'receipt',
   },
 ]
@@ -52,7 +58,7 @@ export const formats: string[] = [
   'Short articles',
   '3–5 minute videos',
   'Interactive calculators',
-  "A glossary that doesn't define a term using the same term",
+  'Plain-language glossary',
 ]
 
 export const learnDisclaimer =

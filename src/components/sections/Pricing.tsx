@@ -35,11 +35,12 @@ interface PricingProps {
  *
  * Three decisions worth keeping:
  *
- *  1. **One chrome hairline.** `.rule-chrome` opens the brokerage table and
- *     appears nowhere else on the section. A metallic edge is a signal that this
- *     is the primary document; put it on every block and it signals nothing.
- *     Every rule below it is a plain `border-border-soft` hairline, and the
- *     amounts sit on one right-hand optical axis so the eye can run the column.
+ *  1. **No metallic edge here.** `.rule-chrome` is spent exactly once on the
+ *     whole page, at the Stats seam. Both tables in this section open on the
+ *     same plain `border` hairline, every rule below them is `border-soft`, and
+ *     the amounts sit on one right-hand optical axis so the eye can run the
+ *     column. Structure comes from rules, measure and type size — nothing here
+ *     is a bordered box except the single recommended tier.
  *
  *  2. **No three-tower plan grid.** Three equal cards is the most generic
  *     pricing layout in existence, and it can only express a recommendation by
@@ -57,12 +58,10 @@ interface PricingProps {
  *     The statutory pass-through line is never collapsed and never sits behind
  *     a blur.
  *
- * Width — Container runs to 1760px, which is more than a rate card can spend:
- * past ~1344px a row is mostly the gap between its two values. `MEASURE` caps
- * the document there and stays *left*-flush (no `mx-auto`) so its left edge
- * lines up with the section heading, which is left-aligned too.
+ * Width is not this file's business: `SectionShell` owns the one content rail
+ * the whole page shares, so the rate card's left edge lines up with the heading
+ * above it and with every other section by construction.
  */
-const MEASURE = 'w-full max-w-[84rem]'
 
 /**
  * Table column headers. Tracked micro-caps live here and nowhere else on the
@@ -91,9 +90,8 @@ export default function Pricing({ id = 'pricing' }: PricingProps) {
       subheading={pricingSubheading}
       tone="raised"
       scale="lead"
-      centered={false}
     >
-      <div className={MEASURE}>
+      <>
         {/* ---------------------------------------------------------------- */}
         {/* The rate card                                                     */}
         {/* ---------------------------------------------------------------- */}
@@ -102,8 +100,9 @@ export default function Pricing({ id = 'pricing' }: PricingProps) {
           <Reveal className="min-w-0 lg:col-span-7">
             <h3 className={SUB_HEAD}>{brokerageColumns.rate}</h3>
 
-            {/* The section's only chrome hairline. See note 1 above. */}
-            <div aria-hidden="true" className="rule-chrome mt-5 h-px w-full" />
+            {/* Plain hairline — the chrome rule belongs to the Stats seam and
+                to nothing else on the page. See note 1 above. */}
+            <div aria-hidden="true" className="mt-5 h-px w-full bg-border" />
 
             {/* Scrolls inside itself on narrow screens — the page never does. */}
             <div className="overflow-x-auto">
@@ -148,7 +147,7 @@ export default function Pricing({ id = 'pricing' }: PricingProps) {
                 Set as a footnote hanging off the closing rule of the table it
                 qualifies, with the rate-card link inline inside the sentence
                 exactly as the deck writes it. Plain surface, no blur. */}
-            <div className="border-t border-border pt-5">
+            <div className="border-t border-border pt-6">
               <CopyText
                 source={statutoryLine}
                 className="max-w-[72ch] text-xs leading-relaxed text-fg-muted"
@@ -160,7 +159,8 @@ export default function Pricing({ id = 'pricing' }: PricingProps) {
           <Reveal delay={80} className="min-w-0 lg:col-span-5">
             <h3 className={SUB_HEAD}>{accountChargesHeading}</h3>
 
-            {/* A plain rule, not the chrome one: this table is the appendix. */}
+            {/* Same rule as the brokerage table above — the appendix differs by
+                position and column count, not by decoration. */}
             <div aria-hidden="true" className="mt-5 h-px w-full bg-border" />
 
             <div className="overflow-x-auto">
@@ -214,12 +214,24 @@ export default function Pricing({ id = 'pricing' }: PricingProps) {
           </Reveal>
 
           <Reveal delay={60}>
-            {/* The section's single elevated element. Elevation is the whole
-                recommendation mechanism here, so it is spent once and nowhere
-                else — the tables and the ledger rows below sit flat on the
-                section. (The gold CTA carries its own lift from Button.) */}
-            <div className="surface-chrome mt-8 rounded-2xl border border-accent/30 shadow-lifted">
-              <div className="grid gap-y-8 p-6 sm:p-8 lg:grid-cols-12 lg:gap-x-12 lg:p-10">
+            {/* The section's single elevated element — `.card`, so it carries
+                the page's one radius, the inset top highlight that puts a light
+                source above it, and the tinted shadow that gives it somewhere to
+                sit. `.surface-chrome` washes the plate on top of that; a
+                brushed panel with no lit edge is still a filled rectangle.
+                Elevation is the whole recommendation mechanism here, so it is
+                spent once and nowhere else — the tables and the ledger rows
+                below sit flat on the section.
+
+                No `.card-lift`: this panel is not one target, it *contains* the
+                target. The lift belongs to a card you can click, not to a
+                container holding a button.
+
+                The edge used to be `border-accent/30`. Gold marks actions, and
+                a panel edge is not an action — the accent now appears in this
+                block only on the CTA, which is the one thing here you can do. */}
+            <div className="card surface-chrome mt-10">
+              <div className="grid gap-y-10 p-8 sm:p-10 lg:grid-cols-12 lg:gap-x-14 lg:p-14">
                 <div className="min-w-0 lg:col-span-5">
                   {/* Set two full steps above the tiers below it. No badge — the
                       size and the panel are the claim, and they are a design
@@ -258,11 +270,11 @@ export default function Pricing({ id = 'pricing' }: PricingProps) {
 
                 {/* Features as hairline-separated rows, not a checklist. A tick
                     glyph on every line is four icons saying the same word. */}
-                <ul className="min-w-0 border-t border-border-soft pt-2 lg:col-span-7 lg:border-l lg:border-t-0 lg:pl-12 lg:pt-0">
+                <ul className="min-w-0 border-t border-border-soft pt-2 lg:col-span-7 lg:border-l lg:border-t-0 lg:pl-14 lg:pt-0">
                   {primary.features.map((feature, index) => (
                     <li
                       key={feature}
-                      className={`py-3.5 text-base leading-relaxed text-fg-muted ${
+                      className={`py-4 text-base leading-relaxed text-fg-muted ${
                         index > 0 ? 'border-t border-border-soft' : ''
                       }`}
                     >
@@ -278,7 +290,7 @@ export default function Pricing({ id = 'pricing' }: PricingProps) {
               staggered cascade — a row that performs is competing with the
               tier above it, and the point of these two is that they don't. */}
           <Reveal delay={120}>
-            <ul className="mt-6 divide-y divide-border-soft border-y border-border-soft">
+            <ul className="mt-8 divide-y divide-border-soft border-y border-border-soft">
               {secondary.map((plan) => (
                 <li key={plan.name}>
                   {/* Baseline alignment across the strip: the tier name, the
@@ -338,10 +350,10 @@ export default function Pricing({ id = 'pricing' }: PricingProps) {
         {/* ---------------------------------------------------------------- */}
         {/* Left-flush with everything above it, on the section's plain surface.
             Live text, selectable, 8.07:1 — never a glass plate. */}
-        <Disclosure tone="note" className="mt-8 max-w-[68ch]">
+        <Disclosure tone="note" className="mt-10 max-w-[68ch] sm:mt-12">
           {finePrint}
         </Disclosure>
-      </div>
+      </>
     </SectionShell>
   )
 }

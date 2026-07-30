@@ -63,7 +63,9 @@ export default function Onboarding() {
                 {/* The detail line is the part a first-time account opener
                     actually needs — which documents, what eSign does, how the
                     first deposit works. Dropping it to keep the sequence tidy
-                    would trade the section's only substance for its looks. */}
+                    would trade the section's only substance for its looks, so
+                    the copy cut took the reassurance off each line and left
+                    every fact standing. */}
                 <span className="mt-2 block text-[0.8125rem] leading-relaxed text-white/60">
                   {step.body}
                 </span>
@@ -73,6 +75,10 @@ export default function Onboarding() {
         ))}
       </ol>
 
+      {/* Two words of lead-in and four nouns. The label stays because without it
+          the line is an unattributed list sitting under a numbered sequence; the
+          items lost their connective tissue instead ("PAN card" → "PAN",
+          "Aadhaar linked to your mobile number" → "Aadhaar linked to mobile"). */}
       <Reveal delay={180} className="w-full">
         <p className="mt-8 max-w-[42em] text-[0.8125rem] leading-relaxed text-white/55">
           {`You'll need: ${requirements.join(', ')}.`}

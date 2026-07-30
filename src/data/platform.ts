@@ -8,8 +8,12 @@ import type { Tool } from '../types'
 
 export const platformEyebrow = 'The platform'
 export const platformHeading = 'Built for the ten seconds that matter'
-export const platformSubheading =
-  "Order entry, charts and positions on one screen — because the market doesn't wait for a page to load."
+/*
+ * The trailing "because the market doesn't wait for a page to load" is dropped:
+ * the headline above it already says "the ten seconds that matter", so the
+ * clause was explaining a claim the reader had just been given.
+ */
+export const platformSubheading = 'Order entry, charts and positions on one screen.'
 
 export const platformCta = 'Take a product tour'
 
@@ -67,11 +71,19 @@ export const tools: Tool[] = [
 ]
 
 /**
- * Description for the eventual terminal screenshot. Per landing.md §10 the asset
- * must not show a large gain, so the brief asks for a neutral, illustrative frame.
+ * Both strings previously described a terminal screenshot — a candlestick chart,
+ * an option chain and an open order ticket, qualified as "illustrative figures
+ * only". That qualification does not save it: motion-brief §7 rules out
+ * fabricated interfaces and chart forms outright, because a rendered candlestick
+ * is invented price history however it is captioned.
+ *
+ * Neither is referenced any more — the section renders `SignalCanvas`, an
+ * abstract field, and needs no placeholder. They are kept, rewritten, so that
+ * whoever eventually wires a real plate here inherits the correct brief rather
+ * than the banned one. Full spec in docs/art-direction.md §A4.
  */
 export const platformMediaLabel =
-  'Web trading terminal — Nifty 50 candlestick chart with indicator pane, option chain beside it, and an order ticket open. Illustrative figures only.'
+  'Machined aluminium rails receding into near-black, lit by one soft grazing key from high left so only the top chamfers catch. Right 56% of frame stays dark and edge-free for the copy. No interface, no numbers, no chart forms, no green or red.'
 
 export const platformMediaAlt =
-  'ThinqProfit web terminal showing a chart, option chain and an open order ticket'
+  'Machined aluminium rails receding into darkness, their top edges catching a single soft light'

@@ -55,8 +55,8 @@ interface LearnProps {
  * `2xl:w-16` = 4rem), so the two always meet whatever the breakpoint.
  *
  * Margin, not padding: the left hairline has to travel with the rung, and
- * padding sits inside the border. The `2xl` step widens because the container
- * does — at 1664px a 44px tread reads as a typo rather than as a stair.
+ * padding sits inside the border. The `2xl` step widens because the rail does —
+ * across 84rem a 44px tread reads as a typo rather than as a stair.
  */
 const rungOffset: string[] = [
   '',
@@ -73,15 +73,11 @@ export default function Learn({ id = 'learn' }: LearnProps) {
     <SectionShell
       id={id}
       heading="Understand the trade before you place it"
-      subheading="Free, open to everyone, and written in the language people actually use — no account required."
-      /* Left-flush: the content below is an asymmetric ladder anchored to the
-         left edge, and a centred heading over it leaves the two sharing no
-         common axis. Pricing, Testimonials and FAQ resolved the same way. */
-      centered={false}
+      subheading="Free, and no account required."
     >
       {/* 8/4 rather than 50/50: the ladder needs the run, and the aside is a
-          short list plus one button — at half of 1664px it would be a very wide
-          box holding four lines. */}
+          short list plus one button — at half the rail it would be a very wide
+          column holding four lines. */}
       <div className="grid gap-12 lg:grid-cols-12 lg:gap-10 xl:gap-14">
         {/* ---------------------------------------------------------------- */}
         {/* The path — five rungs, each one tread further along               */}

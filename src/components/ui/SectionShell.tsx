@@ -2,15 +2,35 @@ import type { ReactNode } from 'react'
 import Container from './Container'
 
 /**
- * Three heading steps, so a lead section and a minor one no longer render at
- * exactly the same size. Previously every H2 on the page was the same clamp,
- * which flattened the whole document into a list of equal-weight slabs.
+ * Heading steps. Assignment is by the section's weight in the page, not by
+ * taste at each call site:
+ *
+ *   lead     — the three sections a visitor came for: what you trade, what it
+ *              costs, how you open an account.
+ *   standard — everything else that is a section in its own right.
+ *   minor    — bands that support a neighbour rather than stand alone.
+ *
+ * Before this, every H2 on the page rendered at the identical clamp, which
+ * flattened the document into a list of equal-weight slabs.
  */
 const SCALE = {
-  lead: 'text-[clamp(2.25rem,4vw,3.25rem)] leading-[1.08] tracking-[-0.03em]',
-  standard: 'text-[clamp(1.75rem,3vw,2.5rem)] leading-[1.15] tracking-[-0.02em]',
-  minor: 'text-[clamp(1.5rem,2.2vw,1.875rem)] leading-[1.2] tracking-[-0.015em]',
+  lead: 'text-[clamp(2.25rem,4vw,3.25rem)] leading-[1.08]',
+  standard: 'text-[clamp(1.75rem,3vw,2.5rem)] leading-[1.14]',
+  minor: 'text-[clamp(1.5rem,2.2vw,1.875rem)] leading-[1.2]',
 } as const
+
+/**
+ * The single content rail. Every section sits in it, so the page has one left
+ * edge from the nav to the footer.
+ *
+ * `Container` caps the *page* at 1760px, which is the right measure for
+ * full-bleed media and the nav. It is far too wide to read across, so sections
+ * previously each invented their own inner width — `84rem` in three files,
+ * `max-w-3xl lg:max-w-4xl` in another, `4xl` rising to `1440px` in another.
+ * Six different measures inside one container is the uniformity defect that
+ * reads as "assembled" rather than "designed". This is now the only one.
+ */
+const RAIL = 'w-full max-w-[84rem]'
 
 interface SectionShellProps {
   id: string
@@ -19,9 +39,16 @@ interface SectionShellProps {
   children: ReactNode
   /** Slightly raised background, for alternating section rhythm. */
   tone?: 'base' | 'raised'
-  /** Centre the heading block. Default true. */
+  /**
+   * Centre the heading block.
+   *
+   * Default **false**. The page reads left-flush from the nav down, and the
+   * media sections park their copy against a left or right margin — a centred
+   * heading over left-aligned content leaves the two sharing no axis. Reserve
+   * `centered` for a section that is genuinely one centred statement.
+   */
   centered?: boolean
-  /** Heading step. Default 'standard'. */
+  /** Heading step. See SCALE — assign by the section's weight, not by feel. */
   scale?: keyof typeof SCALE
   /**
    * Fill the viewport and centre the content vertically.
@@ -44,13 +71,12 @@ interface SectionShellProps {
 
 /**
  * Standard section wrapper for the text-and-data bands: H2, subheading, then
- * content.
+ * content — all inside one shared rail.
  *
  * There is no eyebrow. A category label sitting above a heading ("Pricing"
  * above "Priced plainly, in advance") is decoration wearing the costume of
  * information — the heading already says what the section is, and the label
- * only survives because it is easy to add. The headings here were rewritten to
- * stand alone; nothing was lost with the labels.
+ * only survives because it is easy to add.
  *
  * Sections that lead with imagery use `MediaSection` instead, which bleeds to
  * the viewport edge and overlays its copy on the asset.
@@ -61,7 +87,7 @@ export default function SectionShell({
   subheading,
   children,
   tone = 'base',
-  centered = true,
+  centered = false,
   scale = 'standard',
   fullHeight = true,
   seamless = false,
@@ -70,19 +96,28 @@ export default function SectionShell({
   return (
     <section
       id={id}
-      className={`scroll-mt-24 py-20 sm:py-24 lg:py-28 ${
+      className={`scroll-mt-24 py-28 sm:py-32 lg:py-40 ${
         seamless ? '' : 'border-t border-border-soft'
       } ${fullHeight ? 'flex min-h-svh flex-col justify-center' : ''} ${
         tone === 'raised' ? 'bg-surface/30' : ''
       } ${className}`}
     >
       <Container>
-        <div className={`max-w-2xl ${centered ? 'mx-auto text-center' : ''}`}>
-          <h2 className={`display text-fg ${SCALE[scale]}`}>{heading}</h2>
-          {subheading && <p className="mt-4 text-base leading-relaxed text-fg-muted">{subheading}</p>}
-        </div>
+        <div className={RAIL}>
+          {/* The subheading sits in a reading measure even when the rail is
+              wide — a single sentence set across 1344px is not a sentence. */}
+          <div className={`max-w-[38em] ${centered ? 'mx-auto text-center' : ''}`}>
+            <h2 className={`display text-fg ${SCALE[scale]}`}>{heading}</h2>
+            {subheading && (
+              <p className="mt-4 text-base leading-relaxed text-fg-muted">{subheading}</p>
+            )}
+          </div>
 
-        <div className="mt-12 sm:mt-16">{children}</div>
+          {/* More space above a heading than below it, and more between the
+              heading block and its content than inside that content. The gap is
+              what tells a reader the heading is finished. */}
+          <div className="mt-16 sm:mt-20 lg:mt-24">{children}</div>
+        </div>
       </Container>
     </section>
   )

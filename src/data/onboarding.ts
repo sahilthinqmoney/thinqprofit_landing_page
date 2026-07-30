@@ -40,37 +40,53 @@ export const onboardingCopy: OnboardingCopy = {
    * equal length instead.
    */
   heading: 'Open an account\nbefore your chai\ngets cold',
-  subheading:
-    'Fully online, Aadhaar-based, and no branch visit — assuming your KYC details are current.',
+  /*
+   * The trailing qualification stays. "Fully online, no branch visit" is only
+   * true when the registry already holds current KYC, and stripping the
+   * condition would turn a qualified process description into an unqualified
+   * service promise. Only the connectives went.
+   */
+  subheading: 'Fully online, Aadhaar-based, no branch visit — if your KYC is current.',
   cta: 'Start account opening',
   mediaAlt:
     'Three luminous nodes linking one after another along a single path in an ink-navy void, indigo fading to cyan, each link settling before the next begins. Unhurried, right of frame; the left stays dark. No interface, no numbers, no green or red.',
 }
 
+/**
+ * The three detail lines are the only substance this section carries — which
+ * documents, what eSign does, how the first deposit works — so the facts are
+ * intact and only the reassurance around them was cut ("so you're not re-typing
+ * what the system already has", "and you're done with paperwork"). A step that
+ * lost a fact would be a shorter line that told the reader less.
+ */
 export const steps: OnboardingStep[] = [
   {
     title: 'Verify yourself',
-    body: "Enter your PAN and Aadhaar-linked mobile number. We pull your KYC from the registry, so you're not re-typing what the system already has.",
+    body: 'Enter your PAN and Aadhaar-linked mobile number. We pull your KYC from the registry.',
     icon: 'id-card',
   },
   {
     title: 'Add your details',
-    body: "Link your bank account, complete video verification, and appoint a nominee. eSign with Aadhaar OTP and you're done with paperwork.",
+    body: 'Link your bank account, complete video verification, appoint a nominee, then eSign with Aadhaar OTP.',
     icon: 'file-signature',
   },
   {
     title: 'Fund and trade',
-    body: 'Add money by UPI or net banking. Your demat account activates and you can place your first order the same day.',
+    body: 'Add money by UPI or net banking. Your demat account activates and you can trade the same day.',
     icon: 'wallet',
   },
 ]
 
-/** Requirements — flowed into a single comma-separated line under the steps. */
+/**
+ * Requirements — flowed into a single comma-separated line under the steps.
+ * Stripped to the nouns: a reader scanning a checklist does not need "card",
+ * "details" or "your mobile number" spelled out to know what to fetch.
+ */
 export const requirements: string[] = [
-  'PAN card',
-  'Aadhaar linked to your mobile number',
-  'Bank account details',
-  'Signature and photo',
+  'PAN',
+  'Aadhaar linked to mobile',
+  'bank details',
+  'signature and photo',
 ]
 
 export const timingNote =

@@ -10,10 +10,14 @@ import { appCopy, appFeatures } from '../../data/app'
  * The page's deliberate material break. Every neighbour on this stretch either
  * bleeds a photograph to the viewport edge or sits on flat ink; this band is
  * neither. It is one solid plate of `surface` under `.surface-chrome` — a
- * brushed-metal wash, not a texture — closed at the top by `.rule-chrome`, so
- * the boundary reads as the lip of a machined surface rather than as another
- * hairline divider. That is the whole reason the section is not a MediaSection:
- * a third consecutive image is exactly the monotony this beat exists to break.
+ * brushed-metal wash, not a texture — closed at the top by a plain `border`
+ * hairline. That is the whole reason the section is not a MediaSection: a third
+ * consecutive image is exactly the monotony this beat exists to break.
+ *
+ * The top edge used to be `.rule-chrome`. It is not any more, because that
+ * brushed hairline is reserved for exactly one seam on the page — the Stats
+ * band — and a metallic edge used twice stops reading as the boundary of
+ * something machined and starts reading as a divider style.
  *
  * The second reason it is not a MediaSection is the crop. Copy is centred, and
  * the device is cut off by the section's own bottom edge (`overflow-hidden` plus
@@ -54,17 +58,18 @@ export default function MobileApp({ id = 'mobile-app' }: MobileAppProps) {
       className="surface-chrome relative flex min-h-svh scroll-mt-24 flex-col justify-center overflow-hidden"
     >
       {/* The plate's top lip. Full-bleed, so it runs edge to edge rather than
-          stopping at the container gutter — a metallic edge that stops short of
-          the viewport reads as a rule under a heading, not as the boundary of a
-          surface. Absolute, so it stays out of the flex centring. */}
-      <div aria-hidden="true" className="rule-chrome absolute inset-x-0 top-0 h-px" />
+          stopping at the container gutter — an edge that stops short of the
+          viewport reads as a rule under a heading, not as the boundary of a
+          surface. Absolute rather than a border on the section itself, so it
+          stays out of both the flex centring and the `min-h-svh` box. */}
+      <div aria-hidden="true" className="absolute inset-x-0 top-0 border-t border-border" />
 
       {/* ------------------------------------------------------------------ */}
       {/* Centred copy                                                        */}
       {/* ------------------------------------------------------------------ */}
       {/* The bottom pad is the device's visible slice, reserved. Below `md` the
           phone is a normal flow row, so the pad would only be dead space. */}
-      <Container className="pt-24 sm:pt-28 md:pb-[25rem]">
+      <Container className="pt-28 sm:pt-32 md:pb-[25rem]">
         {/* Wider than the copy needs on purpose: the headline and body carry
             their own measure caps, and the flowed feature line wants the extra
             width so it settles on two lines instead of three. */}
@@ -94,7 +99,7 @@ export default function MobileApp({ id = 'mobile-app' }: MobileAppProps) {
                 that wraps internally leaves its `·` stranded on the line above.
                 The separator is glued to the label it follows with a
                 non-breaking space, so a line can only ever break *after* it. */}
-            <ul className="mx-auto mt-6 max-w-[54rem] text-sm leading-relaxed text-fg-muted">
+            <ul className="mx-auto mt-8 max-w-[54rem] text-sm leading-relaxed text-fg-muted">
               {appFeatures.map((feature, index) => (
                 <li key={feature.label} className="inline">
                   {feature.label}
@@ -113,7 +118,7 @@ export default function MobileApp({ id = 'mobile-app' }: MobileAppProps) {
               Footer.tsx makes the same call for the social row. The deck's
               labels name both stores unambiguously without a badge. */}
           <Reveal delay={120}>
-            <div className="mt-9 flex flex-col items-center justify-center gap-3 sm:flex-row">
+            <div className="mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row">
               {appCopy.storeCtas.map((cta) => (
                 <Button key={cta.label} href={cta.href} variant="secondary">
                   {cta.label}
@@ -142,15 +147,26 @@ export default function MobileApp({ id = 'mobile-app' }: MobileAppProps) {
         <div className="w-[16rem] translate-y-[30%] sm:w-[17rem] md:w-[18rem] md:translate-y-[43%] lg:w-[20rem] lg:translate-y-[48.5%]">
           <Reveal delay={180}>
             {/* One hairline and a radius, nothing else. No speaker pill, no home
-                indicator, no accent glow. The edge is `chrome`, not `border`,
-                because that is the token's job — a machined lip on a metal
-                plate — and the body goes to `bg` so the phone reads darker than
-                the surface it stands on, the way a real object would. */}
-            <div className="rounded-[2.25rem] border border-chrome/20 bg-bg p-2">
+                indicator, no accent glow, and deliberately not `.card`: a lit
+                top edge and a cast shadow would make the device read as another
+                panel lying on the plate, when the point is that it is standing
+                *in* it and being cut by the section's bottom edge. The edge is
+                `chrome`, not `border`, because that is the token's job — a
+                machined lip on a metal plate — and the body goes to `bg` so the
+                phone reads darker than the surface it stands on, the way a real
+                object would.
+
+                The radius is now `--radius-card`, the page's only card radius,
+                rather than the hand-picked 2.25rem it carried before. A device
+                bezel is a physical edge like every other on the page and has no
+                claim to a radius of its own. */}
+            <div className="rounded-[var(--radius-card)] border border-chrome/20 bg-bg p-2">
               {/* Wrapper clips the placeholder's own radius to the bezel's inner
                   curve — two rounded-* utilities on one element resolve by
-                  stylesheet order, not source order. */}
-              <div className="overflow-hidden rounded-[1.75rem]">
+                  stylesheet order, not source order. Concentric, not equal: the
+                  inner radius is the outer minus the 0.5rem bezel wall, so the
+                  two curves stay parallel instead of pinching at the corners. */}
+              <div className="overflow-hidden rounded-[calc(var(--radius-card)-0.5rem)]">
                 {/* `pb` is scaffolding, not styling: MediaPlaceholder centres its
                     brief in its own box, and roughly the lower 40% of that box is
                     off-frame here, so the brief would be cut mid-sentence.

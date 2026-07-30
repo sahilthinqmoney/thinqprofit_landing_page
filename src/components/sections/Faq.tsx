@@ -8,6 +8,15 @@ import type { FaqEntry } from '../../data/faq'
 /**
  * §14 FAQ — "Questions worth asking".
  *
+ * COMPOSITION — twelve native disclosure rows set as a two-column index, every
+ * row closing on a hairline that strengthens to full `border` when it opens.
+ * It is the densest screen on the page and the only one built entirely out of
+ * rules: no surface, no plate, no fill, nothing raised. That is what holds it
+ * apart from both neighbours — Testimonials above is one sentence and one rule
+ * on an almost-empty screen, Support below is one elevated plate with a single
+ * rule on it. Ruled-and-flat, sparse-and-ruled, elevated-and-unruled: three
+ * consecutive sections, three different objects.
+ *
  * Native <details>/<summary>, so it is keyboard-operable and screen-reader
  * correct without any state of our own, and — deliberately — without a `name`
  * attribute, which would force items closed when another opens. Comparing two
@@ -21,12 +30,16 @@ import type { FaqEntry } from '../../data/faq'
  * and the section loses a whole column of chrome.
  *
  * What replaces the decoration is restraint applied to the parts that actually
- * respond to the reader: a 56px minimum row with ~64px of vertical padding, so
+ * respond to the reader: a 56px minimum row with ~72px of vertical padding, so
  * a closed list reads as a set of considered statements rather than a menu; a
  * bottom hairline that lifts from `border-soft` to `border` when its row opens,
  * which is how an open row is marked without a fill or a highlight; and a
  * chevron that turns on `--ease-out-expo`, the same curve everything else on
  * the page decelerates on.
+ *
+ * The row's hover illumination is chrome, not gold. Gold on this page marks an
+ * action you are about to take; a row lighting up under the cursor is the edge
+ * catching a light, which is what `chrome` is the token for.
  */
 
 /**
@@ -52,8 +65,12 @@ function FaqAnswer({ entry }: { entry: FaqEntry }) {
     )
   }
 
+  // A warning callout, not a card — so it takes `Disclosure`'s radius rather
+  // than `--radius-card`. The 28px card radius belongs to physical surfaces
+  // (Support's plate, Pricing's tier), and one inside an accordion row would be
+  // a card nested in a list.
   return (
-    <div className="rounded-xl border border-warning/30 bg-warning/5 p-4 sm:p-5">
+    <div className="rounded-lg border border-warning/30 bg-warning/5 p-4 sm:p-5">
       <p className="flex items-start gap-2 text-base font-semibold leading-relaxed text-warning">
         <TriangleAlert className="mt-0.5 h-5 w-5 shrink-0" strokeWidth={1.5} aria-hidden="true" />
         Not answered yet — pending a business decision
@@ -98,7 +115,7 @@ function FaqRow({ entry, delay }: { entry: FaqEntry; delay: number }) {
   return (
     <Reveal delay={delay}>
       <details className="group border-b border-border-soft transition-colors duration-300 open:border-border hover:border-chrome-dim/40">
-        <summary className="flex min-h-14 cursor-pointer list-none items-start justify-between gap-6 py-7 sm:py-8 [&::-webkit-details-marker]:hidden">
+        <summary className="flex min-h-14 cursor-pointer list-none items-start justify-between gap-8 py-8 sm:py-9 [&::-webkit-details-marker]:hidden">
           <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
             <h3 className="text-lg font-medium leading-[1.4] text-fg sm:text-xl">
               {entry.question}
@@ -123,7 +140,7 @@ function FaqRow({ entry, delay }: { entry: FaqEntry; delay: number }) {
 
         {/* Answers stay on a readable measure even when the row itself is wider,
             and keep clear of the chevron's column. */}
-        <div className="max-w-[68ch] pb-8 pr-8">
+        <div className="max-w-[68ch] pb-10 pr-10">
           <FaqAnswer entry={entry} />
         </div>
       </details>
@@ -132,10 +149,17 @@ function FaqRow({ entry, delay }: { entry: FaqEntry; delay: number }) {
 }
 
 /**
- * Twelve rows at this height read as a very long, very thin list once the page
- * container passes ~1300px, so from `xl` the list splits into two columns that
- * each keep their own top rule. Reading order runs down column one, then column
+ * Twelve rows at this height read as a very long, very thin list once the rail
+ * opens past ~1300px, so from `xl` the list splits into two columns that each
+ * keep their own top rule. Reading order runs down column one, then column
  * two — and with the ordinals gone nothing has to be renumbered to say so.
+ *
+ * The two-column split is also what makes the shared rail the right width here.
+ * The list used to cap itself at `max-w-4xl`, rising to `max-w-[1440px]` at
+ * `xl` — a second and a third measure invented inside a section that already
+ * sits in one. Below `xl` a single column now runs to the rail, which at that
+ * point is the viewport minus its gutters anyway; above it, the columns halve
+ * it and each question lands well short of its own chevron.
  */
 const COLUMN_SIZE = Math.ceil(faqs.length / 2)
 
@@ -146,10 +170,8 @@ const faqColumns = [
 
 export default function Faq() {
   return (
-    <SectionShell id="faq" heading="Questions worth asking" centered={false}>
-      {/* Capped at 1440 rather than left to run to the full 1760 — past that a
-          question sits a very long way from its own chevron. */}
-      <div className="max-w-4xl border-t border-border-soft xl:grid xl:max-w-[1440px] xl:grid-cols-2 xl:gap-x-16 xl:border-t-0">
+    <SectionShell id="faq" heading="Questions worth asking">
+      <div className="border-t border-border-soft xl:grid xl:grid-cols-2 xl:gap-x-20 xl:border-t-0 2xl:gap-x-28">
         {faqColumns.map((column) => (
           <div key={column.id} className="xl:border-t xl:border-border-soft">
             {column.entries.map((faq, position) => (

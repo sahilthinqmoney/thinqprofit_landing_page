@@ -1,24 +1,36 @@
 /**
- * §5 Products — copy source: docs/landing-page-copy.md §5.1–§5.8 (verbatim).
+ * §5 Products — copy source: docs/landing-page-copy.md §5.1–§5.8.
  * Icons: design-system/thinqprofit/pages/landing.md §8 — Products row.
  *
- * Every [SQUARE BRACKET] below is a deliberate placeholder for compliance.
- * Do not fill, paraphrase or delete them here.
+ * Marketing prose here is tightened against the deck rather than transcribed
+ * from it: the deck writes long, and a product row that needs three clauses to
+ * say what it is has not said it. `title` and `body` are ordinary product copy
+ * and stay short — one sentence, the noun first.
+ *
+ * What is NOT editable:
+ *
+ *  - every [SQUARE BRACKET] — an unverified compliance placeholder. Do not
+ *    fill, paraphrase or delete them. Trimming the prose *around* a placeholder
+ *    is fine; the token itself is not copy.
+ *  - every `disclosure` string — risk warnings and registration numbers, live
+ *    regulatory text, carried verbatim.
+ *
+ * `CopyText` is not the line between those two. It is a renderer: it tokenizes
+ * any deck string so the placeholders inside it are flagged in warning colour,
+ * and being wrapped in it says nothing about whether a string is compliance-
+ * bearing. The disclosures and the brackets are the guard.
  */
 import type { Product } from '../types'
 
-/** Section header block — copy deck §5. */
+/** Section header block — copy deck §5. There is no eyebrow; see DESIGN.md §3. */
 export interface ProductsSectionCopy {
-  eyebrow: string
   heading: string
   subheading: string
 }
 
 export const productsSection: ProductsSectionCopy = {
-  eyebrow: 'What you can trade',
   heading: 'One account, every Indian market',
-  subheading:
-    'Equity, derivatives, commodities and funds — settled into a single portfolio view, so you always know what you actually own.',
+  subheading: 'Equity, derivatives, commodities and funds in one portfolio view.',
 }
 
 /**
@@ -35,31 +47,15 @@ export const featuredProductIds: readonly string[] = ['stocks-etfs', 'futures-op
  */
 export const riskDisclosureIds: readonly string[] = ['futures-options']
 
-/**
- * Double-width tiles on the wide (xl) four-column bento: the two lead cards plus
- * the two remaining disclosure carriers, i.e. every card that has to hold a
- * disclosure block as well as three bullets.
- *
- * The spans pack to exact rows of four in the order `products` is declared —
- * `2+2 / 2+1+1 / 1+1+2` — and to exact rows of six at `lg` (`3+3 / 2+2+2 /
- * 2+2+2`). Reordering the array or this list leaves a hole in the grid.
- */
-export const wideTileIds: readonly string[] = [
-  'stocks-etfs',
-  'futures-options',
-  'mutual-funds',
-  'baskets',
-]
-
 export const products: Product[] = [
   {
     id: 'stocks-etfs',
     title: 'Stocks & ETFs',
-    body: 'Buy and hold across NSE and BSE, from blue chips to small caps. Shares land in your demat account; ETFs give you an index in one line item.',
+    body: 'Every NSE and BSE listing, plus index ETFs, held in your own demat account.',
     bullets: [
-      'Delivery and intraday from the same screen',
-      'Company fundamentals, filings and results in-app',
-      'Fractional-friendly SIPs on eligible ETFs',
+      'Delivery and intraday on one screen',
+      'Fundamentals, filings and results',
+      'SIPs on eligible ETFs',
     ],
     cta: 'Explore stocks',
     href: '#',
@@ -68,11 +64,11 @@ export const products: Product[] = [
   {
     id: 'futures-options',
     title: 'Futures & Options',
-    body: 'A full option chain with live Greeks, open interest and implied volatility, plus a payoff builder that shows you the shape of a position before you place it.',
+    body: 'Full option chain, live Greeks, and a payoff builder that shows the position before you place it.',
     bullets: [
-      'Index and stock derivatives across NSE segments',
-      'Multi-leg baskets placed as a single order',
-      'Margin calculator with SPAN and exposure breakdown',
+      'Index and stock derivatives',
+      'Multi-leg baskets as one order',
+      'SPAN and exposure margin calculator',
     ],
     cta: 'Explore F&O',
     href: '#',
@@ -83,11 +79,11 @@ export const products: Product[] = [
   {
     id: 'mutual-funds',
     title: 'Mutual Funds',
-    body: 'Direct plans only. No distributor commission is built into your NAV, which is the entire point.',
+    body: 'Direct plans only — no distributor commission built into your NAV.',
     bullets: [
-      'Start an SIP from [₹AMOUNT] a month',
-      'Switch, pause or step up without paperwork',
-      'Consolidated holdings alongside your stocks',
+      'SIPs from [₹AMOUNT] a month',
+      'Switch, pause or step up',
+      'Holdings alongside your stocks',
     ],
     cta: 'Explore mutual funds',
     href: '#',
@@ -98,12 +94,8 @@ export const products: Product[] = [
   {
     id: 'ipo',
     title: 'IPO',
-    body: 'Apply to mainboard and SME issues with UPI. Funds stay blocked in your bank account until allotment — they never sit with us.',
-    bullets: [
-      'Live and upcoming issue calendar',
-      'Pre-filled applications from your existing details',
-      'Allotment status without leaving the app',
-    ],
+    body: 'Mainboard and SME issues over UPI; funds stay blocked in your bank account until allotment.',
+    bullets: ['Live and upcoming issues', 'Pre-filled applications', 'Allotment status in-app'],
     cta: 'See open IPOs',
     href: '#',
     icon: 'rocket',
@@ -111,11 +103,11 @@ export const products: Product[] = [
   {
     id: 'commodities',
     title: 'Commodities',
-    body: 'Trade gold, silver, crude oil, natural gas and agri contracts on MCX, with position and margin tracking that matches your equity view.',
+    body: 'Gold, silver, crude, natural gas and agri contracts on MCX.',
     bullets: [
-      'Full MCX futures and options coverage',
+      'MCX futures and options',
       'Evening session support',
-      'Contract specs and expiry calendar built in',
+      'Contract specs and expiry calendar',
     ],
     cta: 'Explore commodities',
     href: '#',
@@ -128,7 +120,7 @@ export const products: Product[] = [
     id: 'currency',
     title: 'Currency',
     body: 'USDINR, EURINR, GBPINR and JPYINR derivatives on the NSE currency segment.',
-    bullets: ['Hedge exposure or trade the pair directly', 'Same order types as equity F&O'],
+    bullets: ['Hedge or trade the pair', 'Same order types as equity F&O'],
     cta: 'Explore currency',
     href: '#',
     icon: 'banknote',
@@ -136,11 +128,8 @@ export const products: Product[] = [
   {
     id: 'bonds-gsecs',
     title: 'Bonds & G-Secs',
-    body: "Government securities, T-Bills, SDLs and corporate bonds — the part of a portfolio that isn't supposed to be exciting.",
-    bullets: [
-      'Yield and maturity shown before you commit',
-      'Interest and redemption tracked automatically',
-    ],
+    body: 'Government securities, T-Bills, SDLs and corporate bonds.',
+    bullets: ['Yield and maturity up front', 'Interest and redemption tracked'],
     cta: 'Explore bonds',
     href: '#',
     icon: 'landmark',
@@ -148,12 +137,8 @@ export const products: Product[] = [
   {
     id: 'baskets',
     title: 'Baskets',
-    body: 'Thematic sets of stocks and ETFs you can buy, rebalance or exit in a single order, instead of managing twelve tickers by hand.',
-    bullets: [
-      'Weightings and rationale shown up front',
-      'One-tap rebalance when the basket updates',
-      'SIP into a basket, not just a fund',
-    ],
+    body: 'Thematic sets of stocks and ETFs you buy, rebalance or exit in one order.',
+    bullets: ['Weightings and rationale up front', 'One-tap rebalance', 'SIP into a basket'],
     cta: 'Explore baskets',
     href: '#',
     icon: 'boxes',

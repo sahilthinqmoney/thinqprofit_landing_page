@@ -9,12 +9,27 @@ import type { HeroContent, Registration } from '../types'
 export const hero: HeroContent = {
   eyebrow: 'SEBI-registered broker · NSE · BSE · MCX · CDSL',
   headline: 'Your money. Your market. One app.',
+  /*
+   * One claim, not three. The deck ran "loads fast, prices plainly, and stays
+   * out of your way" — but Platform already owns speed ("the ten seconds that
+   * matter") and Pricing owns plain pricing ("Priced plainly, in advance"), so
+   * two of the three clauses were the hero pre-announcing sections further down
+   * the page. What is left is the instrument list, which is substance, and the
+   * one claim no other section makes.
+   */
   subheadline:
-    'Stocks, ETFs, F&O, commodities and direct mutual funds — on a platform that loads fast, prices plainly, and stays out of your way.',
+    'Stocks, ETFs, F&O, commodities and direct mutual funds — on a platform that stays out of your way.',
   primaryCta: 'Open free account',
   secondaryCta: 'See pricing',
   supportLine: 'Free account opening · Aadhaar eKYC · Ready to trade the same day',
-  mediaAlt: 'ThinqProfit app showing a Nifty 50 chart with an open buy order',
+  /*
+   * The deck asked for "a Nifty 50 chart with an open buy order". That is a
+   * fabricated interface showing invented market data, which motion-brief §7
+   * rules out — a rendered candlestick is made-up price history no matter how
+   * it is labelled. The hero carries an abstract plate instead, and this string
+   * describes what actually ships. See docs/art-direction.md.
+   */
+  mediaAlt: 'A machined aluminium form at rest in near-black, one edge catching warm light',
   riskDisclosure:
     'Investments in the securities market are subject to market risk. Read all the related documents carefully before investing.',
 }
@@ -30,13 +45,28 @@ export const hero: HeroContent = {
  */
 export const heroHeadlineDisplay = 'Your money.\nYour market.\nOne app.'
 
-/** §3 "Hero visual — description for design", carried through to the placeholder. */
+/**
+ * §3 "Hero visual — description for design".
+ *
+ * Rewritten away from the deck. The original asked for an order ticket over a
+ * Nifty 50 candlestick chart with "neutral, obviously-illustrative numbers" —
+ * but motion-brief §7 rules out fabricated interfaces and chart forms outright,
+ * on the grounds that a rendered candlestick is invented price history whether
+ * or not it is captioned as illustrative. The full brief for what ships instead
+ * is in docs/art-direction.md.
+ *
+ * Currently unreferenced: the hero renders `HeroCanvas`, which needs no
+ * placeholder. Kept so the description survives to whoever wires the real plate.
+ */
 export const heroMediaLabel =
-  'App on a dark field, order ticket open over a Nifty 50 candlestick chart. Second card floating: holdings list with day change. No fabricated P&L figures — use neutral, obviously-illustrative numbers.'
+  'A single machined aluminium form at rest in near-black, lit from high and behind so only its top edge catches. Left 45% of frame stays dark and low-contrast for the headline. No interface, no numbers, no chart forms, no green or red.'
 
 /**
- * Mandated stamp on the hero visual (§3 and landing.md §9 accessibility gate:
- * "Hero visual carries a visible 'Illustrative' stamp — never a real-looking P&L").
+ * Was: the mandated "Illustrative" stamp for the hero visual (§3, landing.md §9
+ * accessibility gate). It exists to stop a real-looking P&L being mistaken for
+ * live data — and there is no longer a fabricated screenshot on the page to
+ * stamp. Kept, unreferenced, because the requirement returns the moment anyone
+ * puts a product mock back in the hero.
  */
 export const heroIllustrativeStamp = 'Illustrative. Not a recommendation.'
 
