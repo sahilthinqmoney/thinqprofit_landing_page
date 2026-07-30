@@ -97,7 +97,7 @@ export default function Pricing({ id = 'pricing' }: PricingProps) {
         {/* ---------------------------------------------------------------- */}
         <div className="grid gap-y-16 lg:grid-cols-12 lg:gap-x-16">
           {/* -------- Brokerage — the primary document -------- */}
-          <Reveal className="min-w-0 lg:col-span-7">
+          <Reveal variant="wipe" className="min-w-0 lg:col-span-7">
             <h3 className={SUB_HEAD}>{brokerageColumns.rate}</h3>
 
             {/* Plain hairline — the chrome rule belongs to the Stats seam and
@@ -156,7 +156,7 @@ export default function Pricing({ id = 'pricing' }: PricingProps) {
           </Reveal>
 
           {/* -------- Account charges — the same setting, one step quieter -------- */}
-          <Reveal delay={80} className="min-w-0 lg:col-span-5">
+          <Reveal variant="wipe" delay={80} className="min-w-0 lg:col-span-5">
             <h3 className={SUB_HEAD}>{accountChargesHeading}</h3>
 
             {/* Same rule as the brokerage table above — the appendix differs by
@@ -203,7 +203,7 @@ export default function Pricing({ id = 'pricing' }: PricingProps) {
         {/* Plan tiers — one recommended tier, two ledger rows                 */}
         {/* ---------------------------------------------------------------- */}
         <div className="mt-20 sm:mt-24">
-          <Reveal>
+          <Reveal variant="wipe">
             {/* Chapter break: serif label with the rule running off it to the
                 measure's right edge. Cheaper than a panel and it actually
                 divides something. */}
@@ -213,7 +213,7 @@ export default function Pricing({ id = 'pricing' }: PricingProps) {
             </div>
           </Reveal>
 
-          <Reveal delay={60}>
+          <Reveal variant="wipe" delay={60}>
             {/* The section's single elevated element — `.card`, so it carries
                 the page's one radius, the inset top highlight that puts a light
                 source above it, and the tinted shadow that gives it somewhere to
@@ -295,7 +295,7 @@ export default function Pricing({ id = 'pricing' }: PricingProps) {
           {/* The other tiers. One reveal for the whole ledger rather than a
               staggered cascade — a row that performs is competing with the
               tier above it, and the point of these two is that they don't. */}
-          <Reveal delay={120}>
+          <Reveal variant="wipe" delay={120}>
             <ul className="mt-8 divide-y divide-border-soft border-y border-border-soft">
               {secondary.map((plan) => (
                 <li key={plan.name}>

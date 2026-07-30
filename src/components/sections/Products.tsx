@@ -157,7 +157,7 @@ export default function Products() {
       subheading={productsSection.subheading}
       scale="lead"
     >
-      <Reveal>
+      <Reveal variant="scale">
         {/*
           The rail has to reach the viewport edge. The half-visible next card
           IS the affordance that says "this scrolls"; inside Container's gutter
@@ -200,7 +200,7 @@ export default function Products() {
       {/* The quiet half. One reveal for the whole ledger rather than six
           staggered ones — a cascade would make the rows perform, and the point
           of them is that they don't. */}
-      <Reveal>
+      <Reveal variant="scale">
         <ul className="mt-20 divide-y divide-border-soft border-y border-border-soft sm:mt-24">
           {rest.map((product) => (
             <LedgerRow key={product.id} product={product} />

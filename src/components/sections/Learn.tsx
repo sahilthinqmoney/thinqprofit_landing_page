@@ -102,7 +102,7 @@ export default function Learn({ id = 'learn' }: LearnProps) {
                 )}
 
                 {/* Stagger capped at 180ms — nothing waits past ~250ms (§6). */}
-                <Reveal
+                <Reveal variant="left"
                   delay={Math.min(index, 3) * 60}
                   className={`pl-5 sm:pl-7 2xl:pl-9 ${isLast ? 'pb-1' : 'pb-10 2xl:pb-12'}`}
                 >
@@ -147,7 +147,7 @@ export default function Learn({ id = 'learn' }: LearnProps) {
             lighter ones only separate items. A horizontal rule also cannot be
             mistaken for a sixth rung, which is what a `border-l` on this column
             would have looked like next to the ladder. */}
-        <Reveal delay={120} className="border-t border-border pt-6 lg:col-span-4 2xl:pt-8">
+        <Reveal variant="left" delay={120} className="border-t border-border pt-6 lg:col-span-4 2xl:pt-8">
           <h3 className="text-base font-medium leading-snug text-fg">Formats</h3>
 
           {/* Hairline rows, not pill chips. A `rounded-*` bordered chip per

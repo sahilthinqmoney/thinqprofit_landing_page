@@ -160,7 +160,7 @@ export default function LiquidMetalSurface({
           u_distortion: 0,
           u_contour: 0,
           u_angle: 45,
-          u_shape: 1,
+          u_shape: 0,
           // Sizing uniforms are required; omitting them leaves the shader
           // sampling an undefined world box.
           u_fit: 2,
@@ -168,8 +168,8 @@ export default function LiquidMetalSurface({
           u_rotation: 0,
           u_originX: 0.5,
           u_originY: 0.5,
-          u_offsetX: 0.1,
-          u_offsetY: -0.1,
+          u_offsetX: 0,
+          u_offsetY: 0,
           u_worldWidth: 0,
           u_worldHeight: 0,
         },

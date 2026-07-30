@@ -95,7 +95,7 @@ export default function Support() {
       heading="Real people, published hours"
       subheading="No charge to talk to us, and no phone tree."
     >
-      <Reveal>
+      <Reveal variant="right">
         {/* `overflow-hidden` clips the escalation strip's tint to the card's own
             28px corners. It does not touch the inset highlight, which is drawn
             inside the element's own box. */}

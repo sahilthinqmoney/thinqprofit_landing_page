@@ -151,7 +151,7 @@ export default function Platform({ id = 'platform' }: PlatformProps) {
                 stagger across a ten-item list reads as an entrance animation
                 playing at the reader; the list should simply arrive with the
                 copy it belongs to, one beat behind it. */}
-            <Reveal delay={120} className="mt-10 w-full">
+            <Reveal variant="shear" delay={120} className="mt-10 w-full">
               {/* Row-major fill, so the visual order matches the DOM order a
                   screen reader announces. Capped at the same 34em as the body
                   copy above it so the two blocks share a right edge instead of

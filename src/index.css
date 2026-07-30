@@ -222,6 +222,149 @@
   }
 }
 
+/* ---------------------------------------------------------------------------
+   Reveal variants — one per section, so no two sections enter the same way.
+
+   Every one of these obeys three constraints that rule out most of a stock
+   animation library:
+
+   1. **Nothing rises.** No `translateY` from a positive value. motion-brief §7
+      bans upward motion on a broker page because the eye reads it as a claim
+      about returns. Arrivals settle downward, come in sideways, scale inward, or
+      wipe.
+   2. **No overshoot.** Every one lands on its end value and stops. A spring
+      overshoot is the fastest way a regulated product reads as a toy.
+   3. **No hue, no glow.** Colour on this page means gain, loss or warning.
+   --------------------------------------------------------------------------- */
+
+/* Settle — the quiet default. Down, never up. */
+@keyframes reveal-settle {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* Blur — focus resolving. For figures and for type that should feel developed. */
+@keyframes reveal-blur {
+  from {
+    opacity: 0;
+    filter: blur(14px);
+  }
+  to {
+    opacity: 1;
+    filter: blur(0);
+  }
+}
+
+/* Lateral pair — for content that reads as two columns converging. */
+@keyframes reveal-left {
+  from {
+    opacity: 0;
+    transform: translateX(-28px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes reveal-right {
+  from {
+    opacity: 0;
+    transform: translateX(28px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* Scale inward — a zoom-out arrival. Never scale up from 0; that is a pop. */
+@keyframes reveal-scale {
+  from {
+    opacity: 0;
+    transform: scale(1.06);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/*
+ * Wipe — `clip-path` uncovering content in place, nothing moving.
+ *
+ * The most premium entrance in the set precisely because the element does not
+ * travel: it is revealed rather than delivered. Costs a composite, not a
+ * relayout, and reads as a printed sheet being exposed.
+ */
+@keyframes reveal-wipe {
+  from {
+    clip-path: inset(0 100% 0 0);
+  }
+  to {
+    clip-path: inset(0 0 0 0);
+  }
+}
+
+/*
+ * Shear — a slight skew resolving. Reads as motion arrested rather than motion
+ * performed, which is why it suits a speed claim.
+ */
+@keyframes reveal-shear {
+  from {
+    opacity: 0;
+    transform: skewX(-7deg) translateX(-14px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/*
+ * A hairline drawing itself in, left to right.
+ *
+ * `scaleX` on a transform, not `width` — animating width relayouts everything
+ * downstream of the rule on every frame, while a scale composites. The rule is
+ * 1px tall so there is no vertical distortion to correct for.
+ *
+ * This is the one entrance on the page that is allowed to be purely decorative,
+ * because a rule carries no content: nothing is unreadable while it draws.
+ */
+@keyframes rule-draw {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+/*
+ * Focus resolving — the CSS twin of `FocusPull`, for elements that do not need a
+ * scroll-linked tween. Settles *inward* and *downward*: never up, never
+ * overshooting. A pop-in overshoot is the single most common way a serious
+ * interface starts reading as a toy.
+ */
+@keyframes focus-in {
+  from {
+    opacity: 0;
+    transform: translateY(-8px) scale(1.03);
+    filter: blur(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    filter: blur(0);
+  }
+}
+
 /*
  * The chromatic sweep — light travelling across polished metal.
  *
@@ -298,6 +441,44 @@
       'wght' 380;
     letter-spacing: -0.02em;
     text-wrap: balance;
+  }
+
+  /*
+   * A rule that draws itself in from the left. Origin matters more than the
+   * animation: `left` means the line grows *from* the thing above it, which is
+   * what makes it read as connected rather than as arriving separately.
+   */
+  .rule-draw {
+    transform-origin: left center;
+    animation: rule-draw 900ms var(--ease-out-expo) forwards;
+  }
+
+  /* Focus-in for elements outside a GSAP scope. Same settle, no scroll link. */
+  .focus-in {
+    animation: focus-in 800ms var(--ease-out-expo) forwards;
+  }
+
+  /*
+   * Reduced motion: hold the *end* state, do not shorten the animation to
+   * nothing.
+   *
+   * The blanket `animation-duration: 0.01ms !important` pattern that circulates
+   * with animation libraries is worse than it looks — it would also flatten this
+   * page's authored fallbacks, which are not "the animation, faster": the metal
+   * shader drops to speed 0 so its RAF stops entirely, and both canvases render
+   * one composed still frame at their most-resolved moment. Forcing those to
+   * 0.01ms replaces a considered still with a stutter.
+   *
+   * These two just land on their final values.
+   */
+  @media (prefers-reduced-motion: reduce) {
+    .rule-draw,
+    .focus-in {
+      animation: none;
+      opacity: 1;
+      filter: none;
+      transform: none;
+    }
   }
 
   /*

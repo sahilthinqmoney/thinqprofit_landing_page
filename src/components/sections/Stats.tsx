@@ -71,7 +71,7 @@ export default function Stats() {
             {stats.map((stat, index) => (
               // The Reveal element IS the grid cell: it keeps `dl > div > (dt, dd)`
               // valid and gives each figure its own 60ms step, capped at 180ms.
-              <Reveal
+              <Reveal variant="blur"
                 key={stat.label}
                 delay={Math.min(index, 3) * 60}
                 className="grid min-w-0 content-start gap-y-2.5"

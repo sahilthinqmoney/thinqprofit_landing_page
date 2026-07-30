@@ -267,7 +267,7 @@ export default function Footer() {
       <div className="border-t border-border-soft">
         <Container>
           <div className="py-12">
-            <Reveal>
+            <Reveal variant="settle">
               <div className="overflow-hidden rounded-2xl border border-border bg-surface/40">
                 <div className="flex items-center gap-2 border-b border-border-soft px-5 py-3.5 sm:px-6">
                   {/* Chrome, not accent-soft. Under the gold system a softened

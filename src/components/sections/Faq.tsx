@@ -122,7 +122,7 @@ function FaqRow({ entry, delay }: { entry: FaqEntry; delay: number }) {
   const pending = isResearchFaq(entry) && publishesResearch === null
 
   return (
-    <Reveal delay={delay}>
+    <Reveal variant="wipe" delay={delay}>
       <details className="group border-b border-border-soft transition-colors duration-300 open:border-border hover:border-chrome-dim/40">
         <summary className="flex min-h-14 cursor-pointer list-none items-start justify-between gap-8 py-8 sm:py-9 [&::-webkit-details-marker]:hidden">
           <div className="flex flex-wrap items-center gap-x-3 gap-y-2">

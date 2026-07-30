@@ -50,6 +50,29 @@ import type { Testimonial } from '../../types'
  *    and competing with the actual buttons elsewhere. `chrome` sits one step
  *    down in luminance for exactly this, and it is what the dash gets now.
  *
+ * ── MOTION: the T assembles in order of authority ──────────────────────────
+ *
+ * One idea, three beats, once. The pulled voice resolves **first and alone** out
+ * of a 6px blur; the crossbar then draws itself left-to-right out from under it
+ * while that settle is still finishing; the two subordinate quotes follow. The
+ * section builds itself in the order it wants to be read, which is the whole
+ * argument of the layout — one voice, a line, then corroboration. No other
+ * section on this page has a hierarchy to spend an entrance on.
+ *
+ * Three things this deliberately does not do:
+ *
+ *  - **The blur is on the blockquote and nothing else.** `filter` cannot be
+ *    GPU-composited, so it is scoped to the one display-scale text block, the
+ *    same allowance the headings get. The subordinates and the rule are
+ *    transform and opacity only.
+ *  - **It scales from `left top`, not from the centre.** A centre-origin settle
+ *    walks a left-flush block sideways for the length of the tween, and the
+ *    page's single left edge is the one thing that must not move. Growing from
+ *    the anchor also echoes the hero, where the headline widens into place.
+ *  - **Nothing rises and nothing repeats.** Beats settle downward from −10px on
+ *    `power3.out`, and the timeline is `play none none none`, so scrolling back
+ *    up to re-read a quote does not re-stage it.
+ *
  * COMPLIANCE — unchanged and non-negotiable:
  *  - every `[Name]`, `[City]` and `[YEAR]` is still an unfilled deck value and
  *    still routes through `CopyText`, so it renders visibly flagged. No name,
@@ -60,6 +83,12 @@ import type { Testimonial } from '../../types'
  *  - `testimonialDisclaimer` is required under the block. It stays live text at
  *    `fg-muted` (13.08:1), left-aligned with the rest of the section, never baked
  *    into an image and never behind a blur.
+ *  - the disclaimer and all three attributions are outside the timeline
+ *    entirely. Every `[Name]`, `[City]` and `[YEAR]` is an unfilled value and the
+ *    disclaimer is required copy, so none of them may sit inside an entrance
+ *    that starts at `opacity: 0` — they are legible at frame zero and at every
+ *    frame after it. Only the quote text, which carries no placeholder and no
+ *    regulatory obligation, is allowed to resolve.
  */
 
 /** Real typographic marks, applied at render so the deck string stays untouched. */
@@ -104,7 +133,7 @@ export default function Testimonials() {
   return (
     <SectionShell id="testimonials" heading="What people actually say" tone="raised">
       {/* ---------------- The pulled voice ---------------- */}
-      <Reveal>
+      <Reveal variant="settle">
         <figure>
           {/*
            * Display scale, held a step under the H2's cap (2.25 vs 2.5rem) at
@@ -133,7 +162,7 @@ export default function Testimonials() {
           because with no other line in the section there is nothing for a
           hairline to be quieter *than*. */}
       {rest.length > 0 && (
-        <Reveal delay={80}>
+        <Reveal variant="settle" delay={80}>
           <div className="mt-20 border-t border-border pt-12 sm:mt-24 sm:pt-14">
             {/* Two, side by side, and subordinate — not a grid standing in for
                 a point of view. They sit at body scale under a quote set twice

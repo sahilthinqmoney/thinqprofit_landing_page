@@ -74,7 +74,7 @@ export default function MobileApp({ id = 'mobile-app' }: MobileAppProps) {
             their own measure caps, and the flowed feature line wants the extra
             width so it settles on two lines instead of three. */}
         <div className="mx-auto max-w-[56rem] text-center">
-          <Reveal>
+          <Reveal variant="scale">
             {/* `.display` sets the face, the 400 weight and the tracking — size
                 carries the emphasis, so there is no `font-medium` here and no
                 hand-tuned `tracking-*` fighting the utility.
@@ -93,7 +93,7 @@ export default function MobileApp({ id = 'mobile-app' }: MobileAppProps) {
 
           {/* Features survive as one quiet flowed line. As bordered chips they
               read as four more cards on a page that already has enough. */}
-          <Reveal delay={60}>
+          <Reveal variant="scale" delay={60}>
             {/* Inline `li`s, not flex items: this has to wrap as one run of
                 prose. As a flex row the separator is its own box, so a label
                 that wraps internally leaves its `·` stranded on the line above.
@@ -117,7 +117,7 @@ export default function MobileApp({ id = 'mobile-app' }: MobileAppProps) {
               glyph is a piece of fruit, not the Apple Inc. wordmark — and
               Footer.tsx makes the same call for the social row. The deck's
               labels name both stores unambiguously without a badge. */}
-          <Reveal delay={120}>
+          <Reveal variant="scale" delay={120}>
             <div className="mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row">
               {appCopy.storeCtas.map((cta) => (
                 <Button key={cta.label} href={cta.href} variant="secondary">
@@ -145,7 +145,7 @@ export default function MobileApp({ id = 'mobile-app' }: MobileAppProps) {
             box ends and everything below it is clipped. The md/lg steps hold the
             visible slice at ~350px, which is what the copy column reserves. */}
         <div className="w-[16rem] translate-y-[30%] sm:w-[17rem] md:w-[18rem] md:translate-y-[43%] lg:w-[20rem] lg:translate-y-[48.5%]">
-          <Reveal delay={180}>
+          <Reveal variant="scale" delay={180}>
             {/* One hairline and a radius, nothing else. No speaker pill, no home
                 indicator, no accent glow, and deliberately not `.card`: a lit
                 top edge and a cast shadow would make the device read as another

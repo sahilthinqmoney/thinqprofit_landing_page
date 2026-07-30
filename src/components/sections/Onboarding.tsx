@@ -54,7 +54,7 @@ export default function Onboarding() {
                 : 'border-white/15 sm:flex-1 sm:border-l sm:pl-6 sm:pr-6'
             }
           >
-            <Reveal delay={index * 60} className="flex items-baseline gap-3 sm:block">
+            <Reveal variant="right" delay={index * 60} className="flex items-baseline gap-3 sm:block">
               <span className="text-[1.75rem] font-medium leading-none tabular text-white/35">
                 {index + 1}
               </span>
@@ -79,7 +79,7 @@ export default function Onboarding() {
           the line is an unattributed list sitting under a numbered sequence; the
           items lost their connective tissue instead ("PAN card" → "PAN",
           "Aadhaar linked to your mobile number" → "Aadhaar linked to mobile"). */}
-      <Reveal delay={180} className="w-full">
+      <Reveal variant="right" delay={180} className="w-full">
         <p className="mt-8 max-w-[42em] text-[0.8125rem] leading-relaxed text-white/55">
           {`You'll need: ${requirements.join(', ')}.`}
         </p>

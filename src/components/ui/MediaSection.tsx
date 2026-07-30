@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react'
+import FocusPull from './FocusPull'
 import MediaBackdrop from './MediaBackdrop'
 import type { ImageSources, VideoSources } from './MediaBackdrop'
 
@@ -169,14 +170,27 @@ export default function MediaSection({
           )}
 
           <div className={`flex flex-col items-start text-left ${PLACE[place]}`}>
-            <h2
+            {/*
+              The headline comes into focus against its plate, matching the
+              treatment every `SectionShell` heading gets — so a full-bleed
+              section and a flat one share one gesture instead of reading as two
+              systems.
+
+              Only the headline. The body, the CTA and `finePrint` are left
+              untouched on purpose: `finePrint` is where disclosures live, and a
+              disclosure inside an entrance that starts at zero opacity is
+              illegible to anyone who stops scrolling mid-tween.
+            */}
+            <FocusPull
+              as="h2"
               className={`m-0 whitespace-normal text-fg md:whitespace-pre-line ${
                 voice === 'serif' ? 'display-serif' : 'display'
               } ${SCALE[step]}`}
-              style={{ maxWidth: measure }}
             >
-              {headline}
-            </h2>
+              <span className="block" style={{ maxWidth: measure }}>
+                {headline}
+              </span>
+            </FocusPull>
 
             {body && (
               <div className="mt-6 max-w-[34em] text-base leading-relaxed text-white/70">{body}</div>

@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react'
 import Container from './Container'
+import FocusPull from './FocusPull'
 
 /**
  * Heading steps. Assignment is by the section's weight in the page, not by
@@ -104,14 +105,29 @@ export default function SectionShell({
     >
       <Container>
         <div className={RAIL}>
-          {/* The subheading sits in a reading measure even when the rail is
-              wide — a single sentence set across 1344px is not a sentence. */}
-          <div className={`max-w-[38em] ${centered ? 'mx-auto text-center' : ''}`}>
+          {/*
+            The heading block comes into focus rather than arriving: it enters
+            slightly over-scaled and soft and resolves as it reaches reading
+            position, scrubbed to the wheel. Applied here rather than per section
+            so every heading on the page shares one gesture — nine sections route
+            through this component, and hand-applying it would guarantee nine
+            slightly different versions.
+
+            Scoped to the heading and subheading deliberately. The content below
+            keeps its own `Reveal`, and nothing that carries a disclosure, a
+            statutory line or a `[BRACKETED]` value is inside an entrance that
+            starts at zero opacity — a reader who stops scrolling mid-tween has to
+            still be able to read those.
+
+            The subheading sits in a reading measure even when the rail is wide —
+            a single sentence set across 1344px is not a sentence.
+          */}
+          <FocusPull className={`max-w-[38em] ${centered ? 'mx-auto text-center' : ''}`}>
             <h2 className={`display text-fg ${SCALE[scale]}`}>{heading}</h2>
             {subheading && (
               <p className="mt-4 text-base leading-relaxed text-fg-muted">{subheading}</p>
             )}
-          </div>
+          </FocusPull>
 
           {/* More space above a heading than below it, and more between the
               heading block and its content than inside that content. The gap is
