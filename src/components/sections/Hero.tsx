@@ -94,10 +94,21 @@ export default function Hero() {
               `font-variation-settings` re-lays-out text on every frame.
             */}
             <h1
-              className={`display display-flex m-0 text-[clamp(3rem,7vw,5.75rem)] leading-[1.04] text-fg ${
+              /*
+               * Pushed to 6.5rem at the top end. With the support line and two
+               * thirds of the subheading gone, the viewport has the room, and a
+               * hero that has removed content has to *use* the space rather than
+               * leave a hole where the copy was. 104px sits in the same register
+               * as the reference sites, which run their opening line at 110px.
+               *
+               * The measure tightens with it: at 9em the three lines break where
+               * they are written to break, and the block reads as a sculpted
+               * shape rather than as a paragraph that happens to be large.
+               */
+              className={`display display-flex m-0 text-[clamp(3rem,7.2vw,6.5rem)] leading-[1.02] text-fg ${
                 settled ? '' : 'display-settling'
               }`}
-              style={{ maxWidth: '10em' }}
+              style={{ maxWidth: '9em' }}
             >
               {lines.map((line, index) => (
                 // The clipping wrapper is what makes it read as arriving from
@@ -128,11 +139,39 @@ export default function Hero() {
                 transform: settled ? 'translateY(0)' : 'translateY(8px)',
               }}
             >
-              <p className="mt-8 max-w-[34em] text-base leading-relaxed text-fg-muted">
+              {/* One size up from body, and the only line of prose in the
+                  viewport. `fg-muted` at 13.08:1 — a step below the headline in
+                  rank, nowhere near the floor.
+
+                  30em, not 26: the line is 54 characters, which sets to ~27em at
+                  this size, so a 26em measure broke it one word early and left
+                  "funds." alone on a second line. A one-line subhead under a
+                  three-line headline is the whole shape of this hero; an orphan
+                  turns it into a paragraph. */}
+              <p className="mt-12 max-w-[30em] text-lg leading-relaxed text-fg-muted">
                 {hero.subheadline}
               </p>
 
-              <div className="mt-10 flex flex-col gap-3 sm:flex-row sm:items-center">
+              {/*
+                One action. `hero.secondaryCta` ("See pricing") is deliberately
+                not rendered here.
+
+                Two actions side by side is a choice, and a stranger deciding
+                whether to trust you with money should not be handed a choice
+                before they have been given a reason. Removing it also leaves the
+                alloy ring as the only interactive thing in the viewport, which is
+                the entire point of reserving that treatment for one control.
+
+                It costs nothing, because the path is not lost: `Pricing` is a
+                top-level nav item three inches above this, and the Pricing
+                section states the rate card in full. The string stays in the deck.
+
+                `items-start` is not cosmetic — a flex column defaults to
+                `stretch`, which stretches the rim wrapper full-width while the
+                dark core inside stays content-width, turning a 2px ring into
+                slabs of metal either side of the label.
+              */}
+              <div className="mt-14 flex flex-col items-start">
                 <Button
                   href="#onboarding"
                   size="lg"
@@ -140,18 +179,18 @@ export default function Hero() {
                 >
                   {hero.primaryCta}
                 </Button>
-                <Button href="#pricing" variant="ghost" size="lg">
-                  {hero.secondaryCta}
-                </Button>
               </div>
 
-              {/* `fg-muted` (13.08:1), not `fg-subtle` (5.02:1) — this is a
-                  marketing claim, and index.css reserves subtle for footer meta
-                  and legal fine print. Both clear 4.5:1 on the neutral ground;
-                  the split is about rank, not about the floor. */}
-              <p className="mt-8 text-[0.8125rem] leading-relaxed text-fg-muted">
-                {hero.supportLine}
-              </p>
+              {/*
+                `hero.supportLine` is deliberately not rendered. It read "Free
+                account opening · Aadhaar eKYC · Ready to trade the same day" —
+                and all three facts belong to sections that state them properly:
+                Onboarding owns eKYC and same-day activation, Pricing owns free
+                opening. In the hero they were a third block of text competing
+                with the one line that matters, and three unsupported claims in
+                small grey type is what a hero looks like when nobody was willing
+                to choose. The string stays in the deck for whoever needs it.
+              */}
             </div>
           </div>
         </Container>

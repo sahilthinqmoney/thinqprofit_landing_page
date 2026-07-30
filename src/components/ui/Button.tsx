@@ -96,7 +96,20 @@ const variants: Record<Variant, string> = {
  * page's `lg` size the same absolute value reads proportionally thinner, and at
  * 1.5px the dispersion had too little width to break across.
  */
-const RIM_WRAP = 'p-[2px] shadow-lifted'
+/*
+ * `bg-chrome` is the fallback ring, and it is load-bearing rather than
+ * decorative. The wrapper's only job is to be the 2px the shader paints — so
+ * when the shader does not paint (a refused WebGL context, a browser at the
+ * live-context cap, an older engine) an unpainted wrapper left the control with
+ * no edge at all: just a dark core on a dark ground, boundary contrast ~1.02:1.
+ * The audit caught this as a regression I introduced when the fill became a rim,
+ * because moving `variants.primary` off the wrapper took `bg-accent` with it and
+ * the documented "degrades to the flat button" stopped being true.
+ *
+ * chrome rather than accent: a static ring should read as a machined edge, not
+ * as a shader frozen mid-frame.
+ */
+const RIM_WRAP = 'bg-chrome p-[2px] shadow-lifted'
 const RIM_CORE =
   'overflow-hidden rounded-full bg-[linear-gradient(180deg,#1c1c22_0%,#08080c_100%)] text-fg transition-shadow duration-250 ease-[var(--ease-out-soft)] group-active:shadow-[inset_0_2px_4px_rgba(0,0,0,0.45)]'
 
@@ -179,6 +192,12 @@ export default function Button({
     // actually sits in.
     withMetal ? RIM_WRAP : variants[variant],
     withMetal ? '' : sizing,
+    // A flex column defaults to `stretch`. On the rim variant that stretches the
+    // wrapper while the dark core inside stays content-width, turning the 2px
+    // ring into wide metal slabs either side of the label — which is what it did
+    // on mobile before this. Any caller that genuinely wants a full-width button
+    // asks for it, and `w-full` below then applies to the core as well.
+    withMetal && !fullWidth ? 'self-start' : '',
     fullWidth ? 'w-full' : '',
     className,
   ]

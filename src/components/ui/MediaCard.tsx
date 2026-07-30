@@ -47,7 +47,7 @@ export default function MediaCard({
           className="pointer-events-none absolute inset-x-0 top-0 h-2/3"
           style={{
             zIndex: -1,
-            backgroundImage: `linear-gradient(to bottom, rgba(11,11,13,${scrim}) 0%, rgba(11,11,13,${(scrim * 0.55).toFixed(3)}) 45%, rgba(11,11,13,0) 100%)`,
+            backgroundImage: `linear-gradient(to bottom, rgba(5,5,5,${scrim}) 0%, rgba(5,5,5,${(scrim * 0.55).toFixed(3)}) 45%, rgba(5,5,5,0) 100%)`,
           }}
         />
       )}

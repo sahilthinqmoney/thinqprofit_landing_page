@@ -60,7 +60,7 @@ export default function MediaBackdrop({
   // The page background, not a blue-black. This is what shows in letterbox
   // gaps and for the frame before the asset decodes, so any other value is a
   // visible colour flash on load.
-  tone = '#08080a',
+  tone = '#050505',
   className = '',
 }: MediaBackdropProps) {
   const videoRef = useRef<HTMLVideoElement>(null)
@@ -143,11 +143,18 @@ export default function MediaBackdrop({
 function PendingField({ brief }: { brief: string }) {
   return (
     <div className="absolute inset-0">
+      {/*
+        Neutral, and that is a correction. This was a saturated indigo ramp
+        (#1e2b52 → #0b1220), left over from the palette before last — which made
+        it the only unexplained hue on a page whose stated rule is that colour
+        means gain, loss or warning and nothing else. It also lit four media
+        sections in a brand colour that no longer exists.
+      */}
       <div
         className="absolute inset-0"
         style={{
           background:
-            'radial-gradient(80% 70% at 72% 42%, #1e2b52 0%, #131c33 45%, #0b1220 100%)',
+            'radial-gradient(80% 70% at 72% 42%, #1b1b20 0%, #101014 45%, #050505 100%)',
         }}
       />
       <div
@@ -157,7 +164,14 @@ function PendingField({ brief }: { brief: string }) {
             'repeating-linear-gradient(115deg, #fff 0, #fff 1px, transparent 1px, transparent 9px)',
         }}
       />
-      <p className="absolute bottom-4 right-5 max-w-[22rem] text-right text-[0.6875rem] leading-snug tracking-[0.14em] text-white/25 uppercase">
+      {/*
+        `text-fg-muted`, not `text-white/25`. At 25% over this field the brief
+        measured 2.21:1 — the lowest text ratio on the page, failing even the 3:1
+        large-text floor at 11px, and it is live on every media section that has
+        no asset yet. It is a working note rather than page copy, but a working
+        note nobody can read is not a working note.
+      */}
+      <p className="absolute bottom-4 right-5 max-w-[22rem] text-right text-[0.6875rem] leading-snug tracking-[0.14em] text-fg-muted uppercase">
         {brief}
       </p>
     </div>

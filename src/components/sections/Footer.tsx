@@ -15,6 +15,7 @@ import {
   TriangleAlert,
 } from 'lucide-react'
 import Button from '../ui/Button'
+import ChromaticWordmark from '../ui/ChromaticWordmark'
 import Container from '../ui/Container'
 import CopyText from '../ui/CopyText'
 import Reveal from '../ui/Reveal'
@@ -451,9 +452,22 @@ export default function Footer() {
       </div>
 
       {/* ------------------------------------------------------------------ */}
-      {/* 17.7 Bottom bar                                                     */}
+      {/* 17.7 Brand lockup                                                   */}
       {/* ------------------------------------------------------------------ */}
-      <div className="border-t border-border-soft">
+      {/* Outside Container deliberately — the mark runs to the viewport edges.
+          A wordmark this size that stops inside a 1760px rail reads as an
+          oversized heading rather than as a stamp on the page. It sits above the
+          bottom bar so the legal line stays the last thing in the document. */}
+      <div className="border-t border-border-soft pt-14 sm:pt-16 lg:pt-20">
+        <ChromaticWordmark />
+      </div>
+
+      {/* ------------------------------------------------------------------ */}
+      {/* 17.8 Bottom bar                                                     */}
+      {/* ------------------------------------------------------------------ */}
+      {/* No top border: the wordmark above is already the terminal gesture, and
+          a rule between them would read as the mark being fenced off. */}
+      <div>
         <Container>
           <div className="flex flex-col gap-4 py-7 sm:flex-row sm:items-center sm:justify-between">
             <p className="text-xs leading-relaxed text-fg-muted">

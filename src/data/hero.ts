@@ -10,15 +10,21 @@ export const hero: HeroContent = {
   eyebrow: 'SEBI-registered broker · NSE · BSE · MCX · CDSL',
   headline: 'Your money. Your market. One app.',
   /*
-   * One claim, not three. The deck ran "loads fast, prices plainly, and stays
-   * out of your way" — but Platform already owns speed ("the ten seconds that
-   * matter") and Pricing owns plain pricing ("Priced plainly, in advance"), so
-   * two of the three clauses were the hero pre-announcing sections further down
-   * the page. What is left is the instrument list, which is substance, and the
-   * one claim no other section makes.
+   * The instrument list, and nothing else.
+   *
+   * This has been cut twice. The deck ran three trailing claims — "loads fast,
+   * prices plainly, and stays out of your way" — and the first pass kept one of
+   * them. That last one goes too: Platform owns speed ("the ten seconds that
+   * matter"), Pricing owns plain pricing ("Priced plainly, in advance"), and
+   * "stays out of your way" is a claim about the product that the product's own
+   * section is better placed to make.
+   *
+   * What a first-time visitor needs from a broker's hero is *what can I trade
+   * here*. That is substance, it is unarguable, and the H1 above already carries
+   * the consolidation promise in three words. A hero that argues is a hero the
+   * reader has to evaluate; a hero that states gets scanned and passed.
    */
-  subheadline:
-    'Stocks, ETFs, F&O, commodities and direct mutual funds — on a platform that stays out of your way.',
+  subheadline: 'Stocks, ETFs, F&O, commodities and direct mutual funds.',
   primaryCta: 'Open free account',
   secondaryCta: 'See pricing',
   supportLine: 'Free account opening · Aadhaar eKYC · Ready to trade the same day',

@@ -163,7 +163,7 @@ export default function MediaSection({
               className="pointer-events-none absolute -inset-x-[20%] -bottom-[20%] -top-[25%]"
               style={{
                 zIndex: -1,
-                backgroundImage: `radial-gradient(58% 62% at ${scrimAt}, rgba(11,11,13,${scrim}) 0%, rgba(11,11,13,${(scrim * 0.72).toFixed(3)}) 44%, rgba(11,11,13,0) 100%)`,
+                backgroundImage: `radial-gradient(58% 62% at ${scrimAt}, rgba(5,5,5,${scrim}) 0%, rgba(5,5,5,${(scrim * 0.72).toFixed(3)}) 44%, rgba(5,5,5,0) 100%)`,
               }}
             />
           )}

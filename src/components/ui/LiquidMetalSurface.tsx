@@ -82,8 +82,26 @@ const TINT: [number, number, number, number] = [244 / 255, 246 / 255, 250 / 255,
  * further — and the safer direction here, since a red fringe is the one hue on
  * this page that could be misread as a loss.
  */
-const SHIFT_RED = 0.16
-const SHIFT_BLUE = 0.2
+/*
+ * CORRECTION. Everything above derives the safe value from the `screen`
+ * composite's ~21x attenuation — and the only call site on the page uses
+ * `blend="rim"`, which bypasses that attenuation entirely. The budget was
+ * certified for a path the button does not take, so 0.16/0.20 shipped roughly an
+ * order of magnitude stronger than the figure it was justified by.
+ *
+ * Re-derived for the rim. With no attenuation the on-screen channel split is the
+ * shader's own, so the numbers come down by about the factor the screen path was
+ * silently providing. At 0.09/0.12 the ring holds a visible cool iridescence at
+ * the highlight-to-shadow boundaries — which is where a 2px edge puts *every*
+ * pixel, so it needs far less shift than a flat field did to read at all — while
+ * staying well short of a fringe that could be mistaken for `gain` or `loss`.
+ *
+ * Blue keeps the larger value for the same three reasons as before: the shader
+ * multiplies blue dispersion by 1.3 internally, blue genuinely refracts further,
+ * and red is the one hue on this page that could be misread as a loss.
+ */
+const SHIFT_RED = 0.09
+const SHIFT_BLUE = 0.12
 
 const RESTING_SPEED = 0.55
 const HOVER_SPEED = 1
