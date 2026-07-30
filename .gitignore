@@ -30,3 +30,11 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Agent skill packs, fetched from GitHub by `npx skills add`.
+# Regenerable from skills-lock.json, which IS committed — so this is the
+# node_modules pattern: lock the versions, don't vendor 472KB of third-party
+# content we didn't write and haven't reviewed.
+# .claude/skills holds only symlinks into .agents, which don't travel well in git.
+.agents/
+.claude/skills/
