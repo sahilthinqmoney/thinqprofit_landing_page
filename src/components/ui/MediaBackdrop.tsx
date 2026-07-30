@@ -26,8 +26,17 @@ export interface VideoSources {
   mp4: string
 }
 
+/** Which side of the frame is lit. Put it opposite the copy. */
+export type Focus = 'left' | 'right' | 'center'
+
 interface MediaBackdropProps {
-  /** Required. Describes the asset; becomes alt text, or the placeholder brief. */
+  /**
+   * Required. Alt text for a real asset.
+   *
+   * On sections with no asset yet this string is the production brief, and it is
+   * NOT rendered — see `PendingField`. It used to be, in the corner of nine
+   * sections.
+   */
   alt: string
   image?: ImageSources
   video?: VideoSources
@@ -39,6 +48,12 @@ interface MediaBackdropProps {
   poster?: string
   /** Behind the media, visible in letterbox gaps and before decode. */
   tone?: string
+  /**
+   * Which side of the plate is lit, for the no-asset state. Set it opposite the
+   * copy: the caller is the only thing that knows which margin its words are
+   * parked against.
+   */
+  focus?: Focus
   className?: string
 }
 
@@ -61,6 +76,7 @@ export default function MediaBackdrop({
   // gaps and for the frame before the asset decodes, so any other value is a
   // visible colour flash on load.
   tone = '#050505',
+  focus = 'right',
   className = '',
 }: MediaBackdropProps) {
   const videoRef = useRef<HTMLVideoElement>(null)
@@ -128,52 +144,102 @@ export default function MediaBackdrop({
           <img alt={alt} src={image.desktop} className={fill} />
         </picture>
       ) : (
-        <PendingField brief={alt} />
+        <PendingField focus={focus} />
       )}
     </div>
   )
 }
 
 /**
- * Stand-in until the real clip lands. Deliberately *not* a dashed box: it fills
- * the same space, carries the same darkness, and lets the overlaid copy be
- * judged for contrast now — the whole point of motion-brief §7's last rule.
- * Dropping the real asset in changes nothing about the layout.
+ * The plate that stands in until a shot clip lands.
+ *
+ * **It no longer prints the asset brief.** It used to set the `alt` string —
+ * which on these sections is a full art-direction spec — in 11px uppercase in
+ * the bottom-right corner, live, on nine sections. So the closing CTA read
+ * "CLOSING LOOP, 8S, SEAMLESS. A SINGLE MACHINED-ALUMINIUM FORM AT REST IN
+ * NEAR-BLACK…" to every visitor. That is the production spec shipped as page
+ * copy, and no other single thing on the page did more damage to the claim that
+ * it was finished. A stranger deciding whether to hand this company money was
+ * reading our notes to ourselves.
+ *
+ * The brief strings stay where they are, in the data files, for whoever shoots
+ * the clips. They are documentation. They are not content.
+ *
+ * What replaces it is a *designed* plate rather than a placeholder — the same
+ * subject every brief describes, built in CSS: a machined aluminium face in
+ * near-black with one specular running the length of an edge. Three layers:
+ *
+ *  1. **Body.** An off-axis radial, warmest at the focus and falling to `--bg`
+ *     at the frame. This is the form catching ambient light.
+ *  2. **Specular.** A narrow, hard-edged band across the same axis as the
+ *     brushing. This is the whole reason it reads as metal and not as a
+ *     gradient: a diffuse surface has no specular, so an edge highlight is what
+ *     the eye uses to decide something is machined.
+ *  3. **Brushing.** Anisotropic 1px grain on one axis only. Metal is directional;
+ *     isotropic noise reads as film grain, which the page already has globally.
+ *
+ * `focus` puts the lit side opposite the copy — the caller knows which margin
+ * its words are parked against, so the plate is lit to leave that side dark
+ * rather than relying on the scrim alone to claw contrast back.
+ *
+ * Nothing animates. Nine sections use this, and nine animating layers to
+ * simulate stillness is the wrong trade — the brief for every one of these is a
+ * form *at rest*.
  */
-function PendingField({ brief }: { brief: string }) {
+function PendingField({ focus = 'right' }: { focus?: Focus }) {
+  /*
+   * Hotspot and specular both key off `focus`. The specular is deliberately not
+   * centred on the hotspot: on a real machined edge the bright line sits at the
+   * form's boundary and the ambient falloff sits on its face, so offsetting the
+   * two is what separates "a lit object" from "a glow".
+   */
+  const lit = focus === 'left' ? 28 : focus === 'center' ? 50 : 72
+
   return (
     <div className="absolute inset-0">
-      {/*
-        Neutral, and that is a correction. This was a saturated indigo ramp
-        (#1e2b52 → #0b1220), left over from the palette before last — which made
-        it the only unexplained hue on a page whose stated rule is that colour
-        means gain, loss or warning and nothing else. It also lit four media
-        sections in a brand colour that no longer exists.
-      */}
+      {/* 1 — body. Neutral by rule: colour on this page means gain, loss or
+          warning, so the plate carries luminance only. (It was a saturated
+          indigo ramp two palettes ago, which lit four sections in a brand
+          colour that no longer exists.) */}
+      <div
+        className="absolute inset-0"
+        style={{
+          background: `radial-gradient(74% 78% at ${lit}% 38%, #1d1d22 0%, #14141a 38%, #0a0a0d 72%, #050505 100%)`,
+        }}
+      />
+
+      {/* 2 — specular. Tight stops, not a soft ramp: the transition from lit to
+          unlit on metal happens over a couple of pixels, and widening it is what
+          makes CSS "metal" look like plastic. Kept under 0.1 alpha — this sits
+          behind live copy on every section that uses it. */}
+      <div
+        className="absolute inset-0"
+        style={{
+          backgroundImage:
+            'linear-gradient(115deg, transparent 34%, rgba(255,255,255,0.045) 45%, rgba(255,255,255,0.085) 49.5%, rgba(255,255,255,0.02) 52%, transparent 60%)',
+        }}
+      />
+
+      {/* 3 — brushing, on the specular's axis. 0.045, down from 0.06: at the old
+          value the 1px lines were individually resolvable at 1x and read as a
+          hatch pattern laid over the page rather than as a finish on a surface. */}
+      <div
+        className="absolute inset-0 opacity-[0.045]"
+        style={{
+          backgroundImage:
+            'repeating-linear-gradient(115deg, #fff 0, #fff 1px, transparent 1px, transparent 7px)',
+        }}
+      />
+
+      {/* Edge falloff, so the plate does not meet the section boundary as a
+          visible seam against the flat page either side of it. */}
       <div
         className="absolute inset-0"
         style={{
           background:
-            'radial-gradient(80% 70% at 72% 42%, #1b1b20 0%, #101014 45%, #050505 100%)',
+            'radial-gradient(120% 120% at 50% 50%, transparent 52%, rgba(5,5,5,0.55) 100%)',
         }}
       />
-      <div
-        className="absolute inset-0 opacity-[0.06]"
-        style={{
-          backgroundImage:
-            'repeating-linear-gradient(115deg, #fff 0, #fff 1px, transparent 1px, transparent 9px)',
-        }}
-      />
-      {/*
-        `text-fg-muted`, not `text-white/25`. At 25% over this field the brief
-        measured 2.21:1 — the lowest text ratio on the page, failing even the 3:1
-        large-text floor at 11px, and it is live on every media section that has
-        no asset yet. It is a working note rather than page copy, but a working
-        note nobody can read is not a working note.
-      */}
-      <p className="absolute bottom-4 right-5 max-w-[22rem] text-right text-[0.6875rem] leading-snug tracking-[0.14em] text-fg-muted uppercase">
-        {brief}
-      </p>
     </div>
   )
 }

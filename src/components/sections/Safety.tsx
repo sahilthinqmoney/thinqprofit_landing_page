@@ -238,7 +238,17 @@ export default function Safety() {
   )
 
   return (
-    <SectionShell id="safety" seamless heading="Your money and your shares stay yours">
+    /*
+     * `lead`, not the default `standard`.
+     *
+     * The three `lead` slots were assigned as "what you trade, what it costs,
+     * how you open an account" — the sections a visitor arrives looking for.
+     * That reasoning is about *navigation*, and it under-ranks the section that
+     * carries the actual argument for handing this company money. A stranger
+     * evaluating a broker is deciding one thing: whether their shares and cash
+     * are safe. Custody outranks the product tour.
+     */
+    <SectionShell id="safety" seamless scale="lead" heading="Your money and your shares stay yours">
       <div ref={root}>
         {/* 1 — custody. The full-strength rule, against the softer hairlines
             below it, is the first thing that says which of these six facts the
@@ -289,6 +299,15 @@ export default function Safety() {
         {/* 3 — hygiene. One tween for all three rows, no internal stagger: a
             stagger would make the quietest tier perform, and the point of it is
             that it doesn't. */}
+        {/*
+          Guarded, because the tier is data-driven and the data shrank. The
+          pillar list was cut from six to three, which made `pillars.slice(3)`
+          empty — and an empty `<ul>` still carries its own `mt-16 sm:mt-20`, so
+          the section was paying 80px of margin for a tier with nothing in it.
+          That gap sat directly above the closing statement, which is the one
+          place on this page where the air is supposed to mean something.
+        */}
+        {hygiene.length > 0 && (
         <ul data-tier="3" className="mt-16 sm:mt-20">
           {hygiene.map((pillar) => (
             <li
@@ -303,6 +322,7 @@ export default function Safety() {
             </li>
           ))}
         </ul>
+        )}
 
         {/* The honest note — no box, no coloured border, no flag. The air above
             it is deliberately larger than any gap inside the ladder: it is not a

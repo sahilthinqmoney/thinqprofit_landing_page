@@ -161,7 +161,17 @@ export default function MediaSection({
       id={id}
       className={`relative isolate flex w-full scroll-mt-24 flex-col overflow-hidden ${HEIGHT[height]} ${className}`}
     >
-      <MediaBackdrop {...media} />
+      {/*
+        The plate is lit on the side the copy is NOT on. `place` already encodes
+        that, so the caller never has to state it twice and the two cannot drift
+        apart — which they would the moment this was a separate prop.
+
+        Only reaches the no-asset plate; a real image or video ignores it.
+      */}
+      <MediaBackdrop
+        focus={place === 'right' ? 'left' : place === 'center' ? 'center' : 'right'}
+        {...media}
+      />
 
       <div className="mx-auto flex w-full max-w-[1760px] flex-1 flex-col px-5 py-20 sm:px-6 md:px-0 md:py-24">
         <div className={`relative flex flex-1 flex-col ${ANCHOR[anchor]}`}>

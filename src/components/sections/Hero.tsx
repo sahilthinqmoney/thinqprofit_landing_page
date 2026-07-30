@@ -95,17 +95,21 @@ export default function Hero() {
             */}
             <h1
               /*
-               * Pushed to 6.5rem at the top end. With the support line and two
-               * thirds of the subheading gone, the viewport has the room, and a
-               * hero that has removed content has to *use* the space rather than
-               * leave a hole where the copy was. 104px sits in the same register
-               * as the reference sites, which run their opening line at 110px.
+               * 120px at the top end, leading below 1, tracking to -0.045em.
+               *
+               * The hero is the only place on this page allowed to be loud, and
+               * the whole page's seriousness depends on it landing. At 104px with
+               * 1.02 leading the three lines read as large text; at 120px with
+               * 0.98 they read as a mark — the lines nearly touch, which is what
+               * makes a stacked headline behave as one block instead of three
+               * sentences. Tracking has to tighten with size or the extra width
+               * just spreads the words apart.
                *
                * The measure tightens with it: at 9em the three lines break where
                * they are written to break, and the block reads as a sculpted
                * shape rather than as a paragraph that happens to be large.
                */
-              className={`display display-flex m-0 text-[clamp(3rem,7.2vw,6.5rem)] leading-[1.02] text-fg ${
+              className={`display display-flex m-0 text-[clamp(3rem,8vw,7.5rem)] leading-[0.98] tracking-[-0.045em] text-fg ${
                 settled ? '' : 'display-settling'
               }`}
               style={{ maxWidth: '9em' }}

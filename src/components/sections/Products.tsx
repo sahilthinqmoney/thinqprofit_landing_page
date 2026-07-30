@@ -31,9 +31,10 @@ import SectionShell from '../ui/SectionShell'
 
 /**
  * Art direction per featured product. Each string is the brief while the asset
- * is outstanding (MediaBackdrop prints it into the placeholder field) and
- * becomes the asset's real alt text after, so it describes the subject rather
- * than naming a file. Both are docs/art-direction.md §A2/§A3 "alt text to ship",
+ * is outstanding, and becomes the asset's real alt text after, so it describes
+ * the subject rather than naming a file. It is NOT rendered — `MediaBackdrop`
+ * used to print it into the corner of the placeholder, which shipped our
+ * production notes to the reader; it now draws a designed plate instead. Both are docs/art-direction.md §A2/§A3 "alt text to ship",
  * verbatim — that file supersedes motion-brief §5's colour direction.
  *
  * Lives here rather than in src/data/products.ts because it is art direction,

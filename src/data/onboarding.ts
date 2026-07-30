@@ -24,9 +24,9 @@ export interface OnboardingCopy {
   cta: string
   /**
    * Brief for the still that sits behind this section — motion-brief §5.6,
-   * constrained by §7. Until the asset lands, MediaBackdrop renders it as the
-   * pending field's label, which is intentional: the copy can be judged for
-   * contrast now.
+   * constrained by §7. Documentation for whoever shoots it, and not rendered:
+   * MediaBackdrop draws a designed plate until the asset lands, so the overlaid
+   * copy can still be judged for contrast against a representative ground.
    */
   mediaAlt: string
 }

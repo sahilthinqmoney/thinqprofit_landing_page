@@ -169,7 +169,19 @@ export default function Testimonials() {
                 their size, so the pair reads as corroboration rather than as
                 two more equal cells. No borders, no surfaces: the gutter does
                 the separating. */}
-            <ul className="grid gap-y-12 md:grid-cols-2 md:gap-x-14 xl:gap-x-24">
+            {/*
+              Two columns only when there are two things to put in them.
+              The list was cut from three testimonials to two, which leaves one
+              quote here — and a single item in a fixed `md:grid-cols-2` sat in
+              the left column with the right half of the rail empty, so the
+              section read as though a second quote had failed to load. The
+              column count follows the data.
+            */}
+            <ul
+              className={`grid gap-y-12 md:gap-x-14 xl:gap-x-24 ${
+                rest.length > 1 ? 'md:grid-cols-2' : ''
+              }`}
+            >
               {rest.map((testimonial) => (
                 <li key={testimonial.id} className="min-w-0">
                   <figure>

@@ -31,8 +31,8 @@ import { finalCta } from '../../data/footer'
 
 /**
  * Asset brief for the closing clip. No URL exists yet, so `MediaBackdrop`
- * renders its pending field and prints this string — the layout is already
- * final and the overlaid copy can be judged for contrast now.
+ * draws its designed plate — the layout is already final and the overlaid copy
+ * can be judged for contrast now. This string is not rendered anywhere.
  *
  * Written against docs/motion-brief.md §7 (no numbers or chart forms, no green
  * or red, no upward motion as a promise, people composed and never
