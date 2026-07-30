@@ -15,7 +15,9 @@ import FocusPull from './FocusPull'
  * flattened the document into a list of equal-weight slabs.
  */
 const SCALE = {
-  lead: 'text-[clamp(2.25rem,4vw,3.25rem)] leading-[1.08]',
+  // Matches `MediaSection`'s `tall` exactly, so a flat lead section and a
+  // full-bleed one carry the same rank rather than competing.
+  lead: 'text-[clamp(2.25rem,4vw,3.5rem)] leading-[1.08]',
   standard: 'text-[clamp(1.75rem,3vw,2.5rem)] leading-[1.14]',
   minor: 'text-[clamp(1.5rem,2.2vw,1.875rem)] leading-[1.2]',
 } as const
@@ -74,6 +76,15 @@ interface SectionShellProps {
  * Standard section wrapper for the text-and-data bands: H2, subheading, then
  * content — all inside one shared rail.
  *
+ * The subheading is a DECK, not body copy — one step above body at 18px, in a
+ * 34em measure, with 20px of air under the heading.
+ *
+ * It used to render at `text-base`, which is the same 16px as every paragraph on
+ * the page, so it read as the section's first sentence rather than as its
+ * standfirst. Across the page there were four different subtitle sizes (18, 16,
+ * 14 and 13px) and no rule picking between them. One step, applied here and in
+ * `MediaSection`, is what makes a title read as a title.
+ *
  * There is no eyebrow. A category label sitting above a heading ("Pricing"
  * above "Priced plainly, in advance") is decoration wearing the costume of
  * information — the heading already says what the section is, and the label
@@ -97,7 +108,7 @@ export default function SectionShell({
   return (
     <section
       id={id}
-      className={`scroll-mt-24 py-28 sm:py-32 lg:py-40 ${
+      className={`scroll-mt-24 py-14 sm:py-16 lg:py-20 ${
         seamless ? '' : 'border-t border-border-soft'
       } ${fullHeight ? 'flex min-h-svh flex-col justify-center' : ''} ${
         tone === 'raised' ? 'bg-surface/30' : ''
@@ -124,15 +135,15 @@ export default function SectionShell({
           */}
           <FocusPull className={`max-w-[38em] ${centered ? 'mx-auto text-center' : ''}`}>
             <h2 className={`display text-fg ${SCALE[scale]}`}>{heading}</h2>
-            {subheading && (
-              <p className="mt-4 text-base leading-relaxed text-fg-muted">{subheading}</p>
-            )}
+            {subheading && <p className="mt-5 max-w-[34em] text-lg leading-relaxed text-fg-muted">{subheading}</p>}
           </FocusPull>
 
           {/* More space above a heading than below it, and more between the
               heading block and its content than inside that content. The gap is
               what tells a reader the heading is finished. */}
-          <div className="mt-16 sm:mt-20 lg:mt-24">{children}</div>
+          {/* Was mt-16/20/24. Together with py-40 that spent 416px of an 812px
+              viewport on whitespace before a single row of content. */}
+          <div className="mt-8 sm:mt-10 lg:mt-12">{children}</div>
         </div>
       </Container>
     </section>

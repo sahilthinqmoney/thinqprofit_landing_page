@@ -50,14 +50,6 @@ export const testimonials: Testimonial[] = [
     city: '[City]',
     meta: 'F&O trader',
   },
-  {
-    id: 'tax-report',
-    quote:
-      "I opened the account for the direct mutual funds and stayed for the tax report. Filing took an evening instead of a weekend.",
-    name: '[Name]',
-    city: '[City]',
-    meta: 'SIP investor',
-  },
 ]
 
 /** Required line under the testimonial block. Do not omit. */

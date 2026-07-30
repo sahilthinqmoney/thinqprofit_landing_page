@@ -26,8 +26,6 @@ export const hero: HeroContent = {
    */
   subheadline: 'Stocks, ETFs, F&O, commodities and direct mutual funds.',
   primaryCta: 'Open free account',
-  secondaryCta: 'See pricing',
-  supportLine: 'Free account opening · Aadhaar eKYC · Ready to trade the same day',
   /*
    * The deck asked for "a Nifty 50 chart with an open buy order". That is a
    * fabricated interface showing invented market data, which motion-brief §7
@@ -51,21 +49,6 @@ export const hero: HeroContent = {
  */
 export const heroHeadlineDisplay = 'Your money.\nYour market.\nOne app.'
 
-/**
- * §3 "Hero visual — description for design".
- *
- * Rewritten away from the deck. The original asked for an order ticket over a
- * Nifty 50 candlestick chart with "neutral, obviously-illustrative numbers" —
- * but motion-brief §7 rules out fabricated interfaces and chart forms outright,
- * on the grounds that a rendered candlestick is invented price history whether
- * or not it is captioned as illustrative. The full brief for what ships instead
- * is in docs/art-direction.md.
- *
- * Currently unreferenced: the hero renders `HeroCanvas`, which needs no
- * placeholder. Kept so the description survives to whoever wires the real plate.
- */
-export const heroMediaLabel =
-  'A single machined aluminium form at rest in near-black, lit from high and behind so only its top edge catches. Left 45% of frame stays dark and low-contrast for the headline. No interface, no numbers, no chart forms, no green or red.'
 
 /**
  * Was: the mandated "Illustrative" stamp for the hero visual (§3, landing.md §9

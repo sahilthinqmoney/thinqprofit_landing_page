@@ -18,6 +18,18 @@ import type { SafetyPillar } from '../types'
  * order.
  */
 
+/*
+ * Three pillars, not six.
+ *
+ * The three that went — 2FA, encryption, and the grievance route — are true of
+ * every registered broker, so they proved nothing and cost a third of the
+ * section's height. The grievance route in particular belongs in Support and the
+ * Footer, where it renders in full as an escalation ladder rather than as a
+ * one-line claim; it is also still in the FAQ. Nothing was lost from the page.
+ *
+ * What remains is the part a competitor could not copy: where the shares sit,
+ * where the money sits, and who authorises a debit.
+ */
 export const pillars: SafetyPillar[] = [
   {
     title: 'Shares in your demat account',
@@ -33,21 +45,6 @@ export const pillars: SafetyPillar[] = [
     title: 'You authorise every debit',
     body: 'Approval runs through CDSL TPIN or a SEBI-approved equivalent, never a blanket power of attorney.',
     icon: 'key-round',
-  },
-  {
-    title: 'Account security',
-    body: 'Two-factor authentication on every login, TOTP support, device binding, and session alerts.',
-    icon: 'shield-check',
-  },
-  {
-    title: 'Encryption and monitoring',
-    body: 'Encrypted in transit and at rest, with independent security audits.',
-    icon: 'lock',
-  },
-  {
-    title: 'Transparent grievance route',
-    body: 'If something goes wrong, the escalation path is published: our support desk, then our compliance officer, then SEBI SCORES and the Smart ODR portal.',
-    icon: 'message-square-warning',
   },
 ]
 

@@ -73,7 +73,20 @@ export default function FocusPull({
       mm.add('(prefers-reduced-motion: no-preference)', () => {
         gsap.fromTo(
           el,
-          { scale: 1.045, filter: 'blur(7px)', opacity: 0.45 },
+          {
+            scale: 1.045,
+            filter: 'blur(7px)',
+            opacity: 0.45,
+            /*
+             * Scale from the left edge. `transform-origin` defaults to centre, so
+             * a left-aligned heading grows *outward in both directions* and its
+             * left edge drifts left as it scales — measured 14px at 1440, which
+             * put every section heading out of alignment with the content beneath
+             * it for the whole length of the scrub. Origin at the left edge means
+             * the edge is fixed and only the right side moves.
+             */
+            transformOrigin: 'left center',
+          },
           {
             scale: 1,
             filter: 'blur(0px)',

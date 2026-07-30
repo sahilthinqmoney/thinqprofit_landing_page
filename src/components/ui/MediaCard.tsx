@@ -22,6 +22,11 @@ interface MediaCardProps {
  * A tall card whose art fills the whole card and whose copy sits on top of it —
  * the counterpart to `MediaSection` at card scale.
  *
+ * Height is viewport-relative, not a fixed pixel ladder. At 560/640/760px the
+ * two cards alone made the Products section 2314px against an 812px viewport —
+ * nearly three screens for one section. `clamp(360px, 52vh, 520px)` keeps the art
+ * generous on a tall display and lets the section fit a laptop.
+ *
  * Deliberately not the `rounded-2xl border p-6` box used everywhere else on the
  * page: the art *is* the card. Copy is pinned to the top, the CTA to the
  * bottom, and the vertical gap between them is whatever the card height leaves
@@ -37,7 +42,7 @@ export default function MediaCard({
 }: MediaCardProps) {
   return (
     <article
-      className={`relative isolate flex h-[560px] shrink-0 snap-center flex-col justify-between overflow-hidden rounded-[20px] border border-white/20 sm:h-[640px] xl:h-[760px] ${className}`}
+      className={`relative isolate flex h-[clamp(360px,52vh,520px)] shrink-0 snap-center flex-col justify-between overflow-hidden rounded-[20px] border border-white/20 ${className}`}
     >
       <MediaBackdrop {...media} />
 

@@ -130,7 +130,11 @@ export default function Platform({ id = 'platform' }: PlatformProps) {
 
           <div className="flex flex-col items-start text-left md:ml-[46%] md:mr-[8%] md:items-start md:text-left">
             <h2
-              className="display m-0 whitespace-normal text-[clamp(2.75rem,5.4vw,4.5rem)] leading-[1.07] text-fg md:whitespace-pre-line"
+              /* Matches `MediaSection`'s `tall` and `SectionShell`'s `lead`. This heading
+                 is hand-written because the section renders SignalCanvas rather than
+                 a MediaSection, and it kept the old 4.5rem cap after the ladder was
+                 unified — rendering at 72px against every lead section's 56px. */
+              className="display m-0 whitespace-normal text-[clamp(2.25rem,4vw,3.5rem)] leading-[1.08] text-fg md:whitespace-pre-line"
               style={{ maxWidth: '9em' }}
             >
               {headline}

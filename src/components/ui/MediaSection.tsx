@@ -50,17 +50,25 @@ const ANCHOR = {
 } as const
 
 /**
- * Display steps. Leading opens up as the size drops — a grotesk this tight
+ * Display steps, on ONE ladder with `SectionShell`.
+ *
+ * `tall` used to render at 72px against SectionShell's `lead` at 52 — so Platform
+ * and Onboarding, both mid-page, outranked Products and Pricing, which are the
+ * sections a visitor arrives for. With two competing ladders nothing read as
+ * primary. `tall` now matches `lead` exactly, and the hero at 104px is the only
+ * heading on the page above this scale.
+ *
+ * Leading opens up as the size drops — a grotesk this tight
  * needs the air at 2.25rem that it does not need at 5.75rem, where the line
  * length itself does the separating. Tracking and the variable-axis coordinate
  * come from `.display`; setting them per step would fight the optical sizing
  * the face is already doing.
  */
 const SCALE = {
-  epic: 'text-[clamp(3rem,7vw,5.75rem)] leading-[1.04]',
-  tall: 'text-[clamp(2.75rem,5.4vw,4.5rem)] leading-[1.07]',
-  mid: 'text-[clamp(2.5rem,4.6vw,3.75rem)] leading-[1.1]',
-  short: 'text-[clamp(2.25rem,3.8vw,3.25rem)] leading-[1.12]',
+  epic: 'text-[clamp(2.5rem,4.6vw,4rem)] leading-[1.05]',
+  tall: 'text-[clamp(2.25rem,4vw,3.5rem)] leading-[1.08]',
+  mid: 'text-[clamp(2rem,3.4vw,3rem)] leading-[1.1]',
+  short: 'text-[clamp(1.75rem,3vw,2.5rem)] leading-[1.14]',
 } as const
 
 interface MediaSectionProps {
@@ -192,8 +200,11 @@ export default function MediaSection({
               </span>
             </FocusPull>
 
+            {/* Same deck step as `SectionShell` — 18px in a 34em measure. A
+                full-bleed section's standfirst and a flat one's have to match, or
+                the page has two ideas about what a subtitle is. */}
             {body && (
-              <div className="mt-6 max-w-[34em] text-base leading-relaxed text-white/70">{body}</div>
+              <div className="mt-5 max-w-[34em] text-lg leading-relaxed text-fg-muted">{body}</div>
             )}
 
             {actions && <div className="mt-8 flex flex-wrap items-center gap-3">{actions}</div>}

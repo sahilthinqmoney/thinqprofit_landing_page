@@ -92,25 +92,21 @@ export const megaMenus: NavMegaMenu[] = [
         items: [
           {
             label: 'Stocks & ETFs',
-            description: 'Buy and hold from NSE and BSE',
             href: '#products',
             icon: 'TrendingUp',
           },
           {
             label: 'Mutual Funds',
-            description: 'Direct plans, zero commission',
             href: '#products',
             icon: 'ChartPie',
           },
           {
             label: 'IPO',
-            description: 'Apply with UPI in a few taps',
             href: '#products',
             icon: 'Rocket',
           },
           {
             label: 'Bonds & G-Secs',
-            description: 'Fixed income for the boring part of your portfolio',
             href: '#products',
             icon: 'Landmark',
           },
@@ -121,25 +117,21 @@ export const megaMenus: NavMegaMenu[] = [
         items: [
           {
             label: 'Futures & Options',
-            description: 'Index and stock derivatives with a full option chain',
             href: '#products',
             icon: 'ChartCandlestick',
           },
           {
             label: 'Intraday',
-            description: 'Same-day equity positions with MIS margins',
             href: '#products',
             icon: 'Timer',
           },
           {
             label: 'Commodities',
-            description: 'Gold, silver, crude and more on MCX',
             href: '#products',
             icon: 'Gem',
           },
           {
             label: 'Currency',
-            description: 'USDINR and major pairs on the NSE currency segment',
             href: '#products',
             icon: 'Banknote',
           },
@@ -150,25 +142,21 @@ export const megaMenus: NavMegaMenu[] = [
         items: [
           {
             label: 'MTF',
-            description: 'Margin Trading Facility for delivery positions',
             href: '#products',
             icon: 'Scale',
           },
           {
             label: 'Baskets',
-            description: 'Thematic portfolios you can buy in one order',
             href: '#products',
             icon: 'Boxes',
           },
           {
             label: 'SIP',
-            description: 'Automate weekly or monthly investing',
             href: '#products',
             icon: 'Repeat',
           },
           {
             label: 'Referrals',
-            description: 'Bring a friend, both of you benefit',
             href: '#products',
             icon: 'UserPlus',
           },
@@ -192,19 +180,16 @@ export const megaMenus: NavMegaMenu[] = [
         items: [
           {
             label: 'ThinqProfit Mobile',
-            description: 'iOS and Android',
             href: '#platform',
             icon: 'Smartphone',
           },
           {
             label: 'ThinqProfit Web',
-            description: 'Full trading terminal in the browser',
             href: '#platform',
             icon: 'Globe',
           },
           {
             label: 'ThinqProfit Pro',
-            description: 'Multi-chart desktop layout for active traders',
             href: '#platform',
             icon: 'LayoutGrid',
           },
@@ -215,25 +200,21 @@ export const megaMenus: NavMegaMenu[] = [
         items: [
           {
             label: 'Charts',
-            description: '100+ indicators, drawing tools, saved layouts',
             href: '#platform',
             icon: 'ChartCandlestick',
           },
           {
             label: 'Option Chain',
-            description: 'Live Greeks, OI, IV and payoff builder',
             href: '#platform',
             icon: 'Table2',
           },
           {
             label: 'Screeners',
-            description: 'Filter the whole market on 60+ parameters',
             href: '#platform',
             icon: 'Filter',
           },
           {
             label: 'Alerts',
-            description: 'Price, indicator and OI triggers on your phone',
             href: '#platform',
             icon: 'Bell',
           },
@@ -244,25 +225,21 @@ export const megaMenus: NavMegaMenu[] = [
         items: [
           {
             label: 'API',
-            description: 'REST and WebSocket access for your own systems',
             href: '#platform',
             icon: 'Code',
           },
           {
             label: 'Strategy Builder',
-            description: 'Construct and test multi-leg option strategies',
             href: '#platform',
             icon: 'GitBranch',
           },
           {
             label: 'Paper Trading',
-            description: 'Practise with live data and no money at risk',
             href: '#platform',
             icon: 'FlaskConical',
           },
           {
             label: 'Reports',
-            description: 'Tax P&L, capital gains, and ledger exports',
             href: '#platform',
             icon: 'FileText',
           },
@@ -281,31 +258,26 @@ export const megaMenus: NavMegaMenu[] = [
         items: [
           {
             label: 'Learn Hub',
-            description: 'Guided courses from first trade to F&O',
             href: '#learn',
             icon: 'GraduationCap',
           },
           {
             label: 'Market Digest',
-            description: 'A five-minute read before the open',
             href: '#learn',
             icon: 'Newspaper',
           },
           {
             label: 'Glossary',
-            description: 'Plain-language definitions, no jargon loops',
             href: '#learn',
             icon: 'BookOpen',
           },
           {
             label: 'Videos',
-            description: 'Short walkthroughs of every screen in the app',
             href: '#learn',
             icon: 'CirclePlay',
           },
           {
             label: 'Calculators',
-            description: 'Brokerage, margin, SIP and options payoff',
             href: '#learn',
             icon: 'Calculator',
           },

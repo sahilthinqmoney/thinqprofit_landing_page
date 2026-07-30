@@ -176,7 +176,7 @@ export default function Products() {
           anyway. MediaCardRail re-applies its own inner gutter, so the cards
           still breathe at the edges.
         */}
-        <div className="-mx-5 sm:-mx-6 lg:-mx-8 xl:-mx-12">
+        <div className="mx-[calc(50%-50vw)] w-screen max-w-[100vw]">
           <MediaCardRail>
             {featured.map((product) => (
               <MediaCard

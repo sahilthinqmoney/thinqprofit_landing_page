@@ -28,9 +28,6 @@ export interface AppCopy {
   heading: string
   body: string
   storeCtas: AppStoreCta[]
-  qrLine: string
-  /** Contains unfilled placeholders on purpose — see the deck's TODO. */
-  ratingLine: string
 }
 
 /* -------------------------------------------------------------------------- */
@@ -51,9 +48,6 @@ export const appCopy: AppCopy = {
     { label: 'Download on the App Store', href: '#' },
     { label: 'Get it on Google Play', href: '#' },
   ],
-  qrLine: 'Scan to install',
-  ratingLine:
-    '[X.X] on the App Store · [X.X] on Google Play [TODO: use live ratings or delete this line]',
 }
 
 /**

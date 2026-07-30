@@ -39,7 +39,15 @@ export default function App() {
      * grain gives it something to be. Fixed rather than in flow so it never
      * repaints with a scrolling layer.
      */
-    <div className="grain min-h-screen bg-bg text-fg">
+    /*
+     * `overflow-x-clip`, not `hidden`: clip contains horizontal overflow without
+     * making this element a scroll container, so `position: sticky` and
+     * ScrollTrigger's pinning still work against the document scroller. A
+     * full-bleed section that miscalculates its gutter can then no longer add
+     * horizontal scroll to the whole page — which is what 140px of overflow was
+     * doing before this.
+     */
+    <div className="grain min-h-screen overflow-x-clip bg-bg text-fg">
       <a
         href="#main"
         className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-100 focus:rounded-full focus:bg-accent focus:px-4 focus:py-2 focus:text-sm focus:text-on-accent"

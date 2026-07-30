@@ -26,7 +26,6 @@ export interface Announcement {
 
 export interface MenuItem {
   label: string
-  description: string
   href: string
   icon: IconName
 }
@@ -61,8 +60,6 @@ export interface HeroContent {
   headline: string
   subheadline: string
   primaryCta: string
-  secondaryCta: string
-  supportLine: string
   mediaAlt: string
   riskDisclosure: string
 }
@@ -86,7 +83,6 @@ export interface Product {
   id: string
   title: string
   body: string
-  bullets: string[]
   cta: string
   href: string
   icon: IconName
@@ -100,7 +96,6 @@ export interface Product {
 
 export interface Tool {
   title: string
-  body: string
   icon: IconName
 }
 

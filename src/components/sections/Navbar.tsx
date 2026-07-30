@@ -132,7 +132,18 @@ interface MenuLinkProps {
   onNavigate: () => void
 }
 
-/** One mega-menu row: icon + label + one-line description (deck §2.3–2.5). */
+/**
+ * One mega-menu row: icon + label.
+ *
+ * The one-line description under each label is gone — 28 of them, 189 words. A
+ * description reading "Charts, volumes, order types" under a label reading
+ * "Charts" tells a reader who has already found Charts what charts are. Apple,
+ * Linear and Stripe do not explain their own menu items either.
+ *
+ * The row is a single line now, so `items-start` becomes `items-center` and the
+ * icon loses its optical nudge — both existed only to align a glyph against two
+ * lines of text.
+ */
 function MenuLink({ item, onNavigate }: MenuLinkProps) {
   return (
     <a
@@ -141,21 +152,15 @@ function MenuLink({ item, onNavigate }: MenuLinkProps) {
         focusFragmentTarget(item.href)
         onNavigate()
       }}
-      className="group flex min-h-11 items-start gap-3 rounded-xl px-3 py-2.5 transition-colors duration-200 hover:bg-surface-raised focus-visible:bg-surface-raised"
+      className="group flex min-h-11 items-center gap-3 rounded-xl px-3 py-2 transition-colors duration-200 hover:bg-surface-raised focus-visible:bg-surface-raised"
     >
       {/* Hover lights the well as brushed metal, not as an action. `accent` on a
           menu row would put the page's action value on twenty-odd links; chrome
           is the token for a machined edge and stays clear of that. */}
-      <span className="mt-0.5 grid h-8 w-8 shrink-0 place-items-center rounded-lg border border-border-soft bg-bg/60 text-fg-muted transition-colors duration-200 group-hover:border-chrome/40 group-hover:text-chrome">
+      <span className="grid h-8 w-8 shrink-0 place-items-center rounded-lg border border-border-soft bg-bg/60 text-fg-muted transition-colors duration-200 group-hover:border-chrome/40 group-hover:text-chrome">
         <ItemIcon name={item.icon} />
       </span>
-      <span className="min-w-0">
-        <span className="block text-sm font-medium text-fg">{item.label}</span>
-        {/* Deck §20 — nav descriptions are one line, ~48 chars, and truncate below that. */}
-        <span className="mt-0.5 block truncate text-xs leading-snug text-fg-muted">
-          {item.description}
-        </span>
-      </span>
+      <span className="min-w-0 truncate text-sm font-medium text-fg">{item.label}</span>
     </a>
   )
 }

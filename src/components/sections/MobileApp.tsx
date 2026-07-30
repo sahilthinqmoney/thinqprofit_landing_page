@@ -82,7 +82,10 @@ export default function MobileApp({ id = 'mobile-app' }: MobileAppProps) {
                 fitting, so `text-wrap: balance` (also from `.display`) resolves
                 the heading to two even lines broken at the comma on every
                 desktop width, instead of flipping between one and two. */}
-            <h2 className="display mx-auto max-w-[12em] text-[clamp(2.5rem,5.5vw,4rem)] leading-[1.05] text-fg">
+            <h2 /* `standard`, not a display step. This is a punctuation band between two
+                media sections — at 64px it outranked Products and Pricing, which are
+                sections a visitor actually arrives for. */
+            className="display mx-auto max-w-[14em] text-[clamp(1.75rem,3vw,2.5rem)] leading-[1.14] text-fg">
               {appCopy.heading}
             </h2>
 
