@@ -37,8 +37,24 @@ const HEIGHT = {
  * two never fight. Sections alternate side to break the rhythm.
  */
 const PLACE = {
-  left: 'md:ml-[6%] md:mr-[46%] md:items-start md:text-left',
-  right: 'md:ml-[46%] md:mr-[8%] md:items-start md:text-left',
+  /*
+   * `left` takes NO left margin. The gutter comes from the wrapper below, which
+   * now runs Container's exact padding ladder — so a full-bleed section's copy
+   * starts on the same left edge as every flat section's heading.
+   *
+   * It used to be `md:ml-[6%]`, and that was a unit mismatch rather than a
+   * design decision: 6% of the frame is 86px at 1440 against Container's fixed
+   * 48px, so Onboarding's headline sat 38px inboard of the nine headings above
+   * and below it. One left edge from the nav to the footer is the page's rule,
+   * and a percentage cannot hold it — the offset changes with every viewport
+   * width, so the two edges were never wrong by the same amount twice.
+   *
+   * The percentage stays on the OPPOSITE margin, which is where it belongs: how
+   * much of the frame the copy leaves for the asset genuinely is a fraction of
+   * the frame, and has no edge to align to.
+   */
+  left: 'md:mr-[46%] md:items-start md:text-left',
+  right: 'md:ml-[46%] md:items-start md:text-left',
   center: 'md:mx-auto md:items-center md:text-center',
 } as const
 
@@ -173,7 +189,12 @@ export default function MediaSection({
         {...media}
       />
 
-      <div className="mx-auto flex w-full max-w-[1760px] flex-1 flex-col px-5 py-20 sm:px-6 md:px-0 md:py-24">
+      {/* Container's gutter ladder, verbatim (`px-5 sm:px-6 lg:px-8 xl:px-12`).
+          It used to drop to `md:px-0` and let `PLACE` supply the inset as a
+          percentage, which is what put this section's copy on a different left
+          edge from the rest of the page at every width. The section itself still
+          bleeds — only the copy is railed. */}
+      <div className="mx-auto flex w-full max-w-[1760px] flex-1 flex-col px-5 py-20 sm:px-6 md:py-24 lg:px-8 xl:px-12">
         <div className={`relative flex flex-1 flex-col ${ANCHOR[anchor]}`}>
           {/* Scrim overscans the section so its soft edge never lands inside the frame. */}
           {scrim > 0 && (

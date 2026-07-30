@@ -1,4 +1,5 @@
 import Container from '../ui/Container'
+import { hasPlaceholder } from '../../lib/copyTokens'
 import { registrations, trustLabel } from '../../data/hero'
 
 /**
@@ -64,9 +65,29 @@ export default function TrustStrip() {
                   <span className="min-w-0 text-[0.8125rem] font-medium leading-snug text-fg xl:text-sm">
                     {registration.authority}
                   </span>
-                  <span className="tabular shrink-0 text-xs leading-snug text-fg-muted sm:mt-1.5 sm:block xl:mt-2 xl:text-[0.8125rem]">
-                    {registration.value}
-                  </span>
+                  {/*
+                    The code renders only when it is a real code.
+
+                    Four of the five are still `[Member code]` / `[IN-DP-XXX-XXXX]`,
+                    and this band set them in plain muted grey — so unlike every
+                    other placeholder on the page, which `CopyText` flags in
+                    warning colour, these read as genuine registration codes that
+                    happened to be illegible. Two treatments for the same thing,
+                    and the more misleading one on the band that exists to be
+                    believed.
+
+                    Routing them through `CopyText` instead would be consistent
+                    but wrong here: five orange bracketed tokens is what the Stats
+                    band looked like before it stopped rendering unverified
+                    figures. The authority name is the claim and it is true today;
+                    the code is corroborating detail that either exists or does
+                    not. So the name always shows and the code waits.
+                  */}
+                  {!hasPlaceholder(registration.value) && (
+                    <span className="tabular shrink-0 text-xs leading-snug text-fg-muted sm:mt-1.5 sm:block xl:mt-2 xl:text-[0.8125rem]">
+                      {registration.value}
+                    </span>
+                  )}
                 </li>
               ))}
             </ul>

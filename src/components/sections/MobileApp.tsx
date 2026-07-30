@@ -89,7 +89,16 @@ export default function MobileApp({ id = 'mobile-app' }: MobileAppProps) {
               {appCopy.heading}
             </h2>
 
-            <p className="mx-auto mt-6 max-w-[34em] text-base leading-relaxed text-fg-muted">
+            {/* The deck step — `text-lg`/18px in a 34em measure, matching
+                `SectionShell` and `MediaSection` exactly.
+
+                This section writes its own copy block rather than passing `body`
+                to `MediaSection`, so it never picked up the deck step when the
+                page was unified on one: it sat at `text-base`, the same 16px as
+                every paragraph on the page, and so read as the section's first
+                sentence rather than as its standfirst. `mt-5`, not `mt-6`, for
+                the same reason — the gap under a heading is part of the step. */}
+            <p className="mx-auto mt-5 max-w-[34em] text-lg leading-relaxed text-fg-muted">
               {appCopy.body}
             </p>
           </Reveal>
