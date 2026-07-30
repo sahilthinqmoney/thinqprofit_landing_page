@@ -3,8 +3,9 @@ import { useEffect, useRef } from 'react'
 /**
  * Platform background — "signal resolving out of noise along a path".
  *
- * A scattered field of small platinum marks drifts sideways in low disorder.
- * Periodically a route between five or six of them lights up in gold, a head
+ * A scattered field of small chrome marks drifts sideways in low disorder.
+ * Periodically a route between five or six of them lights up — to the brightest
+ * value in the palette, the alloy the primary action is filled with — a head
  * travels its length, each mark it reaches flares laterally and settles, and the
  * whole thing decays behind it. One decision being made and committed, then the
  * field going quiet again. The reference is a departure board's flap sequence or
@@ -16,14 +17,16 @@ import { useEffect, useRef } from 'react'
  * the resting state can resolve into a graph.
  *
  * Why a canvas rather than a clip — same argument as HeroCanvas: a few KB
- * instead of megabytes, sharp at any DPR, palette read from index.css so it
- * cannot drift off-brand, and seamless by construction rather than by crossfade.
+ * instead of megabytes, sharp at any DPR, its colours are the index.css tokens
+ * by name, and seamless by construction rather than by crossfade.
  *
  * Constraints it respects (docs/motion-brief.md §7, design-system landing.md):
- *  - Gold is the active route and nothing else. The resting field is platinum
- *    `chrome` → `chrome-dim`, and the ambient bloom is chrome too, so the accent
+ *  - The alloy is the active route and nothing else. The resting field is
+ *    `chrome` → `chrome-dim` and the ambient bloom is chrome-dim, so the accent
  *    stays a small fraction of the lit pixels — roughly one route's comet tail
- *    against the whole field. No green, no red: those are market data.
+ *    against the whole field. No green, no red: those are market data. Nothing
+ *    here has hue at all, so "active" is now a statement about luminance, and
+ *    the whole file is tuned to keep that statement legible (see `draw`).
  *  - Motion is lateral and settling. Node drift is horizontal; the only vertical
  *    component is a per-node shear along that drift, randomly signed across the
  *    field, so nothing reads as a rise. Routes are built to meander within one
@@ -105,13 +108,32 @@ const TRAIL = 0.2
 /** Total segments a route is chopped into for the per-sample alpha ramp. */
 const SAMPLES = 88
 
-/** Gold is the active route only. Platinum is everything at rest. */
-const ROUTE_GOLD: [number, number, number] = [212, 175, 55] // accent      #D4AF37
-const FIELD_BRIGHT: [number, number, number] = [200, 204, 212] // chrome     #C8CCD4
-const FIELD_DIM: [number, number, number] = [138, 144, 153] // chrome-dim  #8A9099
+/**
+ * Three luminances of one neutral metal. The alloy is the committed route only;
+ * chrome and chrome-dim are everything at rest.
+ *
+ * The single hardest thing about this palette is that the route and the field are
+ * no longer different *colours*. Before, the route could sit at the same
+ * luminance as the field — below it, in fact — and still read as the live one,
+ * because it was the only warm thing in the frame. That is gone. `ROUTE_ACTIVE`
+ * is now 1.9× the luminance of the brightest resting mark and 4.1× the dimmest,
+ * and the alphas downstream widen the rendered gap further: the resting field
+ * gives up brightness (§ "The resting field") and the route and its head take
+ * it (§ "The active routes"). Move either of those and the section stops saying
+ * anything.
+ */
+const ROUTE_ACTIVE: [number, number, number] = [231, 233, 238] // accent        #E7E9EE 16.78:1
+const ROUTE_HEAD: [number, number, number] = [244, 246, 250] // accent-hover    #F4F6FA
+const FIELD_BRIGHT: [number, number, number] = [169, 174, 184] // chrome        #A9AEB8  9.16:1
+const FIELD_DIM: [number, number, number] = [117, 123, 133] // chrome-dim       #757B85  4.78:1
 
 function mix(a: number, b: number, t: number) {
   return a + (b - a) * t
+}
+
+/** `rgba()` from a token triple, so no channel ever gets retyped by hand. */
+function rgba(c: [number, number, number], a: number) {
+  return `rgba(${c[0]}, ${c[1]}, ${c[2]}, ${a.toFixed(4)})`
 }
 
 function clamp01(v: number) {
@@ -378,16 +400,21 @@ export default function SignalCanvas({ className = '', deadZone }: SignalCanvasP
       ctx.globalCompositeOperation = 'lighter'
 
       // ---- Ambient bloom ----------------------------------------------------
-      // Chrome, never gold. It covers a large area, and putting the accent here
-      // would spend the entire gold budget on something that is not the signal.
+      // Chrome-dim, never the alloy. It covers a large area, and putting the
+      // accent here would spend the entire accent budget on something that is not
+      // the signal — and worse than before, since the budget is now measured in
+      // luminance: a bright wash this wide raises the floor the route has to beat.
+      // The alphas are unchanged even though chrome-dim is a darker value than
+      // the grey that used to be here; the ambience giving up a little is the
+      // point, not a regression.
       const liveX = narrow || !zoneSide ? 0.5 : zoneSide === 'left' ? 0.5 + zoneExtent / 2 : (1 - zoneExtent) / 2
       const bloomX = width * liveX + Math.cos(w * t) * width * 0.04
       const bloomY = height * (narrow ? 0.72 : 0.5)
       const bloomR = Math.max(width, height) * 0.6
       const bloom = ctx.createRadialGradient(bloomX, bloomY, 0, bloomX, bloomY, bloomR)
-      bloom.addColorStop(0, `rgba(138, 144, 153, ${((0.07 + order * 0.05) * fieldAlpha).toFixed(4)})`)
-      bloom.addColorStop(0.5, `rgba(138, 144, 153, ${(0.026 * fieldAlpha).toFixed(4)})`)
-      bloom.addColorStop(1, 'rgba(138, 144, 153, 0)')
+      bloom.addColorStop(0, rgba(FIELD_DIM, (0.07 + order * 0.05) * fieldAlpha))
+      bloom.addColorStop(0.5, rgba(FIELD_DIM, 0.026 * fieldAlpha))
+      bloom.addColorStop(1, rgba(FIELD_DIM, 0))
       ctx.fillStyle = bloom
       ctx.fillRect(0, 0, width, height)
 
@@ -403,22 +430,31 @@ export default function SignalCanvas({ className = '', deadZone }: SignalCanvasP
         const res = resolve[i]
         const flash = commit[i]
 
-        // Raised from (0.15 + 0.4·weight). The field was reading as noise on
-        // the render rather than as a surface with something on it — a resting
-        // mark has to be legible for a committed one to be a *change*.
+        // The resting term comes down from (0.26 + 0.5·weight) and the two active
+        // terms go up. Both halves of that are the same decision: a resting mark
+        // still has to be legible — a field reading as noise gives a committed
+        // mark nothing to be a *change* against — but it can no longer be as
+        // bright as it was, because brightness is the only thing left that says
+        // "committed". Chrome is also a darker token than the grey this field used
+        // to be drawn in, so the resting value falls about a third overall while
+        // a flapped mark now saturates. Clamped, since the terms can now sum past
+        // 1; `att` multiplies after the clamp so the dead zone still wins.
         const alpha =
-          ((0.26 + 0.5 * n.weight) * (0.55 + 0.45 * order) + res * 0.34 + flash * 0.7) *
+          clamp01((0.21 + 0.44 * n.weight) * (0.55 + 0.45 * order) + res * 0.3 + flash * 0.95) *
           att *
           fieldAlpha
         if (alpha <= 0.004) continue
 
-        // Committed marks go platinum-bright and take a whisper of gold, which
-        // is what ties a mark to the route passing through it. A few marks at a
-        // time, a handful of pixels each — the accent stays where it belongs.
+        // A resting mark runs chrome-dim → chrome on its own weight and on the
+        // broad resolve. Only `flash` — the head actually arriving — pulls it to
+        // the alloy, and it pulls nearly all the way (0.85, up from a 0.45
+        // whisper): a hue-tinted hint worked when the accent was warm, but a
+        // 45% step along a neutral ramp is just a slightly lighter grey. A few
+        // marks at a time, a handful of pixels each, so the budget holds.
         const tone = clamp01(n.weight * 0.5 + res * 0.5 + flash * 0.8)
-        const r = mix(mix(FIELD_DIM[0], FIELD_BRIGHT[0], tone), ROUTE_GOLD[0], flash * 0.45)
-        const g = mix(mix(FIELD_DIM[1], FIELD_BRIGHT[1], tone), ROUTE_GOLD[1], flash * 0.45)
-        const b = mix(mix(FIELD_DIM[2], FIELD_BRIGHT[2], tone), ROUTE_GOLD[2], flash * 0.45)
+        const r = mix(mix(FIELD_DIM[0], FIELD_BRIGHT[0], tone), ROUTE_ACTIVE[0], flash * 0.85)
+        const g = mix(mix(FIELD_DIM[1], FIELD_BRIGHT[1], tone), ROUTE_ACTIVE[1], flash * 0.85)
+        const b = mix(mix(FIELD_DIM[2], FIELD_BRIGHT[2], tone), ROUTE_ACTIVE[2], flash * 0.85)
         const rgb = `${r | 0}, ${g | 0}, ${b | 0}`
 
         // The flap: the mark extends laterally as the head reaches it, then
@@ -470,7 +506,11 @@ export default function SignalCanvas({ className = '', deadZone }: SignalCanvasP
             const att = guard((x0 + x1) / 2, (y0 + y1) / 2)
             if (att <= 0.01) continue
 
-            ctx.strokeStyle = `rgba(212, 175, 55, ${(a * 0.7 * att * fieldAlpha).toFixed(4)})`
+            // 0.95, up from 0.7. The trail used to be allowed to sit at partial
+            // alpha because hue carried it; against a field of the same metal it
+            // has to be drawn at nearly the token's full value or the route reads
+            // as one more resting mark that happens to be in a line.
+            ctx.strokeStyle = rgba(ROUTE_ACTIVE, a * 0.95 * att * fieldAlpha)
             ctx.lineWidth = 0.9 + 1.5 * a
             ctx.beginPath()
             ctx.moveTo(x0, y0)
@@ -479,16 +519,21 @@ export default function SignalCanvas({ className = '', deadZone }: SignalCanvasP
           }
         }
 
-        // The head itself — the single brightest thing in the frame, and the
-        // only place the accent gets to bloom.
+        // The head itself — the single brightest thing in the frame, and the only
+        // place the accent gets to bloom. Its core is `accent-hover`, the top of
+        // the palette, at 0.42 rather than 0.3: additively over the trail it lands
+        // the head at effectively full white while staying a 24px radius, so the
+        // brightest pixels on the section are a few hundred of them on one moving
+        // point. That is the whole luminance hierarchy in one place — head, then
+        // trail, then flapped mark, then field.
         const hp = pointAt(route, head)
         const hAtt = guard(hp.x, hp.y)
         if (hAtt > 0.01) {
           const strength = gate * hAtt * fieldAlpha
           const glow = ctx.createRadialGradient(hp.x, hp.y, 0, hp.x, hp.y, 24)
-          glow.addColorStop(0, `rgba(232, 217, 168, ${(0.3 * strength).toFixed(4)})`)
-          glow.addColorStop(0.35, `rgba(212, 175, 55, ${(0.13 * strength).toFixed(4)})`)
-          glow.addColorStop(1, 'rgba(212, 175, 55, 0)')
+          glow.addColorStop(0, rgba(ROUTE_HEAD, 0.42 * strength))
+          glow.addColorStop(0.35, rgba(ROUTE_ACTIVE, 0.2 * strength))
+          glow.addColorStop(1, rgba(ROUTE_ACTIVE, 0))
           ctx.fillStyle = glow
           ctx.beginPath()
           ctx.arc(hp.x, hp.y, 24, 0, Math.PI * 2)

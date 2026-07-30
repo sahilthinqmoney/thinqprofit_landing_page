@@ -39,7 +39,7 @@ import { formats, learnDisclaimer, tracks } from '../../data/learn'
  * assistive tech, and a visible numeral would have it announced twice.
  *
  * The advisory-boundary disclaimer is the section's one hard requirement: live
- * text, `fg-muted` at 8.07:1, never behind a blur, sitting directly under the
+ * text, `fg-muted` at 13.08:1, never behind a blur, sitting directly under the
  * action it qualifies (landing.md §9).
  *
  * Below `md` the treads collapse to zero and the rungs stack against one

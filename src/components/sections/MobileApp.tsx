@@ -156,11 +156,24 @@ export default function MobileApp({ id = 'mobile-app' }: MobileAppProps) {
                 phone reads darker than the surface it stands on, the way a real
                 object would.
 
+                The alpha is 26%, up from 20%. `chrome` dropped from #C8CCD4 to
+                #A9AEB8, losing 30% of its relative luminance, and because the
+                border composites over this element's own `bg-bg` fill, that loss
+                lands on the hairline directly: at 20% the edge resolved to
+                #262729 and separated from the plate around it by 1.27:1, against
+                1.37:1 before the token moved. On a 1px line at near-black that
+                is the difference between an edge and a suggestion. 26% takes it
+                to #303134 and 1.46:1 — slightly clearer than the old bezel, not
+                merely level with it — and 26% is not a fresh number: it is the
+                one alpha index.css already commits to for a visible chrome edge,
+                on `.card-lift:hover`. Reusing it keeps every machined edge on
+                the page mixed at one strength.
+
                 The radius is now `--radius-card`, the page's only card radius,
                 rather than the hand-picked 2.25rem it carried before. A device
                 bezel is a physical edge like every other on the page and has no
                 claim to a radius of its own. */}
-            <div className="rounded-[var(--radius-card)] border border-chrome/20 bg-bg p-2">
+            <div className="rounded-[var(--radius-card)] border border-chrome/26 bg-bg p-2">
               {/* Wrapper clips the placeholder's own radius to the bezel's inner
                   curve — two rounded-* utilities on one element resolve by
                   stylesheet order, not source order. Concentric, not equal: the

@@ -37,9 +37,18 @@ import type { FaqEntry } from '../../data/faq'
  * chevron that turns on `--ease-out-expo`, the same curve everything else on
  * the page decelerates on.
  *
- * The row's hover illumination is chrome, not gold. Gold on this page marks an
+ * The row's hover illumination is chrome, not accent. The accent tier marks an
  * action you are about to take; a row lighting up under the cursor is the edge
- * catching a light, which is what `chrome` is the token for.
+ * catching a light, which is what `chrome` is the token for. That separation used
+ * to be carried by hue and is now carried only by luminance — chrome sits a step
+ * below accent on purpose — so it matters more here than it did, not less: this
+ * is twelve rows, and twelve accent-tier marks would out-shout every button on
+ * the page.
+ *
+ * The open row is marked by going *up* in luminance (`fg`) rather than sideways
+ * into a brand colour, because sideways no longer exists. `accent-soft`
+ * (#c3c8d2) is darker than the chevron's resting `fg-muted` (#cfcfcf), so it
+ * would have dimmed the chevron on open and contradicted the rotation.
  */
 
 /**
@@ -129,9 +138,11 @@ function FaqRow({ entry, delay }: { entry: FaqEntry; delay: number }) {
 
           {/* Rotates on the page's shared deceleration curve — a chevron that
               snaps on `linear` is the one piece of an accordion everybody
-              notices when it is wrong. */}
+              notices when it is wrong. Open brightens to `fg`; the 180° turn is
+              what says which state it is in, and the colour only has to agree
+              with it rather than encode it. */}
           <ChevronDown
-            className="mt-1 h-5 w-5 shrink-0 text-fg-muted transition-[transform,color] duration-500 group-hover:text-fg group-open:rotate-180 group-open:text-accent-soft"
+            className="mt-1 h-5 w-5 shrink-0 text-fg-muted transition-[transform,color] duration-500 group-hover:text-fg group-open:rotate-180 group-open:text-fg"
             style={{ transitionTimingFunction: 'var(--ease-out-expo)' }}
             strokeWidth={1.5}
             aria-hidden="true"

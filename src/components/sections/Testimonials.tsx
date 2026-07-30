@@ -42,10 +42,13 @@ import type { Testimonial } from '../../types'
  *  - the local `MEASURE` constant. `SectionShell` owns the one content rail
  *    (84rem) and the heading's reading measure; a section that redeclares its
  *    own width is how the page came to have six of them.
- *  - the gold em dash. It was the section's "one accent gesture", but an
- *    attribution mark is not an action, and three of them across a sparse
- *    screen is gold spent on punctuation. Chrome is the token for a structural
- *    mark, and it is what the dash gets now.
+ *  - the accented em dash. It was the section's "one accent gesture", but an
+ *    attribution mark is not an action. With no hue left in the brand, `accent`
+ *    is defined purely as the brightest surface on the page, so putting it on
+ *    three dashes across an almost-empty screen would make punctuation the
+ *    highest-luminance thing in the section — louder than the quote it credits
+ *    and competing with the actual buttons elsewhere. `chrome` sits one step
+ *    down in luminance for exactly this, and it is what the dash gets now.
  *
  * COMPLIANCE — unchanged and non-negotiable:
  *  - every `[Name]`, `[City]` and `[YEAR]` is still an unfilled deck value and
@@ -55,7 +58,7 @@ import type { Testimonial } from '../../types'
  *    Thiruvananthapuram" must not be silently ellipsised once real, consented
  *    quotes land.
  *  - `testimonialDisclaimer` is required under the block. It stays live text at
- *    `fg-muted` (8.07:1), left-aligned with the rest of the section, never baked
+ *    `fg-muted` (13.08:1), left-aligned with the rest of the section, never baked
  *    into an image and never behind a blur.
  */
 
@@ -79,9 +82,9 @@ function Attribution({ testimonial, emphasis = 'compact' }: AttributionProps) {
         emphasis === 'lead' ? 'mt-8 text-base lg:mt-10' : 'mt-5 text-sm'
       }`}
     >
-      {/* Chrome, not gold. The em dash is the mark that does the attributing —
-          structural punctuation, not an action, and gold on this page means
-          only the second of those. */}
+      {/* Chrome, not accent. The em dash is the mark that does the attributing —
+          structural punctuation, not an action, and the accent tier on this page
+          means only the second of those. */}
       <span aria-hidden="true" className="text-chrome-dim">
         &mdash;
       </span>
@@ -156,7 +159,7 @@ export default function Testimonials() {
       )}
 
       {/* Required under the block — SEBI advertising rules. Live text at
-          `fg-muted` (8.07:1), never behind a blur, never baked into an image.
+          `fg-muted` (13.08:1), never behind a blur, never baked into an image.
           It carries no rule of its own: a second line here would put the
           section back to looking ruled, and the size drop plus the air already
           say this is the section's footnote rather than a fourth quote. */}

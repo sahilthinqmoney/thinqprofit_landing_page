@@ -18,20 +18,28 @@ and dead zone of each asset, and the alt text that ships with it.
 
 **What it supersedes.** motion-brief §3 and §5 were written against an earlier design
 system — ink-navy `#0F172A`, indigo→cyan light, "premium AI product film". That palette is
-gone. DESIGN.md §2 replaced it with warm ink, gold and platinum, and the display face moved
-from a Didone to Archivo. The *rules* in §7 and the *encoding* in §6 survive intact; the
-colour direction in §3 and §5 does not. Where they disagree, this file wins.
+gone, and so is the gold-and-platinum system that replaced it. DESIGN.md §2 is now a
+**chromatic** system: neutral ink `#050505` and a single near-white polished alloy,
+`accent` `#e7e9ee`, which is the brightest surface on the page and the only one that moves.
+The display face is Archivo, a signage grotesk. The *rules* in motion-brief §7 and the
+*encoding* in §6 survive intact; the colour direction in §3 and §5 does not. Where they
+disagree, this file wins.
 
-Three shipped strings still carry the old direction and will need updating when the assets
-land — the `alt` values in §3 below are their replacements:
+The consequence for imagery is larger than a swapped hex, and §2.2 and §2.3 are where it
+lands: **there is no longer any permitted colour in a plate at all**, and the scarce
+resource the briefs have to ration is no longer hue but *luminance*, because the artwork's
+metal and the brand's metal are now the same neutral alloy.
 
-| File | String | Problem |
+Shipped strings still carrying old direction — the `alt` values in §3 below are their
+replacements:
+
+| File | String | Status |
 |---|---|---|
-| `src/data/hero.ts` | `mediaAlt`, `heroMediaLabel` | Describes a candlestick chart and an order ticket — banned outright (§7 rule 1, rule 5) |
-| `src/data/platform.ts` | `platformMediaAlt` | Describes a web terminal with an option chain and an order ticket — same. Currently unreferenced: `Platform.tsx` now renders `SignalCanvas` and passes no `media` |
-| `src/data/onboarding.ts` | `mediaAlt` | Correct in substance, wrong palette ("ink-navy", "indigo fading to cyan") |
-| `src/components/sections/Products.tsx` | `MEDIA_BRIEF` | Same — "translucent navy plates", "cyan filaments" |
-| `src/components/sections/FinalCta.tsx` | `closingClip` | Same — "ink-navy void", "indigo-to-cyan band" |
+| `src/data/onboarding.ts` | `mediaAlt` | **Stale.** Correct in substance, wrong world — "ink-navy void", "indigo fading to cyan". Replace with A5's alt text |
+| `src/data/hero.ts` | `mediaAlt` | **Residue.** Now describes machined aluminium correctly but says the edge catches *warm* light. There is no warm light in this system; the specular is neutral. Replace with A1's alt text |
+| `src/data/platform.ts` | `platformMediaAlt` | Current and neutral. Unreferenced today: `Platform.tsx` renders `SignalCanvas` and passes no `media` |
+| `src/components/sections/Products.tsx` | `MEDIA_BRIEF` | Current — machined aluminium, no colour |
+| `src/components/sections/FinalCta.tsx` | `closingClip` | Current — "cool near-white specular", neutral monochrome |
 
 ---
 
@@ -53,13 +61,20 @@ single large source, deep falloff, obsessive edge control — not fintech stock 
 a plate could plausibly appear in a camera-module close-up on an iPhone page, it is on
 brand. If it could plausibly appear in a bank's quarterly report, it is not.
 
+**The metal in the artwork and the metal in the interface are now the same material.** That
+is new, and it cuts both ways. It is why this world is the right one — the page's primary
+action is a polished near-white alloy, so a photograph of machined aluminium is the brand
+photographed rather than a mood set beside it. It is also why the discipline in §2.3 is
+stricter than the one it replaces: when the button and the specular are made of the same
+value, a bright edge in the wrong place is not a colour clash, it is a second button.
+
 **One-paragraph version, for pasting into a prompt:**
 
 > Macro industrial photography of a large abstract machined-aluminium form in a matte
 > black room. Single soft volumetric key light raking across the surface at a shallow
 > angle; no fill; long falloff to true black within the frame. Brushed and bead-blasted
 > metal, dark reflective glass, matte black structural planes. Neutral monochrome — steel
-> greys on warm near-black, no colour cast. Shallow depth of field, long lens, flat
+> greys on neutral near-black, no colour cast, no warm light. Shallow depth of field, long lens, flat
 > perspective, no wide-angle distortion. Depth built from light and shadow only. Calm,
 > precise, expensive, empty. Studio, not environment.
 
@@ -86,9 +101,15 @@ approve an asset that violates it because the rest of the frame is good.
 - **Any number, ticker, price, percentage, currency symbol or P&L.** Including partial,
   out of focus, or on a reflected surface. A rendered price is a fabricated market claim,
   not a texture (motion-brief §7 rule 1).
-- **Anything green or red.** Reserved for `gain` / `loss` (DESIGN.md §2). This holds in
-  the light, the reflections, the grade and the compression artefacts, not just the
-  subject (motion-brief §7 rule 2).
+- **Colour of any kind.** The brand has no hue left in it: DESIGN.md §2 reserves hue
+  entirely for meaning, so `gain`, `loss` and `warning` are the only chromatic values on
+  the page and every one of them says something a photograph has no business saying. Green
+  and red remain the hard rejects (motion-brief §7 rule 2), but this now holds for *all*
+  hues, in the light, the reflections, the grade and the compression artefacts, not just the
+  subject. Measurable form in §2.2.
+- **Warm metal.** Gold, brass, bronze, copper, amber, champagne, rose. This is the
+  system that was just removed, and a warm bounce on an aluminium face is the fastest way
+  to bring it back. A tungsten key does it too, without ever naming a colour — see §2.4.
 - **People celebrating with money.** Cash, champagne, cars, watches, fist pumps, keys,
   luxury interiors (motion-brief §7 rule 4).
 - **Upward motion or upward-leading composition.** No ascending diagonal as the dominant
@@ -117,55 +138,124 @@ jewellery, watches, cars, bulls, bears, skylines, city, buildings, office,
 desk, laptop, people, hands, faces, crowd, celebration, green, red, emerald,
 crimson, teal glow, cyan glow, magenta, rainbow, neon, lens flare, light
 streaks, bokeh balls, watermark, logo, signature, caption, low resolution,
-oversharpened, HDR halo, plastic render, chrome sphere, 3D blob
+oversharpened, HDR halo, plastic render, chrome sphere, 3D blob,
+gold, golden, brass, bronze, copper, amber, champagne, rose gold, warm light,
+tungsten, candlelight, sunset light, colour grade, split tone, teal and orange,
+blown highlights, white hot specular
 ```
+
+The last three lines are the chromatic system's additions. The warm-metal terms are there
+because gold was the previous brand and a generation model reaching for "premium metal"
+reaches for it by default. `blown highlights` and `white hot specular` are there for §2.3:
+a clipped highlight is the one thing in a plate that can out-brighten the button.
 
 ### 2.2 Palette
 
-The page is `--color-bg: #08080a` — warm near-black, verified in `src/index.css`. (The
-table in DESIGN.md §2 still lists `#0b0b0d`, one step lighter; the CSS is current.) Plates
-are graded to bottom out at `#08080a` so the frame edge dissolves into the page rather
+The page is `--color-bg: #050505` — neutral near-black, verified in `src/index.css`. Plates
+are graded to bottom out at `#050505` so the frame edge dissolves into the page rather
 than sitting on it as a rectangle.
 
-| Role | Value | OKLCH | Where it may appear in a plate |
-|---|---|---|---|
-| Ink | `#08080a` | L .135 / C .005 / h 286° | The room. Black point of every plate. |
-| Surface | `#141417` – `#1c1c21` | L .19–.29 / C .006–.011 | Matte black structure, shadow-side planes |
-| Platinum | `#c8ccd4` | L .844 / C .012 / h 264° | Specular edges, the machined highlight. **This is the only bright value.** |
-| Chrome dim | `#8a9099` | L .651 / C .015 / h 258° | Mid-tone metal, diffuse aluminium face |
-| Gold | `#d4af37` | L .767 / C .139 / h 91° | See §2.3. Two plates only. |
-| Gain / loss | `#4ade80` / `#f87171` | h 152° / h 22° | **Never.** |
+The ground is three levels darker than the system this supersedes (`#08080a`) and it is no
+longer warm. The warmth existed to keep gold from reading muddy against it; under a neutral
+alloy it tints the metal yellow. Every threshold in this file that was computed against
+`#08080a` has been recomputed — see §2.7.
 
-**Everything else is neutral.** Working tolerance: 95% of pixels in a plate must sit below
-OKLCH chroma `0.02` — visually monochrome. The permitted 5% is either the platinum
-specular (which is near-neutral anyway) or the gold note described below. Nothing in the
-frame carries a colour cast: no teal shadows, no warm/cool split-tone, no "cinematic"
-orange-and-blue grade. The warmth in the image comes from the `#08080a` black point alone,
-which is what stops the greys reading blue.
+OKLCH coordinates are given so a colour rule can be machine-checked rather than argued
+about. All values are computed from the sRGB hex, not read off a picker.
 
-Hard reject bands, checkable per pixel: chroma ≥ `0.04` with hue in **120°–190°** (green)
-or **345°–45°** (red/orange). The second band also catches `warning` orange (`#f97316`,
-h 48°), which is close enough to gold to be worth keeping out of imagery entirely — on a
-broker page a warm-orange glow in a plate under a gold button is a risk disclosure and a
-call to action wearing the same colour.
+| Role | Token | Value | OKLCH | Where it may appear in a plate |
+|---|---|---|---|---|
+| Ink | `bg` | `#050505` | L .115 / C .000 / h — | The room. Black point of every plate. |
+| Surface | `surface` – `surface-raised` | `#0d0d10` – `#16161a` | L .160–.202 / C .006–.008 / h 286° | Matte black structure, shadow-side planes |
+| Panel edge | `border` | `#2b2b31` | L .292 / C .011 / h 286° | The dead zone's 3% tail threshold — no more than 3% of it may be this bright (§2.7) |
+| **Alloy** | `accent` | `#e7e9ee` | L .934 / C .007 / h 269° | **Never.** This is the button. See §2.3 |
+| Alloy, quiet | `accent-soft` | `#c3c8d2` | L .832 / C .015 / h 264° | **Never.** Still inside the action's luminance band |
+| Chrome | `chrome` | `#a9aeb8` | L .750 / C .015 / h 264° | Specular edges, the machined highlight. **This is the brightest value a plate may reach.** |
+| Chrome dim | `chrome-dim` | `#757b85` | L .581 / C .017 / h 261° | Mid-tone metal, diffuse aluminium face |
+| Gain / loss | `gain` / `loss` | `#4ade80` / `#f87171` | C .182 / h 152° · C .166 / h 22° | **Never.** |
+| Warning | `warning` | `#f97316` | L .705 / C .187 / h 48° | **Never.** |
 
-### 2.3 Gold discipline
+Two things changed shape here, not just value.
 
-DESIGN.md §1: *"Gold is the working light, not the decoration. It appears where an action
-is, and nowhere else."* Every plate on this page has a gold `Button` sitting on top of it.
-If the plate also contains gold, the button stops being the only warm thing on the screen
-and stops reading as the action.
+**The bright end moved down, and the plate's ceiling moved with it.** In the gold system
+the brightest value in the palette was platinum at L .844 and the *button* was gold at
+L .767 — the button was darker than the plate's specular and got away with it, because hue
+told them apart. There is no hue now. `accent` is L .934, above everything, and a plate
+that puts a near-white specular on an aluminium chamfer is painting with the button's own
+value. So the specular is briefed to `chrome`, L .750, and the L .750 → .934 gap between a
+machined edge and an action is a brand rule that lives in the imagery as much as in the CSS.
 
-So:
+**The chroma tolerance is no longer a budget, it is a floor.** There is nothing coloured
+left in the brand, so a plate needs no permitted chromatic note of any kind:
 
-- Gold appears in **exactly two** of the six plates — **Onboarding** and **Final CTA** —
-  so the page's warm note lands twice across a long scroll rather than six times.
-- Where it appears it is a **bounce, not a source**: a reflected warm falloff on a metal
-  face, ≤3% of frame area, chroma capped at `0.09` (about two-thirds of the button's), hue
-  held in **80°–100°**.
-- It never sits within 25% of the frame width of where the primary button lands, and never
-  inside the dead zone.
-- The other four plates are neutral steel on ink. No exceptions, no "just a hint".
+- **≥99% of pixels below OKLCH chroma `0.02`** — visually monochrome. The 1% is slack for
+  WebP chroma-subsampling artefacts at a hard specular edge, nothing else. The old 5%
+  allowance existed to hold the gold note and is withdrawn with it.
+- **No pixel at or above chroma `0.04`, at any hue.** Hue no longer needs to be consulted
+  to reject a pixel; chroma alone does it. This is simpler *and* stricter than the old
+  banded rule, which had to leave 60°–120° open for gold.
+- **Meaning-bearing hues get a tighter threshold: chroma ≥ `0.025` with hue in
+  120°–190° (green) or 345°–60° (red through warning orange) is an outright reject**, not a
+  tolerance discussion. On this page green means `gain` and red means `loss`.
+- The red/orange band now runs to **60°** rather than 45°. `warning` sits at h 48° and the
+  old band deliberately stopped short of it because 48° was too close to gold at 91° to
+  separate cleanly. With gold gone there is no reason to leave the gap open, and closing it
+  catches every warm-metal grade in one test.
+- **No colour cast and no split-tone.** No teal shadows, no warm/cool split, no "cinematic"
+  orange-and-blue grade. The greys are held neutral by the neutral black point, not by a
+  counter-tint.
+
+### 2.3 Luminance discipline
+
+This section replaces the gold discipline, and it is the one the whole rewrite turns on.
+
+The old rule rationed **hue**: gold appeared in two plates out of six, ≤3% of frame,
+because every plate carried a gold button and a warm note in the plate would stop the
+button being the only warm thing on screen.
+
+The button is not warm any more. It is *bright* — the brightest surface on the page, and
+the only one that moves (DESIGN.md §2). A monochrome world cannot ration hue, because it
+has none. What it has to ration is exactly what now identifies the action:
+
+**Rule 1 — nothing in a plate reaches the accent's luminance.**
+
+- **No pixel above OKLCH L `.750`** (`chrome`, `#a9aeb8`). That is the plate's specular
+  ceiling, and it holds a 0.18 L gap to `accent` at L .934.
+- **No clipped highlight anywhere in frame.** A blown specular is L 1.0; it out-brightens
+  the button by definition. Expose for the chamfer, not for the room.
+- **≤3% of frame above OKLCH L `.600`** (`#808080`, 5.16:1 on the ground). The 3% is
+  inherited deliberately from the old gold cap — same number, different axis. Hue was the
+  scarce resource; brightness is now.
+- This applies to all six plates, where the gold rule applied to two. The discipline got
+  broader as well as stricter, because a specular is present in every plate and gold was
+  not.
+
+**Rule 2 — the bright note still lands exactly twice.**
+
+The gold bounce was doing compositional work beyond colour: it gave a long scroll two
+moments of punctuation. That structure survives, transposed from hue to light. In a
+monochrome world a "note" can only be made of light, so:
+
+- **Exactly two plates carry a second light event** — a secondary highlight beyond the
+  single permitted rim (§2.4). They are the same two: **Onboarding** and **Final CTA**.
+- Same envelope as the gold note had: **≤3% of frame area**, never within 25% of the frame
+  width of where the primary button lands, never inside the dead zone.
+- It is a **bounce, not a source** — a reflected falloff on a metal face, neutral, capped
+  at OKLCH L `.600` rather than the specular's `.750`, so it reads as light that has
+  travelled rather than as a second key.
+- The other four plates get one key and at most one rim. No exceptions, no "just a hint".
+
+**Rule 3 — nothing in a plate moves like the button.** Mostly moot for six stills, but it
+binds if any plate ships as motion (§4.2): the primary action idles perpetually and speeds
+up under the pointer. A travelling highlight in the plate behind it competes for the same
+read. If a plate moves, its brightest travelling mark stays below L `.600` and settles
+inside the loop — it never idles.
+
+**Why this is not just "keep it dark".** The plate is allowed to be lit, dramatic and
+expensive. What it is not allowed to do is produce the specific value that means *press
+this*. `chrome` reads as machined and premium at L .750; the difference between that and
+L .934 is the entire distance between an edge and an action in this system, and it is the
+one distinction a photograph can casually destroy.
 
 ### 2.4 Lighting
 
@@ -174,14 +264,19 @@ One key. Everything else is subtraction.
 - **Key:** a single large soft source — 4×6ft softbox or equivalent — placed at a grazing
   angle, 70°–85° off the lens axis, so an aluminium face reads as a *gradient across the
   surface* rather than a hotspot in the middle of it. Height slightly above the form,
-  angled down. 5600K, no gel.
+  angled down. **5600K, no gel, and the white balance set to it.** This is now a colour
+  rule and not a technical note: a 3200K key or a warm-balanced grade reintroduces the gold
+  system through the lighting without anyone naming a colour, and it will pass a casual
+  look because tungsten on aluminium is a photograph everyone has seen.
 - **Fill:** none. Black flags on the shadow side. The falloff is the depth; a fill light
   flattens the plate into a grey card and the copy then has nowhere dark to sit.
 - **Rim:** at most one hard accent — a 1° grid spot or a light through a narrow slot —
-  used to draw a single platinum edge line where a form has to separate from the
-  background. One rim per plate. Two rims and the object starts to look lit *for* the
-  camera, which is exactly the tell that separates product photography from a render.
-- **Falloff:** the room must reach `#08080a` inside the frame, not at its edge. If the
+  used to draw a single chrome edge line where a form has to separate from the
+  background, capped at OKLCH L `.750` (§2.3). One rim per plate; the two plates in §2.3
+  rule 2 get a second, dimmer light event and no more. Two rims and the object starts to
+  look lit *for* the camera, which is exactly the tell that separates product photography
+  from a render.
+- **Falloff:** the room must reach `#050505` inside the frame, not at its edge. If the
   background is still grey at the border the plate will read as a lit box against the
   page.
 - **Volumetrics:** permitted and wanted, but as *atmosphere in the falloff*, not as a
@@ -204,13 +299,15 @@ Named, so the prompt has something to hold onto:
   Reads as near-ink; carries a very faint edge highlight and nothing else.
 - **Dark reflective glass** — thick, tinted near-black, used on edge so the refraction
   bends a highlight rather than showing a reflection of the studio.
-- **Machined chamfer** — the 45° cut where two faces meet. This is where the platinum
-  specular lives, and it is the single most useful mark in the whole system: a bright hair
-  line that describes a form's geometry without lighting its face.
+- **Machined chamfer** — the 45° cut where two faces meet. This is where the specular
+  lives, and it is the single most useful mark in the whole system: a bright hair line that
+  describes a form's geometry without lighting its face. Held at `chrome` L `.750`, never
+  brighter (§2.3).
 
-Banned materials: chrome (mirror finish reflects the studio and reads cheap), polished
-gold, carbon fibre, brushed rose gold, marble, concrete, water, smoke machines,
-holographic film.
+Banned materials: **mirror-polished chrome** (it reflects the studio and reads cheap — note
+that this is a finish, not the `chrome` token, which is a *value*: the brief wants brushed
+and bead-blasted surfaces carrying that value, never a mirror), polished gold or any warm
+metal, carbon fibre, marble, concrete, water, smoke machines, holographic film.
 
 ### 2.6 Camera and lens character
 
@@ -238,16 +335,96 @@ crossing the headline is a legibility failure the scrim cannot recover.
 
 **The measurable spec, applied to the dead-zone rectangle before any scrim:**
 
-- No pixel above `#3a3a3e` (relative luminance `0.043`). That holds `#f7f6f3` headline text
-  at **10.5:1** against the worst pixel it can land on.
-- No more than 3% of dead-zone pixels above `#2a2a30` (13.2:1).
-- No luminance step greater than 20 sRGB levels across any 8-pixel span inside the dead
+- **No pixel above `#38383c`** (relative luminance `0.0400`). That holds the `#ffffff`
+  headline at **11.7:1** and `fg-muted` `#cfcfcf` body copy at **7.5:1** against the worst
+  pixel either can land on.
+- **No more than 3% of dead-zone pixels above `#2b2b31`** — the `border` token — which is
+  **14.1:1** against white and **9.0:1** against `fg-muted`.
+- **No luminance step greater than 20 sRGB levels across any 8-pixel span** inside the dead
   zone. Mean darkness is not enough — a machined chamfer running through a headline breaks
   legibility even when the average is near black. **The dead zone must contain no edges,
   not merely no highlights.**
-- Falloff into the dead zone is gradual: the boundary between the lit region and the dead
-  zone spans at least 12% of frame width. A hard terminator at the dead-zone border reads
-  as a matte line.
+- **Falloff into the dead zone is gradual:** the boundary between the lit region and the
+  dead zone spans at least 12% of frame width. A hard terminator at the dead-zone border
+  reads as a matte line.
+
+#### Where these thresholds come from — the arithmetic
+
+Both thresholds were previously computed against ground `#08080a` and headline `#f7f6f3`.
+The ground is now `#050505` and the headline is `#ffffff`, so both were recomputed. The
+arithmetic, in full, because it will need doing again the next time the ground moves.
+
+*Luminance is WCAG relative luminance: linearise each channel with `c ≤ 0.04045 ? c/12.92 :
+((c+0.055)/1.055)^2.4`, then `Y = 0.2126R + 0.7152G + 0.0722B`. Contrast is
+`(Y₁+0.05)/(Y₂+0.05)`. `L*` is CIE lightness, `903.3·Y` below `Y = 0.008856` and
+`116·∛Y − 16` above it — used here because it is perceptually uniform and an sRGB level
+step is not.*
+
+**1. What the old ceiling actually encoded.** `#3a3a3e` → `Y = 0.042735`, `L* = 24.56`. The
+old ground `#08080a` → `Y = 0.002472`, `L* = 2.23`. So the ceiling sat **ΔL\* = 22.32**
+above the page ink. That step — not the hex, and not the 10.5:1 figure — is the real spec:
+it is how much brighter than the page a dead zone may get before the plate stops dissolving
+into the page and starts reading as a lit rectangle laid on it.
+
+**2. Re-anchor that step to the new ground.** `#050505` → `Y = 0.001518`, `L* = 1.371`
+(below the 0.008856 knee, so `L* = 903.3 × 0.001518`). Holding the same perceptual step:
+
+```
+target L*  = 1.371 + 22.32          = 23.69
+target Y   = ((23.69 + 16) / 116)³  = 0.04006
+grey level = 1.055 · Y^(1/2.4) − 0.055, ×255 = 56.3 → 56 = 0x38
+```
+
+Carrying forward the +4-level blue lift the old ceiling used — the same cool cast the
+`border` tokens still carry, at +6 — gives **`#38383c`** → `Y = 0.039953`, `L* = 23.66`,
+**ΔL\* = 22.29** against the new ground. Within 0.03 L\* of the old relationship. The lift is
+cosmetic on a threshold, but it keeps a sampled dead zone hue-consistent with the panel
+edges it sits next to, which matters when the check is "is this pixel above `border`".
+
+**3. Check it against the text that actually sits there.**
+
+```
+#ffffff  Y = 1.000000   → (1.000000 + 0.05) / (0.039953 + 0.05) = 11.67 : 1
+#cfcfcf  Y = 0.623960   → (0.623960 + 0.05) / (0.039953 + 0.05) =  7.49 : 1
+```
+
+The binding case is **not** the headline. White gained headroom when it went from `#f7f6f3`
+(Y 0.921568) to `#ffffff`, and large display type only needs 3:1 anyway. The constraint is
+the 16px `fg-muted` body and disclosure copy that shares every dead zone, and 7.5:1 clears
+the 4.5:1 floor with 66% of margin. Onboarding's `finePrint` is `text-white/75`, which
+composites in sRGB over the ceiling — `0.75 × 255 + 0.25 × 56 = 205` → `#cdcdce` — for
+**7.35:1**, materially the same number, so the one place the page sets an alpha text colour
+over a plate does not need a threshold of its own.
+
+Note how much slack that leaves: 4.5:1 against `#cfcfcf` would permit a max pixel of
+`Y = 0.0998`, sRGB grey **89** (`#595959`). The ceiling is grey 56 at `Y = 0.0400` — **40%
+of the luminance the contrast floor would allow**. That is intentional — the dead-zone ceiling is set by *how a plate meets the
+page*, not by the contrast floor, and it is why the ceiling got slightly darker even though
+the headline got brighter.
+
+**4. The 3% tail threshold is the `border` token, as before.** The old `#2a2a30` was
+exactly the old `border`; the new one is `#2b2b31`, one level up. `Y = 0.024631`,
+`L* = 17.75`:
+
+```
+#ffffff → (1.000000 + 0.05) / (0.024631 + 0.05) = 14.07 : 1   (was 13.2 : 1)
+#cfcfcf → (0.623960 + 0.05) / (0.024631 + 0.05) =  9.03 : 1
+```
+
+Keeping this pinned to `border` rather than to a free-floating hex is the point: the rule
+reads *"no more than 3% of the dead zone may be as bright as a panel edge"*, which stays
+true through any future token change.
+
+**5. The 8-pixel edge rule stays at 20 sRGB levels.** It was checked, not assumed. The dead
+zone's usable range is ground → ceiling: **51 levels** now (5 → 56), against **50** before
+(8 → 58), so a 20-level cap is the same fraction of the available range. In `L*` a 20-level
+step measures 7.4 at the bottom of the range (5 → 25) and 9.3 at the top (36 → 56) — close
+enough to uniform that one number covers the whole rectangle, which is what makes the rule
+checkable with a plain edge detector.
+
+**6. Black point.** Plates are graded to reach `#050505` inside the frame (was `#08080a`).
+Reject threshold moves with the tokens: if the darkest pixel is above **`surface`
+`#0d0d10`** (was `surface` `#141417`), the plate will read as a grey rectangle on the page.
 
 **Which region, per section.** Derived from each section's `place` prop in
 `src/components/sections/`, and from the fact that `MediaSection`'s `PLACE` and `ANCHOR`
@@ -310,7 +487,7 @@ excitement, opportunity or growth.
 
 **Composition.** A single large bead-blasted aluminium form entering from the right edge
 and curving out of the frame — read as a section of something much larger, cropped, not as
-an object placed in the middle of a room. Its leading chamfer runs a platinum hairline from
+an object placed in the middle of a room. Its leading chamfer runs a `chrome` hairline from
 upper-right down toward frame centre, then dies. The left of the frame is empty room. No
 horizon, no floor line, no visible set. The form's mass sits in the right 40%; nothing
 structural crosses x=60%.
@@ -320,7 +497,8 @@ on the page: the H1 is `clamp(3rem, 7vw, 5.75rem)` at a 10em measure — up to ~
 across three lines — with subheadline, two buttons and a support line beneath it.
 
 **Lighting.** Key from camera-right at 80°, high, raking down the form's face so the
-gradient runs from a soft near-white at the top of the curve to ink at the bottom. One 1°
+gradient runs from `chrome` (L .750, no higher — this is the hero, and it is the plate most
+tempted to over-light) at the top of the curve to ink at the bottom. One 1°
 grid spot picking the chamfer. Left half of the room in total falloff. Note that Hero.tsx
 also lays a `to-bg` gradient over the bottom 160px — do not build a highlight there, it
 will be muddied.
@@ -335,7 +513,7 @@ sharp throughout; the falloff is doing the depth work, not the aperture.
 
 | Breakpoint | Frame | What changes |
 |---|---|---|
-| `mobile` ≤425 | 900×1600 (9:16) | Copy is centred *and* full width here — there is no dead side. Reduce to almost nothing: an ink field with a single soft platinum gradient in the bottom-right corner, peaking below `#2a2a30`, and a barely-there lift at the very top edge. This crop is deliberately the quietest of the four. |
+| `mobile` ≤425 | 900×1600 (9:16) | Copy is centred *and* full width here — there is no dead side. Reduce to almost nothing: an ink field with a single soft neutral gradient in the bottom-right corner, peaking below `#2b2b31`, and a barely-there lift at the very top edge. This crop is deliberately the quietest of the four. |
 | `tablet` ≤768 | 1200×1600 (3:4) | Must clear both the top band and the left side. Form pushed hard right and down; only its upper-left curve is in frame, occupying the right 30% below y=55%. |
 | `desktop` 769–1279 | 1920×1280 (3:2) | The reference composition above. Form in the right 40%, chamfer running down-left, empty left. |
 | `wide` ≥1280 | 2560×1440 (16:9) | Same form, pulled back — more room, form now occupies the right 32%, and a second matte black plane enters from the bottom-right corner to give the wider frame something to hold. Do not simply letterbox the desktop crop; the extra width must be *composed* room, not stretched emptiness. |
@@ -363,8 +541,10 @@ stack.
 **Dead zone.** **Top band, full width** — `MediaCard` pins the title (display,
 `clamp(2rem,2.8vw,2.75rem)`) and body to the top with `p-8 / sm:p-10 / lg:p-12`. Reserve
 the top 34% on desktop, top 46% on mobile where the title wraps to two lines in a 335px
-card. **Plus a bottom-left patch** for the gold `Explore stocks` button: 34% × 14% of the
-card, anchored to the bottom-left corner.
+card. **Plus a bottom-left patch** for the metal `Explore stocks` button: 34% × 14% of the
+card, anchored to the bottom-left corner. That button is a live shader at L .934 — the
+brightest, and the only moving, thing in the card — so the patch is held to the §2.7
+ceiling like any other dead zone, not merely kept free of the subject.
 
 **Lighting.** Key from camera-left at 75°, narrow — a strip box, so each plate edge picks
 up a discrete highlight and the intervals between them read as rhythm. No rim. The room
@@ -413,7 +593,7 @@ ascending axis. A ring tilted so its high point leads out of the top-right corne
 upward motion (§2.1).
 
 **Dead zone.** Identical to A2 — top 34% desktop / 46% mobile, plus the bottom-left 34% ×
-14% for the gold `Explore F&O` button.
+14% for the metal `Explore F&O` button.
 
 **Lighting.** Key from camera-right at 85°, very grazing, so the rings are described almost
 entirely by their chamfers and the faces stay dark. One hard rim from behind-left picking
@@ -467,8 +647,15 @@ key refracts through its chamfer into a narrow band of separated light — not a
 about 15% of that edge; the rest of the run falls off in both directions. The right half of
 the frame is glass surface reflecting nothing but a soft dark gradient.
 
+This is the one plate in the set that can produce genuine chroma by accident: dispersion
+through a chamfer is spectral by nature. §2.2's chroma `0.04` reject applies to it exactly
+as written, and a returned frame with a visible spectral fringe is rejected however
+beautiful the edge is. The same constraint governs the button sitting on top of it — the
+shader's own dispersion is held at 0.08 for the same reason, because a red fringe on a
+primary action is `loss` on a buy button.
+
 **Dead zone.** **Right.** x 44–100%, y 14–86%. The copy stack here is the heaviest on the
-page after Onboarding — headline in three lines at the `tall` step, subheading, a gold
+page after Onboarding — headline in three lines at the `tall` step, subheading, a metal
 button, and a ten-item two-column list — and it runs from the rail's 46% mark to its 92%
 mark. Keep the entire right half featureless: a smooth gradient, no edge, no reflection, no
 refraction.
@@ -516,10 +703,13 @@ its chamfers. They sit at a common baseline; the recession is lateral, into the 
 the frame, never upward. A soft ground shadow anchors each one. The left 56% is empty
 room and empty floor.
 
-This is one of the two plates permitted a gold note (§2.3): a warm reflected falloff on the
-third block's shadow-side face, ≤3% of frame, hue 80°–100°, chroma ≤0.09, placed at
-roughly x=82% — well clear of the gold `Start account opening` button, which lands at
-around x=12% on desktop.
+This is one of the two plates permitted a **second light event** (§2.3 rule 2): a neutral
+reflected falloff on the third block's shadow-side face, ≤3% of frame, capped at OKLCH
+L `.600`, placed at roughly x=82% — well clear of the metal `Start account opening` button,
+which lands at around x=12% on desktop. It replaces the gold bounce that used to sit here
+and does the same compositional job: it is the reason the third block reads as *arrived*
+rather than merely as the brightest of three. Neutral, dimmer than the chamfer specular, and
+unmistakably a bounce rather than a source.
 
 **Dead zone.** **Left.** x 0–56%, y 10–90%. The tallest copy stack on the page: three-line
 headline at the `tall` step, subheading, a large button, a three-column numbered step row
@@ -565,7 +755,7 @@ like arriving rather than departing — which is why nothing in it moves, rises 
 **Composition.** A single matte black monolith standing in an empty dark room, centred but
 not symmetrical: it stands at roughly x=50% and the light comes from one side, so its two
 visible faces are lit unequally. Its top is cropped by the frame. Two machined aluminium
-chamfers run down its leading vertical edge, catching platinum. The floor is implied by a
+chamfers run down its leading vertical edge, catching `chrome`. The floor is implied by a
 shadow, not drawn by a line. The centre of the frame — the object's own body — is the
 darkest region in the image.
 
@@ -574,18 +764,26 @@ is legible only by its edges. The copy sits **on** the monolith's unlit face.
 
 **Dead zone.** **Centre.** x 26–74%, y 16–84% — a centred column ~600px wide holding a
 two-line headline, subheading, support line, two buttons and the market-risk disclosure.
-The monolith's face inside that rectangle must hold below `#2a2a30` throughout, and its two
+The monolith's face inside that rectangle must hold below `#2b2b31` throughout, and its two
 chamfer highlights must fall **outside** x 26–74%. If a chamfer crosses the copy column,
 the plate is rejected — this is the plate where §2.7's no-edges rule does the most work.
+
+It is also the plate carrying the page's last primary action, and two centred buttons sit
+inside that column. A chamfer at L .750 landing anywhere near a button at L .934 reads as a
+pair of bright marks rather than as one action, which is the failure §2.3 rule 1 exists to
+prevent — here it is a composition requirement, not just a pixel threshold.
 
 **Lighting.** Key from camera-left at 85°, soft and large. It describes the monolith's left
 chamfer and the wall falloff behind it, and leaves the face facing camera almost entirely
 unlit. One weak rim from camera-right catching the right chamfer at lower intensity than
 the left — asymmetry is what stops it reading as a symmetrical logo lockup.
 
-The second permitted gold note (§2.3) goes here: a warm bounce in the lower-right falloff,
-where the light dies into the floor, at ≤3% of frame. It sits at roughly x=85%, y=88% — far
-from both the centred copy column and the two centred buttons.
+The second permitted **light event** (§2.3 rule 2) goes here: a neutral bounce in the
+lower-right falloff, where the light dies into the floor, at ≤3% of frame and capped at
+OKLCH L `.600`. It sits at roughly x=85%, y=88% — far from both the centred copy column and
+the two centred buttons. Its job is to keep the room from ending at the frame edge; on the
+page's final image, a floor that simply stops reads as the plate running out rather than as
+the scroll arriving.
 
 **Materials.** Anodised matte black monolith, aluminium chamfers, anodised floor.
 
@@ -632,7 +830,7 @@ Encoding targets are motion-brief §6's, not invented here.
 |---|---|---|
 | Format | **WebP only**, quality 80 | Matches §6's poster spec. **Do not ship AVIF siblings**: `MediaBackdrop`'s `<source>` elements carry `srcSet` with no `type` attribute, so a browser that cannot decode the file will not fall through — it will fail. One format per breakpoint. |
 | Colour | sRGB, 8-bit, profile embedded | No Display P3. The palette is neutral; a wide-gamut profile buys nothing and risks a cast on non-managed browsers. |
-| Master | 16-bit, graded, then exported | Do the black-point grade to `#08080a` in 16-bit. Crushing to ink in 8-bit bands visibly across a large flat field. |
+| Master | 16-bit, graded, then exported | Do the black-point grade to `#050505` in 16-bit. Crushing to ink in 8-bit bands visibly across a large flat field, and the new ground is three levels darker than the old one — there is that much less room between the black point and the first visible step. |
 | Dither / grain | 1–2% monochrome grain at export | The only reliable defence against banding in the large dark falloffs. |
 | Budget | ≤180 KB per crop, ≤120 KB for `mobile` | Six sections × four crops, but only one crop per section is ever fetched. |
 | Filenames | `public/media/<section>/<section>-<breakpoint>.webp` | |
@@ -692,9 +890,12 @@ Two wiring notes for whoever swaps a video in:
   `MediaBackdrop`'s mobile `<source>` is hardcoded `type="video/mp4"`, so populating it
   commits you to shipping an MP4 encode specifically for the breakpoint where §6 says ship
   nothing.
-- **`tone` should be `#08080a`.** `MediaBackdrop` defaults to `#0b1220` and
-  `Products.tsx` passes `#0B0B0D`; both are leftovers from the superseded navy palette and
-  will show as a blue-black flash in the letterbox gap before decode.
+- **`tone` should be `#050505`.** It is the colour behind the asset before decode, so
+  anything else shows as a flash in the letterbox gap. `MediaBackdrop` currently defaults to
+  `#08080a` and `Products.tsx` passes `#0B0B0D` — leftovers from the two superseded palettes,
+  three and six levels above the current ground respectively. Neither is dramatic on its own;
+  both are visible against a `#050505` page as a lighter rectangle that resolves a beat
+  later.
 
 ---
 
@@ -716,8 +917,8 @@ it in an image viewer.
    someone tunes it down, and it will already be failing at the frame edges where the
    radial has fallen to zero.
 4. Sample the dead-zone rectangle (§2.7 table) in the screenshot:
-   - **Max pixel > `#3a3a3e`** → reject.
-   - **>3% of pixels > `#2a2a30`** → reject.
+   - **Max pixel > `#38383c`** (`Y > 0.0400`) → reject.
+   - **>3% of pixels > `#2b2b31`** (`Y > 0.0246`) → reject.
    - **Any 8px span with a >20-level luminance step** → reject. Run an edge detector over
      the rectangle; it should return nothing.
 5. Read the actual headline at each width and check no stroke sits on a gradient boundary:
@@ -726,9 +927,22 @@ it in an image viewer.
    - Platform — *"Built for the / ten seconds / that matter"*
    - Onboarding — *"Open an account / before your chai / gets cold"*
    - Final CTA — *"Start with what / you have today"*
-6. Check the **gold button** specifically. `--color-accent` `#d4af37` at L 0.767 needs the
-   plate behind it dark and neutral; a warm mid-grey behind a gold pill kills the edge of
-   the button.
+   Then read the **body copy and the disclosure** at each width, not only the headline. At
+   the ceiling the headline has 11.7:1 and 16px `fg-muted` has 7.5:1 — the small text is the
+   binding case (§2.7), and it is the text a legibility failure actually hurts.
+6. Check the **primary button** specifically, and check it twice.
+   - `--color-accent` `#e7e9ee` sits at OKLCH L .934 and its whole job is being the
+     brightest thing in the viewport. Sample the plate inside and immediately around the
+     button's footprint: **nothing there may exceed L .750**, and the button's edge must be
+     legible against it without relying on the shadow. A pale mid-grey behind a near-white
+     pill deletes the button's silhouette, which is the chromatic system's version of the
+     old warm-grey-behind-gold failure and is easier to hit, because the plate and the
+     button are now the same colour family.
+   - Then **watch it move**, at rest and on hover. The surface is live
+     (`LiquidMetalSurface`, `mix-blend-screen` at 50% over the flat fill), so its darkest
+     phase is what a still screenshot will not show you. The flat `bg-accent` underneath is
+     the contrast floor by construction, but a plate with its own moving-looking gradient
+     behind a moving button reads as two things happening.
 
 ### 5.2 Banned content scan
 
@@ -742,6 +956,12 @@ this one:
 - Any form whose dominant axis leads out of the top-right corner.
 - A ring or arc whose highlight sweeps upward.
 - Generation-model signatures, watermarks or corner artefacts.
+- A specular that reads as warm at thumbnail size. Aluminium lit at 5600K is neutral;
+  "premium metal" is a generation model's cue for gold, and the tint often survives in the
+  highlight after the subject looks right.
+- A highlight bright enough to look like a button. View the frame at 25% with the real
+  section rendered next to it: if the eye lands on the plate before it lands on the CTA, the
+  plate has taken the action's job (§2.3).
 
 Compliance sign-off (motion-brief §8 question 4) applies §2.1 **before** the asset is cut
 and exported, not after.
@@ -760,23 +980,40 @@ The failure mode is four exports of one photograph. To detect it:
 - Confirm the `wide` crop is *composed* for the extra width, not letterboxed. Extra frame
   must be room or a second form, never stretched emptiness or a scaled-up subject.
 
-### 5.4 Colour outside the palette
+### 5.4 Colour and luminance outside the palette
 
 Convert to OKLCH and measure. Do not eyeball it — a 3% green cast in a dark falloff is
 invisible on a laptop and obvious on a calibrated display, and on this page green means
-`gain`.
+`gain`. The luminance half of this gate is new, and it is the half that will actually catch
+things: chroma failures announce themselves once you look, while a specular four levels too
+bright looks like a good photograph.
 
-- **>5% of pixels at chroma ≥ 0.02** → reject. The plates are effectively monochrome.
-- **Any pixel at chroma ≥ 0.04 with hue 120°–190°** (green) → reject outright.
-- **Any pixel at chroma ≥ 0.04 with hue 345°–45°** (red, and `warning` orange at 48° sits
-  just outside it — treat anything under 60° as suspect) → reject outright.
-- **Gold** is permitted only in the Onboarding and Final CTA plates, only at hue 80°–100°,
-  chroma ≤ 0.09, ≤3% of frame area, and outside the dead zone. Anywhere else, or in any
-  other plate → reject.
-- **Black point** must reach `#08080a` inside the frame. If the darkest pixel is above
-  `#141417`, the plate will read as a grey rectangle on the page.
+Chroma (§2.2):
+
+- **>1% of pixels at chroma ≥ 0.02** → reject. The plates are monochrome, not
+  nearly-monochrome; the old 5% tolerance held a gold note that no longer exists.
+- **Any pixel at chroma ≥ 0.04, at any hue** → reject outright. Hue does not need to be
+  consulted to fail a pixel any more.
+- **Any pixel at chroma ≥ 0.025 with hue 120°–190°** (green) or **345°–60°** (red through
+  `warning` orange at 48°) → reject outright. The meaning-bearing hues get the tighter
+  threshold, and the band now closes over 45°–60° because there is no gold left to keep clear
+  of.
 - **No split-toning.** Sample the shadows and the highlights separately; their hues should
   not differ by more than 20°.
+
+Luminance (§2.3):
+
+- **Any pixel above OKLCH L .750** (`chrome`, `#a9aeb8`) → reject. This is the plate's
+  ceiling and the accent's floor.
+- **Any clipped pixel** (255 in any channel) → reject. A blown highlight out-brightens the
+  primary action by definition.
+- **>3% of frame above OKLCH L .600** (`#808080`) → reject. The plate may be lit; it may not
+  be bright.
+- **The second light event** is permitted only in the Onboarding and Final CTA plates, only
+  ≤3% of frame, capped at L .600, clear of the dead zone and ≥25% of frame width from where
+  the primary button lands. Anywhere else, or in any other plate → reject.
+- **Black point** must reach `#050505` inside the frame. If the darkest pixel is above
+  `#0d0d10`, the plate will read as a grey rectangle on the page.
 
 ### 5.5 The system read
 
@@ -785,8 +1022,12 @@ Lay all six desktop crops in scroll order and look at them as one page.
 - Do they read as one shoot? Same room, same key, same material vocabulary, same black
   point.
 - Is exactly one of them the loudest? (It should be the Hero.)
-- Does the warm gold note appear exactly twice — Onboarding and Final CTA — and nowhere
+- Does the second light event appear exactly twice — Onboarding and Final CTA — and nowhere
   else?
+- Now put the six crops next to a screenshot of a primary button. **Is the button still the
+  brightest thing in the set?** In a monochrome system this is the question the old "does the
+  gold appear twice" question was standing in for, and it is the one that decides whether the
+  page has an action or six photographs and a suggestion.
 - Does any two-in-a-row pair share a composition? Hero pushes right, Platform reserves
   right, Onboarding reserves left, Final CTA centres. If two neighbours put their subject
   in the same place, the scroll flattens.

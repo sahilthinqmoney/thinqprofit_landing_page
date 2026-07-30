@@ -66,7 +66,7 @@ interface PricingProps {
 /**
  * Table column headers. Tracked micro-caps live here and nowhere else on the
  * section — at 11px they only read as a label when they are labelling a column.
- * `fg-muted` (8.07:1), never `fg-subtle`, which is reserved for legal meta.
+ * `fg-muted` (13.08:1), never `fg-subtle`, which is reserved for legal meta.
  */
 const COL_HEAD = 'pb-3 pt-5 text-[0.6875rem] font-medium uppercase tracking-[0.16em] text-fg-muted'
 
@@ -227,9 +227,15 @@ export default function Pricing({ id = 'pricing' }: PricingProps) {
                 target. The lift belongs to a card you can click, not to a
                 container holding a button.
 
-                The edge used to be `border-accent/30`. Gold marks actions, and
-                a panel edge is not an action — the accent now appears in this
-                block only on the CTA, which is the one thing here you can do. */}
+                The edge stays on plain `border`, and that matters more in a
+                chromatic system than it did in a coloured one. `accent` is now
+                simply the brightest surface on the page, so luminance is the
+                only thing left marking an action — a bright edge here would not
+                read as "brand", it would read as a second thing to press,
+                competing with the CTA at four times the length. Accent appears
+                in this block on the CTA alone, which is the one thing here you
+                can do; the plate's own edge is the `.surface-chrome` wash and a
+                hairline. */}
             <div className="card surface-chrome mt-10">
               <div className="grid gap-y-10 p-8 sm:p-10 lg:grid-cols-12 lg:gap-x-14 lg:p-14">
                 <div className="min-w-0 lg:col-span-5">
@@ -349,7 +355,7 @@ export default function Pricing({ id = 'pricing' }: PricingProps) {
         {/* Fine print                                                        */}
         {/* ---------------------------------------------------------------- */}
         {/* Left-flush with everything above it, on the section's plain surface.
-            Live text, selectable, 8.07:1 — never a glass plate. */}
+            Live text, selectable, 13.08:1 — never a glass plate. */}
         <Disclosure tone="note" className="mt-10 max-w-[68ch] sm:mt-12">
           {finePrint}
         </Disclosure>

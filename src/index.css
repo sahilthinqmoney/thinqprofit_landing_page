@@ -1,57 +1,79 @@
 @import 'tailwindcss';
 
 /* ---------------------------------------------------------------------------
-   Design tokens — gold & chrome
-   See design-system/thinqprofit/pages/landing.md
+   Design tokens — chromatic
+
+   Gold is gone. The brand surface is now polished metal: a neutral, near-white
+   chromatic alloy that carries a live iridescent sheen on the primary action
+   (see `LiquidMetalSurface`) and sits static everywhere else.
 
    Every value below was contrast-checked against the ink base, not eyeballed.
-   Three constraints shaped the set:
+   Four constraints shape the set:
 
-   1. Gold is the brand action. `white` on gold is 2.10:1 and fails outright, so
-      a gold fill ALWAYS carries ink text (`--color-on-accent`, 9.35:1).
-   2. Warning had to move off amber. Brand gold sits at hue 46°, amber #F59E0B
-      at 38° — 8° apart, which reads as one colour. A risk disclosure must never
-      look like a call to action on a broker page, so warning is now orange at
-      hue 25°, a 21° separation, and it always ships with an icon and a border
-      so it is never signalled by hue alone.
-   3. Gain/loss stay quarantined to market data. They appear on no button, no
-      badge, no link, no illustration.
+   1. **The action is the brightest thing on the page.** With no hue to carry
+      it, a chromatic system distinguishes the primary action by *luminance and
+      motion*, not by colour. `--color-accent` is 16.6:1 on the ground — the
+      highest-contrast surface in the palette — and only the primary action gets
+      the shader that makes it move.
+   2. **A metal fill ALWAYS carries ink text.** White on #E7E9EE is 1.2:1 and
+      is invisible; `--color-on-accent` is 16.6:1 on it. This is the same rule
+      the gold system had, for the same reason, at a different value.
+   3. **Hue is now reserved entirely for meaning.** Nothing in the brand is
+      coloured, so the only chromatic values left on the page are gain, loss and
+      warning. That is a strict improvement: a green number can no longer be
+      confused with a brand accent, because there is no coloured brand accent.
+   4. **Gain/loss stay quarantined to market data.** They appear on no button,
+      badge, link or illustration.
+
+   The ground is neutral, not the warm ink the gold system needed. Warmth
+   existed to stop gold reading muddy; with a neutral alloy it would tint the
+   metal yellow, which is the exact look being removed.
    --------------------------------------------------------------------------- */
 @theme {
   /*
-   * Surfaces — neutral ink, a touch warm so gold doesn't read muddy on it.
+   * Surfaces — neutral ink.
    *
-   * Deepened one step. Not to pure black: #000 is a hole in the screen, and on
-   * OLED it makes every edge that touches it look torn. #08080a still reads as
-   * a surface with a light on it, which is the whole premise. The three steps
-   * are close on purpose — separation comes from the hairline between them, not
-   * from a value jump, which is what keeps panels from looking stuck on.
+   * Not pure #000: that is a hole in the screen, and on OLED it makes every
+   * edge touching it look torn. #050505 still reads as a surface with a light
+   * on it, which is what polished metal needs to sit on.
    *
-   * Everything below got darker, so every documented contrast ratio here is now
-   * a floor rather than an exact figure.
+   * The three steps are deliberately close — separation comes from the hairline
+   * between them, not from a value jump, which is what keeps a panel from
+   * looking stuck on rather than built in. `surface` is lifted off the brief's
+   * #090909 because at four levels above the ground it was invisible; a surface
+   * that cannot be seen is not a surface.
    */
-  --color-bg: #08080a;
-  --color-surface: #101013;
-  --color-surface-raised: #17171b;
+  --color-bg: #050505;
+  --color-surface: #0d0d10;
+  --color-surface-raised: #16161a;
 
-  /* Text — warm greys to sit with gold rather than fight it */
-  --color-fg: #f7f6f3; /* 18.20:1 */
-  --color-fg-muted: #a8a69f; /*  8.07:1 — body copy, disclosures */
-  --color-fg-subtle: #6e6c66; /*  3.75:1 — footer meta + legal fine print ONLY */
+  /* Text — neutral greys. Ratios are against `bg`. */
+  --color-fg: #ffffff; /* 20.38:1 */
+  --color-fg-muted: #cfcfcf; /* 13.08:1 — body copy, disclosures */
+  --color-fg-subtle: #7e7e7e; /*  5.02:1 — footer meta + legal fine print */
 
   /* Lines */
-  --color-border: #2a2a30;
-  --color-border-soft: #1e1e23;
+  --color-border: #2b2b31;
+  --color-border-soft: #1c1c21;
 
-  /* Brand action — gold. Fill takes ink text, never white. */
-  --color-accent: #d4af37; /*  9.35:1 on bg */
-  --color-accent-hover: #e3c263;
-  --color-accent-soft: #e8d9a8; /* 13.97:1 — eyebrows, links, quiet accents */
-  --color-on-accent: #0b0b0d; /*  9.35:1 on gold */
+  /*
+   * Brand action — chromatic alloy. The brightest surface in the palette, and
+   * the only one that moves. Fill takes ink text, never white: white on
+   * #E7E9EE is 1.2:1.
+   */
+  --color-accent: #e7e9ee; /* 16.78:1 on bg */
+  --color-accent-hover: #f4f6fa;
+  --color-accent-soft: #c3c8d2; /* 12.14:1 — links, quiet accents */
+  --color-on-accent: #050505; /* 16.78:1 on the alloy; white would be 1.21:1 */
 
-  /* Chrome — platinum. Hairline highlights, metallic edges, secondary marks. */
-  --color-chrome: #c8ccd4; /* 12.21:1 */
-  --color-chrome-dim: #8a9099; /*  6.11:1 */
+  /*
+   * Chrome — the static, cooler metal. Hairline highlights, machined edges,
+   * secondary marks. Deliberately a step down in luminance from `accent` so an
+   * edge never competes with an action; with no hue in the system, that
+   * luminance gap is the only thing separating the two roles.
+   */
+  --color-chrome: #a9aeb8; /*  9.16:1 */
+  --color-chrome-dim: #757b85; /*  4.78:1 — lifted off #6f757f, which was 4.39 */
 
   /* Market data ONLY — never a button, badge, link or illustration */
   --color-gain: #4ade80;
@@ -105,13 +127,24 @@
   --ease-out-soft: cubic-bezier(0.32, 0.72, 0, 1);
 
   /*
-   * Shadows are tinted with the ink base, never neutral black. A pure-black
-   * shadow on a warm ground reads as a grey smudge; carrying the background
-   * hue is what makes an edge look lit rather than dirty. Each has an offset
-   * and a soft blur — a zero-offset halo is decoration, not depth.
+   * Shadows are neutral black, and that is a change of reasoning, not just of
+   * value. The old rule was that a shadow carries the background's hue, because
+   * pure black on a warm ground reads as a grey smudge. The ground has no hue
+   * any more, so there is nothing to carry — and the old rgba(6, 6, 8) is now
+   * actively wrong: its blue channel is *brighter* than #050505, so on the page
+   * ground it composited to #060607 and drew a faint cool halo around every
+   * card and around the primary Button instead of a shadow.
+   *
+   * The alphas are unchanged, and that is measured rather than skipped:
+   * rgba(0, 0, 0, 0.5) takes 2.5 steps off #050505, the same 2.5 steps
+   * rgba(6, 6, 8, 0.5) took off the old #0b0b0d. Same depth, no halo. On a
+   * ground this low, black is also the only tint with headroom left to darken.
+   *
+   * Each keeps an offset and a soft blur — a zero-offset halo is decoration,
+   * not depth.
    */
-  --shadow-lifted: 0 1px 2px rgba(6, 6, 8, 0.5), 0 12px 32px -8px rgba(6, 6, 8, 0.65);
-  --shadow-deep: 0 2px 4px rgba(6, 6, 8, 0.55), 0 32px 64px -16px rgba(6, 6, 8, 0.75);
+  --shadow-lifted: 0 1px 2px rgba(0, 0, 0, 0.5), 0 12px 32px -8px rgba(0, 0, 0, 0.65);
+  --shadow-deep: 0 2px 4px rgba(0, 0, 0, 0.55), 0 32px 64px -16px rgba(0, 0, 0, 0.75);
 
   /* Section rhythm */
   --spacing-section: 6rem;
@@ -176,6 +209,26 @@
   }
 }
 
+/*
+ * Click ripple on the primary action. Scales and fades from the pointer, and is
+ * centred on it via the translate — so the origin is where the finger landed
+ * rather than the middle of the control.
+ *
+ * `transform` and `opacity` only, so it composites without touching layout.
+ * `Button` skips spawning these entirely under reduced motion, so there is no
+ * media query needed here.
+ */
+@keyframes button-ripple {
+  from {
+    transform: translate(-50%, -50%) scale(0);
+    opacity: 0.65;
+  }
+  to {
+    transform: translate(-50%, -50%) scale(4.5);
+    opacity: 0;
+  }
+}
+
 @layer utilities {
   /*
    * Display type.
@@ -221,12 +274,14 @@
    *
    * Three things make a panel read as an object rather than as a filled
    * rectangle, and the order matters: a hairline border defines the edge, an
-   * inset highlight along the top puts a light source above it, and a tinted
-   * shadow underneath gives it somewhere to sit. Miss the inset and it is a
-   * div; miss the shadow and it is a sticker.
+   * inset highlight along the top puts a light source above it, and a shadow
+   * underneath gives it somewhere to sit. Miss the inset and it is a div; miss
+   * the shadow and it is a sticker. (The shadow used to be described as tinted;
+   * see `--shadow-lifted` for why it is neutral now.)
    *
-   * The highlight is 6% white and 1px. Anything stronger reads as a bevel,
-   * which is a different decade.
+   * The highlight stays 6% white at 1px, unchanged. White is neutral and the
+   * ground is neutral, so nothing about a hueless brand argues with it, and
+   * anything stronger reads as a bevel, which is a different decade.
    */
   .card {
     border-radius: var(--radius-card);
@@ -305,47 +360,62 @@
   }
 
   /*
-   * Chrome hairline — a brushed-metal edge, not a flat border. Used for the
-   * top rule of a section or the lip of a raised surface. Restraint matters:
-   * a metallic edge everywhere just reads as noise.
+   * Chrome hairline — a brushed-metal edge, not a flat border. Restraint
+   * matters: a metallic edge everywhere just reads as noise, so this is spent
+   * exactly once, on the Stats seam, which sits full-bleed directly on `bg`.
+   *
+   * The percentages went up because `chrome` came down. #c8ccd4 → #a9aeb8 is a
+   * 30% drop in relative luminance (0.602 → 0.422), and a 1px line at 38% of it
+   * composites to 2.12:1 on #050505 — a seam you have to hunt for, where the
+   * old value read at 2.56:1. 52% puts it at 3.08:1, which both restores the
+   * edge it was drawn with and clears the 3:1 non-text floor the old value
+   * never actually reached. The taper scales with the centre (22% → 30%) so the
+   * ratio between them is held at ~1.73; the *shape* of the fade is what this
+   * utility exists for, not any single stop.
+   *
+   * Brighter is safe here: 3.08:1 still sits well over five times darker than
+   * `accent` at 16.78:1, so the machined edge cannot be read as an action.
    */
   .rule-chrome {
     background-image: linear-gradient(
       90deg,
       transparent 0%,
-      color-mix(in oklab, var(--color-chrome) 22%, transparent) 22%,
-      color-mix(in oklab, var(--color-chrome) 38%, transparent) 50%,
-      color-mix(in oklab, var(--color-chrome) 22%, transparent) 78%,
+      color-mix(in oklab, var(--color-chrome) 30%, transparent) 22%,
+      color-mix(in oklab, var(--color-chrome) 52%, transparent) 50%,
+      color-mix(in oklab, var(--color-chrome) 30%, transparent) 78%,
       transparent 100%
     );
   }
 
   /*
-   * Gold leaf — for display type only, never body copy or anything legal.
-   * A gradient on running text destroys its measured contrast.
+   * `.text-gold-leaf` was deleted here, and it is not coming back under a
+   * chromatic name. It died twice over: the brand has no gold to leaf, and
+   * DESIGN.md's Refused list bans gradient text outright — emphasis comes from
+   * size and weight, and a gradient across a glyph makes the measured contrast
+   * of the type a range rather than a number, so it cannot be signed off. The
+   * temptation now is a "chrome sheen" version sweeping accent through chrome;
+   * that is the same banned technique with the hue removed. Display type gets
+   * `.display` and a size step. Nothing referenced the utility.
+   *
+   * Brushed-metal surface for premium panels — a wash, not a colour. Subtle by
+   * design: it lies under the whole MobileApp section and under the fee plate in
+   * Pricing, in both cases over the opaque `surface` base laid down by the
+   * second gradient below.
+   *
+   * 7% → 8% and 4% → 5% because the darker `chrome` collapsed the wash toward
+   * the plate it is meant to lift off: against `surface` #0d0d10 the red-channel
+   * delta fell to (169−13)/(200−13) = 0.83 of what it was, on a treatment that
+   * was already at the threshold of visible. The bump restores the delta it was
+   * drawn with. It is deliberately not more than that — this is a sheen, and
+   * anything readable as a gradient panel is a different, worse idea.
    */
-  .text-gold-leaf {
-    background-image: linear-gradient(
-      100deg,
-      var(--color-accent-soft) 0%,
-      var(--color-accent) 38%,
-      #f2e6bf 52%,
-      var(--color-accent) 66%,
-      var(--color-accent-soft) 100%
-    );
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
-  }
-
-  /* Brushed-metal surface for premium panels. Subtle by design. */
   .surface-chrome {
     background-image:
       linear-gradient(
         135deg,
-        color-mix(in oklab, var(--color-chrome) 7%, transparent) 0%,
+        color-mix(in oklab, var(--color-chrome) 8%, transparent) 0%,
         transparent 42%,
-        color-mix(in oklab, var(--color-chrome) 4%, transparent) 100%
+        color-mix(in oklab, var(--color-chrome) 5%, transparent) 100%
       ),
       linear-gradient(var(--color-surface), var(--color-surface));
   }

@@ -19,7 +19,11 @@ import { finalCta } from '../../data/footer'
  * not open another chapter.
  *
  * Constraints honoured:
- *  - gold CTA, never green — landing.md §1 conflict 2, §10
+ *  - the primary CTA is the chromatic alloy, never green — landing.md §1
+ *    conflict 2, §10. Green and red are market-data values only, and with no hue
+ *    left anywhere in the brand a green button would now be the single most
+ *    misreadable object on the page: the one coloured thing on a broker page
+ *    that is not a number.
  *  - no urgency mechanics, no countdown, no scarcity line — landing.md §10
  *  - the market-risk disclosure is live text under the CTA, inside the section,
  *    above the scrim and never behind a blur — landing.md §9, §10
@@ -32,13 +36,16 @@ import { finalCta } from '../../data/footer'
  *
  * Written against docs/motion-brief.md §7 (no numbers or chart forms, no green
  * or red, no upward motion as a promise, people composed and never
- * celebrating), and against the gold-and-platinum world in docs/art-direction.md
- * — not the indigo→cyan the brief originally specified, which predates the
- * palette. Note the dead zone moves: the hero reserves the left 45%, this
- * section is centre-placed, so here it is the centre that stays dark.
+ * celebrating), and against the machined-alloy world in docs/art-direction.md —
+ * not the indigo→cyan the brief originally specified, which predates the
+ * palette. The specular is neutral: a warm note in the falloff would put the one
+ * coloured thing in frame directly behind the primary action, and the action is
+ * now identified by being the brightest *neutral* surface on screen. Note the
+ * dead zone moves: the hero reserves the left 45%, this section is centre-placed,
+ * so here it is the centre that stays dark.
  */
 const closingClip =
-  'Closing loop, 8s, seamless. A single machined-aluminium form at rest in near-black, lit from high and behind so only its top edge catches. One warm gold reflection travels the length of that edge, laterally, and settles; nothing rises. Centre of frame stays dark and low-contrast for the centred copy. No numbers, tickers, candles or chart forms. No green, no red.'
+  'Closing loop, 8s, seamless. A single machined-aluminium form at rest in near-black, lit from high and behind so only its top edge catches. One cool near-white specular travels the length of that edge, laterally, and settles; nothing rises. Neutral monochrome throughout, no colour cast. Centre of frame stays dark and low-contrast for the centred copy. No numbers, tickers, candles or chart forms. No green, no red.'
 
 export default function FinalCta() {
   /**

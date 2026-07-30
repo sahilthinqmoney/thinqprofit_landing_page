@@ -51,13 +51,20 @@ export default function Hero() {
       <HeroCanvas className="-z-20" />
 
       {/* Scrim sized and placed to sit under the copy, not across the frame —
-          it overscans the section so its soft edge never lands inside it. */}
+          it overscans the section so its soft edge never lands inside it.
+
+          The RGB is `--color-bg` exactly (5,5,5), not a tint of it. A scrim is a
+          thickening of the ground, so any drift between the two shows up as a
+          cast in the falloff — and against a neutral alloy field a scrim carrying
+          even a couple of points of blue or warmth reads as a haze laid over the
+          page rather than as the page getting darker. It also has to agree with
+          the `to-bg` fade directly below it, which is #050505 by definition. */}
       <div
         aria-hidden="true"
         className="pointer-events-none absolute -inset-x-[20%] -bottom-[20%] -top-[25%] -z-10"
         style={{
           backgroundImage:
-            'radial-gradient(58% 62% at 30% 46%, rgba(11,11,13,0.94) 0%, rgba(11,11,13,0.7) 44%, rgba(11,11,13,0) 100%)',
+            'radial-gradient(58% 62% at 30% 46%, rgba(5,5,5,0.94) 0%, rgba(5,5,5,0.7) 44%, rgba(5,5,5,0) 100%)',
         }}
       />
       <div
@@ -138,9 +145,10 @@ export default function Hero() {
                 </Button>
               </div>
 
-              {/* `fg-muted` (8.07:1), not `fg-subtle` (3.75:1) — this is a
+              {/* `fg-muted` (13.08:1), not `fg-subtle` (5.02:1) — this is a
                   marketing claim, and index.css reserves subtle for footer meta
-                  and legal fine print, where 3.75:1 is the documented floor. */}
+                  and legal fine print. Both clear 4.5:1 on the neutral ground;
+                  the split is about rank, not about the floor. */}
               <p className="mt-8 text-[0.8125rem] leading-relaxed text-fg-muted">
                 {hero.supportLine}
               </p>

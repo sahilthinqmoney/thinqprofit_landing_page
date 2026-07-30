@@ -11,14 +11,18 @@ import { useEffect, useRef } from 'react'
  * Why this is a canvas and not a video file:
  *  - ~6 KB of JS against 2-3 MB for an equivalent clip
  *  - renders at device pixel ratio, so it stays sharp on any display
- *  - reads the palette from index.css, so it can never drift off-brand
+ *  - its three colours are the index.css tokens by name, so a palette move is a
+ *    three-line edit here rather than a re-render and a re-upload
  *  - loops seamlessly by construction — no seam to hide
  *
  * Constraints it must respect (design-system/thinqprofit/pages/landing.md):
- *  - gold → chrome only. No green, no red: those are reserved for market data,
- *    and a green shimmer in the hero teaches the wrong association on sight.
+ *  - the field is neutral metal end to end: `chrome-dim` → `chrome` → `accent`.
+ *    No green, no red — those are market data, and a green shimmer in the hero
+ *    teaches the wrong association on sight. Nothing here carries hue at all,
+ *    so depth and emphasis are carried entirely by luminance (see `draw`).
  *  - the left of frame stays dark and low-contrast — the H1 sits there.
  *  - reduced motion gets a single composed still, never a frozen blank.
+ *  - motion is orbital and lateral, never upward (docs/motion-brief.md §7.3).
  */
 
 interface HeroCanvasProps {
@@ -45,14 +49,28 @@ const PARTICLE_COUNT_DESKTOP = 520
 const PARTICLE_COUNT_MOBILE = 220
 
 /**
- * Gold core → platinum chrome highlight. Nothing else is permitted in here:
- * no green, no red — those belong to gain and loss.
+ * The whole field is one neutral alloy read at three luminances. Nothing else is
+ * permitted in here: no green, no red — those belong to gain and loss — and no
+ * hue of any kind, because hue in this system means something.
+ *
+ * The ramp is the depth cue *and* the emphasis. `FIELD_FAR` is the back of the
+ * orbit, `FIELD_NEAR` the body of it, and `CREST` — the brightest surface in the
+ * palette, the same value the primary action is filled with — is reserved for
+ * the front edge alone. Ordering matters: the old field ran a warm accent against
+ * a *brighter* cool chrome and let hue do the separating, which is not available
+ * any more. Bright now means near, and near means live.
  */
-const COLOR_NEAR: [number, number, number] = [212, 175, 55] // gold     #D4AF37
-const COLOR_FAR: [number, number, number] = [200, 204, 212] // chrome   #C8CCD4
+const FIELD_FAR: [number, number, number] = [117, 123, 133] // chrome-dim  #757B85  4.78:1
+const FIELD_NEAR: [number, number, number] = [169, 174, 184] // chrome     #A9AEB8  9.16:1
+const CREST: [number, number, number] = [231, 233, 238] // accent          #E7E9EE 16.78:1
 
 function mix(a: number, b: number, t: number) {
   return a + (b - a) * t
+}
+
+/** `rgba()` from a token triple, so no channel ever gets retyped by hand. */
+function rgba(c: [number, number, number], a: number) {
+  return `rgba(${c[0]}, ${c[1]}, ${c[2]}, ${a})`
 }
 
 export default function HeroCanvas({ className = '' }: HeroCanvasProps) {
@@ -141,16 +159,26 @@ export default function HeroCanvas({ className = '' }: HeroCanvasProps) {
         const x = mix(wanderX, bandX, settle)
         const y = mix(wanderY, bandY, settle)
 
-        // Depth cue: the far half of the orbit sits behind, so it dims and cools.
+        // Depth cue, and the only cue available: the far half of the orbit sits
+        // behind, so it drops to `chrome-dim` and the front rises through
+        // `chrome`. The cube confines the alloy to roughly the front eighth of
+        // the orbit — spread across the whole near half it would stop being a
+        // crest and become the field's own brightness, which is exactly how a
+        // luminance-only accent gets thrown away.
         const depth = (Math.sin(angle) + 1) / 2
-        const r = mix(COLOR_FAR[0], COLOR_NEAR[0], depth)
-        const g = mix(COLOR_FAR[1], COLOR_NEAR[1], depth)
-        const b = mix(COLOR_FAR[2], COLOR_NEAR[2], depth)
+        const crest = depth * depth * depth
+        const r = mix(mix(FIELD_FAR[0], FIELD_NEAR[0], depth), CREST[0], crest)
+        const g = mix(mix(FIELD_FAR[1], FIELD_NEAR[1], depth), CREST[1], crest)
+        const b = mix(mix(FIELD_FAR[2], FIELD_NEAR[2], depth), CREST[2], crest)
 
         // Keep the headline side quiet: fade anything drifting into the left third.
         const leftGuard = narrow ? 1 : Math.min(1, Math.max(0, (x / width - 0.06) / 0.34))
 
-        const alpha = p.alpha * (0.45 + depth * 0.55) * (0.55 + settle * 0.45) * leftGuard * fieldAlpha
+        // Alpha compounds the ramp rather than fighting it: 0.28 → 1.0 across
+        // depth where this used to be 0.45 → 1.0. Colour alone buys a 4:1
+        // luminance spread; alpha takes the rendered spread to roughly 14:1, and
+        // that widened gap is what replaces the hue that used to mark the front.
+        const alpha = p.alpha * (0.28 + depth * 0.72) * (0.55 + settle * 0.45) * leftGuard * fieldAlpha
         if (alpha <= 0.002) continue
 
         const size = p.size * (0.7 + depth * 0.6) * (0.8 + settle * 0.4)
@@ -167,21 +195,30 @@ export default function HeroCanvas({ className = '' }: HeroCanvasProps) {
       }
 
       // A thin counter-rotating inner arc: reads as structure rather than a
-      // scatter, and gives the composition an axis.
-      ctx.strokeStyle = `rgba(232, 217, 168, ${0.05 + order * 0.07})`
+      // scatter, and gives the composition an axis. A machined edge, so it takes
+      // `chrome` and not the alloy — an edge that matched the crest would read as
+      // a second live element. Alpha is nudged up a little because chrome is a
+      // darker line than the pale metal that was here before.
+      ctx.strokeStyle = rgba(FIELD_NEAR, 0.06 + order * 0.08)
       ctx.lineWidth = 1
       ctx.beginPath()
       ctx.ellipse(cx, cy, radiusX * 0.62, radiusY * 0.62, -t * 0.06, 0, Math.PI * 2)
       ctx.stroke()
 
       // A soft bloom on the band's leading edge — sells it as a light source
-      // rather than a scatter of dots.
+      // rather than a scatter of dots. Its core is the alloy, because the leading
+      // edge is the live part of the composition, but the alpha comes *down* from
+      // 0.15/0.28: at equal alpha the alloy is ~1.8× the luminance of the value
+      // it replaces, and letting a bloom this wide inherit that lift would spend
+      // the new gap on background wash instead of on the crest. The tail is
+      // chrome the whole way out — a bloom that fades through the ink base
+      // reasoned about a warm ground this palette no longer has.
       const glowX = cx + Math.cos(t * 0.28) * radiusX * 0.55
       const glowY = cy + Math.sin(t * 0.28) * radiusY * 0.55
       const glow = ctx.createRadialGradient(glowX, glowY, 0, glowX, glowY, radiusX * 0.85)
-      glow.addColorStop(0, `rgba(212, 175, 55, ${(0.15 + order * 0.13) * fieldAlpha})`)
-      glow.addColorStop(0.55, 'rgba(200, 204, 212, 0.05)')
-      glow.addColorStop(1, 'rgba(11, 11, 13, 0)')
+      glow.addColorStop(0, rgba(CREST, (0.11 + order * 0.09) * fieldAlpha))
+      glow.addColorStop(0.55, rgba(FIELD_NEAR, 0.045 * fieldAlpha))
+      glow.addColorStop(1, rgba(FIELD_NEAR, 0))
       ctx.fillStyle = glow
       ctx.fillRect(0, 0, width, height)
 

@@ -143,7 +143,10 @@ function MenuLink({ item, onNavigate }: MenuLinkProps) {
       }}
       className="group flex min-h-11 items-start gap-3 rounded-xl px-3 py-2.5 transition-colors duration-200 hover:bg-surface-raised focus-visible:bg-surface-raised"
     >
-      <span className="mt-0.5 grid h-8 w-8 shrink-0 place-items-center rounded-lg border border-border-soft bg-bg/60 text-fg-muted transition-colors duration-200 group-hover:border-accent/50 group-hover:text-accent-soft">
+      {/* Hover lights the well as brushed metal, not as an action. `accent` on a
+          menu row would put the page's action value on twenty-odd links; chrome
+          is the token for a machined edge and stays clear of that. */}
+      <span className="mt-0.5 grid h-8 w-8 shrink-0 place-items-center rounded-lg border border-border-soft bg-bg/60 text-fg-muted transition-colors duration-200 group-hover:border-chrome/40 group-hover:text-chrome">
         <ItemIcon name={item.icon} />
       </span>
       <span className="min-w-0">
@@ -390,9 +393,24 @@ export default function Navbar() {
                   onPointerEnter={hoverOpen(null)}
                   className="flex shrink-0 items-center gap-2 rounded-full py-2 pr-2 transition-opacity duration-200 hover:opacity-90"
                 >
-                  <span className="grid h-7 w-7 place-items-center rounded-lg bg-accent xl:h-9 xl:w-9">
+                  {/* The mark is `chrome`, not `accent`, and that is the whole
+                      point of the luminance gap between them.
+
+                      An accent-filled tile would be the brightest object in the
+                      bar — brighter than the signup CTA sitting two controls to
+                      its right, which is the one element on the page that is
+                      meant to be. With no hue left in the system, luminance and
+                      motion are the *only* signals separating a mark from an
+                      action, so the mark takes the step down: chrome carries a
+                      little over half the light of the alloy and none of the
+                      shader.
+
+                      The glyph is ink, never white. Every surface in this family
+                      is too bright to hold white type — white is 1.2:1 on the
+                      alloy and ~2.1:1 on chrome; ink is 9.16:1 here. */}
+                  <span className="grid h-7 w-7 place-items-center rounded-lg bg-chrome xl:h-9 xl:w-9">
                     <TrendingUp
-                      className="h-4 w-4 text-white xl:h-5 xl:w-5"
+                      className="h-4 w-4 text-bg xl:h-5 xl:w-5"
                       strokeWidth={1.5}
                       aria-hidden="true"
                     />
@@ -583,8 +601,11 @@ export default function Navbar() {
         >
           <div className="flex h-16 shrink-0 items-center justify-between border-b border-border-soft px-6">
             <span className="flex items-center gap-2">
-              <span className="grid h-7 w-7 place-items-center rounded-lg bg-accent">
-                <TrendingUp className="h-4 w-4 text-white" strokeWidth={1.5} aria-hidden="true" />
+              {/* Same mark, same reasoning as the desktop bar: chrome tile, ink
+                  glyph. The sheet's own primary action sits in the footer of
+                  this panel, so the gap still has to hold. */}
+              <span className="grid h-7 w-7 place-items-center rounded-lg bg-chrome">
+                <TrendingUp className="h-4 w-4 text-bg" strokeWidth={1.5} aria-hidden="true" />
               </span>
               <span className="text-[0.9375rem] font-semibold tracking-tight text-fg">
                 {wordmark}

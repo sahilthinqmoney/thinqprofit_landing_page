@@ -30,27 +30,44 @@ import SectionShell from '../ui/SectionShell'
  */
 
 /**
- * Art direction per featured product — docs/motion-brief.md §5.1: 3–4s silent
- * seamless loops, one abstract motif each, all shot in the same ink-navy void.
- * Each string is the brief while the clip is outstanding (MediaBackdrop prints
- * it into the placeholder field) and becomes the asset's real alt text after,
- * so it describes the motif rather than naming a file.
+ * Art direction per featured product. Each string is the brief while the asset
+ * is outstanding (MediaBackdrop prints it into the placeholder field) and
+ * becomes the asset's real alt text after, so it describes the subject rather
+ * than naming a file. Both are docs/art-direction.md §A2/§A3 "alt text to ship",
+ * verbatim — that file supersedes motion-brief §5's colour direction.
  *
  * Lives here rather than in src/data/products.ts because it is art direction,
  * not copy, and that file is the copy deck's mirror.
  *
- * §7 is baked in: no numbers, no tickers, no chart forms, no green or red, and
- * no upward motion — the motifs rotate, orbit and interleave, never climb.
+ * The previous briefs asked for translucent navy plates under an indigo rim
+ * light and cyan filaments at the intersection. That was written for a palette
+ * with hue in it. Hue is now reserved entirely for meaning — gain, loss,
+ * warning — so a commissioned clip carrying indigo or cyan would put the only
+ * coloured light on the page next to a legally required derivatives warning and
+ * mean nothing by it. Machined aluminium in an unlit room says the same thing
+ * about breadth and interlock, and says it in the material the brand is now
+ * made of: depth built from a grazing key on a chamfer, never from one form
+ * being a different colour from its neighbour.
+ *
+ * motion-brief §7 still holds: no numbers, no tickers, no chart forms, nothing
+ * green or red, and no upward motion — these are level, lateral and static.
  */
 const MEDIA_BRIEF: Record<string, string> = {
   'stocks-etfs':
-    'Stocks and ETFs — a cluster of thin translucent navy plates suspended in a dark void, rotating slowly, each catching an indigo rim light as it turns.',
+    'Thin machined aluminium plates suspended in darkness, each catching a narrow band of light along its edge.',
   'futures-options':
-    'Futures and options — two interlocking luminous rings on offset axes turning in opposite directions, cyan filaments tracing where they intersect.',
+    'Two machined rings on offset axes intersecting in darkness, a hard highlight tracing where they cross.',
 }
 
-/** The ink-navy void every asset in the library shares (motion-brief §5). */
-const VOID = '#0B0B0D'
+/**
+ * The letterbox ground behind every plate in the library. It is the page's own
+ * ink, read from the token rather than transcribed: the hardcoded `#0B0B0D` it
+ * replaces is blue-black, and it flashed as a tinted rectangle in the gap
+ * before decode (docs/art-direction.md §4.2). A plate is graded to bottom out
+ * on the ground so its frame edge dissolves into the page; that only works if
+ * the two are the same value, which a second hex cannot guarantee.
+ */
+const VOID = 'var(--color-bg)'
 
 type WithDisclosure = Product & { disclosure: string }
 

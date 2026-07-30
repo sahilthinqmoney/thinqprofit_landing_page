@@ -27,7 +27,7 @@ import { stats } from '../../data/social'
  *  2. The uppercase `tracking-[0.14em]` micro-labels are gone. That treatment
  *     had spread far enough across the page to stop reading as a decision, and
  *     it costs legibility at 12px for no gain. The labels are sentence case at
- *     14px in `fg-muted` (8.07:1) — quieter than the figure without shouting
+ *     14px in `fg-muted` (13.08:1) — quieter than the figure without shouting
  *     about being a label.
  *
  *  3. Centred text is now left-aligned. Tabular figures want a shared left edge;

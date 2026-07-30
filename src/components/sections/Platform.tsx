@@ -48,8 +48,8 @@ interface PlatformProps {
  * The backdrop is a live canvas (SignalCanvas), not the briefed macro clip that
  * MediaBackdrop was holding space for. There is no image pipeline here, and a
  * pending field is a placeholder either way; a procedural plate is the same
- * darkness, costs a few KB instead of megabytes, loops with no seam, and reads
- * the palette from index.css so it cannot drift off-brand. Its concept —
+ * darkness, costs a few KB instead of megabytes, loops with no seam, and is
+ * matched to the tokens in index.css rather than to a plate. Its concept —
  * scattered marks with a route resolving through them — says "instrumentation"
  * without rendering a single UI element, which was §5.2's whole brief.
  *
@@ -62,10 +62,19 @@ interface PlatformProps {
  * backdrop layer differs.
  *
  * Constraints honoured:
- *  - no green or red anywhere; the palette here is white on ink (landing.md §10)
- *  - gold `accent` is the CTA colour and the canvas's active route, nothing else
+ *  - no hue at all in this frame, not merely no green or red. The section is
+ *    white on ink; the only coloured tokens left in the system are gain, loss
+ *    and warning, and none of the three is section decoration.
+ *  - `accent` is spent on the CTA alone. It is the brightest surface in the
+ *    palette and the only one that moves, and with no hue to carry it that
+ *    luminance is the whole signal — so the field behind it runs on `chrome`, a
+ *    deliberate step down, and only the route's few lit pixels reach accent. The
+ *    dead zone below keeps even those out of the copy column, so nothing near
+ *    the button is as bright as the button.
  *  - nothing sits behind blur or glass. The scrim is a flat radial pinned at
- *    z-index -1 behind live text; row copy at `text-white/80` clears ~9:1.
+ *    z-index -1 behind live text. `text-white/80` resolves to #CDCDCD on this
+ *    ink — 12.8:1, measured where the copy actually sits rather than at the
+ *    field's brightest point, because the dead zone excludes the two.
  */
 export default function Platform({ id = 'platform' }: PlatformProps) {
   return (
@@ -81,31 +90,41 @@ export default function Platform({ id = 'platform' }: PlatformProps) {
     >
       {/* Backdrop region. Same pin as MediaBackdrop: behind everything in this
           section's stacking context, so the copy stays in normal document flow
-          and needs no z-index of its own. The tone is the page's own ink rather
-          than a plate colour — the canvas supplies the light. */}
+          and needs no z-index of its own. The tone is the page's own ink, taken
+          from the token and not a hex — the canvas supplies the light, and a
+          backdrop that is a few levels off `bg` shows up as a seam at the
+          section boundary where nothing else is lit. */}
       <div
         aria-hidden="true"
         className="absolute inset-0 overflow-hidden"
-        style={{ backgroundColor: '#08080a', zIndex: -999 }}
+        style={{ backgroundColor: 'var(--color-bg)', zIndex: -999 }}
       >
         {/* Copy owns the right 46% from 768px up, so the field is kept out of
             the right 54% entirely and feathers back in over 18% of the width —
-            the accent never reaches the text at all, and the scrim below is
-            working on ink rather than fighting a lit route. */}
+            the lit route never reaches the text at all, and the scrim below is
+            working on ink rather than fighting it. */}
         <SignalCanvas deadZone={{ side: 'right', extent: 0.54, feather: 0.18 }} />
       </div>
 
       <div className="mx-auto flex w-full max-w-[1760px] flex-1 flex-col px-5 py-20 sm:px-6 md:px-0 md:py-24">
         <div className="relative flex flex-1 flex-col md:justify-center">
           {/* Scrim overscans the section so its soft edge never lands inside the
-              frame. Its dense core sits under the copy, not in the middle. */}
+              frame. Its dense core sits under the copy, not in the middle.
+
+              Geometry is MediaSection's, transcribed. The ink is not: that file
+              still writes the scrim as literal `rgba(11,11,13,a)`, which was the
+              plate colour of the superseded palette and now sits *lighter* than
+              `bg` — a scrim mixed toward a value above its own ground stops
+              darkening and starts hazing, lifting a faint rectangle under the
+              copy. Mixing the token with transparent keeps it a scrim and keeps
+              it tied to whatever `bg` is. */}
           <div
             aria-hidden="true"
             className="pointer-events-none absolute -inset-x-[20%] -bottom-[20%] -top-[25%]"
             style={{
               zIndex: -1,
               backgroundImage:
-                'radial-gradient(58% 62% at 68% 50%, rgba(11,11,13,0.86) 0%, rgba(11,11,13,0.619) 44%, rgba(11,11,13,0) 100%)',
+                'radial-gradient(58% 62% at 68% 50%, color-mix(in oklab, var(--color-bg) 86%, transparent) 0%, color-mix(in oklab, var(--color-bg) 61.9%, transparent) 44%, transparent 100%)',
             }}
           />
 

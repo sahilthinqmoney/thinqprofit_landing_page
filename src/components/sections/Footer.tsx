@@ -44,8 +44,17 @@ import {
  * registration disclosure (§17.3). Dropping any of them is a compliance gap,
  * not a tidy-up.
  *
- * Contrast: all disclosure copy renders at text-fg-muted (6.1:1) or
- * text-warning — never text-fg-subtle (3.9:1) — per landing.md §2 and §9.
+ * Contrast: all disclosure copy renders at text-fg-muted (13.08:1) or
+ * text-warning (7.02:1). Under the previous palette fg-subtle was 3.9:1 and so
+ * was banned outright here; it now measures 5.02:1 and clears the floor, but
+ * disclosure copy stays on fg-muted anyway. Legal text should not sit at the
+ * bottom of the legible range just because it is allowed to — fg-subtle is for
+ * footer meta and fine print, and only the bottom bar's separator uses it.
+ *
+ * Colour: nothing in this footer is coloured except by meaning. `warning` marks
+ * the risk disclosure and the Attention Investors panel; every other mark, icon
+ * and numeral is `chrome`, and `accent-soft` is held to actual links. There is
+ * no brand hue left to tint anything with.
  *
  * Every deck string that can carry an unfilled `[PLACEHOLDER]` — registrations,
  * statutory disclosures, the grievance ladder, the entity name — renders through
@@ -172,8 +181,12 @@ export default function Footer() {
               className="inline-flex min-h-11 items-center gap-2.5 rounded-lg"
               aria-label={`${brandName} home`}
             >
-              <span className="grid h-8 w-8 place-items-center rounded-lg bg-accent">
-                <TrendingUp className="h-[1.125rem] w-[1.125rem] text-white" strokeWidth={1.5} aria-hidden="true" />
+              {/* Chrome tile, ink glyph — one mark, identical at every size on
+                  the page. Accent belongs to the newsletter submit sitting in
+                  the same row; the mark stays a luminance step below it. White
+                  on either metal is invisible (1.2:1 / ~2.1:1). */}
+              <span className="grid h-8 w-8 place-items-center rounded-lg bg-chrome">
+                <TrendingUp className="h-[1.125rem] w-[1.125rem] text-bg" strokeWidth={1.5} aria-hidden="true" />
               </span>
               <span className="text-lg font-semibold tracking-tight text-fg">{brandName}</span>
             </a>
@@ -189,7 +202,10 @@ export default function Footer() {
                     <a
                       href={social.href}
                       aria-label={`${brandName} on ${social.label}`}
-                      className="grid h-11 w-11 place-items-center rounded-full border border-border text-fg-muted transition-colors duration-200 hover:border-accent hover:bg-surface-raised hover:text-fg"
+                      /* Edge goes to chrome on hover, not accent: five social
+                         circles pulsing at the action value would read as five
+                         primary buttons in the footer. */
+                      className="grid h-11 w-11 place-items-center rounded-full border border-border text-fg-muted transition-colors duration-200 hover:border-chrome hover:bg-surface-raised hover:text-fg"
                     >
                       <Icon className="h-[1.125rem] w-[1.125rem]" strokeWidth={1.5} aria-hidden="true" />
                     </a>
@@ -253,7 +269,11 @@ export default function Footer() {
             <Reveal>
               <div className="overflow-hidden rounded-2xl border border-border bg-surface/40">
                 <div className="flex items-center gap-2 border-b border-border-soft px-5 py-3.5 sm:px-6">
-                  <Landmark className="h-4 w-4 shrink-0 text-accent-soft" strokeWidth={1.5} aria-hidden="true" />
+                  {/* Chrome, not accent-soft. Under the gold system a softened
+                      accent on a section icon read as a whisper of brand hue;
+                      with no hue it just reads as a dimmed action. Chrome is the
+                      token that actually means "machined mark". */}
+                  <Landmark className="h-4 w-4 shrink-0 text-chrome" strokeWidth={1.5} aria-hidden="true" />
                   <h3 className="text-xs font-semibold uppercase tracking-[0.16em] text-fg">
                     Registration &amp; entity details
                   </h3>
@@ -379,7 +399,7 @@ export default function Footer() {
         <Container>
           <div className="py-12">
             <div className="flex items-center gap-2">
-              <Scale className="h-4 w-4 shrink-0 text-accent-soft" strokeWidth={1.5} aria-hidden="true" />
+              <Scale className="h-4 w-4 shrink-0 text-chrome" strokeWidth={1.5} aria-hidden="true" />
               <h3 className="text-xs font-semibold uppercase tracking-[0.16em] text-fg">
                 {grievanceHeading}
               </h3>
@@ -396,7 +416,10 @@ export default function Footer() {
                   <li key={step} className="flex gap-3 bg-surface p-5">
                     <span
                       aria-hidden="true"
-                      className="tabular grid h-6 w-6 shrink-0 place-items-center rounded-full border border-border text-xs font-medium text-accent-soft"
+                      /* Step numerals are marks, so chrome — 8.6:1 on `surface`,
+                         well clear of the floor, and it keeps the ladder from
+                         looking like six actions. */
+                      className="tabular grid h-6 w-6 shrink-0 place-items-center rounded-full border border-border text-xs font-medium text-chrome"
                     >
                       {index + 1}
                     </span>
