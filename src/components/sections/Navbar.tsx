@@ -35,6 +35,7 @@ import {
 import type { LucideIcon } from 'lucide-react'
 import Button from '../ui/Button'
 import Container from '../ui/Container'
+import { RAIL } from '../ui/SectionShell'
 import {
   directLinks,
   loginLabel,
@@ -378,8 +379,14 @@ export default function Navbar() {
         }`}
       >
         <Container>
+          {/* The nav sits on `SectionShell`'s rail, not on Container's full
+              1760px. Once the sections centre at 84rem, a nav that keeps
+              running to the Container edge puts the wordmark ~200px left of
+              every heading beneath it on a wide display — the page would have
+              two left edges and two centres. The rail is what makes the
+              wordmark, every section title and the footer share one axis. */}
           <div
-            className="relative"
+            className={`relative ${RAIL}`}
             onMouseLeave={closeMenuOnHover}
             onBlur={onNavBlur}
           >
@@ -561,8 +568,11 @@ export default function Navbar() {
                 <Button href="#" variant="ghost" size="sm" className="xl:px-5">
                   {loginLabel}
                 </Button>
+                {/* The account-opening path is the closing section: there is no
+                    Onboarding section any more, and the close is the one place
+                    on the page that asks for the decision. */}
                 <Button
-                  href="#onboarding"
+                  href="#final-cta"
                   variant="primary"
                   size="sm"
                   className="xl:px-5"
@@ -725,7 +735,7 @@ export default function Navbar() {
               <Button href="#" variant="secondary" size="md" fullWidth>
                 {loginLabel}
               </Button>
-              <Button href="#onboarding" variant="primary" size="md" fullWidth>
+              <Button href="#final-cta" variant="primary" size="md" fullWidth>
                 {signupLabel}
               </Button>
             </div>

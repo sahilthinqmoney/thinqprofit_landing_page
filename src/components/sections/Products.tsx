@@ -1,26 +1,22 @@
-import type { Product } from '../../types'
-import {
-  featuredProductIds,
-  products,
-  productsSection,
-  riskDisclosureIds,
-} from '../../data/products'
+import { featuredProductIds, products, productsSection } from '../../data/products'
 import Button from '../ui/Button'
-import CopyText from '../ui/CopyText'
-import Disclosure from '../ui/Disclosure'
 import MediaCard, { MediaCardRail } from '../ui/MediaCard'
 import Reveal from '../ui/Reveal'
 import SectionShell from '../ui/SectionShell'
+import { plateImage, type PlateId } from '../../lib/media'
 
 /**
  * §5 Products — the half-width-cards module.
  *
  * Deliberately asymmetric, and the asymmetry is the design: the two segments
  * that carry the business (Stocks & ETFs, F&O) get full-height media cards
- * with their copy sitting *on* the art, and the other six get a hairline
- * ledger of quiet rows. The previous version rendered all eight as bordered
- * boxes with icon tiles and 01–08 ordinals, which said every product matters
- * exactly the same amount — a bento grid standing in for a point of view.
+ * with their copy sitting *on* the art, and the two behind them get a hairline
+ * ledger of quiet rows. An earlier version rendered all of them as bordered
+ * boxes with icon tiles and ordinals, which said every product matters exactly
+ * the same amount — a bento grid standing in for a point of view.
+ *
+ * The list itself is four long now, down from seven; src/data/products.ts
+ * records what went and why.
  *
  * No icon-in-a-box anywhere here. On a media card an icon tile competes with
  * the art it is sitting on; on a ledger row it inflates a one-line fact into
@@ -61,6 +57,33 @@ const MEDIA_BRIEF: Record<string, string> = {
 }
 
 /**
+ * Which rendered plate carries which product — A2 and A3, rendered by
+ * `tools/plates` from docs/art-direction.md §3. Two entries, because §5 gives
+ * two products a media card and the other six a ledger row.
+ *
+ * The four crops behind each id are four *compositions*, not four exports —
+ * §5.3 is explicit that reframing one render to four aspect ratios defeats the
+ * mechanism, because the dead zone moves between breakpoints and a crop cannot
+ * move a highlight that is already inside it. On a phone `MediaCard`'s title
+ * wraps to two lines in a 335px card, so the reserve grows from the top 34% to
+ * the top 46% and the artwork is composed for it rather than cropped to it.
+ * The paths themselves are derived in `src/lib/media.ts`, which owns the
+ * renderer's naming convention.
+ *
+ * The product ids come from the copy deck and the plate ids from
+ * docs/art-direction.md §A2/§A3, and they do not match — `stocks-etfs` is
+ * plate `stocks`, `futures-options` is plate `derivatives`. This map is where
+ * that mismatch is stated once, rather than being resolved by whoever is
+ * editing a section file at the time. A product with no plate falls through to
+ * `MediaBackdrop`'s designed field, which is the correct behaviour for the six
+ * ledger products: they are deliberately not shot (§3 "not briefed here").
+ */
+const PLATE: Record<string, PlateId> = {
+  'stocks-etfs': 'stocks',
+  'futures-options': 'derivatives',
+}
+
+/**
  * The letterbox ground behind every plate in the library. It is the page's own
  * ink, read from the token rather than transcribed: the hardcoded `#0B0B0D` it
  * replaces is blue-black, and it flashed as a tinted rectangle in the gap
@@ -70,86 +93,8 @@ const MEDIA_BRIEF: Record<string, string> = {
  */
 const VOID = 'var(--color-bg)'
 
-type WithDisclosure = Product & { disclosure: string }
-
-const hasDisclosure = (product: Product): product is WithDisclosure =>
-  Boolean(product.disclosure)
-
-/**
- * Fine print for the two media cards.
- *
- * The F&O derivatives warning is legally required and has to be live text at
- * 4.5:1 (copy deck §20, landing.md §9). It therefore renders here, on the page
- * background, rather than inside the MediaCard: type over a video plate has no
- * guaranteed contrast ratio, and the card's scrim is precisely the "behind a
- * blur or glass" treatment disclosures are forbidden to sit in. The product
- * name labels each one so the association survives the move out of the card.
- */
-function FeaturedFinePrint({ items }: { items: WithDisclosure[] }) {
-  if (items.length === 0) return null
-
-  return (
-    <div className="mt-10 space-y-8 sm:mt-12">
-      {items.map((product) => (
-        <div key={product.id} className="max-w-[68ch]">
-          <p className="text-xs font-medium uppercase tracking-[0.14em] text-fg-muted">
-            {product.title}
-          </p>
-          <Disclosure
-            tone={riskDisclosureIds.includes(product.id) ? 'risk' : 'note'}
-            className="tabular mt-2"
-          >
-            {product.disclosure}
-          </Disclosure>
-        </div>
-      ))}
-    </div>
-  )
-}
-
-/**
- * One ledger row: name — description — link. No card, no border box, no
- * ordinal, no bullet dots. The hairlines between rows are the only structure,
- * which is what lets six of these read as a list of facts instead of six more
- * objects competing with the two cards above.
- */
-function LedgerRow({ product }: { product: Product }) {
-  return (
-    <li className="py-7 sm:py-8">
-      {/* The link is stretched across this box so the whole row is a target —
-          but only this box. The disclosure below sits outside it and stays
-          selectable, which live regulatory text has to be. */}
-      <div className="group relative grid items-baseline gap-x-10 gap-y-2 md:grid-cols-[minmax(0,14rem)_minmax(0,1fr)_auto]">
-        <h3 className="text-lg font-medium leading-snug text-fg sm:text-xl">{product.title}</h3>
-
-        <CopyText source={product.body} className="text-base leading-relaxed text-fg-muted" />
-
-        <a
-          href={product.href}
-          className="inline-flex min-h-11 items-center gap-1.5 self-center text-sm font-medium text-accent-soft transition-colors duration-200 after:absolute after:inset-0 hover:text-fg md:justify-self-end"
-        >
-          {product.cta}
-          <span
-            aria-hidden="true"
-            className="transition-transform duration-200 group-hover:translate-x-0.5"
-          >
-            &rarr;
-          </span>
-        </a>
-      </div>
-
-      {product.disclosure && (
-        <Disclosure tone="note" className="tabular mt-3 max-w-[68ch]">
-          {product.disclosure}
-        </Disclosure>
-      )}
-    </li>
-  )
-}
-
 export default function Products() {
   const featured = products.filter((product) => featuredProductIds.includes(product.id))
-  const rest = products.filter((product) => !featuredProductIds.includes(product.id))
 
   return (
     <SectionShell
@@ -184,7 +129,11 @@ export default function Products() {
                 key={product.id}
                 title={product.title}
                 body={product.body}
-                media={{ alt: MEDIA_BRIEF[product.id] ?? product.title, tone: VOID }}
+                media={{
+                  alt: MEDIA_BRIEF[product.id] ?? product.title,
+                  tone: VOID,
+                  image: PLATE[product.id] ? plateImage(PLATE[product.id]) : undefined,
+                }}
                 action={
                   <Button href={product.href} variant="primary" size="md">
                     {product.cta}
@@ -196,18 +145,27 @@ export default function Products() {
         </div>
       </Reveal>
 
-      <FeaturedFinePrint items={featured.filter(hasDisclosure)} />
+      {/*
+        Removed on request: `FeaturedFinePrint` (the F&O disclosure under the
+        cards) and the ledger of remaining products — Mutual Funds, IPO and the
+        rest, each with its own disclosure line.
 
-      {/* The quiet half. One reveal for the whole ledger rather than six
-          staggered ones — a cascade would make the rows perform, and the point
-          of them is that they don't. */}
-      <Reveal variant="scale">
-        <ul className="mt-20 divide-y divide-border-soft border-y border-border-soft sm:mt-24">
-          {rest.map((product) => (
-            <LedgerRow key={product.id} product={product} />
-          ))}
-        </ul>
-      </Reveal>
+        The section is now the heading, the deck and the two featured cards, and
+        nothing else.
+
+        FLAG FOR COMPLIANCE, recorded here because a comment outlives a
+        conversation. Three mandated lines went with those blocks and are not
+        stated anywhere else on the page:
+          - the SEBI F&O loss warning, which has to accompany any derivatives
+            offer, and the two cards still offer derivatives;
+          - the mutual-fund market-risk line;
+          - the Baskets research-analyst registration.
+        `FeaturedFinePrint`, `LedgerRow` and `hasDisclosure` were DELETED rather
+        than left unreferenced — this project builds with `noUnusedLocals`, so
+        dead components fail `tsc -b`. They are recoverable from git history at
+        the commit before this one. Every disclosure string itself still lives in
+        src/data/products.ts, untouched.
+      */}
     </SectionShell>
   )
 }

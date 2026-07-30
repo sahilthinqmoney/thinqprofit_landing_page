@@ -4,21 +4,15 @@
  *
  * Copy source: docs/landing-page-copy.md
  * Design source: design-system/thinqprofit/pages/landing.md
+ *
+ * The deck's §1 (announcement bar), §8 (onboarding), §11 (Learn), §12
+ * (testimonials), §13 (stats), §14 (FAQ) and §15 (support) shapes are gone with
+ * their sections — see the note at the top of src/App.tsx. The numbering below
+ * still follows the deck, so the gaps are where those sections were.
  */
 
 /** Lucide icon name. Components import the component itself from `lucide-react`. */
 export type IconName = string
-
-/* -------------------------------------------------------------------------- */
-/* 1. Announcement bar                                                        */
-/* -------------------------------------------------------------------------- */
-
-export interface Announcement {
-  id: string
-  message: string
-  linkLabel?: string
-  href?: string
-}
 
 /* -------------------------------------------------------------------------- */
 /* 2. Navigation                                                              */
@@ -124,16 +118,6 @@ export interface Plan {
 }
 
 /* -------------------------------------------------------------------------- */
-/* 8. Onboarding                                                              */
-/* -------------------------------------------------------------------------- */
-
-export interface OnboardingStep {
-  title: string
-  body: string
-  icon: IconName
-}
-
-/* -------------------------------------------------------------------------- */
 /* 9. Mobile app                                                              */
 /* -------------------------------------------------------------------------- */
 
@@ -149,57 +133,6 @@ export interface AppFeature {
 export interface SafetyPillar {
   title: string
   body: string
-  icon: IconName
-}
-
-/* -------------------------------------------------------------------------- */
-/* 11. Learn                                                                  */
-/* -------------------------------------------------------------------------- */
-
-export interface LearnTrack {
-  title: string
-  body: string
-  icon: IconName
-}
-
-/* -------------------------------------------------------------------------- */
-/* 12. Testimonials                                                           */
-/* -------------------------------------------------------------------------- */
-
-export interface Testimonial {
-  /** Stable key — the deck mandates these be swapped for real consented quotes. */
-  id: string
-  quote: string
-  name: string
-  city: string
-  meta: string
-}
-
-/* -------------------------------------------------------------------------- */
-/* 13. Stats                                                                  */
-/* -------------------------------------------------------------------------- */
-
-export interface Stat {
-  value: string
-  label: string
-}
-
-/* -------------------------------------------------------------------------- */
-/* 14. FAQ                                                                    */
-/* -------------------------------------------------------------------------- */
-
-export interface FaqItem {
-  question: string
-  answer: string
-}
-
-/* -------------------------------------------------------------------------- */
-/* 15. Support                                                                */
-/* -------------------------------------------------------------------------- */
-
-export interface SupportChannel {
-  channel: string
-  detail: string
   icon: IconName
 }
 

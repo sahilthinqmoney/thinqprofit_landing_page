@@ -13,13 +13,20 @@ import FocusPull from './FocusPull'
  *
  * Before this, every H2 on the page rendered at the identical clamp, which
  * flattened the document into a list of equal-weight slabs.
+ *
+ * The number that matters in each clamp is the FLOOR, not the ceiling. A clamp
+ * bottoms out on a phone and — because `vw` is small there too — most of these
+ * were still bottomed out at 1024px. `standard` sat at 28px against an 18px
+ * deck, a ratio of 1.56, so on the two widths most people actually use, a
+ * section title was barely a step above its own standfirst. Every floor here is
+ * set so title:deck clears 2.0 at 375px, which is the width where it was worst.
  */
 const SCALE = {
   // Matches `MediaSection`'s `tall` exactly, so a flat lead section and a
   // full-bleed one carry the same rank rather than competing.
-  lead: 'text-[clamp(2.25rem,4vw,3.5rem)] leading-[1.08]',
-  standard: 'text-[clamp(1.75rem,3vw,2.5rem)] leading-[1.14]',
-  minor: 'text-[clamp(1.5rem,2.2vw,1.875rem)] leading-[1.2]',
+  lead: 'text-[clamp(2.5rem,4.6vw,4rem)] leading-[1.04]',
+  standard: 'text-[clamp(2.125rem,3.9vw,3.25rem)] leading-[1.1]',
+  minor: 'text-[clamp(1.75rem,2.6vw,2.25rem)] leading-[1.16]',
 } as const
 
 /**
@@ -32,8 +39,32 @@ const SCALE = {
  * `max-w-3xl lg:max-w-4xl` in another, `4xl` rising to `1440px` in another.
  * Six different measures inside one container is the uniformity defect that
  * reads as "assembled" rather than "designed". This is now the only one.
+ *
+ * `mx-auto` is load-bearing and was missing. A capped block with no auto margin
+ * is left-flush in its parent, so above ~1440px — the point where Container's
+ * content box first exceeds 1344px — every section on the page sat against the
+ * left gutter and dumped all the slack on the right. At 1920px that is 48px of
+ * padding on one side and 368px on the other, which is the "sections aren't
+ * centred, padding isn't equal" defect exactly. `Navbar` and `Footer` now share
+ * this same rail, so the page has one centred axis top to bottom rather than a
+ * 1344px body hanging off a 1760px chrome.
  */
-const RAIL = 'w-full max-w-[84rem]'
+export const RAIL = 'mx-auto w-full max-w-[84rem]'
+
+/**
+ * The one vertical rhythm. Every section — shell, full-bleed, or hand-rolled —
+ * uses this string and nothing else.
+ *
+ * There were twelve distinct vertical-padding values across the page
+ * (`py-14 sm:py-16 lg:py-20` here, `py-20 md:py-24` in MediaSection and
+ * Platform, `py-16 sm:py-20 lg:py-24` in Stats, and so on). Twelve values is
+ * not a rhythm, it is an absence of one, and it is what makes consecutive
+ * sections feel unevenly spaced even when each looks fine alone.
+ */
+export const SECTION_Y = 'py-16 sm:py-20 lg:py-24'
+
+/** The one page gutter. Mirrors `Container`, for sections that bleed past it. */
+export const GUTTER_X = 'px-5 sm:px-6 lg:px-8 xl:px-12'
 
 interface SectionShellProps {
   id: string
@@ -76,8 +107,8 @@ interface SectionShellProps {
  * Standard section wrapper for the text-and-data bands: H2, subheading, then
  * content — all inside one shared rail.
  *
- * The subheading is a DECK, not body copy — one step above body at 18px, in a
- * 34em measure, with 20px of air under the heading.
+ * The subheading is a DECK, not body copy — one step above body at 17px, in a
+ * 30em measure, with 20px of air under the heading.
  *
  * It used to render at `text-base`, which is the same 16px as every paragraph on
  * the page, so it read as the section's first sentence rather than as its
@@ -108,7 +139,7 @@ export default function SectionShell({
   return (
     <section
       id={id}
-      className={`scroll-mt-24 py-14 sm:py-16 lg:py-20 ${
+      className={`scroll-mt-24 ${SECTION_Y} ${
         seamless ? '' : 'border-t border-border-soft'
       } ${fullHeight ? 'flex min-h-svh flex-col justify-center' : ''} ${
         tone === 'raised' ? 'bg-surface/30' : ''
@@ -135,15 +166,35 @@ export default function SectionShell({
           */}
           <FocusPull className={`max-w-[38em] ${centered ? 'mx-auto text-center' : ''}`}>
             <h2 className={`display text-fg ${SCALE[scale]}`}>{heading}</h2>
-            {subheading && <p className="mt-5 max-w-[34em] text-lg leading-relaxed text-fg-muted">{subheading}</p>}
+            {/*
+              17px, not 18. The deck is one step over the 16px body and several
+              steps under the title, and at 18px it was neither — it read as the
+              section's first paragraph, set slightly large.
+
+              The measure matters as much as the size. At `34em` a two-sentence
+              standfirst ran to three full lines and ~612px wide, so its sheer
+              mass out-weighed a 28px title sitting above it. `30em` keeps it to
+              two lines, which is what a standfirst is.
+            */}
+            {subheading && (
+              <p className="mt-5 max-w-[30em] text-[1.0625rem] leading-[1.6] text-fg-muted lg:mt-6">
+                {subheading}
+              </p>
+            )}
           </FocusPull>
 
-          {/* More space above a heading than below it, and more between the
-              heading block and its content than inside that content. The gap is
-              what tells a reader the heading is finished. */}
-          {/* Was mt-16/20/24. Together with py-40 that spent 416px of an 812px
-              viewport on whitespace before a single row of content. */}
-          <div className="mt-8 sm:mt-10 lg:mt-12">{children}</div>
+          {/*
+            The break comes AFTER the deck, not between the title and the deck.
+
+            Those two are one optical group — 20px apart — and the gap that
+            tells a reader the heading block is finished has to be visibly
+            larger than the gap inside it. It was `mt-8` (32px) against `mt-5`
+            (20px), a ratio of 1.6, which is not enough separation to register;
+            the deck read as the top of the content rather than the bottom of
+            the heading. At 56/64/80px the ratio is 2.8–3.3, and the
+            heading-block break is now the largest gap in the section.
+          */}
+          <div className="mt-14 sm:mt-16 lg:mt-20">{children}</div>
         </div>
       </Container>
     </section>

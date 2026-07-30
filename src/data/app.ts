@@ -55,10 +55,14 @@ export const appCopy: AppCopy = {
  * noun phrase rather than a sentence — the explanatory tails ("for your…",
  * "Works on a… — orders queue and confirm") were what made the run of them
  * scan as prose instead of as a list.
+ *
+ * Three, and three is a length rather than a count: at four the line wrapped to
+ * two rows under a centred heading and stopped reading as a caption. The one cut
+ * ("Watchlist and holdings widgets") is the only item here that describes a
+ * convenience rather than something the app does when it matters.
  */
 export const appFeatures: AppFeature[] = [
   { label: 'Face ID and fingerprint login', icon: 'scan-face' },
-  { label: 'Watchlist and holdings widgets', icon: 'layout-grid' },
   { label: 'Alerts for orders, triggers and margin calls', icon: 'bell-ring' },
   { label: 'Order queuing on a patchy connection', icon: 'wifi-off' },
 ]

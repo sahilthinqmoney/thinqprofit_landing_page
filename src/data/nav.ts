@@ -1,55 +1,12 @@
 /**
- * Announcement bar (§1) and navigation (§2) content.
- * Copy source: docs/landing-page-copy.md — verbatim, including [PLACEHOLDERS].
+ * Navigation content (§2). Copy source: docs/landing-page-copy.md — verbatim,
+ * including [PLACEHOLDERS].
+ *
+ * The announcement bar (§1) and its three copy variants are gone with the
+ * component: a dismissable strip above the nav is a fourth message competing
+ * with the headline before the reader has had the first.
  */
-import type { Announcement, MegaMenu, MenuColumn, NavItem } from '../types'
-
-/* -------------------------------------------------------------------------- */
-/* 1. Announcement bar                                                        */
-/* -------------------------------------------------------------------------- */
-
-/**
- * Local extension of `Announcement`. Two of the three deck variants place the
- * link mid-sentence, so the shared shape (message + trailing link) cannot carry
- * the words that follow it. `trailing` holds those words so the line stays
- * verbatim. Still assignable to `Announcement[]`.
- */
-export interface AnnouncementVariant extends Announcement {
-  /** Copy that follows the inline link. */
-  trailing?: string
-  /** Render a lucide arrow after the link (deck variant A ends in "→"). */
-  linkArrow?: boolean
-}
-
-export const announcements: AnnouncementVariant[] = [
-  {
-    id: 'promo',
-    message: 'Account opening is free until [DATE].',
-    linkLabel: 'Get started in under 10 minutes',
-    href: '#onboarding',
-    linkArrow: true,
-  },
-  {
-    id: 'regulatory',
-    message: 'Investor Charter and monthly complaint data are published in our',
-    linkLabel: 'Investor Relations',
-    href: '#',
-    trailing: 'section.',
-  },
-  {
-    id: 'launch',
-    message: 'New: GTT orders are now live on stocks and F&O.',
-    linkLabel: 'See what changed',
-    href: '#',
-  },
-]
-
-/** Deck §1 — dismiss label. */
-export const dismissLabel = 'Close announcement'
-
-/* -------------------------------------------------------------------------- */
-/* 2. Navigation                                                              */
-/* -------------------------------------------------------------------------- */
+import type { MegaMenu, MenuColumn, NavItem } from '../types'
 
 export const wordmark = 'ThinqProfit'
 /** Deck §2.1 — alt text for the logo lockup. */
@@ -81,6 +38,18 @@ export interface NavMegaMenu extends Omit<MegaMenu, 'footer'> {
   footer?: MenuFooter
 }
 
+/**
+ * Two menus, three links each.
+ *
+ * Both panels used to run twelve items, and a third menu (Learn) carried five
+ * more — twenty-nine destinations in a header for a page with seven sections.
+ * A mega-menu that lists everything is a sitemap wearing a nav's costume. Each
+ * column now names the three things a visitor picks a broker over; the rest are
+ * still reachable from the footer, which is where an exhaustive list belongs.
+ *
+ * The Products panel's footer strip is gone with it — it pointed at a Learn hub
+ * that no longer has a section on this page.
+ */
 export const megaMenus: NavMegaMenu[] = [
   {
     id: 'products',
@@ -105,11 +74,6 @@ export const megaMenus: NavMegaMenu[] = [
             href: '#products',
             icon: 'Rocket',
           },
-          {
-            label: 'Bonds & G-Secs',
-            href: '#products',
-            icon: 'Landmark',
-          },
         ],
       },
       {
@@ -129,11 +93,6 @@ export const megaMenus: NavMegaMenu[] = [
             label: 'Commodities',
             href: '#products',
             icon: 'Gem',
-          },
-          {
-            label: 'Currency',
-            href: '#products',
-            icon: 'Banknote',
           },
         ],
       },
@@ -155,20 +114,9 @@ export const megaMenus: NavMegaMenu[] = [
             href: '#products',
             icon: 'Repeat',
           },
-          {
-            label: 'Referrals',
-            href: '#products',
-            icon: 'UserPlus',
-          },
         ],
       },
     ],
-    footer: {
-      text: 'New to markets? Start with',
-      linkLabel: 'ThinqProfit Learn',
-      href: '#learn',
-      trailing: '— free, no account needed.',
-    },
   },
   {
     id: 'platform',
@@ -209,11 +157,6 @@ export const megaMenus: NavMegaMenu[] = [
             icon: 'Table2',
           },
           {
-            label: 'Screeners',
-            href: '#platform',
-            icon: 'Filter',
-          },
-          {
             label: 'Alerts',
             href: '#platform',
             icon: 'Bell',
@@ -238,64 +181,28 @@ export const megaMenus: NavMegaMenu[] = [
             href: '#platform',
             icon: 'FlaskConical',
           },
-          {
-            label: 'Reports',
-            href: '#platform',
-            icon: 'FileText',
-          },
-        ],
-      },
-    ],
-  },
-  {
-    id: 'learn',
-    label: 'Learn',
-    wide: false,
-    // The deck gives this menu a flat list with no column heading (§2.5).
-    columns: [
-      {
-        heading: '',
-        items: [
-          {
-            label: 'Learn Hub',
-            href: '#learn',
-            icon: 'GraduationCap',
-          },
-          {
-            label: 'Market Digest',
-            href: '#learn',
-            icon: 'Newspaper',
-          },
-          {
-            label: 'Glossary',
-            href: '#learn',
-            icon: 'BookOpen',
-          },
-          {
-            label: 'Videos',
-            href: '#learn',
-            icon: 'CirclePlay',
-          },
-          {
-            label: 'Calculators',
-            href: '#learn',
-            icon: 'Calculator',
-          },
         ],
       },
     ],
   },
 ]
 
-/** Deck §2.2 — top-level entries that are plain links, not mega-menus. */
-export const directLinks: NavItem[] = [
-  { label: 'Pricing', href: '#pricing' },
-  { label: 'Support', href: '#support' },
-]
+/**
+ * Deck §2.2 — top-level entries that are plain links, not mega-menus.
+ *
+ * Empty, and both entries went for the same reason: a nav link to an anchor that
+ * no longer exists is worse than no link. Support went with the Support section;
+ * Pricing went with the Pricing section, which was removed because every rate in
+ * it was still an unfilled placeholder.
+ *
+ * Kept as an exported empty array rather than deleted — `Navbar` maps over it in
+ * two places, and a third top-level link is the likeliest next nav change.
+ */
+export const directLinks: NavItem[] = []
 
 /** Deck §18.5 — canonical button labels. */
 export const loginLabel = 'Log in'
 export const signupLabel = 'Open free account'
 
-/** Deck §2.6 — mobile sheet order: Products → Platform → Pricing → Learn → Support. */
-export const mobileOrder: string[] = ['Products', 'Platform', 'Pricing', 'Learn', 'Support']
+/** Mobile sheet order — the three top-level entries, in header order. */
+export const mobileOrder: string[] = ['Products', 'Platform', 'Pricing']

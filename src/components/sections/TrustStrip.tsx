@@ -1,4 +1,5 @@
 import Container from '../ui/Container'
+import { RAIL } from '../ui/SectionShell'
 import { hasPlaceholder } from '../../lib/copyTokens'
 import { registrations, trustLabel } from '../../data/hero'
 
@@ -38,11 +39,12 @@ export default function TrustStrip() {
       className="border-y border-border-soft"
     >
       <Container>
-        {/* The rail, matching `SectionShell`'s 84rem cap inside the same 1760px
-            Container. Without it this band runs to the Container edge while
-            every section above and below stops at 84rem, and on a wide display
-            the page's left edge visibly jogs at the hero/trust seam. */}
-        <div className="w-full max-w-[84rem] py-7 sm:py-8 xl:py-9">
+        {/* `SectionShell`'s rail, imported rather than transcribed — this was a
+            hand-copied `w-full max-w-[84rem]`, and it silently missed the
+            `mx-auto` when that was added there. Vertical padding stays local and
+            deliberately below `SECTION_Y`: this band is punctuation between two
+            sections, not a section. */}
+        <div className={`${RAIL} py-7 sm:py-8 xl:py-9`}>
           <div className="xl:flex xl:items-center xl:gap-8 2xl:gap-12">
             <div className="flex items-center gap-4 xl:shrink-0">
               <h2

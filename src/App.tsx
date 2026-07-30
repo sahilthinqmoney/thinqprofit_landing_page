@@ -1,34 +1,52 @@
-import AnnouncementBar from './components/sections/AnnouncementBar'
 import Navbar from './components/sections/Navbar'
 import Hero from './components/sections/Hero'
 import TrustStrip from './components/sections/TrustStrip'
 import Products from './components/sections/Products'
 import Platform from './components/sections/Platform'
-import Pricing from './components/sections/Pricing'
-import Onboarding from './components/sections/Onboarding'
 import Safety from './components/sections/Safety'
-import MobileApp from './components/sections/MobileApp'
-import Learn from './components/sections/Learn'
-import Stats from './components/sections/Stats'
-import Testimonials from './components/sections/Testimonials'
-import Faq from './components/sections/Faq'
-import Support from './components/sections/Support'
 import FinalCta from './components/sections/FinalCta'
 import Footer from './components/sections/Footer'
 
 /**
- * Section order follows design-system/thinqprofit/pages/landing.md §7
- * (Trust & Authority spine): proof at position 4, safety before the app pitch.
+ * Seven sections and a footer, in the Trust & Authority order of
+ * design-system/thinqprofit/pages/landing.md §7 — proof before price, safety
+ * before the app pitch.
+ *
+ * The page was fourteen sections. It is seven, and the cut was the point: a
+ * broker page earns trust by saying less with more certainty, so each remaining
+ * section states one thing and stops. What went, and why:
+ *
+ *  - Announcement bar — a dismissable strip above the nav, carrying copy nobody
+ *    arrived for. The header is now the nav alone (see `--header-stack`).
+ *  - Onboarding — a full viewport of "how to open an account" ahead of any
+ *    reason to want one. The account-opening CTAs point at the closing section
+ *    instead, which is the one place on the page that asks for the decision.
+ *  - Learn, Testimonials, FAQ, Support — four consecutive sections of secondary
+ *    material.
+ *
+ *    NOTE: this previously read "support channels and the escalation ladder
+ *    render in full in the footer". That is no longer true. The footer's
+ *    statutory blocks — registration & entity details, statutory disclosures,
+ *    Attention Investors and the grievance escalation ladder — were removed on
+ *    request in the same pass, so the escalation route is not currently stated
+ *    anywhere on the page. Flagged, not fixed: see the note in Footer.tsx.
+ *  - Stats — five figures, none of them yet verifiable, so the band rendered
+ *    nothing at all.
+ *  - Pricing — removed on request. Every rate in both tables was an unfilled
+ *    `[₹X per executed order]`-style placeholder, so the section's own heading
+ *    ("Priced plainly, in advance") was the one claim on the page the section
+ *    could not support. Products still names what can be traded; nothing on the
+ *    page now states what it costs. `Pricing.tsx` and `src/data/pricing.ts` are
+ *    left in place, unreferenced, with the rate card and the statutory
+ *    pass-through line intact.
  *
  * Every section covers the full screen (`min-h-svh`, content vertically
- * centred) — that is the brief. `svh` rather than `vh` so mobile browser chrome
- * doesn't push a section past the fold, and `min-` rather than a fixed height so
- * content-heavy sections (Products, Pricing, Footer) grow instead of clipping.
+ * centred). `svh` rather than `vh` so mobile browser chrome doesn't push a
+ * section past the fold, and `min-` rather than a fixed height so the two
+ * content-heavy sections (Products, Footer) grow instead of clipping.
  *
- * The two deliberate exceptions are TrustStrip and Stats, which opt out with
- * `fullHeight={false}`. Both are thin punctuation bands between sections rather
- * than sections in their own right; giving them a full screen each would put a
- * viewport of empty space around five registration codes.
+ * TrustStrip is the one deliberate exception: a thin band of registrations
+ * between the hero and the first section, not a section in its own right.
  */
 export default function App() {
   return (
@@ -55,7 +73,6 @@ export default function App() {
         Skip to content
       </a>
 
-      <AnnouncementBar />
       <Navbar />
 
       <main id="main">
@@ -63,15 +80,7 @@ export default function App() {
         <TrustStrip />
         <Products />
         <Platform />
-        <Pricing />
-        <Onboarding />
         <Safety />
-        <MobileApp />
-        <Learn />
-        <Stats />
-        <Testimonials />
-        <Faq />
-        <Support />
         <FinalCta />
       </main>
 

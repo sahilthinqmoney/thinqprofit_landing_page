@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react'
 import FocusPull from './FocusPull'
 import MediaBackdrop from './MediaBackdrop'
+import { GUTTER_X, RAIL, SECTION_Y } from './SectionShell'
 import type { ImageSources, VideoSources } from './MediaBackdrop'
 
 /**
@@ -58,7 +59,7 @@ const PLACE = {
   center: 'md:mx-auto md:items-center md:text-center',
 } as const
 
-/** The section's own `md:py-24` supplies the inset; these only pick the edge. */
+/** The inner rail's `SECTION_Y` supplies the inset; these only pick the edge. */
 const ANCHOR = {
   top: 'md:justify-start',
   center: 'md:justify-center',
@@ -81,10 +82,10 @@ const ANCHOR = {
  * the face is already doing.
  */
 const SCALE = {
-  epic: 'text-[clamp(2.5rem,4.6vw,4rem)] leading-[1.05]',
-  tall: 'text-[clamp(2.25rem,4vw,3.5rem)] leading-[1.08]',
-  mid: 'text-[clamp(2rem,3.4vw,3rem)] leading-[1.1]',
-  short: 'text-[clamp(1.75rem,3vw,2.5rem)] leading-[1.14]',
+  epic: 'text-[clamp(2.75rem,5.2vw,4.5rem)] leading-[1.02]',
+  tall: 'text-[clamp(2.5rem,4.6vw,4rem)] leading-[1.04]',
+  mid: 'text-[clamp(2.25rem,4.1vw,3.5rem)] leading-[1.08]',
+  short: 'text-[clamp(2.125rem,3.9vw,3.25rem)] leading-[1.1]',
 } as const
 
 interface MediaSectionProps {
@@ -189,13 +190,17 @@ export default function MediaSection({
         {...media}
       />
 
-      {/* Container's gutter ladder, verbatim (`px-5 sm:px-6 lg:px-8 xl:px-12`).
-          It used to drop to `md:px-0` and let `PLACE` supply the inset as a
-          percentage, which is what put this section's copy on a different left
-          edge from the rest of the page at every width. The section itself still
-          bleeds — only the copy is railed. */}
-      <div className="mx-auto flex w-full max-w-[1760px] flex-1 flex-col px-5 py-20 sm:px-6 md:py-24 lg:px-8 xl:px-12">
-        <div className={`relative flex flex-1 flex-col ${ANCHOR[anchor]}`}>
+      {/* `Container` + `RAIL`, reproduced exactly — 1760px cap and gutter
+          ladder on the outside, 84rem rail within it. Both layers are needed:
+          the outer one is Container, the inner one is what every `SectionShell`
+          puts inside Container, and skipping the inner one is what left this
+          section's copy starting at 128px on a 1920px display while every flat
+          section above and below it started at 288px.
+
+          The section itself still bleeds to the viewport edge — only the copy is
+          railed. That is the whole point of the split. */}
+      <div className={`mx-auto flex w-full max-w-[1760px] flex-1 flex-col ${GUTTER_X} ${SECTION_Y}`}>
+        <div className={`relative flex flex-1 flex-col ${RAIL} ${ANCHOR[anchor]}`}>
           {/* Scrim overscans the section so its soft edge never lands inside the frame. */}
           {scrim > 0 && (
             <div
@@ -231,11 +236,13 @@ export default function MediaSection({
               </span>
             </FocusPull>
 
-            {/* Same deck step as `SectionShell` — 18px in a 34em measure. A
+            {/* Same deck step as `SectionShell` — 17px in a 30em measure. A
                 full-bleed section's standfirst and a flat one's have to match, or
                 the page has two ideas about what a subtitle is. */}
             {body && (
-              <div className="mt-5 max-w-[34em] text-lg leading-relaxed text-fg-muted">{body}</div>
+              <div className="mt-5 max-w-[30em] text-[1.0625rem] leading-[1.6] text-fg-muted lg:mt-6">
+                {body}
+              </div>
             )}
 
             {actions && <div className="mt-8 flex flex-wrap items-center gap-3">{actions}</div>}

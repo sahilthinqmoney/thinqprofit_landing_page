@@ -47,6 +47,15 @@ export const featuredProductIds: readonly string[] = ['stocks-etfs', 'futures-op
  */
 export const riskDisclosureIds: readonly string[] = ['futures-options']
 
+/**
+ * Four, not seven.
+ *
+ * Commodities, Currency and Baskets are real segments and are still one click
+ * away in the nav and the footer — but a landing page is not a catalogue, and a
+ * reader deciding whether to trust a broker with a PAN is not choosing between
+ * seven asset classes. What is left is the two that carry the business and the
+ * two that most first accounts are opened for.
+ */
 export const products: Product[] = [
   {
     id: 'stocks-etfs',
@@ -83,34 +92,5 @@ export const products: Product[] = [
     cta: 'See open IPOs',
     href: '#',
     icon: 'rocket',
-  },
-  {
-    id: 'commodities',
-    title: 'Commodities',
-    body: 'Gold, silver, crude, natural gas and agri contracts on MCX.',
-    cta: 'Explore commodities',
-    href: '#',
-    icon: 'gem',
-  },
-  {
-    // Copy deck §5.6 carries an internal build note, not display copy:
-    // "Note for compliance: confirm eligibility and underlying-exposure
-    // requirements before this section goes live." Kept here so it is not lost.
-    id: 'currency',
-    title: 'Currency',
-    body: 'USDINR, EURINR, GBPINR and JPYINR derivatives on the NSE currency segment.',
-    cta: 'Explore currency',
-    href: '#',
-    icon: 'banknote',
-  },
-  {
-    id: 'baskets',
-    title: 'Baskets',
-    body: 'Thematic sets of stocks and ETFs you buy, rebalance or exit in one order.',
-    cta: 'Explore baskets',
-    href: '#',
-    icon: 'boxes',
-    disclosure:
-      'Baskets are not advisory recommendations unless explicitly marked as such and issued under our Research Analyst registration [INH000XXXXXX].',
   },
 ]

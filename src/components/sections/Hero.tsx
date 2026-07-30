@@ -3,16 +3,16 @@ import { ArrowUpRight, ChevronDown } from 'lucide-react'
 import Button from '../ui/Button'
 import Container from '../ui/Container'
 import Disclosure from '../ui/Disclosure'
-import HeroCanvas from '../ui/HeroCanvas'
+import MediaBackdrop from '../ui/MediaBackdrop'
 import { hero, heroHeadlineDisplay } from '../../data/hero'
 
 /**
  * §3 Hero — full-bleed motion with the copy set on top of it.
  *
- * The background is a live canvas (HeroCanvas), not a video file: ~6 KB against
- * 2-3 MB, sharp at any DPR, palette read from the tokens, seamless loop. The
- * concept is docs/motion-brief.md §4 variant A — disorder resolving into an
- * orbital band, right of frame so the headline keeps the left.
+ * The background is A1 from docs/art-direction.md §3 — a brushed aluminium form
+ * curving out of darkness, its mass in the right 40% so the headline keeps the
+ * left. Four art-directed crops and an 8s loop, rendered by `tools/plates` and
+ * served through `MediaBackdrop`.
  *
  * This is the page's one authored motion moment. The headline arrives a line at
  * a time, each settling out of a blur while the field behind it is still
@@ -28,8 +28,9 @@ import { hero, heroHeadlineDisplay } from '../../data/hero'
  * copy deck §3 requires it visible, adjacent to the hero, never collapsed, and
  * landing.md §10 forbids putting it behind a blur, so the rail is opaque.
  *
- * To swap in a real video later: drop <HeroCanvas /> for a <MediaBackdrop
- * video={…} poster={…} />. Encoding targets are in docs/motion-brief.md §6.
+ * `HeroCanvas` is kept in the tree, unreferenced. It is the fallback if the
+ * plate set is ever pulled, and it is the only thing on the page that renders
+ * at device pixel ratio rather than at a fixed crop.
  */
 export default function Hero() {
   const lines = heroHeadlineDisplay.split('\n')
@@ -47,8 +48,36 @@ export default function Hero() {
       id="hero"
       className="relative isolate flex min-h-[calc(100svh-var(--header-stack))] w-full flex-col overflow-hidden"
     >
-      {/* Animated field. Decorative, aria-hidden, pauses offscreen. */}
-      <HeroCanvas className="-z-20" />
+      {/*
+        A1, from docs/art-direction.md §3 — rendered by `tools/plates`, four
+        art-directed crops plus an 8s loop for the two widest.
+
+        This is the swap this file's header comment described, and it is worth
+        stating what it cost and what it bought. It cost the procedural field:
+        ~6 KB of canvas that read the palette from the tokens and could never
+        drift from them. It bought the subject the rest of the page is now made
+        of — the same machined aluminium as Products, Platform, Onboarding and
+        the closing plate, lit by the same key, graded to the same black point.
+        Six sections reading as one shoot is §5.5's test, and a procedural field
+        in the hero was the one frame that could never join it.
+
+        The loop is served at ≥769px only. Below that `MediaBackdrop` falls to
+        the `mobile` and `tablet` crops, which is §4.2's rule and not a
+        bandwidth optimisation: on a phone the copy is full-width and
+        top-anchored, so the dead zone is somewhere else entirely and a 16:9
+        frame cropped to 9:16 reserves nothing.
+      */}
+      <MediaBackdrop
+        alt={hero.mediaAlt}
+        image={{
+          mobile: '/media/hero/hero-mobile.webp',
+          tablet: '/media/hero/hero-tablet.webp',
+          desktop: '/media/hero/hero-desktop.webp',
+          wide: '/media/hero/hero-wide.webp',
+        }}
+        video={{ webm: '/media/hero/hero.webm', mp4: '/media/hero/hero.mp4' }}
+        poster="/media/hero/hero-poster.webp"
+      />
 
       {/* Scrim sized and placed to sit under the copy, not across the frame —
           it overscans the section so its soft edge never lands inside it.
@@ -109,7 +138,11 @@ export default function Hero() {
                * they are written to break, and the block reads as a sculpted
                * shape rather than as a paragraph that happens to be large.
                */
-              className={`display display-flex m-0 text-[clamp(3rem,8vw,7.5rem)] leading-[0.98] tracking-[-0.045em] text-fg ${
+              /* The floor rises with the rest of the ladder. At a 3rem floor the
+                 hero rendered 48px on a phone against a `lead` section title's
+                 new 40px — 1.2×, close enough that the page's largest statement
+                 stopped reading as the largest. 3.25rem restores it to 1.3×. */
+              className={`display display-flex m-0 text-[clamp(3.25rem,8vw,7.5rem)] leading-[0.98] tracking-[-0.045em] text-fg ${
                 settled ? '' : 'display-settling'
               }`}
               style={{ maxWidth: '9em' }}
@@ -177,7 +210,7 @@ export default function Hero() {
               */}
               <div className="mt-14 flex flex-col items-start">
                 <Button
-                  href="#onboarding"
+                  href="#final-cta"
                   size="lg"
                   trailing={<ArrowUpRight className="h-4 w-4" strokeWidth={1.5} />}
                 >

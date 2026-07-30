@@ -270,9 +270,13 @@ export default function Safety() {
             >
               {custody.title}
             </h3>
+            {/* Body, not a deck — `text-lg` here put tier-1's prose at 18px
+                under a 24px h3, a ratio of 1.33, so the tier read as a heading
+                with a second heading under it. 16px is what every other body on
+                the page is set at. */}
             <CopyText
               source={custody.body}
-              className="max-w-[60ch] text-lg leading-relaxed text-fg-muted"
+              className="max-w-[60ch] text-base leading-relaxed text-fg-muted"
             />
           </article>
         </div>
@@ -314,7 +318,10 @@ export default function Safety() {
               key={pillar.title}
               className={`${ROW} gap-y-2 border-t border-border-soft py-6 sm:py-7`}
             >
-              <h3 className="text-base font-medium leading-snug text-fg">{pillar.title}</h3>
+              {/* 18px, not 16. At `text-base` this tier-3 heading was the exact
+                  size of the body copy beside it, separated only by weight 500
+                  vs 400 — which at this size is not a rank, it is a bold word. */}
+              <h3 className="text-lg font-medium leading-snug text-fg">{pillar.title}</h3>
               <CopyText
                 source={pillar.body}
                 className="max-w-[76ch] text-base leading-relaxed text-fg-muted"
@@ -337,7 +344,11 @@ export default function Safety() {
           />
           <CopyText
             source={honestNote}
-            className="display mt-10 max-w-[22em] text-[clamp(1.5rem,2.6vw,2.25rem)] leading-[1.3] text-fg sm:mt-12"
+            /* Held just under tier-1's h3 at every width. This is a closing
+               sentence, not a fourth tier, and at its old clamp it tied the
+               custody heading at 375px and out-sized every h3 in the section —
+               so the largest thing under the H2 was a paragraph. */
+            className="display mt-10 max-w-[22em] text-[clamp(1.375rem,2.4vw,2rem)] leading-[1.34] text-fg sm:mt-12"
           />
         </div>
       </div>

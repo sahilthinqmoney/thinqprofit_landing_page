@@ -2,7 +2,9 @@ import { ArrowRight } from 'lucide-react'
 
 import Button from '../ui/Button'
 import Reveal from '../ui/Reveal'
-import SignalCanvas from '../ui/SignalCanvas'
+import MediaBackdrop from '../ui/MediaBackdrop'
+import { plateImage } from '../../lib/media'
+import { GUTTER_X, RAIL, SECTION_Y } from '../ui/SectionShell'
 
 import { platformCta, platformHeading, platformSubheading, tools } from '../../data/platform'
 
@@ -22,6 +24,13 @@ import { platformCta, platformHeading, platformSubheading, tools } from '../../d
  * was already the minimal form.
  */
 const headline = platformHeading.replace(' ten seconds ', '\nten seconds\n')
+
+/**
+ * §A4's "alt text to ship", verbatim. It describes the subject rather than
+ * naming a file, so it survives the asset being re-rendered.
+ */
+const platformPlateAlt =
+  'A macro view across the edge of dark glass, one narrow band in sharp focus and the rest falling away.'
 
 interface PlatformProps {
   /** Anchor target. Matches the nav's Platform link. */
@@ -94,20 +103,45 @@ export default function Platform({ id = 'platform' }: PlatformProps) {
           from the token and not a hex — the canvas supplies the light, and a
           backdrop that is a few levels off `bg` shows up as a seam at the
           section boundary where nothing else is lit. */}
-      <div
-        aria-hidden="true"
-        className="absolute inset-0 overflow-hidden"
-        style={{ backgroundColor: 'var(--color-bg)', zIndex: -999 }}
-      >
-        {/* Copy owns the right 46% from 768px up, so the field is kept out of
-            the right 54% entirely and feathers back in over 18% of the width —
-            the lit route never reaches the text at all, and the scrim below is
-            working on ink rather than fighting it. */}
-        <SignalCanvas deadZone={{ side: 'right', extent: 0.54, feather: 0.18 }} />
-      </div>
+      {/*
+        Plate A4, replacing the `SignalCanvas` field this section ran while
+        there was no image pipeline. Two reasons, and neither is that the canvas
+        looked bad.
 
-      <div className="mx-auto flex w-full max-w-[1760px] flex-1 flex-col px-5 py-20 sm:px-6 md:px-0 md:py-24">
-        <div className="relative flex flex-1 flex-col md:justify-center">
+        **The page's motion budget.** Robinhood's homepage carries video on
+        exactly two sections — the opening and the closing — and nothing moving
+        in between. This page now matches that: the hero loop and the closing
+        loop, with every mid-page section still. A live canvas here made
+        Platform a third moving surface, competing with the two that are meant
+        to bracket the scroll.
+
+        **§5.5's system read.** The test is whether the plates look like one
+        shoot: same room, same key, same black point. A procedural field is the
+        one frame that could never join that set — it is made of different
+        material, lit by nothing, and graded by hand. §A4's macro glass edge is
+        lit by the same 5600K key as the other five and bottoms out on the same
+        ink.
+
+        The dead zone moves with it and gets stricter: the canvas took a
+        `deadZone` prop and kept its marks out of the right 54%; the plate
+        reserves x 44–100%, y 14–86% *in the render*, before the grade, so the
+        copy column contains no edges rather than merely no bright ones (§2.7).
+      */}
+      <MediaBackdrop
+        alt={platformPlateAlt}
+        image={plateImage('platform')}
+        tone="var(--color-bg)"
+      />
+
+      {/* `MediaSection`'s rail, imported rather than transcribed. It had drifted:
+          this kept `md:px-0`, which drops the gutter to zero from 768px, while
+          MediaSection had moved to Container's full ladder. Two full-bleed
+          sections with different gutters is exactly the uneven padding the rest
+          of this pass is removing. */}
+      <div
+        className={`mx-auto flex w-full max-w-[1760px] flex-1 flex-col ${GUTTER_X} ${SECTION_Y}`}
+      >
+        <div className={`relative flex flex-1 flex-col md:justify-center ${RAIL}`}>
           {/* Scrim overscans the section so its soft edge never lands inside the
               frame. Its dense core sits under the copy, not in the middle.
 
@@ -134,13 +168,19 @@ export default function Platform({ id = 'platform' }: PlatformProps) {
                  is hand-written because the section renders SignalCanvas rather than
                  a MediaSection, and it kept the old 4.5rem cap after the ladder was
                  unified — rendering at 72px against every lead section's 56px. */
-              className="display m-0 whitespace-normal text-[clamp(2.25rem,4vw,3.5rem)] leading-[1.08] text-fg md:whitespace-pre-line"
+              className="display m-0 whitespace-normal text-[clamp(2.5rem,4.6vw,4rem)] leading-[1.04] text-fg md:whitespace-pre-line"
               style={{ maxWidth: '9em' }}
             >
               {headline}
             </h2>
 
-            <div className="mt-6 max-w-[34em] text-base leading-relaxed text-white/70">
+            {/* The shared deck step. This was the page's only 16px deck, set in
+                `white/70` — a full step under every other standfirst and dimmer
+                than the tool list beneath it, so the section's own body copy
+                out-ranked its subtitle. `fg-muted` rather than a white alpha
+                because an alpha's contrast depends on whatever the scrim happens
+                to resolve to underneath it. */}
+            <div className="mt-5 max-w-[30em] text-[1.0625rem] leading-[1.6] text-fg-muted lg:mt-6">
               {platformSubheading}
             </div>
 
@@ -157,26 +197,30 @@ export default function Platform({ id = 'platform' }: PlatformProps) {
                 copy it belongs to, one beat behind it. */}
             <Reveal variant="shear" delay={120} className="mt-10 w-full">
               {/* Row-major fill, so the visual order matches the DOM order a
-                  screen reader announces. Capped at the same 34em as the body
-                  copy above it so the two blocks share a right edge instead of
-                  the list sprawling to the full 46% column on a wide display.
+                  screen reader announces. Capped to the same RENDERED width as
+                  the deck above it so the two blocks share a right edge instead
+                  of the list sprawling to the full 46% column on a wide display.
 
-                  `text-base`, not a 15px step: `em` resolves against each
-                  element's own font size, so 34em on a 15px list is 510px
-                  against the body's 544px — the shared right edge this cap
-                  exists for only lines up if both blocks are set at 16px. It is
-                  also the page's body-copy floor. At 16px the longest name
-                  ("Baskets & multi-leg") still clears the 157px column the 46%
-                  rail leaves at 768px, so nothing wraps and the block stays well
-                  inside the section's fixed height. */}
+                  The cap is 31.875em and that number is arithmetic, not taste:
+                  `em` resolves against each element's own font size, so matching
+                  the deck means matching px, not `em`. The deck is 30em at 17px
+                  = 510px; this list is 16px, so it needs 510 / 16 = 31.875em.
+                  It was 34em back when the deck was also 16px — when the deck
+                  moved to the 17px step, an unchanged 34em here would have
+                  silently pushed the list 34px past the deck's right edge.
+
+                  `text-base`, not a 15px step: it is the page's body-copy floor,
+                  and at 16px the longest name ("Baskets & multi-leg") still
+                  clears the 157px column the 46% rail leaves at 768px, so
+                  nothing wraps and the block stays well inside the section. */}
               <ul
                 aria-label="Platform capabilities"
-                className="grid max-w-[34em] grid-cols-1 gap-x-8 sm:grid-cols-2 sm:gap-x-10"
+                className="grid max-w-[31.875em] grid-cols-1 gap-x-8 sm:grid-cols-2 sm:gap-x-10"
               >
                 {tools.map((tool) => (
                   <li
                     key={tool.title}
-                    className="border-t border-white/15 py-3 text-base leading-snug text-white/80"
+                    className="border-t border-white/15 py-3 text-base leading-snug text-fg-muted"
                   >
                     {tool.title}
                   </li>

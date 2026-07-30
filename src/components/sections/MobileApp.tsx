@@ -1,8 +1,44 @@
 import Button from '../ui/Button'
 import Container from '../ui/Container'
-import MediaPlaceholder from '../ui/MediaPlaceholder'
 import Reveal from '../ui/Reveal'
+import { plateImage } from '../../lib/media'
 import { appCopy, appFeatures } from '../../data/app'
+
+
+/** Plate A7's four art-directed crops — see `src/lib/media.ts`. */
+const deviceImage = plateImage('device')
+
+/**
+ * Feathers the device plate into this section's metal band.
+ *
+ * Every plate is graded to bottom out on `#050505`, the page ink, so its frame
+ * edge dissolves into the page rather than sitting on it. That is right on the
+ * sections that sit on ink and wrong here: this band is `surface` under
+ * `.surface-chrome`, several levels lighter, so the plate's own ground reads as
+ * a darker rectangle laid on the metal and the asset's bounding box shows on
+ * three sides.
+ *
+ * The centre is above the middle because the device is top-anchored and its
+ * lower half is already cut by the section's bottom edge — there is nothing to
+ * blend down there.
+ */
+const MASK = 'radial-gradient(86% 52% at 50% 26%, #000 6%, transparent 92%)'
+
+/**
+ * The ink pool the plate sits in.
+ *
+ * Feathering the image alone is not enough on its own: the plate's ground *is*
+ * the page ink, several levels darker than this band, so however softly the
+ * asset fades it is still fading from a darker value to a lighter one across
+ * its own footprint. Laying a pool of that same ink under it — wider than the
+ * image on every side — means the only transition left is the pool's, which is
+ * a soft radial with no straight edges anywhere in it.
+ *
+ * Deliberately not a `box-shadow` or a `blur`: both would put a halo around a
+ * rectangle, and the rectangle is the thing being hidden.
+ */
+const POOL =
+  'radial-gradient(62% 54% at 50% 34%, #050505 0%, rgba(5,5,5,0.82) 42%, rgba(5,5,5,0) 100%)'
 
 /**
  * §9 Mobile app.
@@ -68,8 +104,10 @@ export default function MobileApp({ id = 'mobile-app' }: MobileAppProps) {
       {/* Centred copy                                                        */}
       {/* ------------------------------------------------------------------ */}
       {/* The bottom pad is the device's visible slice, reserved. Below `md` the
-          phone is a normal flow row, so the pad would only be dead space. */}
-      <Container className="pt-28 sm:pt-32 md:pb-[25rem]">
+          phone is a normal flow row, so it only needs `SECTION_Y`'s ordinary
+          bottom air — which was missing entirely, leaving the feature line
+          sitting on the section's bottom edge on every phone. */}
+      <Container className="pb-16 pt-28 sm:pb-20 sm:pt-32 md:pb-[25rem]">
         {/* Wider than the copy needs on purpose: the headline and body carry
             their own measure caps, and the flowed feature line wants the extra
             width so it settles on two lines instead of three. */}
@@ -85,12 +123,12 @@ export default function MobileApp({ id = 'mobile-app' }: MobileAppProps) {
             <h2 /* `standard`, not a display step. This is a punctuation band between two
                 media sections — at 64px it outranked Products and Pricing, which are
                 sections a visitor actually arrives for. */
-            className="display mx-auto max-w-[14em] text-[clamp(1.75rem,3vw,2.5rem)] leading-[1.14] text-fg">
+            className="display mx-auto max-w-[14em] text-[clamp(2.125rem,3.9vw,3.25rem)] leading-[1.1] text-fg">
               {appCopy.heading}
             </h2>
 
-            {/* The deck step — `text-lg`/18px in a 34em measure, matching
-                `SectionShell` and `MediaSection` exactly.
+            {/* The deck step — 17px in a 30em measure, matching `SectionShell`
+                and `MediaSection` exactly.
 
                 This section writes its own copy block rather than passing `body`
                 to `MediaSection`, so it never picked up the deck step when the
@@ -98,7 +136,7 @@ export default function MobileApp({ id = 'mobile-app' }: MobileAppProps) {
                 every paragraph on the page, and so read as the section's first
                 sentence rather than as its standfirst. `mt-5`, not `mt-6`, for
                 the same reason — the gap under a heading is part of the step. */}
-            <p className="mx-auto mt-5 max-w-[34em] text-lg leading-relaxed text-fg-muted">
+            <p className="mx-auto mt-5 max-w-[30em] text-[1.0625rem] leading-[1.6] text-fg-muted lg:mt-6">
               {appCopy.body}
             </p>
           </Reveal>
@@ -185,27 +223,75 @@ export default function MobileApp({ id = 'mobile-app' }: MobileAppProps) {
                 rather than the hand-picked 2.25rem it carried before. A device
                 bezel is a physical edge like every other on the page and has no
                 claim to a radius of its own. */}
-            <div className="rounded-[var(--radius-card)] border border-chrome/26 bg-bg p-2">
-              {/* Wrapper clips the placeholder's own radius to the bezel's inner
-                  curve — two rounded-* utilities on one element resolve by
-                  stylesheet order, not source order. Concentric, not equal: the
-                  inner radius is the outer minus the 0.5rem bezel wall, so the
-                  two curves stay parallel instead of pinching at the corners. */}
-              <div className="overflow-hidden rounded-[calc(var(--radius-card)-0.5rem)]">
-                {/* `pb` is scaffolding, not styling: MediaPlaceholder centres its
-                    brief in its own box, and roughly the lower 40% of that box is
-                    off-frame here, so the brief would be cut mid-sentence.
-                    Padding-bottom lifts it into the visible half. It leaves with
-                    the placeholder when the real screenshot lands — the reserved
-                    9/19 box is unchanged, so nothing shifts (CLS). */}
-                <MediaPlaceholder
-                  kind="screen"
-                  aspect="aspect-[9/19]"
-                  className="pb-[78%]"
-                  label="Screen stays dark — the real UI is composited in later. No prices, P&L or chart forms."
-                  alt="The ThinqProfit app running on a phone"
+            {/*
+              Plate A7, rendered by `tools/plates`. It replaces two things at
+              once: the `APP SCREEN PLACEHOLDER` box — which shipped the words
+              "the real UI is composited in later" to every visitor — and the
+              CSS bezel that used to frame it.
+
+              The bezel goes because the render already has one. A 1px
+              `border-chrome/26` is a drawn approximation of a machined lip; the
+              plate carries the real thing — a fillet where the front face turns
+              into the side wall, catching one specular hairline down the left
+              edge under the same 5600K key every other plate is lit by. Keeping
+              both would put a drawn edge around a photographed one, which reads
+              as a phone inside a phone. The old comment argued for "one hairline
+              and a radius, nothing else"; this is that argument satisfied in the
+              render rather than in the stylesheet.
+
+              **The screen is empty, and that is the requirement, not a
+              shortfall.** motion-brief §7 rule 5 forbids fabricated interfaces
+              and art-direction.md §3 is explicit: ship a screenshot of the real
+              product, or ship the dark screen. This is the dark screen — flush
+              glass taking a diagonal grade and nothing else. No chart forms, no
+              rows, no glyphs, no invented figures.
+
+              `aspect-[9/19]` is unchanged from the placeholder it replaces, so
+              the reserved box is identical and nothing shifts on decode (CLS).
+            */}
+            {/*
+              The mask is structural, not a flourish. Every plate is graded to
+              bottom out on `#050505` — the page ink — so that its frame edge
+              dissolves into the page instead of sitting on it. That is exactly
+              right on the eight sections that sit on ink, and wrong here: this
+              is the one band on the page built from `surface` under
+              `.surface-chrome`, several levels *lighter* than ink, so the
+              plate's own ground reads as a darker rectangle laid on the metal
+              and the asset's bounding box becomes visible on three sides.
+
+              Feathering the plate into its surroundings is the fix that keeps
+              the grade correct for every other section. The radial is centred
+              above the middle because the device is top-anchored and its lower
+              half is already cut by the section's bottom edge — there is
+              nothing to blend down there.
+            */}
+            {/* Inline rather than an arbitrary utility: Tailwind's arbitrary-value
+                parser does not emit this one reliably (the gradient carries both
+                a hex and percentages), and a mask that silently fails to compile
+                looks exactly like a mask that is too weak — which cost a round of
+                debugging here. */}
+            <div className="relative">
+              <div
+                aria-hidden="true"
+                className="pointer-events-none absolute -inset-x-[55%] -top-[10%] bottom-0"
+                style={{ backgroundImage: POOL }}
+              />
+              <picture
+                className="relative block"
+                style={{
+                  maskImage: MASK,
+                  WebkitMaskImage: MASK,
+                }}
+              >
+                <source media="(min-width: 1280px)" srcSet={deviceImage.wide} />
+                <source media="(max-width: 425px)" srcSet={deviceImage.mobile} />
+                <source media="(max-width: 768px)" srcSet={deviceImage.tablet} />
+                <img
+                  src={deviceImage.desktop}
+                  alt="The ThinqProfit app on a phone, screen dark"
+                  className="block aspect-[9/19] w-full object-cover object-top"
                 />
-              </div>
+              </picture>
             </div>
           </Reveal>
         </div>

@@ -2,6 +2,7 @@ import Button from '../ui/Button'
 import CopyText from '../ui/CopyText'
 import Disclosure from '../ui/Disclosure'
 import MediaSection from '../ui/MediaSection'
+import { plateImage, platePoster, plateVideo } from '../../lib/media'
 import { finalCta } from '../../data/footer'
 
 /**
@@ -89,15 +90,22 @@ export default function FinalCta() {
       voice="serif"
       headline={headline}
       body={finalCta.subheading}
+      /*
+       * One action, and it is the page's account-opening destination — every
+       * "Open free account" above this (nav, hero, mobile sheet) now scrolls
+       * here, so `href` is the signup route rather than another anchor.
+       *
+       * `finalCta.secondaryCta` ("Talk to us first") is deliberately not
+       * rendered. It pointed at the Support section, which is gone; more to the
+       * point, the hero spends its whole argument earning one decision, and
+       * offering an alternative to it in the closing frame is where a page
+       * stops believing its own case. The support channels are in the footer,
+       * two screens of nothing between here and them.
+       */
       actions={
-        <>
-          <Button href="#onboarding" size="lg">
-            {finalCta.primaryCta}
-          </Button>
-          <Button href="#support" variant="secondary" size="lg">
-            {finalCta.secondaryCta}
-          </Button>
-        </>
+        <Button href="#" size="lg">
+          {finalCta.primaryCta}
+        </Button>
       }
       /**
        * Live text, selectable, in normal flow above the scrim — nothing is
@@ -106,7 +114,32 @@ export default function FinalCta() {
        * racing it in the cascade, and holds above 4.5:1 on the scrimmed plate.
        */
       finePrint={<Disclosure>{finalCta.disclosure}</Disclosure>}
-      media={{ alt: closingClip }}
+      /*
+       * Plate A6, and the second of the two plates that ship as motion (§4.2) —
+       * the page's only other moving surface is the hero, so the scroll opens
+       * and closes on movement and holds still in between.
+       *
+       * The plate's trick is that its subject sits *inside* the centred copy
+       * column: a matte black monolith legible almost entirely by the two
+       * chamfer hairlines that fall either side of the text. That is why this
+       * section can put a centred serif headline over a photograph at all.
+       *
+       * The loop settles rather than idling (§2.3 rule 3). The specular creeps
+       * along an edge that is already there and comes to rest; nothing crosses
+       * the frame. The primary action directly above it is the only thing on
+       * this page allowed to move forever, and a backdrop that never stopped
+       * would be competing with it at the exact moment the page asks for a
+       * decision.
+       *
+       * `MediaBackdrop` serves the loop at ≥769px only and falls to the stills
+       * below that — the 16:9 loop cropped to a phone's 9:16 reserves nothing.
+       */
+      media={{
+        alt: closingClip,
+        image: plateImage('closing'),
+        video: plateVideo('closing'),
+        poster: platePoster('closing'),
+      }}
     >
       <CopyText source={supportLine} className="mt-6 text-sm leading-relaxed text-white/65" />
     </MediaSection>

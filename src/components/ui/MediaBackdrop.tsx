@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 /**
  * Art-directed crops, one per breakpoint — NOT one image scaled.
@@ -58,6 +58,37 @@ interface MediaBackdropProps {
 }
 
 /**
+ * True at ≥769px — the width at which `ImageSources` stops serving the `tablet`
+ * crop and starts serving `desktop`.
+ *
+ * This exists so a section can ship a video *and* the four art-directed stills,
+ * which is not a nicety: docs/art-direction.md §4.2 says mobile "serve the
+ * poster still, skip the video", and §2.7's dead zone moves between breakpoints
+ * — on a phone the copy is full-width and top-anchored, not parked to a side. A
+ * single 16:9 loop `object-cover`-ed into a 9:16 frame reserves nothing, so
+ * shipping video to mobile is not a bandwidth question, it is a legibility one.
+ *
+ * Matched in JS rather than with two elements and a CSS media query because CSS
+ * cannot stop the hidden one downloading, and the whole point below 769px is to
+ * not fetch 2 MB of loop.
+ */
+function useWideViewport() {
+  const [wide, setWide] = useState(
+    () => typeof window !== 'undefined' && window.matchMedia('(min-width: 769px)').matches,
+  )
+
+  useEffect(() => {
+    const query = window.matchMedia('(min-width: 769px)')
+    const sync = () => setWide(query.matches)
+    sync()
+    query.addEventListener('change', sync)
+    return () => query.removeEventListener('change', sync)
+  }, [])
+
+  return wide
+}
+
+/**
  * The layer that sits *behind* section copy. Never a sibling that overlays the
  * text — it is pinned at `z-index: -999` inside the section's own stacking
  * context, so copy participates in normal flow and needs no z-index of its own.
@@ -80,6 +111,15 @@ export default function MediaBackdrop({
   className = '',
 }: MediaBackdropProps) {
   const videoRef = useRef<HTMLVideoElement>(null)
+  const wide = useWideViewport()
+  /*
+   * The loop plays only where its composition was art-directed to work. Below
+   * 769px the `mobile` and `tablet` crops take over — different framing, not the
+   * same frame letterboxed (§5.3). A section with a video and no stills still
+   * gets the video everywhere, which is the honest fallback: something is better
+   * than the pending plate, and the alternative is silently showing nothing.
+   */
+  const playsVideo = Boolean(video) && (wide || !image)
 
   useEffect(() => {
     const el = videoRef.current
@@ -110,7 +150,10 @@ export default function MediaBackdrop({
       observer.disconnect()
       document.removeEventListener('visibilitychange', sync)
     }
-  }, [])
+    /* Re-runs when the viewport crosses 769px: the <video> is unmounted below
+       that width, so the observer has a different element to attach to (or
+       none at all). */
+  }, [playsVideo])
 
   const fill = 'absolute inset-0 h-full w-full object-cover'
 
@@ -120,7 +163,7 @@ export default function MediaBackdrop({
       className={`absolute inset-0 overflow-hidden ${className}`}
       style={{ backgroundColor: tone, zIndex: -999 }}
     >
-      {video ? (
+      {playsVideo && video ? (
         <video
           ref={videoRef}
           aria-label={alt}

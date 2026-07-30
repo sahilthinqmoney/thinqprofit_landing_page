@@ -33,7 +33,16 @@ export const hero: HeroContent = {
    * it is labelled. The hero carries an abstract plate instead, and this string
    * describes what actually ships. See docs/art-direction.md.
    */
-  mediaAlt: 'A machined aluminium form at rest in near-black, one edge catching warm light',
+  /*
+   * docs/art-direction.md §A1's "alt text to ship", verbatim. It replaces a
+   * string that said the edge caught *warm* light — residue from the gold
+   * palette. There is no warm light in this system: §2.4 fixes the key at 5600K
+   * and makes that a colour rule rather than a technical note, because a warm
+   * grade reintroduces the removed brand through the lighting without anyone
+   * naming a colour.
+   */
+  mediaAlt:
+    'A large brushed aluminium form curving out of darkness, lit along one edge by a single soft light.',
   riskDisclosure:
     'Investments in the securities market are subject to market risk. Read all the related documents carefully before investing.',
 }

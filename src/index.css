@@ -151,19 +151,20 @@
 }
 
 /*
- * Height of everything pinned above the hero: the announcement bar plus the
- * nav. The hero subtracts it so its mandatory risk disclosure still lands
- * inside the first viewport — a plain `100svh` hero pushes that rail below the
- * fold by exactly this much. Declared outside `@theme` because it is a layout
- * measurement, not a design token, and it changes with the nav's own scale.
+ * Height of everything pinned above the hero — the nav, and nothing else since
+ * the announcement bar was removed. The hero subtracts it so its mandatory risk
+ * disclosure still lands inside the first viewport: a plain `100svh` hero pushes
+ * that rail below the fold by exactly this much. Declared outside `@theme`
+ * because it is a layout measurement, not a design token, and it changes with
+ * the nav's own scale.
  */
 :root {
-  --header-stack: 6.75rem; /* 44px bar + 64px nav */
+  --header-stack: 4rem; /* 64px nav */
 }
 
 @media (min-width: 1280px) {
   :root {
-    --header-stack: 7.75rem; /* nav grows to 80px from xl */
+    --header-stack: 5rem; /* nav grows to 80px from xl */
   }
 }
 

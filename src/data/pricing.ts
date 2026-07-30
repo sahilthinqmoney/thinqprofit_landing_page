@@ -46,7 +46,19 @@ export const brokerage: BrokerageRow[] = [
 export const statutoryLine =
   'Plus statutory and exchange charges at actuals — STT/CTT, exchange transaction charges, SEBI turnover fees, stamp duty and GST. See the [full rate card](#) for the complete breakdown.'
 
-/** Column headers for the account charges table. */
+/**
+ * The account-charges table and the three plan tiers are gone from the page.
+ *
+ * The section's own subheading is "One rate card" — and it was followed by three
+ * tables. Two of them were the ones nobody scrolled to a broker's homepage to
+ * read: an AMC-and-Call-&-Trade appendix, and a tiering ladder that turns a
+ * promise of plain pricing into a comparison exercise. The rate card is the
+ * claim; both belong on the full pricing page the statutory line links to.
+ *
+ * Deliberately not deleted from this file. Every value in them is compliance-
+ * supplied and non-reconstructable, so they stay here in the copy deck's mirror
+ * ready for that page. Nothing imports them today.
+ */
 export const accountChargeColumns = { item: 'Item', amount: 'Amount' } as const
 
 export const accountChargesHeading = 'Account charges'

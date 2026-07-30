@@ -18,10 +18,12 @@ export const platformSubheading = 'Order entry, charts and positions on one scre
 export const platformCta = 'Take a product tour'
 
 /*
- * Six, not ten. Ten reads as an inventory; six reads as a claim about what the
- * platform is for. The four that went — paper trading, reports, portfolio
- * analytics, multi-leg baskets — are real and are still in the nav; they are just
- * not what someone chooses a broker over.
+ * Four, not ten. Ten reads as an inventory; four reads as a claim about what the
+ * platform is for — and four is what fits on one line of the copy column without
+ * the list becoming the section. Everything that went (screeners, GTT orders,
+ * paper trading, reports, portfolio analytics, multi-leg baskets) is real, is
+ * still in the nav and the footer, and belongs on the tour page the CTA points
+ * at rather than in a checklist here.
  */
 export const tools: Tool[] = [
   {
@@ -33,16 +35,8 @@ export const tools: Tool[] = [
     icon: 'table-2',
   },
   {
-    title: 'Screeners',
-    icon: 'filter',
-  },
-  {
     title: 'Alerts',
     icon: 'bell',
-  },
-  {
-    title: 'GTT orders',
-    icon: 'timer',
   },
   {
     title: 'API',

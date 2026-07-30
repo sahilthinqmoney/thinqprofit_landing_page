@@ -53,103 +53,58 @@ export const brandBlurb =
 export const socials: SocialLink[] = [
   { label: 'X', href: '#', icon: 'AtSign' },
   { label: 'LinkedIn', href: '#', icon: 'Briefcase' },
-  { label: 'Instagram', href: '#', icon: 'Camera' },
   { label: 'YouTube', href: '#', icon: 'MonitorPlay' },
-  { label: 'Telegram', href: '#', icon: 'Send' },
 ]
 
 /* -------------------------------------------------------------------------- */
-/* §17.2 Link columns — all eight, every label from the deck                   */
+/* §17.2 Link columns                                                          */
 /* -------------------------------------------------------------------------- */
 
+/**
+ * Five columns of five, down from eight columns of up to eleven.
+ *
+ * Sixty-eight links across eight headings is a sitemap, and a sitemap at the
+ * foot of a page is a directory nobody reads: at eight columns each one was a
+ * ~120px strip of 13px grey type. Each column now carries the five destinations
+ * it would actually be opened for, and the mandated material is not in this
+ * grid at all — the registration block, statutory disclosures, Attention
+ * Investors and the grievance ladder all render in full below it.
+ *
+ * Support keeps a column despite the Support *section* going: the channels are
+ * what a customer comes to a footer for, and the escalation ladder further down
+ * is the route when those channels have not worked.
+ */
 export const footerColumns: FooterColumn[] = [
   {
     heading: 'Products',
-    links: [
-      'Stocks & ETFs',
-      'Futures & Options',
-      'Intraday',
-      'Mutual Funds',
-      'IPO',
-      'Commodities',
-      'Currency',
-      'Bonds & G-Secs',
-      'MTF',
-      'Baskets',
-      'SIP',
-    ],
+    links: ['Stocks & ETFs', 'Futures & Options', 'Mutual Funds', 'IPO', 'Commodities'],
   },
   {
     heading: 'Platform',
-    links: [
-      'Mobile app',
-      'Web terminal',
-      'ThinqProfit Pro',
-      'Charts',
-      'Option chain',
-      'Screeners',
-      'Alerts',
-      'GTT orders',
-      'Paper trading',
-      'API docs',
-      'Status page',
-    ],
-  },
-  {
-    heading: 'Pricing',
-    links: [
-      'Rate card',
-      'Brokerage calculator',
-      'Margin calculator',
-      'Account charges',
-      'Plans',
-    ],
-  },
-  {
-    heading: 'Learn',
-    links: ['Learn hub', 'Market digest', 'Glossary', 'Videos', 'Calculators', 'Webinars'],
+    links: ['Mobile app', 'Web terminal', 'Charts', 'Option chain', 'API docs'],
   },
   {
     heading: 'Company',
-    links: ['About us', 'Careers', 'Press', 'Blog', 'Partner with us', 'Contact'],
+    links: ['About us', 'Careers', 'Pricing', 'Blog', 'Contact'],
   },
   {
     heading: 'Support',
     links: [
       'Help centre',
       'Raise a ticket',
-      'Contact us',
       'Account opening status',
       'Downloads & forms',
-      'Bulletins',
+      'Status page',
     ],
   },
   {
-    heading: 'Legal',
+    heading: 'Legal & regulatory',
     links: [
       'Terms & conditions',
       'Privacy policy',
       'Risk disclosure',
-      'Policies & procedures',
-      'Rights & obligations',
-      "Do's and don'ts for investors",
-      'Refund policy',
-      'Cookie policy',
-    ],
-  },
-  {
-    heading: 'Regulatory',
-    links: [
       'Investor Charter',
-      'Investor grievances',
       'Monthly complaint data',
-      'SEBI SCORES',
-      'Smart ODR portal',
-      'Investor awareness',
-      'Advisory for investors',
-      'Annual reports',
-      'Disclosures under SEBI regulations',
-      'Anti-money laundering policy',
     ],
   },
 ]
@@ -283,24 +238,10 @@ export const copyrightSuffix = 'All rights reserved.'
 
 export const bottomBarLinks: string[] = ['Terms', 'Privacy', 'Disclosures', 'Sitemap']
 
-/* -------------------------------------------------------------------------- */
-/* §18.2 Newsletter                                                            */
-/* -------------------------------------------------------------------------- */
-
-export interface NewsletterCopy {
-  heading: string
-  body: string
-  placeholder: string
-  button: string
-  success: string
-  error: string
-}
-
-export const newsletter: NewsletterCopy = {
-  heading: 'A five-minute read before the open',
-  body: 'Market digest, every trading day. No tips, no targets.',
-  placeholder: 'you@email.com',
-  button: 'Subscribe',
-  success: "You're in. First issue lands tomorrow morning.",
-  error: 'Enter a valid email address.',
-}
+/*
+ * §18.2 Newsletter is gone from the page along with the signup card that sat in
+ * the footer's brand row. An email capture is a second thing to ask a stranger
+ * for on a page whose one request is "open an account", and it put a bordered
+ * form directly above the statutory disclosures. The copy lives in the deck if
+ * a digest landing page is ever built.
+ */
