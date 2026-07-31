@@ -70,7 +70,8 @@ interface SectionShellProps {
   id: string
   heading: string
   subheading?: string
-  children: ReactNode
+  /** Optional: a band may be a heading and a deck alone — see the render below. */
+  children?: ReactNode
   /** Slightly raised background, for alternating section rhythm. */
   tone?: 'base' | 'raised'
   /**
@@ -165,7 +166,18 @@ export default function SectionShell({
             a single sentence set across 1344px is not a sentence.
           */}
           <FocusPull className={`max-w-[38em] ${centered ? 'mx-auto text-center' : ''}`}>
-            <h2 className={`display text-fg ${SCALE[scale]}`}>{heading}</h2>
+            {/*
+              `md:whitespace-pre-line` so a `\n` in a heading string is honoured
+              here exactly as it is in `MediaSection`. DESIGN.md §3 states that as
+              a page rule — "a `\n` in a heading is an art direction, honoured at
+              ≥768px and ignored below it" — and this component was the one place
+              that silently collapsed it, so a flat band and a full-bleed band
+              disagreed about what a heading string means. No heading currently
+              passed to this component contains one, so nothing re-rags today.
+            */}
+            <h2 className={`display whitespace-normal text-fg md:whitespace-pre-line ${SCALE[scale]}`}>
+              {heading}
+            </h2>
             {/*
               17px, not 18. The deck is one step over the 16px body and several
               steps under the title, and at 18px it was neither — it read as the
@@ -194,7 +206,14 @@ export default function SectionShell({
             the heading. At 56/64/80px the ratio is 2.8–3.3, and the
             heading-block break is now the largest gap in the section.
           */}
-          <div className="mt-14 sm:mt-16 lg:mt-20">{children}</div>
+          {/*
+            Omitted entirely when there is no content, rather than rendered
+            empty. A heading-and-deck band is a legitimate section — it opens a
+            run of full-bleed claims below it — and an empty wrapper would put
+            56–80px of dead air under the deck, which reads as content that
+            failed to load rather than as a section that ends there.
+          */}
+          {children && <div className="mt-14 sm:mt-16 lg:mt-20">{children}</div>}
         </div>
       </Container>
     </section>

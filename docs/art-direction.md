@@ -462,6 +462,9 @@ the crop set.
 | Products — Futures & Options | `MediaCard` | linear, top ⅔ | **Top band** + bottom-left CTA patch | Top 46% + bottom-left patch |
 | Platform | `right` | `68% 50%` | **Right.** x 44–100%, y 14–86% | Top 80% |
 | Terminal | `left` | `26% 50%` | **Left.** x 0–56%, y 12–80% | Top 85% |
+| Terminal · gate | `right` | `74% 50%` | **Right.** x 44–100%, y 14–86% | Top 85% |
+| Terminal · scale | `left` | `26% 50%` | **Left.** x 0–56%, y 12–80% | Top 85% |
+| Terminal · bore | `right` | `74% 50%` | **Right.** x 44–100%, y 14–86% | Top 85% |
 | Onboarding | `left` | `26% 50%` | **Left.** x 0–56%, y 10–90% | Top 85% |
 | Final CTA | `center` | `50% 50%` | **Centre.** x 26–74%, y 16–84% | Top 70% |
 
@@ -908,6 +911,90 @@ band. Straight-on, flat perspective, no tilt.
 **Alt text to ship** (in `src/data/terminal.ts` as `terminalPlateAlt`):
 
 > `A machined aluminium slab cut by a single deep channel, one dark tool resting in it.`
+
+---
+
+### A9, A10, A11 — the other three Terminal claims
+
+`src/components/sections/Terminal.tsx` renders four full-bleed sections, one claim each.
+A8 backs the first; these three back the rest.
+
+**The governing rule for the set is that each carries a different form language.** A
+first pass gave all four the same one — "a lateral cut in a flat surface, lit from one
+side" — and the page would have shown one photograph four times. §5.5's system read
+catches that by eye and §5.3's signature test does not, because four *different*
+subjects shot the same way still correlate. So the languages are assigned, and they are
+not interchangeable:
+
+| Plate | Section | Form language |
+|---|---|---|
+| A8 `terminal` | The copilot has hands | **Wide.** A whole surface, one long lateral cut, a tool resting in it |
+| A9 `gate` | Every sentence is gated | **Tight mechanism.** Light comes *through* a gap between forms |
+| A10 `scale` | Order flow, labelled | **Extreme macro.** One small stamped detail, large in frame, shallow focus |
+| A11 `bore` | Options live on the chart | **Radial.** Concentric stepped depth, cropped hard |
+
+Everything in §1, §2 and §4 applies to all three unchanged: one key placed as a lamp,
+no rim unless the form needs separating, **no second light event** (§2.3 rule 2 belongs
+to Onboarding and Final CTA), monochrome by construction, `chrome` ceiling, `#050505`
+black point, and the reserve held by the lamp's falloff rather than by `deadFloor`.
+
+---
+
+**A9 — gate.** Two heavy machined jaws face each other across a narrow slot, with a
+blade crossing it part way, at rest. The key sits *behind* the slot: the only bright
+marks are the line of light escaping where the blade has not closed, and what that
+light rakes across the jaw faces. Reserve right, subject left.
+
+The failure to watch for is a soft round highlight floating on an open plane — §2.4
+asks for "a gradient across the surface rather than a hotspot in the middle of it", and
+the first attempt at this plate came back as a lit wall corner with a glowing blob.
+**Every bright mark must be described by geometry**: if the jaws could be deleted and
+the frame still looked the same, the plate is wrong. *This is the weakest of the four as
+shipped — it passes every gate, but its highlights are softer than the brief asks and it
+is the first one to re-render if the set is revisited.*
+
+> alt: `Two machined jaws with a narrow slot between them, one blade held part way across it.`
+
+---
+
+**A10 — scale.** A punched index mark in aluminium at 1:1 — the datum a machinist
+stamps to say *this is the one I measured from* — with the burr of displaced metal
+raised around its rim catching the key, and the shallow score it references running out
+of focus behind it. Reserve left, subject right.
+
+This is the one plate in the set where shallow depth of field is the subject rather
+than a softness (§2.6 permits it once per plate). **Scale is what separates it from A8:**
+A8 is a wide shot of a surface, this is one small feature magnified until its machining
+*is* the image. A wide version of this plate is A8 with a smaller cut, which is exactly
+what the first attempt produced.
+
+No graduations, no ticks, no ruler edge — one mark and one score. An evenly spaced
+repeated form resolves into bars at 25% zoom (§5.2), and on a page about order flow that
+reading is the one thing this plate must not offer.
+
+Note the mobile crop: the score originally sat at frame y 0.152, on the top-85%
+reserve's own boundary, which is where a 54-level step across 8px came from. A feature
+placed *on* a reserve edge is an edge inside the reserve — §2.7's rule is about the
+worst pixel, and the boundary is where it will be.
+
+> alt: `A long shallow score across machined aluminium, with a single punched index mark beside it.`
+
+---
+
+**A11 — bore.** A counterbore sunk into machined aluminium: three concentric machined
+steps descending, each catching a chamfer hairline on the key side and going to ink on
+the other, so the eye reads depth as a stack of registered levels. Reserve right,
+subject left.
+
+The radial geometry is the whole reason this plate exists in a set that is otherwise
+lateral, so the curvature has to be legible — the bore is large in frame. Two rules stop
+it becoming a logo: **it is never centred, and it is cropped hard by the frame edge**, so
+the eye sees a corner of a much larger bore with most of it out of shot. Concentric rings
+sitting dead-centre and fully visible is a roundel, and that is the failure mode here.
+
+Three steps maximum. Four becomes a repeating rhythm.
+
+> alt: `A stepped bore sunk into machined aluminium, each step catching a thin line of light.`
 
 ---
 

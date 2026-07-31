@@ -16,9 +16,12 @@ import onboarding from './sections/onboarding.mjs'
 import closing from './sections/closing.mjs'
 import device from './sections/device.mjs'
 import terminal from './sections/terminal.mjs'
+import gate from './sections/gate.mjs'
+import scale from './sections/scale.mjs'
+import bore from './sections/bore.mjs'
 
 export { CROPS, resolveCrop } from './spec.mjs'
 
-export const plates = [hero, stocks, derivatives, platform, onboarding, closing, device, terminal]
+export const plates = [hero, stocks, derivatives, platform, onboarding, closing, device, terminal, gate, scale, bore]
 
 export const platesById = Object.fromEntries(plates.map((plate) => [plate.id, plate]))

@@ -48,7 +48,10 @@ const SECTIONS = [
   ['hero', 'Your money. / Your market. / One app.'],
   ['products', 'Stocks & ETFs · Futures & Options'],
   ['platform', 'Built for the / ten seconds / that matter'],
-  ['terminal', 'The terminal acts, / and labels it'],
+  ['terminal', 'The copilot / has hands'],
+  ['terminal-gate', 'Every sentence / is gated'],
+  ['terminal-flow', 'Order flow, / labelled'],
+  ['terminal-options', 'Options live / on the chart'],
   ['final-cta', 'Start with what / you have today'],
 ]
 

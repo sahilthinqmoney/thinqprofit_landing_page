@@ -36,6 +36,9 @@ export type PlateId =
   | 'closing'
   | 'device'
   | 'terminal'
+  | 'gate'
+  | 'scale'
+  | 'bore'
 
 const base = (plate: PlateId) => `/media/${plate}/${plate}`
 
