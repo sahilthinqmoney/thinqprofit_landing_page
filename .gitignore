@@ -15,6 +15,16 @@ dist-ssr
 # TypeScript incremental build info
 *.tsbuildinfo
 
+# Plate renderer intermediates. `render.mjs` writes PNG masters here and
+# `encode.mjs` turns them into the WebP/WebM under public/media, which IS
+# committed. The masters are reproducible from the shaders — 533MB of them —
+# so they are output, not source. `node tools/plates/encode.mjs --clean` removes them.
+tools/plates/out/
+
+# `/brag` skill output: a rendered launch video and its capture set. Generated
+# from the site itself, and regenerable; the brief in docs/ is the source.
+brag-output/
+
 # Env — never commit credentials
 .env
 .env.*

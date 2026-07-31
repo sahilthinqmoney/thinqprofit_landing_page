@@ -291,9 +291,21 @@ More space above a heading than below it. Tight groups, generous separation.
   being removed, not a default.
 - **Video is `loop muted playsinline preload="auto"` with no `autoplay`.**
   IntersectionObserver drives playback; a backgrounded tab stops it; reduced motion
-  leaves the poster.
-- Until real assets land, a full-bleed pending field renders in place — not a dashed
-  box — so overlay contrast can be judged now.
+  leaves the poster. A section may ship a loop *and* the four stills: the loop plays at
+  ≥769px and the crops take over below it, which is
+  [docs/art-direction.md](docs/art-direction.md) §4.2's rule and a legibility one rather
+  than a bandwidth one — on a phone the copy is full-width and top-anchored, so a 16:9
+  frame cropped to 9:16 reserves nothing.
+- **The plates are rendered, not photographed.** `tools/plates/` builds all six from the
+  briefs in art-direction §3 — WebGL scenes in the materials of §2.5, encoded to §4's
+  targets, gated against §5.3 and §5.4 by `tools/plates/qa.mjs`. The reason to render
+  rather than commission is that §2.2's chroma floor, §2.3's luminance ceiling and §2.7's
+  dead zone can then be satisfied *in the shader* instead of measured afterwards: output
+  is monochrome because shading resolves to one scalar, nothing reaches `chrome` because
+  the grade rolls off asymptotically onto it, and the dead zone attenuates radiance before
+  the grade so it contains no edges rather than merely no highlights.
+- A full-bleed pending field still renders for any section with no asset — not a dashed
+  box — so overlay contrast can be judged before the plate exists.
 
 Every plate is briefed in [docs/art-direction.md](docs/art-direction.md), which owns the
 dead-zone geometry, the luminance thresholds a plate must hold under the copy, and the

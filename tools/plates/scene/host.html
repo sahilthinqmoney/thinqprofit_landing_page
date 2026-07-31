@@ -1,0 +1,117 @@
+<!doctype html>
+<meta charset="utf-8" />
+<title>plate host</title>
+<style>
+  html,
+  body {
+    margin: 0;
+    background: #050505;
+  }
+  canvas {
+    display: block;
+  }
+</style>
+<canvas id="gl"></canvas>
+<canvas id="out"></canvas>
+<script>
+  /*
+   * Offscreen host for the plate renderer. Nothing here is art direction — it
+   * compiles whatever fragment shader render.mjs hands it, sets the uniform set
+   * declared in core.glsl, and hands back a downsampled PNG.
+   *
+   * Supersampling is done here rather than by rendering large and letting the
+   * encoder resize, for one reason: the plates are large flat falloffs graded to
+   * a 51-level range between the black point and the dead-zone ceiling (§2.7),
+   * and a box downsample in linear-ish space is what keeps that range from
+   * banding. A resize inside cwebp happens after quantisation.
+   */
+  const glCanvas = document.getElementById('gl')
+  const outCanvas = document.getElementById('out')
+
+  let gl = null
+  let program = null
+  let uniforms = {}
+
+  const VERT = `#version 300 es
+  precision highp float;
+  const vec2 verts[3] = vec2[3](vec2(-1.0, -1.0), vec2(3.0, -1.0), vec2(-1.0, 3.0));
+  void main() { gl_Position = vec4(verts[gl_VertexID], 0.0, 1.0); }`
+
+  function compile(type, source) {
+    const shader = gl.createShader(type)
+    gl.shaderSource(shader, source)
+    gl.compileShader(shader)
+    if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+      const log = gl.getShaderInfoLog(shader)
+      const numbered = source
+        .split('\n')
+        .map((line, i) => `${String(i + 1).padStart(4)}: ${line}`)
+        .join('\n')
+      throw new Error(`shader compile failed\n${log}\n---\n${numbered}`)
+    }
+    return shader
+  }
+
+  window.__build = (fragmentSource) => {
+    gl = glCanvas.getContext('webgl2', {
+      antialias: false,
+      preserveDrawingBuffer: true,
+      premultipliedAlpha: false,
+    })
+    if (!gl) throw new Error('no webgl2')
+
+    program = gl.createProgram()
+    gl.attachShader(program, compile(gl.VERTEX_SHADER, VERT))
+    gl.attachShader(program, compile(gl.FRAGMENT_SHADER, fragmentSource))
+    gl.linkProgram(program)
+    if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
+      throw new Error(`link failed: ${gl.getProgramInfoLog(program)}`)
+    }
+    gl.useProgram(program)
+
+    uniforms = {}
+    const count = gl.getProgramParameter(program, gl.ACTIVE_UNIFORMS)
+    for (let i = 0; i < count; i++) {
+      const info = gl.getActiveUniform(program, i)
+      const name = info.name.replace(/\[0\]$/, '')
+      uniforms[name] = gl.getUniformLocation(program, name)
+    }
+    return Object.keys(uniforms)
+  }
+
+  window.__draw = (spec) => {
+    const { width, height, scale, values } = spec
+    const w = Math.round(width * scale)
+    const h = Math.round(height * scale)
+
+    glCanvas.width = w
+    glCanvas.height = h
+    gl.viewport(0, 0, w, h)
+
+    const set = (name, value) => {
+      const loc = uniforms[name]
+      if (!loc) return
+      if (typeof value === 'number') gl.uniform1f(loc, value)
+      else if (value.length === 2) gl.uniform2f(loc, value[0], value[1])
+      else if (value.length === 3) gl.uniform3f(loc, value[0], value[1], value[2])
+      else if (value.length === 4) gl.uniform4f(loc, value[0], value[1], value[2], value[3])
+      else gl.uniform1fv(loc, new Float32Array(value))
+    }
+
+    set('uResolution', [w, h])
+    for (const [name, value] of Object.entries(values)) set(name, value)
+
+    gl.drawArrays(gl.TRIANGLES, 0, 3)
+    gl.finish()
+
+    outCanvas.width = width
+    outCanvas.height = height
+    const ctx = outCanvas.getContext('2d', { willReadFrequently: false })
+    ctx.imageSmoothingEnabled = true
+    ctx.imageSmoothingQuality = 'high'
+    ctx.clearRect(0, 0, width, height)
+    ctx.drawImage(glCanvas, 0, 0, width, height)
+
+    return outCanvas.toDataURL('image/png')
+  }
+</script>

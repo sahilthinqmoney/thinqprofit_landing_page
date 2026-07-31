@@ -1,8 +1,31 @@
 # ThinqProfit — Art direction for photographic and rendered assets
 
-Generation briefs for every plate the page consumes. There is no image-generation API in
-this repo, so these are written to be handed to a photographer, a retoucher, or a
-generation model and run once, correctly, without a conversation.
+Generation briefs for every plate the page consumes. Written to be handed to a
+photographer, a retoucher, or a generation model and run once, correctly, without a
+conversation.
+
+**The six plates now ship, and they are rendered rather than photographed.** There is still
+no image-generation API in this repo and no shoot booked, but this document is specified to
+the pixel — frame sizes, dead-zone rectangles, a luminance ceiling, a chroma floor, a black
+point — which is enough to *render*. `tools/plates/` does that: WebGL scenes built from the
+materials in §2.5, driven by the per-crop compositions in §3, encoded to §4's targets, and
+gated against §5.3 and §5.4 by `tools/plates/qa.mjs`.
+
+That choice buys one thing a commissioned asset cannot give: **the constraints in §2.2, §2.3
+and §2.7 are satisfied in the shader instead of being checked afterwards and hoped for.**
+Output is monochrome because shading resolves to one scalar written to all three channels,
+so chroma is 0.000 by construction. Nothing reaches `chrome`'s luminance because the grade
+rolls off asymptotically onto it. The dead zone attenuates radiance *before* the grade and
+over a ≥12% feather, so it contains no edges rather than merely no highlights. A returned
+photograph would have to be measured for all three and re-shot when it failed.
+
+What it does not buy is composition, and the gates cannot see it. §5.1's read of the real
+headline over the real plate, §5.2's banned-content scan and §5.5's system read are still
+human steps, and `tools/plates/page-shot.mjs` exists to set up the first of them rather than
+to answer it.
+
+If a real shoot ever happens, nothing here changes: the briefs are the brief, the QA is the
+QA, and the renders are what ships until something better arrives.
 
 **What this document is authoritative for:** the visual world, the palette, the composition
 and dead zone of each asset, and the alt text that ships with it.
@@ -36,8 +59,8 @@ replacements:
 | File | String | Status |
 |---|---|---|
 | `src/data/onboarding.ts` | `mediaAlt` | **Stale.** Correct in substance, wrong world — "ink-navy void", "indigo fading to cyan". Replace with A5's alt text |
-| `src/data/hero.ts` | `mediaAlt` | **Residue.** Now describes machined aluminium correctly but says the edge catches *warm* light. There is no warm light in this system; the specular is neutral. Replace with A1's alt text |
-| `src/data/platform.ts` | `platformMediaAlt` | Current and neutral. Unreferenced today: `Platform.tsx` renders `SignalCanvas` and passes no `media` |
+| `src/data/hero.ts` | `mediaAlt` | **Replaced** with A1's alt text. It said the edge caught *warm* light — residue from the gold palette, against a §2.4 key now fixed at 5600K |
+| `src/data/platform.ts` | `platformMediaAlt` | Current and neutral. **Replaced** with A4's alt text when the plate was wired in |
 | `src/components/sections/Products.tsx` | `MEDIA_BRIEF` | Current — machined aluminium, no colour |
 | `src/components/sections/FinalCta.tsx` | `closingClip` | Current — "cool near-white specular", neutral monochrome |
 
@@ -438,6 +461,7 @@ the crop set.
 | Products — Stocks & ETFs | `MediaCard` | linear, top ⅔ | **Top band** + bottom-left CTA patch | Top 46% + bottom-left patch |
 | Products — Futures & Options | `MediaCard` | linear, top ⅔ | **Top band** + bottom-left CTA patch | Top 46% + bottom-left patch |
 | Platform | `right` | `68% 50%` | **Right.** x 44–100%, y 14–86% | Top 80% |
+| Terminal | `left` | `26% 50%` | **Left.** x 0–56%, y 12–80% | Top 85% |
 | Onboarding | `left` | `26% 50%` | **Left.** x 0–56%, y 10–90% | Top 85% |
 | Final CTA | `center` | `50% 50%` | **Centre.** x 26–74%, y 16–84% | Top 70% |
 
@@ -802,6 +826,88 @@ angle on a monolith is heroic, and heroic is a returns claim in a different cost
 **Alt text to ship** (replaces `closingClip` in `src/components/sections/FinalCta.tsx`):
 
 > `A single matte black monolith standing in an empty dark room, its edges caught by a low light.`
+
+---
+
+### A8 — Terminal
+
+`src/components/sections/Terminal.tsx` · `place="left"` · `scrim={0.86}` · `scrimAt="26% 50%"`
+headline **"The terminal acts, / and labels it"**
+
+Numbered A8 rather than A7: `a7-device.glsl` already exists.
+
+**Intent.** A tool acting on a surface. The section's claim is that the copilot has
+its hands on the terminal rather than talking beside it, and that every number it
+shows says where it came from — so the image has to say *control* and *made
+thing*, with no interface anywhere near it. It must not say speed: two of the four
+capabilities are restraints, and a plate that reads as motion argues against them.
+
+**Composition.** A bead-blasted aluminium surface filling the entire frame — no
+silhouette, no edge of it in shot, no room around it. One machined channel is cut
+laterally across it, capped at its left end and running out through the right-hand
+frame edge; a matte black cylindrical tool is seated in the cut, its crown flush
+with the face, its near cap in frame and its far end leaving with the channel. The
+left of the frame is the same surface, unlit.
+
+**The slab having no silhouette is the composition, not a shortcut.** Two earlier
+passes gave it finite width and both failed on it: first as a hard vertical
+terminator splitting the frame at its left edge, then — once that was pushed
+off-frame — as its *right* edge walking back into shot on the 16:9 crop. Neither
+is visible to any gate in §5.3 or §5.4. §1 asks for depth built entirely from
+light, and a form with no edge in frame is the only version of this subject that
+cannot produce one by accident at a breakpoint nobody screenshotted.
+
+**One cut, never a field.** §5.2 rejects a repeating rhythm that resolves into
+bars at thumbnail size, and a grooved face is exactly how a machined plate becomes
+a bar chart. The count is structural — there is no parameter in `a8-terminal.glsl`
+that could add a second channel.
+
+**The cut is a hairline, not a track.** At `channelHalfHeight` 0.018 the slot
+rendered ~48px tall on a 1440px viewport and read as a slider — fabricated UI
+arriving through geometry rather than through pixels. It is now 0.0095, which
+reads as a machined score. Anything that makes the cut tall enough to look
+*filled* has reintroduced the failure.
+
+**Dead zone.** **Left.** x 0–56%, y 12–80% on desktop and wide. The copy stack is
+the heaviest on the page after the hero: a two-line headline at the `mid` step, a
+two-line deck, four two-line claims, a button and a disclosure.
+
+The reserve is held by the **light**, not by the mask. An early pass ran
+`deadFloor` at 0.06 — a 94% attenuation — and the rectangle printed its own shape
+into the frame, which is §2.7's "hard terminator reads as a matte line" arriving
+from the enforcement side. The lamp is now placed so its inverse-square falloff
+has already reached ink by the reserve boundary, and the floor sits at 0.32–0.34
+doing almost nothing. The channel's left cap is placed just outside the boundary
+so the feather extinguishes the cut rather than the geometry ending it.
+
+**Lighting.** One key, positional — a lamp with `keyPos`/`keyRange`, not a
+direction. The subject is a single flat face and a source at infinity puts one
+even tone on it, so the gradient §2.4 asks for is falloff and falloff needs a
+position. **No rim** (§2.4 permits one; this plate does not need it — there is no
+silhouette to separate) and **no second light event**: §2.3 rule 2 gives that to
+Onboarding and Final CTA and to nothing else.
+
+**Materials.** Bead-blasted aluminium face, one machined fillet on the channel
+lip, anodised matte black tool. No glass. The grain is left isotropic rather than
+brushed: a brushed grain would have to run across the frame (§2.5 forbids up), and
+a lateral texture running parallel to a lateral cut is the two-line rhythm §5.2
+rejects, arriving through texture instead of geometry.
+
+**Camera.** 20–26° depending on crop — 85mm to 135mm equivalent, inside §2.6's
+band. Straight-on, flat perspective, no tilt.
+
+**Crops.**
+
+| Breakpoint | Frame | What changes |
+|---|---|---|
+| `mobile` ≤425 | 900×1600 (9:16) | Copy is top-anchored and full width; the reserve is the top 85%. The only lit thing is a shallow band along the bottom with the cut running out of it. The lamp is the closest in the set and the only one below the frame's midline. Quietest of the four. |
+| `tablet` ≤768 | 1200×1600 (3:4) | The most conservative crop: at exactly 768px the tablet image is served while the copy is already parked left, so it clears the top band **and** the left column. Both reserves are declared and the subject sits in the bottom-right quadrant, dark in both before either is applied. |
+| `desktop` 769–1279 | 1920×1280 (3:2) | Reference composition. Cut at y≈29%, capped at x≈66%, tool seated from x≈75%. Light rakes from upper right. |
+| `wide` ≥1280 | 2560×1440 (16:9) | Not the desktop crop with more room: the cut moves to the **upper** third and the lamp drops **below** the midline, so the frame's energy inverts. The extra width is room, not content. An earlier version kept desktop's arrangement and §5.3 caught it — signatures correlated at 0.949, "a scale, not a crop". |
+
+**Alt text to ship** (in `src/data/terminal.ts` as `terminalPlateAlt`):
+
+> `A machined aluminium slab cut by a single deep channel, one dark tool resting in it.`
 
 ---
 

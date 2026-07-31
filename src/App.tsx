@@ -3,6 +3,7 @@ import Hero from './components/sections/Hero'
 import TrustStrip from './components/sections/TrustStrip'
 import Products from './components/sections/Products'
 import Platform from './components/sections/Platform'
+import Terminal from './components/sections/Terminal'
 import Safety from './components/sections/Safety'
 import FinalCta from './components/sections/FinalCta'
 import Footer from './components/sections/Footer'
@@ -80,6 +81,7 @@ export default function App() {
         <TrustStrip />
         <Products />
         <Platform />
+        <Terminal />
         <Safety />
         <FinalCta />
       </main>
