@@ -495,7 +495,7 @@ export default function Navbar() {
                       what holds the ring's weight against the wordmark. */}
                   <ThinqMark
                     size={28}
-                    tone="copper"
+                    tone="steel"
                     small
                     className="shrink-0 xl:h-[34px] xl:w-[34px]"
                   />
@@ -745,7 +745,7 @@ export default function Navbar() {
                   No `lockup` class: this is a static header inside an open
                   sheet, not a link, so there is nothing to hover and no reason
                   to animate. */}
-              <ThinqMark size={24} tone="copper" small className="shrink-0" />
+              <ThinqMark size={24} tone="steel" small className="shrink-0" />
               <span className="text-[0.9375rem] font-semibold tracking-tight text-fg">
                 {wordmark}
               </span>

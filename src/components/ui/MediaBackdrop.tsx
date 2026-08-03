@@ -318,7 +318,7 @@ function PendingField({ focus = 'right' }: { focus?: Focus }) {
         className="absolute inset-0 pointer-events-none"
         style={{
           backgroundImage:
-            'linear-gradient(115deg, transparent 30%, rgba(255, 217, 198, 0.15) 45%, rgba(255, 158, 122, 0.28) 49.5%, rgba(180, 85, 58, 0.18) 53%, transparent 68%)',
+            'linear-gradient(115deg, transparent 30%, rgba(255, 255, 255, 0.15) 45%, rgba(231, 233, 238, 0.25) 49.5%, rgba(140, 140, 144, 0.18) 53%, transparent 68%)',
         }}
       />
 
@@ -327,7 +327,7 @@ function PendingField({ focus = 'right' }: { focus?: Focus }) {
         className="absolute inset-0 opacity-[0.05] pointer-events-none"
         style={{
           backgroundImage:
-            'repeating-linear-gradient(115deg, #ff9e7a 0, #ff9e7a 1px, transparent 1px, transparent 7px)',
+            'repeating-linear-gradient(115deg, #e7e9ee 0, #e7e9ee 1px, transparent 1px, transparent 7px)',
         }}
       />
 

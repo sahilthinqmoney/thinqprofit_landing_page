@@ -66,18 +66,13 @@ export default function App() {
      * horizontal scroll to the whole page — which is what 140px of overflow was
      * doing before this.
      */
-    <div className="grain min-h-screen overflow-x-clip bg-bg text-fg">
+    <div className="grain min-h-screen overflow-x-clip bg-[#050505] bg-bg text-fg">
       {/*
         The skip link is one of the page's two genuinely SOLID accent fills (the
         other is `Button`'s primary variant), and that is why it takes ink rather
         than white.
 
-        `on-accent` #2E0F06 on `accent` #FF9E7A measures 8.7807:1. White on the
-        same fill is 2.0146:1 — unusable. This is not a contradiction of the
-        spec's "button labels are white": the spec's primary control is a 14%
-        coral TINT with a ring, where white sits on a dark core; this page's rim
-        button is that construction. A FILL takes ink. Two different backgrounds,
-        two different answers, and the number is what decides between them.
+        `on-accent` #050505 on `accent` #E7E9EE measures 16.78:1. A solid fill takes dark ink text.
       */}
       <a
         href="#main"

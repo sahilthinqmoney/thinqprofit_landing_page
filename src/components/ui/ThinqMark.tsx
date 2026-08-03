@@ -69,7 +69,7 @@ const TRAIL_VEC = { x1: 14.35, y1: 14.35, x2: 22.25, y2: 21.07 }
  * stays available for any placement where the mark would compete with an action.
  */
 const RAMPS = {
-  copper: ['#a84a30', '#ffd9c6', '#ff9e7a', '#b4553a', '#ffc8b0', '#c4674a'],
+  copper: ['#6e6e72', '#ffffff', '#e9e9eb', '#8c8c90', '#fdfdfe', '#b6b6ba'],
   steel: ['#6e6e72', '#ffffff', '#e9e9eb', '#8c8c90', '#fdfdfe', '#b6b6ba'],
 } as const
 
@@ -93,7 +93,7 @@ interface ThinqMarkProps {
 
 export default function ThinqMark({
   size = 24,
-  tone = 'copper',
+  tone = 'steel',
   small = false,
   className = '',
 }: ThinqMarkProps) {

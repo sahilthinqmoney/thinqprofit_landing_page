@@ -43,7 +43,7 @@ export default function MediaPlaceholder({
       role="img"
       aria-label={`Placeholder: ${label}`}
       data-pending-alt={alt ?? label}
-      className={`relative grid ${aspect} w-full place-items-center overflow-hidden rounded-2xl border border-dashed border-accent/40 bg-surface/80 shadow-[0_0_20px_rgba(255,158,122,0.1)] ${className}`}
+      className={`relative grid ${aspect} w-full place-items-center overflow-hidden rounded-2xl border border-dashed border-accent/40 bg-surface/80 shadow-[0_0_20px_rgba(231,233,238,0.12)] ${className}`}
     >
       {/* Diagonal copper hatch overlay */}
       <div

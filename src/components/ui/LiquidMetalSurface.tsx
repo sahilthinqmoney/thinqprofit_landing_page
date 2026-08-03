@@ -109,8 +109,8 @@ import { ShaderMount, liquidMetalFragmentShader } from '@paper-design/shaders'
  * underneath, instead of ringing the label with a halo the way a light
  * `colorBack` would.
  */
-const BACK: [number, number, number, number] = [10 / 255, 8 / 255, 8 / 255, 1]
-const TINT: [number, number, number, number] = [250 / 255, 245 / 255, 238 / 255, 1]
+const BACK: [number, number, number, number] = [5 / 255, 5 / 255, 5 / 255, 1]
+const TINT: [number, number, number, number] = [244 / 255, 246 / 255, 250 / 255, 1]
 
 /**
  * Chromatic dispersion — the reason the theme is called chromatic.

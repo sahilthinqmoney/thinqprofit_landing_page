@@ -89,7 +89,7 @@ export default function Pricing({ id = 'pricing' }: PricingProps) {
           axis survives. */}
       <Reveal variant="wipe" className="min-w-0 max-w-[64rem]">
         {/* Copper chromatic badge highlight */}
-        <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-accent/40 bg-accent/10 px-4 py-1.5 text-xs font-semibold uppercase tracking-wider text-accent shadow-[0_0_15px_rgba(255,158,122,0.15)]">
+        <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-accent/40 bg-accent/10 px-4 py-1.5 text-xs font-semibold uppercase tracking-wider text-accent shadow-[0_0_15px_rgba(231,233,238,0.15)]">
           <span className="h-2 w-2 rounded-full bg-accent animate-pulse" />
           Zero Brokerage & Flat Fee Structure
         </div>

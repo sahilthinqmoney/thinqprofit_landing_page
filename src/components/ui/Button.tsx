@@ -206,9 +206,9 @@ const variants: Record<Variant, string> = {
  * first in the list, so it is the layer nearest the ring.
  */
 const RIM_WRAP =
-  'surface-copper p-[2px] shadow-[0_0_18px_-6px_rgba(255,158,122,0.4),var(--shadow-lifted)]'
+  'surface-copper p-[2px] shadow-[0_0_18px_-6px_rgba(231,233,238,0.35),var(--shadow-lifted)]'
 const RIM_CORE =
-  'overflow-hidden rounded-full bg-[linear-gradient(180deg,#211A17_0%,#0C0908_100%)] text-fg transition-shadow duration-250 ease-[var(--ease-out-soft)] group-active:shadow-[inset_0_2px_4px_rgba(0,0,0,0.45)]'
+  'overflow-hidden rounded-full bg-[linear-gradient(180deg,#1c1c22_0%,#08080c_100%)] text-fg transition-shadow duration-250 ease-[var(--ease-out-soft)] group-active:shadow-[inset_0_2px_4px_rgba(0,0,0,0.45)]'
 
 const sizes: Record<Size, string> = {
   sm: 'px-4 py-2 text-sm min-h-11',

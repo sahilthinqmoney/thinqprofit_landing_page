@@ -59,7 +59,7 @@ export default function MediaCard({
       HIGHLIGHT stays white, because a lift is not a line. This is a line.
     */
     <article
-      className={`relative isolate flex h-[clamp(360px,52vh,520px)] shrink-0 snap-center flex-col justify-between overflow-hidden rounded-[20px] border border-accent/30 hover:border-accent/60 shadow-[0_0_25px_rgba(255,158,122,0.12)] transition-all duration-300 ${className}`}
+      className={`relative isolate flex h-[clamp(360px,52vh,520px)] shrink-0 snap-center flex-col justify-between overflow-hidden rounded-[20px] border border-accent/30 hover:border-accent/60 shadow-[0_0_25px_rgba(231,233,238,0.15)] transition-all duration-300 ${className}`}
     >
       <MediaBackdrop {...media} />
 

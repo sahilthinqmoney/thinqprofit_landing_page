@@ -275,7 +275,7 @@ export default function MobileApp({ id = 'mobile-app' }: MobileAppProps) {
                 a hex and percentages), and a mask that silently fails to compile
                 looks exactly like a mask that is too weak — which cost a round of
                 debugging here. */}
-            <div className="relative rounded-[32px] p-1.5 border border-accent/40 bg-surface/90 shadow-[0_0_40px_rgba(255,158,122,0.25)] transition-all duration-300">
+            <div className="relative rounded-[32px] p-1.5 border border-accent/40 bg-surface/90 shadow-[0_0_40px_rgba(231,233,238,0.2)] transition-all duration-300">
               <picture
                 className="relative block overflow-hidden rounded-[26px]"
               >

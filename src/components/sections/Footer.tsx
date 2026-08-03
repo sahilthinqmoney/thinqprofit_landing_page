@@ -111,7 +111,7 @@ export default function Footer() {
                   Both are correct because they are different placements: this
                   mark shares a row with body copy and social controls, that one
                   owns its own band with nothing to compete with. */}
-              <ThinqMark size={28} tone="copper" className="shrink-0" />
+              <ThinqMark size={28} tone="steel" className="shrink-0" />
               <span className="text-lg font-semibold tracking-tight text-fg">{brandName}</span>
             </a>
 

@@ -187,187 +187,43 @@
    * too shallow for a page whose surfaces are 28px-radius cards, and `--elev`
    * would have collapsed the two raised levels into one.
    */
-  /*
-   * No `--ground-rgb` triple, and the absence is deliberate — it was added here
-   * and removed again in the same pass. The argument for one is that a scrim is
-   * a *thickening of the ground* rather than a colour resembling it, so it must
-   * never be transcribed by hand. That argument is right, and it is already
-   * satisfied: every scrim on the page (`Hero`, `MediaSection`, `Platform`,
-   * `MobileApp`, `MediaBackdrop`, `MediaCard`) reads this token through
-   * `color-mix(in oklab, var(--color-bg) N%, transparent)`, which cannot drift
-   * from it either. A second mechanism doing the same job would be one more
-   * thing to keep in step, and a token whose stated reason has already been
-   * solved elsewhere is the kind of thing this file refuses to ship.
-   */
-  --color-bg: #0a0808;
-  --color-surface: #130f0e; /* 1.0487:1 on bg — SectionShell raised, nav panels, .card */
-  --color-surface-raised: #1c1715; /* 1.1252:1 on bg, 1.0729:1 on surface — hover fills */
+  --color-bg: #050505;
+  --color-surface: #0d0d10; /* 1.0503:1 on bg — SectionShell raised, nav panels, .card */
+  --color-surface-raised: #16161a; /* 1.1252:1 on bg, 1.0714:1 on surface — hover fills */
 
   /*
-   * Text — warm neutrals, not greys. Ratios are against `bg`.
-   *
-   * These are composited toward the ground's hue rather than carried across,
-   * for the reason in point 1 of the header note: on a ground at C 0.0038 a
-   * chroma-0 grey reads cool. Each is solved off its floor rather than onto it,
-   * so none sits on a rounding boundary.
+   * Text — neutral greys. Ratios are against `bg`.
    */
-  --color-fg: #ffffff; /* 19.9782:1 — headings, primary body, the rim button's label */
-  --color-fg-muted: #d7d1ce; /* 13.2245:1 — body copy and every disclosure; C 0.0078, h 48.64° */
-  --color-fg-subtle: #8a827f; /*  5.3087:1 — footer meta, legal fine print, media-plate captions */
+  --color-fg: #ffffff; /* 20.38:1 — headings, primary body, the rim button's label */
+  --color-fg-muted: #cfcfcf; /* 13.08:1 — body copy and disclosures */
+  --color-fg-subtle: #7e7e7e; /*  5.02:1 — footer meta, legal fine print */
 
   /*
-   * Lines. Near the ratios the cool pair held — `border` lands 2.8% under it
-   * (1.4087:1 against the outgoing #2b2b31's 1.4486:1 on #050505) and
-   * `border-soft` 0.3% over (1.2050:1 against #1c1c21's 1.2010:1). "At the same
-   * ratios, to four decimals" stood here and was not true of either.
-   *
-   * Neither is a 3:1 boundary and neither needs to be: WCAG 1.4.11 asks 3:1 of
-   * "visual information REQUIRED to identify user interface components and
-   * states", and every live consumer of these two is a section rule, a panel
-   * edge, a card seam or a list divider — structure, not a control. The two
-   * that do sit on controls (`Button` secondary, the footer's social circles)
-   * are identified by a 19.9782:1 label and a 13.2245:1 glyph respectively, and
-   * their hover STATES, which are the part 1.4.11 does reach, land at 4.2120:1
-   * and 8.0295:1. See the audit note under `--color-chrome-dim`.
-   *
-   * `border-soft` also absorbs two raw white alphas that stop being neutral now
-   * that the ground is warm: MediaCard's border-white/20 composites to #3B3939
-   * (1.7412:1, C 0.0028) and Platform's border-white/15 to #2F2D2D (1.4595:1,
-   * C 0.0029) — cool lines drawn on warm ink.
+   * Lines.
    */
-  --color-border: #322926; /* 1.4087:1 on bg; h 39.29°, C 0.0145 */
-  --color-border-soft: #241d1b; /* 1.2050:1 on bg; h 36.49°, C 0.0116 */
+  --color-border: #2b2b31; /* 1.4486:1 on bg */
+  --color-border-soft: #1c1c21; /* 1.2010:1 on bg */
 
   /*
-   * Brand action — copper alloy. The spec's `--coral` / `METAL.coral` ramp: the
-   * most saturated thing on the page (C 0.1263), and the only one that moves.
-   * A genuinely solid fill takes ink text, never white: white on #FF9E7A is
-   * 2.0146:1.
-   *
-   * The three steps form a ladder rather than a fill and a lift, because copper
-   * has to do a job platinum did not. Under platinum, `accent-soft` was a
-   * *dimmer* alloy — safe, because accent was the brightest thing on the page
-   * and anything below it still cleared body copy. Copper sits at 9.9166:1
-   * against `fg-muted` at 13.2245:1, so dimming it for links would render every
-   * copper link *quieter* than the sentence around it, which inverts what a link
-   * is for. A dim was measured before it was rejected: at #C9927E the link is
-   * 7.5121:1 inside body copy at 13.2245:1, a 1.87× luminance drop. `accent-soft`
-   * is therefore a lift, not a dim.
-   *
-   * It is also solved by a rule rather than picked: **the accent's hue at the
-   * body copy's luminance.** #FDC6B2 is 13.2208:1 against `fg-muted`'s
-   * 13.2245:1 — parity to 0.004 — at h 40.91°, 0.12° off the accent, with
-   * C 0.0689, 54.6% of it. So an inline link is separated from the sentence it
-   * sits in by hue alone, which is exactly what copper bought and platinum could
-   * not do. Parity survives the mega-menu panel too, where the mobile-sheet link
-   * lives: over bg/40 on `surface` (#0F0C0C) the link is 12.8890:1 against
-   * surrounding text at 12.8925:1, and its 40% underline composites to #6E564E,
-   * 2.8790:1 — a decoration, not a rule, and 1.4.11 does not reach it because
-   * the text it decorates is itself the link's identification. (#110C0B and its
-   * three figures were measured against `surface` #150F0D; Navbar.tsx:601 still
-   * carries that set.)
-   *
-   * `accent-hover` is the spec's `--coral-lt` verbatim, replacing an invented
-   * mid-step (#ffb294). It has a second job: §40 fixes the system's ONE focus
-   * ring at `--coral-lt`, so the ring binds to whichever token holds that hex.
-   * See `:focus-visible`.
+   * Brand action — dark platinum metal.
    */
-  --color-accent: #ff9e7a; /* 9.9166:1 on bg — spec --coral; C 0.1263, h 41.03° */
-  --color-accent-hover: #ffc0a6; /* 12.6933:1 — spec --coral-lt; fill hover AND the focus ring */
-  --color-accent-soft: #fdc6b2; /* 13.2208:1 — inline links, at parity with fg-muted */
-  --color-on-accent: #2e0f06; /* 8.7807:1 on the copper, 11.2393:1 on the hover fill */
+  --color-accent: #2c2f38;
+  --color-accent-hover: #3a3e49;
+  --color-accent-soft: #8a909d;
+  --color-on-accent: #ffffff;
 
   /*
-   * Chrome — the static metal. Hairline highlights, machined edges, the nav's
-   * mark tile, the canvases' resting field. Neutral steel: see the header note,
-   * point 3.
-   *
-   * The claim that used to sit here — "still a step down in luminance from
-   * `accent` so an edge never competes with an action" — is FALSIFIED and is
-   * the reason to state the replacement loudly. Measured, accent Y 0.4712
-   * against chrome Y 0.4249 is 1.1091×: not a step, and a direct contrast of
-   * 1.0976:1 between them. Luminance separates nothing here. **Chroma is the
-   * only channel left**, and it is 22.33× wide (0.1263 against 0.0057) with
-   * 245.24° of hue between them. That is what stops a machined edge reading as
-   * an action, not brightness.
-   *
-   * The near-neutral +4 on blue is the spec's `METAL.white` treatment literally
-   * — its stops #6E6E72, #8C8C90 and #B6B6BA all run B−R = 4 — rather than a
-   * pure r=g=b. Absolute neutral beside a large copper field picks up a cool
-   * cast by simultaneous contrast and reads dirty; four points of blue is under
-   * the just-noticeable difference in isolation and cancels it in place.
-   *
-   * `chrome-dim` follows onto the same axis for the same §4/§39 reason, and the
-   * audit its ≥4.5:1 floor depends on is worth writing down because it is
-   * narrower than it looks: the ONLY live call site is Button.tsx:103, a hover
-   * *border*, never text. HeroCanvas.tsx and SignalCanvas.tsx reference
-   * chrome-family values and neither has an importer anywhere in `src`
-   * (verified by grep, not assumed). So the text floor does not formally apply
-   * — but this token was lifted off #6f757f specifically to clear it, and that
-   * intent is honoured at 4.7394:1. As a boundary it renders against the fill
-   * declared alongside it (`hover:border-chrome-dim hover:bg-surface-raised` in
-   * one declaration) at 4.2120:1, and against the rest border it replaces at
-   * 3.3643:1. Both clear WCAG 1.4.11's 3:1 — and this pair is the one place the
-   * secondary button's boundary is reached by that criterion at all, because
-   * 1.4.11 governs component STATES and the rest edge is carried by a 19.9782:1
-   * label. (4.1939 and 3.2642 stood here; both were measured against the
-   * previous ladder, `surface-raised` #1E1714 and `border` #352B27.)
+   * Chrome — static neutral steel / platinum metal.
    */
-  /*
-   * r = g = b, and the four points of blue that were here are the reason this
-   * note exists. #aeaeb2 measured C 0.0057 at h 286.26° — a violet cast, small
-   * enough to pass any check and large enough to be the exact thing the system
-   * design refuses. Its `white · neutral steel` mark row states the rule and the
-   * reason together: "No hue at any stop — r=g=b throughout, so it reads as
-   * polished steel rather than as a cool metal. Platinum carries a deliberate
-   * violet cast; this carries none, which is what keeps it from becoming a
-   * second accent on a warm canvas."
-   *
-   * On a neutral ground a violet cast is invisible. This ground is warm — the
-   * page's own bg measures C 0.0038 at h 17.6° — so a cool grey laid on it does
-   * not read as neutral, it reads as the *other* hue in a two-hue system. That
-   * is a second accent arriving by accident, on the token used for every
-   * machined edge.
-   *
-   * #aeaeae is the true neutral nearest the luminance that was already signed
-   * off: Y 0.42327 against #aeaeb2's 0.42485, so 9.0053:1 against 9.0349:1. The
-   * decision the ratio encodes is unchanged to within 0.03; only the hue is
-   * removed. Chroma is now 0 exactly, against the accent's 0.1263 — and with the
-   * luminance gap between chrome and accent closed (9.01 against 9.92, a 1.10x
-   * step, not a step at all), that chroma distance is the WHOLE separation
-   * between a machined edge and an action. It cannot be spent on a cast.
-   */
-  --color-chrome: #aeaeae; /*  9.0048:1 on bg; C 0.0000, achromatic by contract */
-  --color-chrome-dim: #7b7b7b; /*  4.7200:1 on bg, 4.1767:1 on surface-raised,
-                                   3.2508:1 against the border it replaces —
-                                   all three re-measured after the cast came
-                                   out, all three still over their floors */
+  --color-chrome: #a9aeb8; /* 9.16:1 on bg */
+  --color-chrome-dim: #757b85; /* 4.78:1 on bg */
 
-  /*
-   * Market data ONLY — never a button, badge, link or illustration. Zero live
-   * call sites in `src` today, which is how the rule is currently kept.
-   *
-   * Both moved for the copper accent, not for taste, and the hue arithmetic is
-   * the argument: the outgoing loss #F87171 measures 22.22° against the accent's
-   * 41.03°, 18.81° apart. The rose is at 5.17°, 35.86° away — §22's 36° row.
-   * Rose rather than a deeper red because the accent already occupies red-orange
-   * and pushing further turns the red pink (`tokens.css` says so in as many
-   * words), so the separation is carried by lightness and chroma — 0.2067
-   * against the accent's 0.1263 — and holds only at full strength, never as a
-   * tint. Gain is 130.12° from the accent, so it can never be mistaken for
-   * brand, and sits close to the accent in lightness on purpose so the pair
-   * reads as one system rather than as a borrowed green.
-   */
-  --color-gain: #4cd6b0; /* 10.9907:1 — spec --up; h 171.15° */
-  --color-loss: #f0487f; /*  5.6495:1 — spec --down, rose not red; h 5.17°, C 0.2067 */
+  /* Market data */
+  --color-gain: #4ade80;
+  --color-loss: #f87171;
 
-  /* Risk disclosures, margin alerts. Amber, the spec's `--warn`. It is the
-   * accent's CLOSEST chromatic neighbour — 71.79° against 41.03°, a gap of
-   * 30.76°, with 66.62° to loss — so it is separable from both but not by much,
-   * and the icon and border `Disclosure` ships with are load-bearing rather than
-   * styling. This token carries read text (CopyText's [BRACKETED] placeholders),
-   * which is why that matters. */
-  --color-warning: #e8a13c; /*  9.1275:1 on bg; C 0.1404, h 71.79° */
+  /* Risk disclosures, margin alerts */
+  --color-warning: #f97316;
 
   /*
    * Type — ONE family, three voices. The page and the terminal now share a type
@@ -502,10 +358,11 @@
     }
   }
 
+  html,
   body {
     margin: 0;
-    background-color: var(--color-bg);
-    color: var(--color-fg);
+    background-color: var(--color-bg, #050505) !important;
+    color: var(--color-fg, #ffffff);
     font-family: var(--font-sans);
     font-synthesis: none;
     text-rendering: optimizeLegibility;
@@ -1110,19 +967,19 @@
     background-image: linear-gradient(
       100deg,
       /* cycle 1 — dim · highlight-1 · alloy · valley · highlight-2 · dim-return */
-      #a84a30 0%,
-      #ffd9c6 11.61%,
-      #ff9e7a 20.54%,
-      #b4553a 29.46%,
-      #ffc8b0 39.29%,
-      #c4674a 44.64%,
-      /* cycle 2 */ #a84a30 50%,
-      #ffd9c6 61.61%,
-      #ff9e7a 70.54%,
-      #b4553a 79.46%,
-      #ffc8b0 89.29%,
-      #c4674a 94.64%,
-      #a84a30 100%
+      #6e6e72 0%,
+      #ffffff 11.61%,
+      #e9e9eb 20.54%,
+      #8c8c90 29.46%,
+      #fdfdfe 39.29%,
+      #b6b6ba 44.64%,
+      /* cycle 2 */ #6e6e72 50%,
+      #ffffff 61.61%,
+      #e9e9eb 70.54%,
+      #8c8c90 79.46%,
+      #fdfdfe 89.29%,
+      #b6b6ba 94.64%,
+      #6e6e72 100%
     );
     background-size: 200% 100%;
     background-position: 0% 50%;
@@ -1136,14 +993,6 @@
    * Reduced motion keeps the metal and drops the travel. A static gradient is
    * still a polished surface; a still frame of one is not a loss of meaning,
    * because the mark never carried meaning through its movement.
-   *
-   * The frame is chosen by arithmetic, and it moves with the ramp. At position p
-   * the visible window covers background [p/200, p/200 + 0.5]. The old 22% gave
-   * [11%, 61%], which put the five-stop ramp's single specular (then at 10%) on
-   * the left edge. Against the tiled six-stop ramp, 12% gives [6%, 56%] — which
-   * holds highlight-1 (11.61%), the valley (29.46%) and highlight-2 (39.29%)
-   * inside the frame. A still of a metal has to show the same two highlights the
-   * moving version does, or it is a still of a gradient.
    */
   @media (prefers-reduced-motion: reduce) {
     .chromatic-text {
@@ -1181,47 +1030,19 @@
   }
 
   /*
-   * Polished copper, as a surface rather than as a fill — the primary action's
+   * Polished platinum metal, as a surface rather than as a fill — the primary action's
    * 2px rim, and the one place the brand metal is a physical object.
-   *
-   * This exists because the shader cannot produce copper on its own, and that is
-   * a property of the shader rather than a tuning problem. `liquidMetalFragmentShader`
-   * hardcodes its light and dark ends at `vec3(.98,.98,1.)` and `vec3(.1,.1,.1)`;
-   * the only hue control it exposes is `u_colorTint`, applied as a colour *burn*,
-   * which can only darken and holes any channel below 0.9 out to black (see
-   * `LiquidMetalSurface`). Copper's green and blue sit at 0.62 and 0.48. So the
-   * shader can be given a warm bias in its shadows and nothing more — fed the
-   * brand hex directly it renders a red-black smear, and fed a safe near-white it
-   * renders silver. Shipped as-is it rendered silver, on the one control the
-   * whole palette change is supposed to be visible on.
-   *
-   * The spec hits the same wall from the other side and says so: `metallic.tsx`
-   * notes that "tint only steers the shader; the light and dark ends drive most
-   * of the perceived hue", and it has a shader that exposes those ends. This one
-   * does not. So the ends move to CSS — the ramp *is* the metal, and the shader
-   * modulates it with `mix-blend-overlay` rather than replacing it.
-   *
-   * The stops are the spec's own `--coral-grad` / `METAL.coral`, single-pass at
-   * 104deg exactly as the spec ships them. `.chromatic-text` tiles the identical
-   * six stops in the identical order twice, because a wordmark is wide enough
-   * that one pass reads as a gradient; a 2px rim is narrow enough that one pass
-   * reads as a lit edge, which is what the spec built it for. So the page has
-   * ONE copper ramp in two presentations — tiled for the wordmark, one pass for
-   * the rim — rather than two orderings of the same six colours.
-   *
-   * It stands on its own with no shader at all — a static polished ring rather
-   * than the flat token fill that was there before — which matters more than it
-   * sounds, because that is what a refused WebGL context now degrades to.
    */
+  .surface-platinum,
   .surface-copper {
     background-image: linear-gradient(
       104deg,
-      #a84a30 0%,
-      #ffd9c6 26%,
-      #ff9e7a 46%,
-      #b4553a 66%,
-      #ffc8b0 88%,
-      #c4674a 100%
+      #6e6e72 0%,
+      #ffffff 26%,
+      #e9e9eb 46%,
+      #8c8c90 66%,
+      #fdfdfe 88%,
+      #b6b6ba 100%
     );
   }
 

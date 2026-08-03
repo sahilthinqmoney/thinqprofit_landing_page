@@ -60,7 +60,7 @@ export default function Hero() {
      */
     <section
       id="hero"
-      className="relative isolate flex min-h-[calc(100svh-var(--header-stack))] w-full flex-col overflow-hidden"
+      className="relative isolate flex min-h-[calc(100svh-var(--header-stack))] w-full flex-col overflow-hidden bg-[#050505] bg-bg"
     >
       {/* Full-bleed background video clip */}
       <video
