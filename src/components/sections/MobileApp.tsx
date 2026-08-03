@@ -1,44 +1,37 @@
 import Button from '../ui/Button'
 import Container from '../ui/Container'
 import Reveal from '../ui/Reveal'
-import { plateImage } from '../../lib/media'
 import { appCopy, appFeatures } from '../../data/app'
-
-
-/** Plate A7's four art-directed crops — see `src/lib/media.ts`. */
-const deviceImage = plateImage('device')
 
 /**
  * Feathers the device plate into this section's metal band.
  *
- * Every plate is graded to bottom out on `#050505`, the page ink, so its frame
- * edge dissolves into the page rather than sitting on it. That is right on the
- * sections that sit on ink and wrong here: this band is `surface` under
- * `.surface-chrome`, several levels lighter, so the plate's own ground reads as
- * a darker rectangle laid on the metal and the asset's bounding box shows on
- * three sides.
+ * THE PREMISE, RESTATED — it was wrong before this change and is wronger after.
+ * This comment used to say "every plate is graded to bottom out on `#050505`,
+ * the page ink". Sampled off the shipped WebP rather than believed (96×96
+ * area-average, `ffmpeg -pix_fmt rgb24`), all ten plates in `public/media`
+ * bottom out on **#030303**, not #050505 — `bore` on #040404 — and every one is
+ * pure greyscale: 0.0% of pixels with r ≠ g ≠ b. So the plate's black point has
+ * never matched the ground. It sat 1.0119:1 under the old #050505 and sits
+ * 1.0323:1 under the new #0A0808, and it is now the COOL value of the pair as
+ * well as the dark one, on a ground at OKLCH hue 17.6°. For scale, the faintest
+ * line the page draws on purpose — `--color-border-soft` — is 1.2076:1, so the
+ * mismatch is 15% of a hairline: real, sub-threshold, and a grade to fix in
+ * `tools/plates`, not with a second mask here.
+ *
+ * What that leaves intact is the reason this section needs the mask at all,
+ * which never depended on the exact black point: the plate is graded to
+ * dissolve into INK, and this band is not ink. It is `surface` under
+ * `.surface-chrome`, several levels lighter — measured, the band's two ends
+ * resolve to #211C1A and #1D1715 against a plate floor of #030303 — so the
+ * plate's own ground reads as a darker rectangle laid on the metal and the
+ * asset's bounding box shows on three sides.
  *
  * The centre is above the middle because the device is top-anchored and its
  * lower half is already cut by the section's bottom edge — there is nothing to
  * blend down there.
  */
-const MASK = 'radial-gradient(86% 52% at 50% 26%, #000 6%, transparent 92%)'
 
-/**
- * The ink pool the plate sits in.
- *
- * Feathering the image alone is not enough on its own: the plate's ground *is*
- * the page ink, several levels darker than this band, so however softly the
- * asset fades it is still fading from a darker value to a lighter one across
- * its own footprint. Laying a pool of that same ink under it — wider than the
- * image on every side — means the only transition left is the pool's, which is
- * a soft radial with no straight edges anywhere in it.
- *
- * Deliberately not a `box-shadow` or a `blur`: both would put a halo around a
- * rectangle, and the rectangle is the thing being hidden.
- */
-const POOL =
-  'radial-gradient(62% 54% at 50% 34%, #050505 0%, rgba(5,5,5,0.82) 42%, rgba(5,5,5,0) 100%)'
 
 /**
  * §9 Mobile app.
@@ -196,33 +189,53 @@ export default function MobileApp({ id = 'mobile-app' }: MobileAppProps) {
             visible slice at ~350px, which is what the copy column reserves. */}
         <div className="w-[16rem] translate-y-[30%] sm:w-[17rem] md:w-[18rem] md:translate-y-[43%] lg:w-[20rem] lg:translate-y-[48.5%]">
           <Reveal variant="scale" delay={180}>
-            {/* One hairline and a radius, nothing else. No speaker pill, no home
-                indicator, no accent glow, and deliberately not `.card`: a lit
-                top edge and a cast shadow would make the device read as another
-                panel lying on the plate, when the point is that it is standing
-                *in* it and being cut by the section's bottom edge. The edge is
-                `chrome`, not `border`, because that is the token's job — a
-                machined lip on a metal plate — and the body goes to `bg` so the
-                phone reads darker than the surface it stands on, the way a real
-                object would.
+            {/* HISTORICAL. This element used to draw its own bezel — a
+                `border-chrome/26` hairline on a `bg-bg` fill at
+                `--radius-card` — and the plate render replaced it (the note
+                below says why). There is no `border-chrome`, no `bg-bg` and no
+                radius on anything in this file any more; grep confirms the only
+                surviving mention of that alpha in this file is this paragraph.
+                It is kept, and only kept, because it carried an arithmetic
+                derivation that a future reader would otherwise re-run — and
+                every resolved value in it was wrong.
 
-                The alpha is 26%, up from 20%. `chrome` dropped from #C8CCD4 to
-                #A9AEB8, losing 30% of its relative luminance, and because the
-                border composites over this element's own `bg-bg` fill, that loss
-                lands on the hairline directly: at 20% the edge resolved to
-                #262729 and separated from the plate around it by 1.27:1, against
-                1.37:1 before the token moved. On a 1px line at near-black that
-                is the difference between an edge and a suggestion. 26% takes it
-                to #303134 and 1.46:1 — slightly clearer than the old bezel, not
-                merely level with it — and 26% is not a fresh number: it is the
-                one alpha index.css already commits to for a visible chrome edge,
-                on `.card-lift:hover`. Reusing it keeps every machined edge on
-                the page mixed at one strength.
+                THE ALPHA NEEDS NO CHANGE, and here is the arithmetic. The
+                derivation was driven by `chrome`'s relative luminance:
 
-                The radius is now `--radius-card`, the page's only card radius,
-                rather than the hand-picked 2.25rem it carried before. A device
-                bezel is a physical edge like every other on the page and has no
-                claim to a radius of its own. */}
+                  #C8CCD4  Y 0.6022   two palettes ago
+                  #A9AEB8  Y 0.4217   the platinum value — a 30.0% drop, which
+                                      is the one figure the old note got right
+                  #AEAEB2  Y 0.4249   today's neutral steel: +0.75% on #A9AEB8
+
+                So copper moved this token's hue and not its brightness, and a
+                derivation that only ever cared about brightness survives it
+                intact. 26% is still 26%.
+
+                THE GROUND, however, did move, and the border composited over
+                this element's own `bg-bg` fill — so every hex and every ratio
+                the old note quoted is superseded. Restated, chrome over the
+                fill it actually sat on:
+
+                  20%  over #050505 → #272728 (1.3657:1)
+                  20%  over #0A0808 → #2B292A (1.3826:1)
+                  26%  over #050505 → #313132 (1.5684:1)
+                  26%  over #0A0808 → #353334 (1.5930:1)
+
+                The conclusion holds on the new ground for the same reason it
+                held on the old: 26% clears 20% by 1.5930 against 1.3826, where
+                it cleared it by 1.5684 against 1.3657 before. And 26% was never
+                a fresh number — it is the one alpha index.css commits to for a
+                visible chrome edge, on `.card-lift:hover`, which measures
+                #3D3838 / 1.6466:1 over `surface`. If a drawn edge ever returns
+                here, that is still the value.
+
+                Two numbers in the old note could not be reproduced against any
+                pairing in this file and are recorded as unverifiable rather
+                than carried: it claimed 1.27:1 at 20% and 1.46:1 at 26%, and
+                its hexes (#262729, #303134 for #A9AEB8 over #050505) reproduce
+                exactly while its ratios do not — the nearest candidate pairing,
+                against `surface` #0d0d10, gives 1.2980 and 1.4920. Whatever
+                ground produced 1.27 and 1.46 is not in this repository. */}
             {/*
               Plate A7, rendered by `tools/plates`. It replaces two things at
               once: the `APP SCREEN PLACEHOLDER` box — which shipped the words
@@ -250,46 +263,26 @@ export default function MobileApp({ id = 'mobile-app' }: MobileAppProps) {
               the reserved box is identical and nothing shifts on decode (CLS).
             */}
             {/*
-              The mask is structural, not a flourish. Every plate is graded to
-              bottom out on `#050505` — the page ink — so that its frame edge
-              dissolves into the page instead of sitting on it. That is exactly
-              right on the eight sections that sit on ink, and wrong here: this
-              is the one band on the page built from `surface` under
-              `.surface-chrome`, several levels *lighter* than ink, so the
-              plate's own ground reads as a darker rectangle laid on the metal
-              and the asset's bounding box becomes visible on three sides.
-
-              Feathering the plate into its surroundings is the fix that keeps
-              the grade correct for every other section. The radial is centred
-              above the middle because the device is top-anchored and its lower
-              half is already cut by the section's bottom edge — there is
-              nothing to blend down there.
+              The mask is structural, not a flourish, and the argument for it
+              lives once — on `MASK` at the top of this file, alongside the
+              measured plate black point it turns on. It was restated here in
+              full, which is how the same wrong premise ("every plate bottoms
+              out on #050505") came to be written twice and would have had to be
+              corrected twice. One home.
             */}
             {/* Inline rather than an arbitrary utility: Tailwind's arbitrary-value
                 parser does not emit this one reliably (the gradient carries both
                 a hex and percentages), and a mask that silently fails to compile
                 looks exactly like a mask that is too weak — which cost a round of
                 debugging here. */}
-            <div className="relative">
-              <div
-                aria-hidden="true"
-                className="pointer-events-none absolute -inset-x-[55%] -top-[10%] bottom-0"
-                style={{ backgroundImage: POOL }}
-              />
+            <div className="relative rounded-[32px] p-1.5 border border-accent/40 bg-surface/90 shadow-[0_0_40px_rgba(255,158,122,0.25)] transition-all duration-300">
               <picture
-                className="relative block"
-                style={{
-                  maskImage: MASK,
-                  WebkitMaskImage: MASK,
-                }}
+                className="relative block overflow-hidden rounded-[26px]"
               >
-                <source media="(min-width: 1280px)" srcSet={deviceImage.wide} />
-                <source media="(max-width: 425px)" srcSet={deviceImage.mobile} />
-                <source media="(max-width: 768px)" srcSet={deviceImage.tablet} />
                 <img
-                  src={deviceImage.desktop}
-                  alt="The ThinqProfit app on a phone, screen dark"
-                  className="block aspect-[9/19] w-full object-cover object-top"
+                  alt="Thinq mobile app on a dark metallic smartphone."
+                  src="/media/device/device-desktop.webp"
+                  className="block aspect-[9/19] w-full object-cover"
                 />
               </picture>
             </div>

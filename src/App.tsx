@@ -67,6 +67,18 @@ export default function App() {
      * doing before this.
      */
     <div className="grain min-h-screen overflow-x-clip bg-bg text-fg">
+      {/*
+        The skip link is one of the page's two genuinely SOLID accent fills (the
+        other is `Button`'s primary variant), and that is why it takes ink rather
+        than white.
+
+        `on-accent` #2E0F06 on `accent` #FF9E7A measures 8.7807:1. White on the
+        same fill is 2.0146:1 — unusable. This is not a contradiction of the
+        spec's "button labels are white": the spec's primary control is a 14%
+        coral TINT with a ring, where white sits on a dark core; this page's rim
+        button is that construction. A FILL takes ink. Two different backgrounds,
+        two different answers, and the number is what decides between them.
+      */}
       <a
         href="#main"
         className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-100 focus:rounded-full focus:bg-accent focus:px-4 focus:py-2 focus:text-sm focus:text-on-accent"

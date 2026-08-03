@@ -11,15 +11,20 @@ import { useEffect, useRef } from 'react'
  * Why this is a canvas and not a video file:
  *  - ~6 KB of JS against 2-3 MB for an equivalent clip
  *  - renders at device pixel ratio, so it stays sharp on any display
- *  - its three colours are the index.css tokens by name, so a palette move is a
- *    three-line edit here rather than a re-render and a re-upload
+ *  - two of its three colours are index.css tokens by name and the third is a
+ *    named stop of the mark metal, so a palette move is a three-line edit here
+ *    rather than a re-render and a re-upload
  *  - loops seamlessly by construction — no seam to hide
  *
  * Constraints it must respect (design-system/thinqprofit/pages/landing.md):
- *  - the field is neutral metal end to end: `chrome-dim` → `chrome` → `accent`.
- *    No green, no red — those are market data, and a green shimmer in the hero
- *    teaches the wrong association on sight. Nothing here carries hue at all,
- *    so depth and emphasis are carried entirely by luminance (see `draw`).
+ *  - the field is neutral steel end to end: `chrome-dim` → `chrome` → the mark
+ *    metal's specular. No green, no red — those are market data, and a green
+ *    shimmer in the hero teaches the wrong association on sight. And no copper,
+ *    which is the change: the accent's role list is closed at the rim ring, the
+ *    copper ramp under the shader and the solid primary fill, and an ambient
+ *    backdrop is on none of them. So depth and emphasis are carried by
+ *    luminance, alpha and size (see `draw`), and the one channel that means
+ *    "you can act on this" is left unspent here.
  *  - the left of frame stays dark and low-contrast — the H1 sits there.
  *  - reduced motion gets a single composed still, never a frozen blank.
  *  - motion is orbital and lateral, never upward (docs/motion-brief.md §7.3).
@@ -49,20 +54,60 @@ const PARTICLE_COUNT_DESKTOP = 520
 const PARTICLE_COUNT_MOBILE = 220
 
 /**
- * The whole field is one neutral alloy read at three luminances. Nothing else is
- * permitted in here: no green, no red — those belong to gain and loss — and no
- * hue of any kind, because hue in this system means something.
+ * Neutral steel at three luminances, on a warm ground. Two of the three are
+ * tokens — `chrome-dim` and `chrome` — and the third is the mark metal's own
+ * specular, because the palette has no token between `chrome` at 9.0349:1 and
+ * `fg` at 19.9782:1 and a crest needs one. `#E9E9EB` is `METAL.white`'s alloy
+ * stop verbatim (design-suite `src/logos.tsx`, DESIGN.md §39) — the same ramp
+ * `chrome` is cut from, so the field is one metal read at three points on it.
  *
  * The ramp is the depth cue *and* the emphasis. `FIELD_FAR` is the back of the
- * orbit, `FIELD_NEAR` the body of it, and `CREST` — the brightest surface in the
- * palette, the same value the primary action is filled with — is reserved for
- * the front edge alone. Ordering matters: the old field ran a warm accent against
- * a *brighter* cool chrome and let hue do the separating, which is not available
- * any more. Bright now means near, and near means live.
+ * orbit, `FIELD_NEAR` the body of it, and `CREST` is reserved for the front edge
+ * alone.
+ *
+ * THE CREST DOES NOT FOLLOW THE ACCENT INTO COPPER. That was the open question
+ * when the palette went warm, and it is settled here rather than left implicit,
+ * because a draft of this file had already answered it the other way. Three
+ * reasons, in the order that decides it.
+ *
+ * 1. The role. The accent is the rim ring, the copper ramp under the shader and
+ *    the solid primary fill — and nothing else. Under platinum this file could
+ *    hold `accent` honestly, because `accent` was then a LUMINANCE role: a
+ *    neutral near-white alloy that carried no meaning a backdrop could steal.
+ *    Copper makes it a HUE role, and hue in this system is a claim. Ambient
+ *    particles cannot make it.
+ *
+ * 2. The measurement, which forbids it independently of the rule. Accent Y is
+ *    0.4712 against `chrome`'s 0.4249 — 1.1091x. A crest sitting 1.109x above
+ *    the body of its own orbit is not a crest. The only way to buy the gap back
+ *    is to abandon the chrome tokens for hand-picked steel, which is exactly
+ *    what the copper draft did (#656569 / #8C8C90), and it is expensive: at the
+ *    alphas below — which are unchanged, and were solved against platinum — the
+ *    rendered field lost 33.3% at the back of the orbit and 56.0% through the
+ *    body, and the crest lost 73.2%. The whole section went dark to make room
+ *    for a hue it was not entitled to use.
+ *
+ * 3. The separation that is actually available. Steel sits at hue 286.35 deg,
+ *    245.32 deg from the accent's 41.03 deg, at chroma 0.0027 against 0.1263 —
+ *    46.8x. So nothing here can be mistaken for the primary action at any alpha
+ *    or any overlap, which is a stronger guarantee than platinum could give:
+ *    there the field and the action were the same neutral family and only
+ *    luminance told them apart.
+ *
+ * The ladder: 4.7394 / 9.0349 / 16.4772 on `#0A0808`, an even 2.1339x then
+ * 1.9207x in luminance, 4.0986x end to end. That is the platinum ladder re-hung
+ * on the mark metal to within 1.4% — #757B85 → #7B7B7F is +1.36% in Y, #A9AEB8 →
+ * #AEAEB2 is +0.75%, #E7E9EE → #E9E9EB is +0.20%. Which is why not one alpha in
+ * this file moves: they were tuned for values these land on top of, and
+ * re-tuning them would be a change with no measurement behind it.
+ *
+ * `FIELD_FAR` stops at 4.7394:1 rather than going darker to widen the ladder: it
+ * is `chrome-dim`, and below 3:1 a rendered mark is under the non-text floor —
+ * a depth cue that has faded out of perception is not a subtler depth cue.
  */
-const FIELD_FAR: [number, number, number] = [117, 123, 133] // chrome-dim  #757B85  4.78:1
-const FIELD_NEAR: [number, number, number] = [169, 174, 184] // chrome     #A9AEB8  9.16:1
-const CREST: [number, number, number] = [231, 233, 238] // accent          #E7E9EE 16.78:1
+const FIELD_FAR: [number, number, number] = [123, 123, 127] // chrome-dim   #7B7B7F  4.7394:1
+const FIELD_NEAR: [number, number, number] = [174, 174, 178] // chrome      #AEAEB2  9.0349:1
+const CREST: [number, number, number] = [233, 233, 235] // METAL.white alloy #E9E9EB 16.4772:1
 
 function mix(a: number, b: number, t: number) {
   return a + (b - a) * t
@@ -159,12 +204,13 @@ export default function HeroCanvas({ className = '' }: HeroCanvasProps) {
         const x = mix(wanderX, bandX, settle)
         const y = mix(wanderY, bandY, settle)
 
-        // Depth cue, and the only cue available: the far half of the orbit sits
-        // behind, so it drops to `chrome-dim` and the front rises through
-        // `chrome`. The cube confines the alloy to roughly the front eighth of
-        // the orbit — spread across the whole near half it would stop being a
-        // crest and become the field's own brightness, which is exactly how a
-        // luminance-only accent gets thrown away.
+        // Depth in colour: the far half of the orbit sits behind, so it drops to
+        // `chrome-dim` and the front rises through `chrome`. The cube confines
+        // the specular to roughly the front eighth of the orbit — spread across
+        // the whole near half it would stop being a crest and become the field's
+        // own brightness, which is exactly how a luminance-carried emphasis gets
+        // thrown away. Hue is not one of the channels here and is not coming
+        // back: see the token block for why the crest stayed neutral steel.
         const depth = (Math.sin(angle) + 1) / 2
         const crest = depth * depth * depth
         const r = mix(mix(FIELD_FAR[0], FIELD_NEAR[0], depth), CREST[0], crest)
@@ -175,9 +221,11 @@ export default function HeroCanvas({ className = '' }: HeroCanvasProps) {
         const leftGuard = narrow ? 1 : Math.min(1, Math.max(0, (x / width - 0.06) / 0.34))
 
         // Alpha compounds the ramp rather than fighting it: 0.28 → 1.0 across
-        // depth where this used to be 0.45 → 1.0. Colour alone buys a 4:1
-        // luminance spread; alpha takes the rendered spread to roughly 14:1, and
-        // that widened gap is what replaces the hue that used to mark the front.
+        // depth where this used to be 0.45 → 1.0. Colour alone buys 4.0986x
+        // between `chrome-dim` and the specular; the 3.571x alpha ramp on top of
+        // it takes the rendered spread to 14.63x, against 14.81x under platinum
+        // and 12.85x in the copper draft. That spread is what marks the front
+        // edge, since hue is spent on the primary action and not on this.
         const alpha = p.alpha * (0.28 + depth * 0.72) * (0.55 + settle * 0.45) * leftGuard * fieldAlpha
         if (alpha <= 0.002) continue
 
@@ -196,9 +244,10 @@ export default function HeroCanvas({ className = '' }: HeroCanvasProps) {
 
       // A thin counter-rotating inner arc: reads as structure rather than a
       // scatter, and gives the composition an axis. A machined edge, so it takes
-      // `chrome` and not the alloy — an edge that matched the crest would read as
-      // a second live element. Alpha is nudged up a little because chrome is a
-      // darker line than the pale metal that was here before.
+      // `chrome` and not the specular — an edge that matched the crest would read
+      // as a second live element. The 0.06/0.14 pair was solved against #A9AEB8
+      // when this stopped being gold; `chrome` #AEAEB2 is +0.75% in luminance, so
+      // it stands unchanged rather than being re-nudged for a 0.75% move.
       ctx.strokeStyle = rgba(FIELD_NEAR, 0.06 + order * 0.08)
       ctx.lineWidth = 1
       ctx.beginPath()
@@ -206,13 +255,21 @@ export default function HeroCanvas({ className = '' }: HeroCanvasProps) {
       ctx.stroke()
 
       // A soft bloom on the band's leading edge — sells it as a light source
-      // rather than a scatter of dots. Its core is the alloy, because the leading
-      // edge is the live part of the composition, but the alpha comes *down* from
-      // 0.15/0.28: at equal alpha the alloy is ~1.8× the luminance of the value
-      // it replaces, and letting a bloom this wide inherit that lift would spend
-      // the new gap on background wash instead of on the crest. The tail is
-      // chrome the whole way out — a bloom that fades through the ink base
-      // reasoned about a warm ground this palette no longer has.
+      // rather than a scatter of dots. Its core is the specular, because the
+      // leading edge is the live part of the composition, but the alpha sits
+      // *down* at 0.11/0.20 from the 0.15/0.28 this ran as gold: at equal alpha
+      // #E9E9EB is 1.816x the luminance of the #D4AF37 it replaced, and letting
+      // a bloom this wide inherit that lift would spend the gap on background
+      // wash instead of on the crest. Rendered, the core lands at 1.2430:1 to
+      // 1.6378:1 on the ground — ambience, not a second light.
+      //
+      // The tail is `chrome` the whole way out and its final stop is `chrome` at
+      // alpha 0, not a ground colour. The previous note here justified that with
+      // "a warm ground this palette no longer has", which is now false twice
+      // over — the ground is #0A0808, warm at chroma 0.0038 — and the real
+      // reason never needed it: canvas gradients interpolate non-premultiplied,
+      // so an rgba(11,11,13,0) terminator drags the ramp toward that RGB on the
+      // way out. Same hue at zero alpha is the only stop that fades to nothing.
       const glowX = cx + Math.cos(t * 0.28) * radiusX * 0.55
       const glowY = cy + Math.sin(t * 0.28) * radiusY * 0.55
       const glow = ctx.createRadialGradient(glowX, glowY, 0, glowX, glowY, radiusX * 0.85)

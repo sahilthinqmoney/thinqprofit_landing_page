@@ -10,10 +10,22 @@ import { useGSAP } from '@gsap/react'
  * a trigger is created, and does not re-measure on its own. This page changes
  * height substantially *after* first paint, for three reasons:
  *
- *  1. **Webfonts.** Archivo and Instrument Sans load async. Until they swap in,
- *     every headline is measured in the fallback metrics — and the display type
- *     runs to 104px, so the error is tens of pixels per heading and compounds down
- *     a fourteen-section page.
+ *  1. **Webfonts.** IBM Plex Sans Variable and IBM Plex Mono load async. Until
+ *     they swap in, every headline is measured in the fallback metrics — and the
+ *     display type runs to 120px, so the error is tens of pixels per heading and
+ *     compounds down the page.
+ *
+ *     The faces changed (Archivo + Instrument Sans + Newsreader → one Plex
+ *     family) and the error got LARGER, not smaller, which is worth stating
+ *     because the obvious assumption is the reverse. Two measured reasons. Plex's
+ *     font box is 1.300em against Archivo's 1.088em, so every line reserves 19.5%
+ *     more vertical space than the `system-ui` fallback is likely to. And the
+ *     variable face is loaded from `wdth.css`, whose axis the display styles
+ *     actually use (`'wdth' 75 → 82`) — until it arrives the fallback sets at
+ *     full width with no axis at all, so headings are wider AND taller mid-swap.
+ *     Self-hosted via `@fontsource`, so there is no third-party connection in the
+ *     path, but "self-hosted" is not "synchronous" and this refresh is still the
+ *     only thing making the triggers correct.
  *  2. **`min-h-svh` sections.** Their resolved height depends on the visual
  *     viewport, which on mobile settles only after browser chrome does.
  *  3. **The canvases.** HeroCanvas and SignalCanvas size themselves to their

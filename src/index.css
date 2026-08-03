@@ -1,116 +1,413 @@
 @import 'tailwindcss';
 
+/*
+ * Type, self-hosted. Two files — and *which file* matters more than which
+ * package, because getting it wrong fails silently.
+ *
+ * `@fontsource-variable/ibm-plex-sans`'s DEFAULT entry (`index.css`) is the
+ * wght-only build: `font-weight: 100 700` and NO `font-stretch`. Import the
+ * bare package name and the face arrives with no width axis, every `'wdth'`
+ * declaration in this file no-ops, and `.display-settling` animates nothing at
+ * all while still costing a `font-variation-settings` transition. `wdth.css` is
+ * the build that carries it — `font-stretch: 75% 100%`, `font-weight: 100 700`
+ * — confirmed against the installed package's own `metadata.json`, which
+ * declares wdth 75–100 step 0.1, wght 100–700, ital 0–1. So the width axis is
+ * real here and the hero's settle survives the move off Archivo; it is
+ * re-solved onto a 25-unit range rather than rebuilt (see `.display-settling`).
+ *
+ * Mono at `latin-400` only. `.tabular` is its sole consumer, and the gap between
+ * how many call sites EXIST and how many RENDER is worth writing down, because
+ * the 400-only build is only safe on the ones that render.
+ *
+ * Four call sites in source — CopyText.tsx:57, TrustStrip.tsx:113,
+ * Footer.tsx:205, Pricing.tsx:132. Two of the four emit nothing today:
+ * Pricing.tsx is not imported by App.tsx (the section was removed), and
+ * TrustStrip's span is behind `!hasPlaceholder(registration.value)` while all
+ * five values in `data/hero.ts` are still `[INZ000XXXXXX]`-style placeholders,
+ * so it renders zero times. Counted on the rendered 1440 page rather than
+ * grepped: `document.querySelectorAll('.tabular')` returns exactly 3 — the ©
+ * year and two CopyText placeholders, all three inside the footer, and every one
+ * of them computes to IBM Plex Mono at weight 400.
+ *
+ * `body` sets `font-synthesis: none`, so a `.tabular` placed under a non-400
+ * ancestor would quietly render 400 rather than fake a bold. Measured, not
+ * assumed: all three live elements report `font-weight: 400`, so the constraint
+ * is satisfied today — it is a constraint on future use, which is why it is
+ * here. No italic build — grep finds zero italic call sites on the page.
+ */
+@import '@fontsource-variable/ibm-plex-sans/wdth.css';
+@import '@fontsource/ibm-plex-mono/latin-400.css';
+
 /* ---------------------------------------------------------------------------
-   Design tokens — chromatic
+   Design tokens — copper chromatic
 
-   Gold is gone. The brand surface is now polished metal: a neutral, near-white
-   chromatic alloy that carries a live iridescent sheen on the primary action
-   (see `LiquidMetalSurface`) and sits static everywhere else.
+   The brand metal is copper, taken from the terminal specification's own ramp
+   (`--coral-grad` / `METAL.coral` in design-suite `src/tokens.css` and
+   `src/logos.tsx`). Spec §07 states the split this page sits on: chrome is the
+   primary mark inside the working terminal, and *coral is for brand surfaces
+   where the accent leads*. A landing page is that surface, so the accent leads
+   here and the metal is warm.
 
-   Every value below was contrast-checked against the ink base, not eyeballed.
-   Four constraints shape the set:
+   This is not a recolour of the platinum system — it moves the load-bearing
+   signal off luminance and onto hue, and four things move with it.
 
-   1. **The action is the brightest thing on the page.** With no hue to carry
-      it, a chromatic system distinguishes the primary action by *luminance and
-      motion*, not by colour. `--color-accent` is 16.6:1 on the ground — the
-      highest-contrast surface in the palette — and only the primary action gets
-      the shader that makes it move.
-   2. **A metal fill ALWAYS carries ink text.** White on #E7E9EE is 1.2:1 and
-      is invisible; `--color-on-accent` is 16.6:1 on it. This is the same rule
-      the gold system had, for the same reason, at a different value.
-   3. **Hue is now reserved entirely for meaning.** Nothing in the brand is
-      coloured, so the only chromatic values left on the page are gain, loss and
-      warning. That is a strict improvement: a green number can no longer be
-      confused with a brand accent, because there is no coloured brand accent.
-   4. **Gain/loss stay quarantined to market data.** They appear on no button,
-      badge, link or illustration.
+   EVERY ratio in this file is computed against `--color-bg` #0A0808 and nothing
+   else. The set that was here before was computed against #050505; all of it
+   was wrong by 1–2% the moment the ground moved, so it is restated rather than
+   carried. Where a figure is not a ratio it says what it is (OKLCH chroma, hue
+   in degrees, relative luminance Y).
 
-   The ground is neutral, not the warm ink the gold system needed. Warmth
-   existed to stop gold reading muddy; with a neutral alloy it would tint the
-   metal yellow, which is the exact look being removed.
+   1. **The ground is warm because the alloy is warm.** The previous note here
+      argued the opposite — that a neutral ground was needed or a warm metal
+      would collapse into it. Measured, that is backwards. #0A0808 is the
+      system's `--bg` verbatim and sits at OKLCH L 0.1372, C 0.0038, h 17.62° —
+      already warm. Figure/ground is carried by *luminance*, and comfortably:
+      the ramp's darkest stop #A84A30 is 3.5078:1 on it and its specular
+      #FFD9C6 is 15.2144:1. What a neutral ground would actually cost is the
+      other thing — at C 0.0038 the ground is warm enough that a chroma-0 grey
+      laid on it reads *cool* by simultaneous contrast. That is why the neutral
+      ladder is warm-composited rather than carried across: `fg-muted` C 0.0078,
+      `fg-subtle` C 0.0107, `border-soft` C 0.0116, `border` C 0.0145. (The
+      0.0138 and 0.0165 written here were the ladder's PREVIOUS generation —
+      `border-soft` #251D1A and `border` #352B27 — and survived the re-hang that
+      replaced both. Re-measured off the hexes this file actually ships.)
+      Carrying the old greys over also broke their own floors — #cfcfcf measures
+      12.8234:1 here against a declared ≥13:1, and #7e7e7e measures 4.9210:1
+      against a declared ≥5:1. §4: "when the product feels under-branded, warm
+      the neutrals — never raise the accent."
+   2. **Hue and motion identify the action. Luminance cannot any more.** Under
+      platinum the primary action was the *brightest* surface (#e7e9ee, 16.78:1
+      on #050505) because a hueless system has nothing else to mark with. Copper
+      is 9.9166:1, and five tokens now sit above it: `fg` 19.9782:1, `fg-muted`
+      13.2245:1, `accent-soft` 13.2208:1, `accent-hover` 12.6933:1, `gain`
+      10.9907:1. "The action is the brightest thing on the page" is therefore
+      dead and must not be re-derived. The rule that replaces it is measurable:
+      **only the action is SATURATED copper.** Accent chroma is 0.1263, the
+      highest of any brand token; the whole warm neutral axis tops out at
+      `border` 0.0165, 7.65× below it. Motion still amplifies it, and still only
+      on the primary action.
+   3. **Copper is spent on the action and on the mark, and on nothing else.**
+      The action is the rim ring, the copper ramp beneath the shader and the
+      solid primary fill; the mark is the footer wordmark. Two consequences that
+      are easy to get wrong. (a) A genuinely SOLID copper fill takes ink, never
+      white: white on #FF9E7A is 2.0146:1, and `--color-on-accent` #2E0F06 is
+      8.7807:1 on it and 11.2393:1 on the hover fill. That is not in tension
+      with §4 rule 4 ("button labels are white") — the spec's primary is a
+      14%-alpha tint with a ring, and this page's equivalent is the rim button,
+      whose white label sits on the dark core and never on metal. The solid fill
+      is the no-shader fallback, and a fill takes ink. (b) Chrome stays NEUTRAL
+      steel and does not follow the brand warm. §4: "the silver/platinum metal
+      ramp, on every surface including chrome — cool mark against warm
+      interface"; §39's dark row is METAL.white, r=g=b at every stop. The
+      measurement makes it a rule rather than a preference: accent Y 0.4712
+      against chrome Y 0.4249 is 1.1091×, so luminance separates the two by
+      nothing, and a brushed-copper chrome would land 1.56° off the accent's
+      hue, leaving chroma alone to carry it at 4.22×. Neutral steel restores two
+      channels at once — 245.24° of hue separation and a 22.33× chroma gap
+      (0.1263 against 0.0057).
+   4. **Gain, loss and warning stay quarantined, and the down-red is the rose
+      because coral forces it.** They are market data and appear on no button,
+      badge, link or illustration — grep finds zero `text-`/`bg-`/`border-gain`
+      and `-loss` call sites in `src`, so §4 rule 2 is currently kept by
+      construction rather than by vigilance. Loss is the rose by §4 condition 1,
+      and the numbers are why it is a condition: the outgoing #f87171 measures
+      hue 22.22° against the accent's 41.03° — 18.81° apart, inside the range
+      where a falling price and a brand button are one colour to a glancing eye.
+      #F0487F sits at 5.17°, 35.86° away, which is §22's 36° row. The hue cannot
+      simply be pushed further and `tokens.css` says why — "coral lives in the
+      red-orange region, and pushing further turns the red pink" — so separation
+      is carried by lightness and chroma (0.2067 against 0.1263) and survives
+      only at full strength, never as a tint. Three hue claims that used to live
+      in this file are all wrong and are deleted rather than adjusted: measured,
+      the accent is 41.03° (not ~16°), the outgoing #f97316 is 47.60° (not ~25°,
+      and so it sat 6.57° *off* the accent rather than between it and red), and
+      `warning` #E8A13C is 71.79° (not ~35°).
    --------------------------------------------------------------------------- */
 @theme {
   /*
-   * Surfaces — neutral ink.
+   * Surfaces — warm ink, the spec's own ground.
    *
    * Not pure #000: that is a hole in the screen, and on OLED it makes every
-   * edge touching it look torn. #050505 still reads as a surface with a light
+   * edge touching it look torn. #0A0808 still reads as a surface with a light
    * on it, which is what polished metal needs to sit on.
    *
    * The three steps are deliberately close — separation comes from the hairline
    * between them, not from a value jump, which is what keeps a panel from
-   * looking stuck on rather than built in. `surface` is lifted off the brief's
-   * #090909 because at four levels above the ground it was invisible; a surface
-   * that cannot be seen is not a surface.
-   */
-  --color-bg: #050505;
-  --color-surface: #0d0d10;
-  --color-surface-raised: #16161a;
-
-  /* Text — neutral greys. Ratios are against `bg`. */
-  --color-fg: #ffffff; /* 20.38:1 */
-  --color-fg-muted: #cfcfcf; /* 13.08:1 — body copy, disclosures */
-  --color-fg-subtle: #7e7e7e; /*  5.02:1 — footer meta + legal fine print */
-
-  /* Lines */
-  --color-border: #2b2b31;
-  --color-border-soft: #1c1c21;
-
-  /*
-   * Brand action — chromatic alloy. The brightest surface in the palette, and
-   * the only one that moves. Fill takes ink text, never white: white on
-   * #E7E9EE is 1.2:1.
-   */
-  --color-accent: #e7e9ee; /* 16.78:1 on bg */
-  --color-accent-hover: #f4f6fa;
-  --color-accent-soft: #c3c8d2; /* 12.14:1 — links, quiet accents */
-  --color-on-accent: #050505; /* 16.78:1 on the alloy; white would be 1.21:1 */
-
-  /*
-   * Chrome — the static, cooler metal. Hairline highlights, machined edges,
-   * secondary marks. Deliberately a step down in luminance from `accent` so an
-   * edge never competes with an action; with no hue in the system, that
-   * luminance gap is the only thing separating the two roles.
-   */
-  --color-chrome: #a9aeb8; /*  9.16:1 */
-  --color-chrome-dim: #757b85; /*  4.78:1 — lifted off #6f757f, which was 4.39 */
-
-  /* Market data ONLY — never a button, badge, link or illustration */
-  --color-gain: #4ade80;
-  --color-loss: #f87171;
-
-  /* Risk disclosures, margin alerts. Orange, deliberately NOT gold. */
-  --color-warning: #f97316; /*  7.02:1 */
-
-  /*
-   * Type. Both faces are variable; see `.display` for why that is structural
-   * rather than a nicety.
+   * looking stuck on rather than built in. The step was re-solved onto the warm
+   * axis rather than recoloured, holding every ratio to within 0.4%: the old
+   * #0d0d10 was 1.0503:1 on #050505, and the surface here is 1.0487:1 on
+   * #0A0808. (1.0455:1 stood here and belonged to #150F0D, the plate this
+   * change rejected — see below.)
    *
-   * The display face is a grotesk, not a serif, and that is a decision about
-   * what money looks like. High-contrast serifs — hairline strokes against
-   * thick stems — are the visual language of fashion and luxury goods. Low
-   * contrast, even colour and closed apertures are the language of
-   * infrastructure: wayfinding, instrument panels, timetables. A broker is
-   * infrastructure.
+   * ── THE WARM NEUTRALS ARE PULLED DOWN IN CHROMA, NOT ROUND IN HUE ──────────
    *
-   * Archivo comes out of exactly that tradition — a newspaper and signage
-   * grotesk. Its skeleton is square and quiet, which is what keeps it premium
-   * at 76px; faces with more personality in the letterforms turn cartoonish the
-   * moment they get large, because the quirk scales with the type.
+   * They did sit on the accent's, and it was a real defect rather than a
+   * rounding one. `--color-surface` was #150F0D — h 39.26° — and `--color-border`
+   * #352B27 at h 42.98°, against an accent at h 41.03°. Under 2° apart. At
+   * 1.05:1 against the ground a surface carries no *value* information at all,
+   * so hue is the only thing it communicates — which made every panel on the
+   * page a faint copper wash and every hairline a faded copper line, sitting
+   * directly beside a saturated copper CTA. That is the classic tinted-neutral
+   * failure, and it is worth naming precisely because each value looked
+   * defensible alone.
+   *
+   * The spec's own numbers say the same thing from the other side. It caps warm
+   * Δ (R−B) at 6 on a surface and halved its own cast to Δ2 after measuring Δ4
+   * as over-applied and Δ9 as the failure case — "a widget should read as dark,
+   * not as warm". #150F0D is Δ8. #130F0E is Δ5, inside the cap.
+   *
+   * WHAT ACTUALLY MOVED, measured off the hexes below rather than off the
+   * intention. The paragraph that stood here claimed the ladder had been moved
+   * onto the GROUND's hue — "~20° here against the ground's 17.6°, roughly 20°
+   * clear of the accent". That is not what shipped and it is worth correcting
+   * rather than softening, because it is the kind of claim a later reader would
+   * enforce. Measured, the ladder runs `surface` h 34.32°, `border-soft` 36.49°,
+   * `border` 39.29°, `surface-raised` 43.06° — it straddles the accent's 41.03°
+   * rather than clearing it, and `border` sits 1.74° from the accent where the
+   * #352B27 it replaced sat 1.95°. On hue alone, nothing was fixed.
+   *
+   * What was fixed is AMPLITUDE, and that is the honest mechanism. At 1.05:1 a
+   * surface carries no value information, so what it communicates is hue times
+   * chroma — and chroma is what came down: `surface` C 0.0110 → 0.0071 (−35%),
+   * `border-soft` 0.0138 → 0.0116 (−16%), `border` 0.0165 → 0.0145 (−12%). In
+   * sRGB that is the spec's own Δ(R−B) test above: #150F0D is Δ8, #130F0E is Δ5.
+   * A line 1.74° off the accent at C 0.0145 and 1.4087:1 is not a copper line;
+   * it is 8.7× less saturated than the accent it sits beside, and that ratio is
+   * what does the work. The simultaneous-contrast argument survives intact (a
+   * chroma-0 grey still reads cool on a warm ground, which is why these are not
+   * greys).
+   *
+   * Worth stating as the open end rather than leaving implied: `surface` took
+   * the whole of that reduction and `border` took 12% of it, so if the hairlines
+   * ever do read copper, `border` is the token that has not moved yet.
+   *
+   * The spec's own panel values were tried and rejected, both for the same
+   * reason: `--panel` #0C0A0A measures 1.0117:1 and `--panel2` #110F0F
+   * 1.0456:1, and `--elev` #161313 is 1.0814:1 — built for terminal density,
+   * too shallow for a page whose surfaces are 28px-radius cards, and `--elev`
+   * would have collapsed the two raised levels into one.
    */
-  --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, -apple-system, sans-serif;
-  --font-display: 'Archivo', var(--font-sans);
+  /*
+   * No `--ground-rgb` triple, and the absence is deliberate — it was added here
+   * and removed again in the same pass. The argument for one is that a scrim is
+   * a *thickening of the ground* rather than a colour resembling it, so it must
+   * never be transcribed by hand. That argument is right, and it is already
+   * satisfied: every scrim on the page (`Hero`, `MediaSection`, `Platform`,
+   * `MobileApp`, `MediaBackdrop`, `MediaCard`) reads this token through
+   * `color-mix(in oklab, var(--color-bg) N%, transparent)`, which cannot drift
+   * from it either. A second mechanism doing the same job would be one more
+   * thing to keep in step, and a token whose stated reason has already been
+   * solved elsewhere is the kind of thing this file refuses to ship.
+   */
+  --color-bg: #0a0808;
+  --color-surface: #130f0e; /* 1.0487:1 on bg — SectionShell raised, nav panels, .card */
+  --color-surface-raised: #1c1715; /* 1.1252:1 on bg, 1.0729:1 on surface — hover fills */
 
   /*
-   * The editorial voice — used exactly once on the page, for the closing
-   * statement, and nowhere else.
+   * Text — warm neutrals, not greys. Ratios are against `bg`.
    *
-   * Newsreader, not a Didone. Moderate stroke contrast and an old-style
-   * skeleton, so it reads as a considered sentence rather than as a fashion
-   * masthead. A serif used once is a change of register; a serif used
-   * everywhere is just a different default.
+   * These are composited toward the ground's hue rather than carried across,
+   * for the reason in point 1 of the header note: on a ground at C 0.0038 a
+   * chroma-0 grey reads cool. Each is solved off its floor rather than onto it,
+   * so none sits on a rounding boundary.
    */
-  --font-serif: 'Newsreader', ui-serif, Georgia, serif;
+  --color-fg: #ffffff; /* 19.9782:1 — headings, primary body, the rim button's label */
+  --color-fg-muted: #d7d1ce; /* 13.2245:1 — body copy and every disclosure; C 0.0078, h 48.64° */
+  --color-fg-subtle: #8a827f; /*  5.3087:1 — footer meta, legal fine print, media-plate captions */
+
+  /*
+   * Lines. Near the ratios the cool pair held — `border` lands 2.8% under it
+   * (1.4087:1 against the outgoing #2b2b31's 1.4486:1 on #050505) and
+   * `border-soft` 0.3% over (1.2050:1 against #1c1c21's 1.2010:1). "At the same
+   * ratios, to four decimals" stood here and was not true of either.
+   *
+   * Neither is a 3:1 boundary and neither needs to be: WCAG 1.4.11 asks 3:1 of
+   * "visual information REQUIRED to identify user interface components and
+   * states", and every live consumer of these two is a section rule, a panel
+   * edge, a card seam or a list divider — structure, not a control. The two
+   * that do sit on controls (`Button` secondary, the footer's social circles)
+   * are identified by a 19.9782:1 label and a 13.2245:1 glyph respectively, and
+   * their hover STATES, which are the part 1.4.11 does reach, land at 4.2120:1
+   * and 8.0295:1. See the audit note under `--color-chrome-dim`.
+   *
+   * `border-soft` also absorbs two raw white alphas that stop being neutral now
+   * that the ground is warm: MediaCard's border-white/20 composites to #3B3939
+   * (1.7412:1, C 0.0028) and Platform's border-white/15 to #2F2D2D (1.4595:1,
+   * C 0.0029) — cool lines drawn on warm ink.
+   */
+  --color-border: #322926; /* 1.4087:1 on bg; h 39.29°, C 0.0145 */
+  --color-border-soft: #241d1b; /* 1.2050:1 on bg; h 36.49°, C 0.0116 */
+
+  /*
+   * Brand action — copper alloy. The spec's `--coral` / `METAL.coral` ramp: the
+   * most saturated thing on the page (C 0.1263), and the only one that moves.
+   * A genuinely solid fill takes ink text, never white: white on #FF9E7A is
+   * 2.0146:1.
+   *
+   * The three steps form a ladder rather than a fill and a lift, because copper
+   * has to do a job platinum did not. Under platinum, `accent-soft` was a
+   * *dimmer* alloy — safe, because accent was the brightest thing on the page
+   * and anything below it still cleared body copy. Copper sits at 9.9166:1
+   * against `fg-muted` at 13.2245:1, so dimming it for links would render every
+   * copper link *quieter* than the sentence around it, which inverts what a link
+   * is for. A dim was measured before it was rejected: at #C9927E the link is
+   * 7.5121:1 inside body copy at 13.2245:1, a 1.87× luminance drop. `accent-soft`
+   * is therefore a lift, not a dim.
+   *
+   * It is also solved by a rule rather than picked: **the accent's hue at the
+   * body copy's luminance.** #FDC6B2 is 13.2208:1 against `fg-muted`'s
+   * 13.2245:1 — parity to 0.004 — at h 40.91°, 0.12° off the accent, with
+   * C 0.0689, 54.6% of it. So an inline link is separated from the sentence it
+   * sits in by hue alone, which is exactly what copper bought and platinum could
+   * not do. Parity survives the mega-menu panel too, where the mobile-sheet link
+   * lives: over bg/40 on `surface` (#0F0C0C) the link is 12.8890:1 against
+   * surrounding text at 12.8925:1, and its 40% underline composites to #6E564E,
+   * 2.8790:1 — a decoration, not a rule, and 1.4.11 does not reach it because
+   * the text it decorates is itself the link's identification. (#110C0B and its
+   * three figures were measured against `surface` #150F0D; Navbar.tsx:601 still
+   * carries that set.)
+   *
+   * `accent-hover` is the spec's `--coral-lt` verbatim, replacing an invented
+   * mid-step (#ffb294). It has a second job: §40 fixes the system's ONE focus
+   * ring at `--coral-lt`, so the ring binds to whichever token holds that hex.
+   * See `:focus-visible`.
+   */
+  --color-accent: #ff9e7a; /* 9.9166:1 on bg — spec --coral; C 0.1263, h 41.03° */
+  --color-accent-hover: #ffc0a6; /* 12.6933:1 — spec --coral-lt; fill hover AND the focus ring */
+  --color-accent-soft: #fdc6b2; /* 13.2208:1 — inline links, at parity with fg-muted */
+  --color-on-accent: #2e0f06; /* 8.7807:1 on the copper, 11.2393:1 on the hover fill */
+
+  /*
+   * Chrome — the static metal. Hairline highlights, machined edges, the nav's
+   * mark tile, the canvases' resting field. Neutral steel: see the header note,
+   * point 3.
+   *
+   * The claim that used to sit here — "still a step down in luminance from
+   * `accent` so an edge never competes with an action" — is FALSIFIED and is
+   * the reason to state the replacement loudly. Measured, accent Y 0.4712
+   * against chrome Y 0.4249 is 1.1091×: not a step, and a direct contrast of
+   * 1.0976:1 between them. Luminance separates nothing here. **Chroma is the
+   * only channel left**, and it is 22.33× wide (0.1263 against 0.0057) with
+   * 245.24° of hue between them. That is what stops a machined edge reading as
+   * an action, not brightness.
+   *
+   * The near-neutral +4 on blue is the spec's `METAL.white` treatment literally
+   * — its stops #6E6E72, #8C8C90 and #B6B6BA all run B−R = 4 — rather than a
+   * pure r=g=b. Absolute neutral beside a large copper field picks up a cool
+   * cast by simultaneous contrast and reads dirty; four points of blue is under
+   * the just-noticeable difference in isolation and cancels it in place.
+   *
+   * `chrome-dim` follows onto the same axis for the same §4/§39 reason, and the
+   * audit its ≥4.5:1 floor depends on is worth writing down because it is
+   * narrower than it looks: the ONLY live call site is Button.tsx:103, a hover
+   * *border*, never text. HeroCanvas.tsx and SignalCanvas.tsx reference
+   * chrome-family values and neither has an importer anywhere in `src`
+   * (verified by grep, not assumed). So the text floor does not formally apply
+   * — but this token was lifted off #6f757f specifically to clear it, and that
+   * intent is honoured at 4.7394:1. As a boundary it renders against the fill
+   * declared alongside it (`hover:border-chrome-dim hover:bg-surface-raised` in
+   * one declaration) at 4.2120:1, and against the rest border it replaces at
+   * 3.3643:1. Both clear WCAG 1.4.11's 3:1 — and this pair is the one place the
+   * secondary button's boundary is reached by that criterion at all, because
+   * 1.4.11 governs component STATES and the rest edge is carried by a 19.9782:1
+   * label. (4.1939 and 3.2642 stood here; both were measured against the
+   * previous ladder, `surface-raised` #1E1714 and `border` #352B27.)
+   */
+  /*
+   * r = g = b, and the four points of blue that were here are the reason this
+   * note exists. #aeaeb2 measured C 0.0057 at h 286.26° — a violet cast, small
+   * enough to pass any check and large enough to be the exact thing the system
+   * design refuses. Its `white · neutral steel` mark row states the rule and the
+   * reason together: "No hue at any stop — r=g=b throughout, so it reads as
+   * polished steel rather than as a cool metal. Platinum carries a deliberate
+   * violet cast; this carries none, which is what keeps it from becoming a
+   * second accent on a warm canvas."
+   *
+   * On a neutral ground a violet cast is invisible. This ground is warm — the
+   * page's own bg measures C 0.0038 at h 17.6° — so a cool grey laid on it does
+   * not read as neutral, it reads as the *other* hue in a two-hue system. That
+   * is a second accent arriving by accident, on the token used for every
+   * machined edge.
+   *
+   * #aeaeae is the true neutral nearest the luminance that was already signed
+   * off: Y 0.42327 against #aeaeb2's 0.42485, so 9.0053:1 against 9.0349:1. The
+   * decision the ratio encodes is unchanged to within 0.03; only the hue is
+   * removed. Chroma is now 0 exactly, against the accent's 0.1263 — and with the
+   * luminance gap between chrome and accent closed (9.01 against 9.92, a 1.10x
+   * step, not a step at all), that chroma distance is the WHOLE separation
+   * between a machined edge and an action. It cannot be spent on a cast.
+   */
+  --color-chrome: #aeaeae; /*  9.0048:1 on bg; C 0.0000, achromatic by contract */
+  --color-chrome-dim: #7b7b7b; /*  4.7200:1 on bg, 4.1767:1 on surface-raised,
+                                   3.2508:1 against the border it replaces —
+                                   all three re-measured after the cast came
+                                   out, all three still over their floors */
+
+  /*
+   * Market data ONLY — never a button, badge, link or illustration. Zero live
+   * call sites in `src` today, which is how the rule is currently kept.
+   *
+   * Both moved for the copper accent, not for taste, and the hue arithmetic is
+   * the argument: the outgoing loss #F87171 measures 22.22° against the accent's
+   * 41.03°, 18.81° apart. The rose is at 5.17°, 35.86° away — §22's 36° row.
+   * Rose rather than a deeper red because the accent already occupies red-orange
+   * and pushing further turns the red pink (`tokens.css` says so in as many
+   * words), so the separation is carried by lightness and chroma — 0.2067
+   * against the accent's 0.1263 — and holds only at full strength, never as a
+   * tint. Gain is 130.12° from the accent, so it can never be mistaken for
+   * brand, and sits close to the accent in lightness on purpose so the pair
+   * reads as one system rather than as a borrowed green.
+   */
+  --color-gain: #4cd6b0; /* 10.9907:1 — spec --up; h 171.15° */
+  --color-loss: #f0487f; /*  5.6495:1 — spec --down, rose not red; h 5.17°, C 0.2067 */
+
+  /* Risk disclosures, margin alerts. Amber, the spec's `--warn`. It is the
+   * accent's CLOSEST chromatic neighbour — 71.79° against 41.03°, a gap of
+   * 30.76°, with 66.62° to loss — so it is separable from both but not by much,
+   * and the icon and border `Disclosure` ships with are load-bearing rather than
+   * styling. This token carries read text (CopyText's [BRACKETED] placeholders),
+   * which is why that matters. */
+  --color-warning: #e8a13c; /*  9.1275:1 on bg; C 0.1404, h 71.79° */
+
+  /*
+   * Type — ONE family, three voices. The page and the terminal now share a type
+   * identity; §5's "one family, two roles" plus a display cut.
+   *
+   * The display face is still a grotesk, not a serif, and that is still a
+   * decision about what money looks like: high-contrast serifs — hairline
+   * strokes against thick stems — are the language of fashion and luxury goods,
+   * while low contrast, even colour and closed apertures are the language of
+   * infrastructure (wayfinding, instrument panels, timetables). A broker is
+   * infrastructure. What does NOT transfer is the provenance argument that used
+   * to sit here: Archivo is a newspaper and signage grotesk and IBM Plex is not.
+   * Plex comes out of corporate and technical documentation — the same
+   * infrastructure conclusion by a different route, and the honest version of it
+   * is that this page is now set in the face the product itself is set in.
+   *
+   * `--font-display` stays a NAME rather than collapsing into `--font-sans` at
+   * every call site, because `.display` and every SCALE step reference a ROLE
+   * (§45). The family behind the role is now the same one; the role is not.
+   *
+   * `--font-serif` is DELETED along with Newsreader. What marked the closing
+   * statement was a change of family; what marks it now is a change of posture
+   * inside one family — see `.display-quiet`, which is where that argument
+   * lives so it stays next to the thing it governs. Nothing referenced the
+   * `font-serif` utility (grep: zero call sites).
+   */
+  --font-sans: 'IBM Plex Sans Variable', ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-sans);
+
+  /*
+   * Every numeral on the page, via `.tabular`. The system's `--mono` verbatim.
+   *
+   * §5 puts figures in mono for a reason that is about reading rather than
+   * about texture: in a monospaced face a column of prices is a column, digit
+   * over digit, so a changing figure does not reflow and two figures can be
+   * compared by eye without being aligned by hand. A proportional face makes
+   * "1" narrow and "0" wide and both of those true statements false. The site
+   * inherits the rule from the terminal because the same person reads both.
+   */
+  --font-mono: 'IBM Plex Mono', ui-monospace, 'SF Mono', Menlo, monospace;
 
   /*
    * Card geometry. One radius for every physical surface on the page — a page
@@ -127,27 +424,42 @@
   --ease-out-soft: cubic-bezier(0.32, 0.72, 0, 1);
 
   /*
-   * Shadows are neutral black, and that is a change of reasoning, not just of
-   * value. The old rule was that a shadow carries the background's hue, because
-   * pure black on a warm ground reads as a grey smudge. The ground has no hue
-   * any more, so there is nothing to carry — and the old rgba(6, 6, 8) is now
-   * actively wrong: its blue channel is *brighter* than #050505, so on the page
-   * ground it composited to #060607 and drew a faint cool halo around every
-   * card and around the primary Button instead of a shadow.
+   * Shadows stay neutral black — but the reason that used to be given for it
+   * ("the ground has no hue any more, so there is nothing to carry") is dead
+   * with the warm ground, and it would have argued straight back into a tinted
+   * shadow. Two measurements replace it, and they point the same way.
    *
-   * The alphas are unchanged, and that is measured rather than skipped:
-   * rgba(0, 0, 0, 0.5) takes 2.5 steps off #050505, the same 2.5 steps
-   * rgba(6, 6, 8, 0.5) took off the old #0b0b0d. Same depth, no halo. On a
-   * ground this low, black is also the only tint with headroom left to darken.
+   * First, §-level: a shadow is an ABSENCE OF LIGHT, not an inversion of the
+   * palette. Shadows do not invert with the theme; they are the one thing on the
+   * page that is the same on any ground.
    *
-   * Each keeps an offset and a soft blur — a zero-offset halo is decoration,
-   * not depth.
+   * Second, arithmetic. A shadow tinted with the ground's own hue is a no-op ON
+   * the ground: rgba(10, 8, 8, 0.5) over #0A0808 composites to #0A0808 exactly —
+   * it draws nothing. Over `surface` #130F0E it reaches #0F0C0B, 1.0229:1
+   * against the plate, where black at the same alpha reaches #0A0807 and
+   * 1.0492:1 — twice the depth for the same alpha. On a ground this low, black
+   * is simply the only tint with headroom left to darken.
+   *
+   * The outgoing rgba(6, 6, 8) is wrong on the new ground for the same reason it
+   * was wrong on the old one, and worse: over #0A0808 it composites to #080708 —
+   * blue above red on a ground whose hue is 17.62° — so it drew a faint COOL
+   * halo around every card and around the primary Button instead of a shadow.
+   * That is now the most visible possible defect, because the halo would sit
+   * directly under a copper rim.
+   *
+   * The alphas are unchanged. Each keeps an offset and a soft blur — a
+   * zero-offset halo is decoration, not depth.
    */
   --shadow-lifted: 0 1px 2px rgba(0, 0, 0, 0.5), 0 12px 32px -8px rgba(0, 0, 0, 0.65);
   --shadow-deep: 0 2px 4px rgba(0, 0, 0, 0.55), 0 32px 64px -16px rgba(0, 0, 0, 0.75);
 
-  /* Section rhythm */
-  --spacing-section: 6rem;
+  /*
+   * `--spacing-section: 6rem` was deleted here. It had no consumer: the page's
+   * actual section rhythm is `SectionShell`'s `py-16 sm:py-20 lg:py-24`, which
+   * is a responsive ladder a single value could not have expressed anyway. A
+   * token nothing reads is worse than no token, because it greps as a system and
+   * invites the next edit to "keep it in step" with something it never drove.
+   */
 }
 
 /*
@@ -173,6 +485,23 @@
     scroll-behavior: smooth;
   }
 
+  /*
+   * The one declaration rescued from the deleted blanket reduced-motion reset
+   * (see the note at the foot of this file). Smooth scrolling is the only thing
+   * on the page a user cannot opt out of any other way: every other animation
+   * here has an authored still, but a smooth scroll is motion the page imposes
+   * on a navigation the user asked for, and the nav's in-page anchors trigger it
+   * on every menu click.
+   *
+   * Scoped to `html` rather than to `*`, so it turns off exactly the behaviour
+   * it names and touches nothing else.
+   */
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+  }
+
   body {
     margin: 0;
     background-color: var(--color-bg);
@@ -184,9 +513,35 @@
     -moz-osx-font-smoothing: grayscale;
   }
 
-  /* Prices, percentages and ₹ amounts must not jitter as digits change. */
+  /*
+   * Every numeral on the page. Prices, percentages, ₹ amounts, registration
+   * codes and the copyright year — §5 puts all of them in IBM Plex Mono, and
+   * this one hook covers every live figure site with no component edit:
+   * CopyText.tsx:27 (each [BRACKETED] placeholder, which also carries
+   * `text-warning`), TrustStrip.tsx:89 (SEBI/exchange codes), Footer.tsx:180
+   * (the © year), Pricing.tsx:110 (unmounted).
+   *
+   * The swap is free at the sizes it renders, which is what makes it safe to
+   * apply this broadly: Plex Sans's '0' advances 600/em at wdth 100 and is
+   * CONSTANT across wght 300/400/600, and Plex Mono's advance is also exactly
+   * 600/em — so a figure moving from Sans to Mono at full width moves by zero.
+   *
+   * Three constraints that follow, written down rather than discovered later.
+   * (1) Mono costs +19% on LETTERS (600/em against Plex Sans's 504.3/em
+   * lowercase average), so this belongs on figures and codes and never on prose
+   * that happens to contain a figure — which is also why no [BRACKETED] copy
+   * needed rewrapping. (2) At wdth < 100 Plex Sans's '0' shrinks to 576/em at 90
+   * and 540/em at 75, so a figure inside `.display` WOULD move if it were
+   * switched; none exists today. (3) The mono is imported at latin-400 only —
+   * see the import note at the top.
+   *
+   * `lining-nums` is added alongside `tabular-nums` because tabular figures and
+   * old-style figures are independent axes, and a figure that drops below the
+   * baseline in a price is a bug in a broker's UI, not a flourish.
+   */
   .tabular {
-    font-variant-numeric: tabular-nums;
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums lining-nums;
     font-feature-settings: 'tnum';
   }
 
@@ -199,8 +554,24 @@
     display: none;
   }
 
+  /*
+   * ONE focus ring for the whole page — spec §40 declares the system's single
+   * ring at `--coral-lt`, and the token that holds that hex is now
+   * `--color-accent-hover`. The ring has to be bound to the HEX's token, not to
+   * a name that used to carry it: this declaration read `var(--color-accent-soft)`
+   * and was correct only while `accent-soft` *was* #FFC0A6. `accent-soft` has
+   * since been re-solved for inline links (#FDC6B2, at parity with body copy),
+   * so leaving the binding alone would have silently moved the ring off the one
+   * value §40 fixes. §40 exists because nine hand-copied rings had each been
+   * defensible on its own and incoherent as a set; this is how that happens.
+   *
+   * Contrast is not the binding constraint but it is comfortable: 12.6933:1 on
+   * the ground, against WCAG 1.4.11's 3:1 for a focus indicator — four times the
+   * floor — and `outline-offset` puts it outside the control, so it never has to
+   * hold against a fill it surrounds.
+   */
   :focus-visible {
-    outline: 2px solid var(--color-accent);
+    outline: 2px solid var(--color-accent-hover);
     outline-offset: 2px;
   }
 
@@ -215,7 +586,14 @@
    *
    * Selection has to be legible over the mandatory risk disclosure specifically,
    * because a user copying it is the one moment that text is guaranteed to be
-   * selected. Opaque and inked, it is 16.78:1 everywhere, unconditionally.
+   * selected. Opaque and inked, it is 8.7807:1 everywhere, unconditionally.
+   *
+   * The guarantee halved with the move to copper — it was 16.78:1 when the fill
+   * was platinum and the ink was the page ground — and that is the number to
+   * state rather than the old one. It is still the highest *guaranteed* figure
+   * available, because a solid fill's ratio is a property of the pair and an
+   * alpha's is a property of whatever it lands on. Halving a guarantee is worth
+   * less than keeping one.
    */
   ::selection {
     background: var(--color-accent);
@@ -235,7 +613,14 @@
       wipe.
    2. **No overshoot.** Every one lands on its end value and stops. A spring
       overshoot is the fastest way a regulated product reads as a toy.
-   3. **No hue, no glow.** Colour on this page means gain, loss or warning.
+   3. **No glow, and no entrance that introduces a hue of its own.** The old
+      form of this rule — "colour on this page means gain, loss or warning" — is
+      false under a copper brand and would be read as licence to reject any
+      warm-tinted entrance on principle. The constraint that actually holds is
+      narrower and survives: an entrance may not ADD colour that the element does
+      not have at rest. A reveal is a change of state, and if it arrives copper
+      and settles neutral it has said "you can act on this" about something that
+      cannot be acted on (§4 rule 1). Opacity, blur, transform and clip only.
    --------------------------------------------------------------------------- */
 
 /* Settle — the quiet default. Down, never up. */
@@ -384,6 +769,82 @@
   }
 }
 
+/* ---------------------------------------------------------------------------
+   The brand mark's thinking rhythm — spec `src/marks.css`, DESIGN.md §7.
+
+   The typing-indicator cadence, which is the one motion everyone already reads
+   as "thinking". 1.25s cycle with a 160ms stagger so the dots are out of phase,
+   and deliberately slower than a spinner: a spinner says *waiting*, this says
+   *deliberating*.
+
+   Two details from the spec that are silent when missed, so they are not to be
+   trimmed:
+
+   **The pulse travels upward.** d2 (the far, lower dot) fires first, d1 follows,
+   the ring lands last — so the wave climbs from the trail back toward the ring
+   and the mark gathers itself upward. The spec shipped it the other way round
+   first, and reversed it on the grounds that on a trading product every repeated
+   downward motion is worth a second look, and this one runs on every logo hover.
+   Identical geometry, identical rhythm, one swapped delay. It is the same rule
+   this page's own reveal keyframes obey from the other direction — nothing
+   rises, because a rise reads as a claim about returns; here nothing *falls*,
+   because a fall reads as the opposite one.
+
+   **Hover only.** A logo that pulses on its own is ambient motion, and this
+   page's motion budget spends its two moving things on the hero and the primary
+   action. The spec permits an always-on variant for a standalone display plate;
+   there is no such plate here.
+   --------------------------------------------------------------------------- */
+
+/*
+ * `transform-box: fill-box` is REQUIRED. Without it an SVG child scales about
+ * the viewBox origin rather than about itself, so the dots swing across the mark
+ * instead of pulsing in place. Its absence is silent: the animation runs and
+ * simply looks wrong.
+ */
+.thinq-mark .ring,
+.thinq-mark .d1,
+.thinq-mark .d2 {
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+@keyframes thinking {
+  0%,
+  62%,
+  100% {
+    opacity: 0.42;
+    transform: scale(0.78);
+  }
+  28% {
+    opacity: 1;
+    transform: scale(1.16);
+  }
+}
+
+/*
+ * The ring breathes rather than pulses. Same cycle and easing so it stays in the
+ * wave, at a fraction of the amplitude: the ring is 5.8 units across against the
+ * dots' 1.85 and 1.25, so scaling it 0.78 → 1.16 like a dot would throw about
+ * seven units of travel across the mark — which stops reading as thinking and
+ * starts reading as a pulse alarm.
+ *
+ * It also never drops to 0.42 opacity. The ring is the mark's silhouette, and a
+ * logo that half-disappears on hover reads as a loading state.
+ */
+@keyframes thinking-ring {
+  0%,
+  62%,
+  100% {
+    opacity: 0.82;
+    transform: scale(1);
+  }
+  28% {
+    opacity: 1;
+    transform: scale(1.045);
+  }
+}
+
 /*
  * Click ripple on the primary action. Scales and fades from the pointer, and is
  * centred on it via the translate — so the origin is where the finger landed
@@ -408,39 +869,128 @@
   /*
    * Display type.
    *
-   * `wdth: 90` is doing two jobs. It buys back the line length that trading
-   * copy eats — "Understand the trade before you place it" — so the size never
-   * has to drop, and size is what actually carries authority. It also holds the
-   * display face visibly apart from Instrument Sans at full width beneath it,
-   * so two grotesks on one page read as intentional.
+   * WHAT HOLDS DISPLAY APART FROM BODY, now that there is one family and "two
+   * grotesks held apart by width" is dead. Not width alone — that was the old
+   * argument's second job and it does not survive: 82/600 and 100/400 set the
+   * same string within 3.8% of each other, because weight buys back what
+   * condensation removes. Three things do it, in order of work done:
    *
-   * Weight 600, not 800. Heavy grotesks read as advertising. This sits where a
-   * headline is unmistakably the loudest thing on the page and still sounds
-   * like a statement rather than a shout.
+   *   1. WEIGHT — 600 against the body's 400, a third of Plex's 100–700 axis,
+   *      and the primary separator now.
+   *   2. PROPORTION — at 82/600 the 'n' advances 547.6/em against the body's
+   *      568.0/em while carrying 50% more weight. Narrower AND heavier appears
+   *      nowhere else in the page's type.
+   *   3. TRACKING — -0.028em against 0, which removes 1.12em of space from a
+   *      40-glyph line.
    *
-   * Tracking at -0.035em: a narrowed grotesk already has less sidebearing, so
-   * this is about as tight as it goes before the counters start closing up.
+   * `wdth: 82`, not the 90 that was here. Archivo's 90/-0.035em was measured on
+   * Plex before it was rejected: "Your market." at 120px sets 638.3px in Plex
+   * 90/600/-0.035em against Archivo's 585.3px, +9.0%, and at that size the track
+   * closes Plex's horizontally-cut apertures. 82/600/-0.028em sets the same line
+   * at 626.8px, +7.1%. Plex is simply wider — even at its 75 floor with -0.032em
+   * it sets 602.2px, +2.9% — so Archivo's line length is not reproducible at any
+   * setting on this axis, and 7.1% is the accepted price rather than a miss.
+   *
+   * Weight 600, not 800, unchanged and for the unchanged reason: heavy grotesks
+   * read as advertising. This is unmistakably the loudest thing on the page and
+   * still sounds like a statement rather than a shout.
+   *
+   * Note for anyone reading a component: `tracking-[-0.045em]` utilities that
+   * sit alongside `.display` in the tree are DEAD. Verified in the built
+   * stylesheet, not assumed: the utilities layer opens at byte 8358, Tailwind
+   * emits `.tracking-\[-0\.045em\]` at 25689, and this hand-written block lands
+   * at 45105 — same layer, same (0,1,0) specificity, later source position, so
+   * `.display` wins. They were already inert before this change; the tracking
+   * that renders is the one declared here.
+   */
+  /*
+   * ── A HAND-CUT OPTICAL LADDER, BECAUSE PLEX HAS NO `opsz` AXIS ─────────────
+   *
+   * `.display` and `.display-lead` are the same voice at two optical sizes, and
+   * the split is not a refinement — one coordinate serving both was a defect.
+   *
+   * The numbers: `.display` is asked for by `SectionShell`'s `minor` step at
+   * clamp(1.75rem, 2.6vw, 2.25rem) — 28px — and, before this, by the Hero H1 at
+   * clamp(3.25rem, 8vw, 7.5rem) — 120px. A 4.3x size range on one setting, and
+   * Plex ships no optical-size axis to absorb it, so the compensation a
+   * variable face would normally make has to be cut by hand or not made at all.
+   *
+   * It fails in opposite directions at the two ends, which is why a single
+   * compromise value cannot exist:
+   *
+   *   · At 28px, `wdth 82` with -0.028em closes Plex's counters and crowds its
+   *     flared humanist terminals. A subhead set at a headline's condensation
+   *     reads cramped, and cramped reads cheap.
+   *   · At 120px on a near-black ground, weight 600 blooms. Emissive dark
+   *     surfaces optically add weight, so the largest size is the one that needs
+   *     LESS of it, not more — and it can afford more condensation and tighter
+   *     tracking precisely because the line is long enough to carry them.
+   *
+   * So width and tracking come BACK at small sizes and weight comes DOWN at
+   * large ones. `.display` relaxes to 90/620/-0.018em; `.display-lead` takes
+   * 82/580/-0.034em. Both stay unmistakably the display voice against body text
+   * at 100/400/0 — the three separators named above all survive at both ends.
    */
   .display {
     font-family: var(--font-display);
     font-variation-settings:
       'wdth' 90,
-      'wght' 600;
-    letter-spacing: -0.035em;
+      'wght' 620;
+    letter-spacing: -0.018em;
     text-wrap: balance;
   }
 
   /*
-   * The page's one serif moment: the closing statement. Set at a lighter weight
-   * than the surrounding grotesk, because an old-style serif at 500 already
-   * carries more presence per pixel than Archivo at 600.
+   * The two largest steps only: the Hero H1 and `MediaSection`'s `tall`. If a
+   * third call site wants this, check its rendered size first — below about
+   * 56px the tracking starts eating the counters this exists to protect.
    */
-  .display-serif {
-    font-family: var(--font-serif);
+  .display-lead {
+    font-family: var(--font-display);
     font-variation-settings:
-      'opsz' 72,
-      'wght' 380;
-    letter-spacing: -0.02em;
+      'wdth' 82,
+      'wght' 580;
+    letter-spacing: -0.034em;
+    text-wrap: balance;
+  }
+
+  /*
+   * The closing statement — the page's one change of register, and it is no
+   * longer a change of FAMILY.
+   *
+   * This was `.display-serif` and it set Newsreader. Both are gone: a class
+   * named after a serif that sets no serif is exactly the falsified name this
+   * codebase bans, so the class is renamed with the face
+   * (MediaSection's `voice="serif"` becomes `voice="quiet"` with it).
+   *
+   * What marks it instead: the page's display voice is DEFINED by three moves —
+   * condense, weight up, track in — and the closing statement inverts all three
+   * at once, in the same family, at the opposite corner of it. wdth 100 against
+   * display's 82, wght 300 against 600, +0.01em against -0.028em. A reader does
+   * not need to name the axis to feel that the page has stopped shouting; it is
+   * the same voice speaking quietly, which suits a closing line better than a
+   * borrowed one ever did.
+   *
+   * It does not re-rag, which is why this is a swap and not a layout change:
+   * "Start with what / you have today" at 56px sets two lines of 374.0/370.5px
+   * in Plex 100/300 against Newsreader's 381.5/377.6px — the same break — inside
+   * the copy column at every width the page uses (504/576/608px). The block
+   * grows 18px because 1.24 leading replaces 1.08.
+   *
+   * `line-height` is declared here deliberately, and it wins where it has to.
+   * `SCALE[step]` in SectionShell ships `leading-[1.08]`, a Tailwind utility at
+   * (0,1,0) emitted at byte 24964 of the built stylesheet against this block's
+   * 45233 — same layer, later source, so this takes it. 1.08 is display leading;
+   * a quiet sentence at display size needs air, and 1.24 is where it stops
+   * reading as a headline.
+   */
+  .display-quiet {
+    font-family: var(--font-display);
+    font-variation-settings:
+      'wdth' 100,
+      'wght' 300;
+    letter-spacing: 0.01em;
+    line-height: 1.24;
     text-wrap: balance;
   }
 
@@ -501,22 +1051,56 @@
    * the page is already near — for decoration, at the very bottom, where it
    * competes with nothing. Same chromatic language, none of the cost.
    *
-   * The banding is four identical cycles of dim → alloy → specular → soft → dim
-   * across a `200%` background, and both numbers are load-bearing.
+   * Every stop below is a stop of the spec's own copper ramp — `--coral-grad` in
+   * design-suite `src/tokens.css`, `METAL.coral` in `src/logos.tsx` — TILED
+   * rather than reordered. The spec ships it as a single six-stop 104deg pass
+   * because it is painted into a 64px mark; at wordmark scale one pass is a wide
+   * monotonic ramp, which is the failure described below. So the source's order
+   * is kept and the cycle is repeated.
    *
-   * Four, because a wide monotonic ramp does not read as metal. The first attempt
-   * ran one long dim-to-bright pass at `300%`, so the visible window only ever
-   * held a single gradient direction — which renders as grey text with a
-   * highlight at one end, not as a polished surface. Metal reads as metal because
-   * several speculars and several shadows are in frame at once. At `200%` the
-   * visible window is exactly half the background, so two full cycles are always
-   * on screen.
+   * KEEPING THE SOURCE ORDER IS THE WHOLE POINT, and the version that was here
+   * before got it wrong in a way that is only visible when measured. It ran five
+   * stops ranked by luminance — dim, mid, specular, alloy, shadow — which puts
+   * exactly ONE highlight in a cycle. §17 says a metal reads by TWO. Measured Y
+   * of the six source stops in source order: dim #A84A30 0.1344, highlight-1
+   * #FFD9C6 0.7496, alloy #FF9E7A 0.4712, VALLEY #B4553A 0.1651, highlight-2
+   * #FFC8B0 0.6570, dim-return #C4674A 0.2193. Highlight-1 -> valley is
+   * −0.5846 Y and valley -> highlight-2 is +0.4920 Y: that trough is the
+   * struck-metal structure, and it is precisely the stop a luminance ranking
+   * deletes as redundant. It is not redundant — dropping #B4553A merges the two
+   * highlights into one broad shoulder of only −0.0926 Y (a 1.131:1 step), which
+   * is flatter than the shoulder it was dropped to avoid. §39 names the two
+   * highlight positions at 26% and 88% with the valley at 66%; the source order
+   * keeps all three, a ranking keeps none.
    *
-   * And because the cycles are identical, travelling `0% → 100%` — which for a
-   * background wider than its box means exactly one box-width of overflow, so
-   * exactly two cycles — lands on a state indistinguishable from the start. The
-   * loop is seamless by construction rather than by a long duration hiding the
-   * seam.
+   * Internal span 4.3374:1 (#FFD9C6 over #A84A30), clear of §39's ≥4:1 floor.
+   * The ramp is also measurably kinder on the ground than the platinum it
+   * replaces: its darkest stop is 3.5078:1 on #0A0808 where platinum's dim was
+   * 2.9855:1 on #050505.
+   *
+   * TWO cycles, not four, and that is a density measurement rather than a
+   * preference. With `background-size: 200%` the visible window is exactly half
+   * the background, so N cycles over the background puts N highlights in frame.
+   * The platinum incumbent had five stops with one highlight each at four cycles
+   * — 2 highlights in frame. Six stops with two highlights each at four cycles
+   * would put 4 in frame, and on a wordmark measuring 1017.7px at a 1440px
+   * viewport that is a specular every ~254px, roughly one per 2.7 glyphs, which
+   * reads as ripple rather than as metal. Two cycles holds the incumbent's
+   * ~509px pitch and shows exactly the two highlights and the valley §17 asks
+   * for.
+   *
+   * The positions keep the source's own rhythm rather than spacing evenly:
+   * METAL.coral's stops sit at 0/26/46/66/88/100 and its shortest interval is
+   * the final 12 units, so the wrap back to the dim is given that same 12 units.
+   * The cycle is therefore 112 source units mapped onto 50% — 0, 11.61, 20.54,
+   * 29.46, 39.29, 44.64, and the same again from 50%.
+   *
+   * SEAMLESS BY CONSTRUCTION, unchanged and still the reason for `200%`: the
+   * colour at 0%, 50% and 100% is the same stop, and travelling
+   * `background-position: 0% -> 100%` over a background twice the box width
+   * moves exactly one box width, which is exactly one cycle. The loop closes on
+   * a state indistinguishable from the start rather than on a long duration
+   * hiding a seam.
    *
    * 100deg rather than 90: a highlight raking slightly across the letterforms is
    * what a curved surface does under a moving light. A vertical band reads as a
@@ -525,27 +1109,20 @@
   .chromatic-text {
     background-image: linear-gradient(
       100deg,
-      /* cycle 1 */ #565b64 0%,
-      #a9aeb8 6.25%,
-      #ffffff 10%,
-      #c3c8d2 13.75%,
-      #6f747e 18.75%,
-      #565b64 25%,
-      /* cycle 2 */ #a9aeb8 31.25%,
-      #ffffff 35%,
-      #c3c8d2 38.75%,
-      #6f747e 43.75%,
-      #565b64 50%,
-      /* cycle 3 */ #a9aeb8 56.25%,
-      #ffffff 60%,
-      #c3c8d2 63.75%,
-      #6f747e 68.75%,
-      #565b64 75%,
-      /* cycle 4 */ #a9aeb8 81.25%,
-      #ffffff 85%,
-      #c3c8d2 88.75%,
-      #6f747e 93.75%,
-      #565b64 100%
+      /* cycle 1 — dim · highlight-1 · alloy · valley · highlight-2 · dim-return */
+      #a84a30 0%,
+      #ffd9c6 11.61%,
+      #ff9e7a 20.54%,
+      #b4553a 29.46%,
+      #ffc8b0 39.29%,
+      #c4674a 44.64%,
+      /* cycle 2 */ #a84a30 50%,
+      #ffd9c6 61.61%,
+      #ff9e7a 70.54%,
+      #b4553a 79.46%,
+      #ffc8b0 89.29%,
+      #c4674a 94.64%,
+      #a84a30 100%
     );
     background-size: 200% 100%;
     background-position: 0% 50%;
@@ -559,12 +1136,93 @@
    * Reduced motion keeps the metal and drops the travel. A static gradient is
    * still a polished surface; a still frame of one is not a loss of meaning,
    * because the mark never carried meaning through its movement.
+   *
+   * The frame is chosen by arithmetic, and it moves with the ramp. At position p
+   * the visible window covers background [p/200, p/200 + 0.5]. The old 22% gave
+   * [11%, 61%], which put the five-stop ramp's single specular (then at 10%) on
+   * the left edge. Against the tiled six-stop ramp, 12% gives [6%, 56%] — which
+   * holds highlight-1 (11.61%), the valley (29.46%) and highlight-2 (39.29%)
+   * inside the frame. A still of a metal has to show the same two highlights the
+   * moving version does, or it is a still of a gradient.
    */
   @media (prefers-reduced-motion: reduce) {
     .chromatic-text {
       animation: none;
-      background-position: 22% 50%;
+      background-position: 12% 50%;
     }
+  }
+
+  /*
+   * The brand lockup: mark plus wordmark, travelling as one object.
+   *
+   * `.thinq-mark` animates continuously (thinking rhythm: d2 → d1 → ring climb).
+   */
+  .thinq-mark .d2 {
+    animation: thinking 1.25s ease-in-out infinite;
+  }
+
+  .thinq-mark .d1 {
+    animation: thinking 1.25s ease-in-out 0.16s infinite;
+  }
+
+  .thinq-mark .ring {
+    animation: thinking-ring 1.25s ease-in-out 0.32s infinite;
+  }
+
+  /*
+   * Reduced motion holds the mark at rest rather than at an arbitrary frame.
+   */
+  @media (prefers-reduced-motion: reduce) {
+    .thinq-mark .ring,
+    .thinq-mark .d1,
+    .thinq-mark .d2 {
+      animation: none;
+    }
+  }
+
+  /*
+   * Polished copper, as a surface rather than as a fill — the primary action's
+   * 2px rim, and the one place the brand metal is a physical object.
+   *
+   * This exists because the shader cannot produce copper on its own, and that is
+   * a property of the shader rather than a tuning problem. `liquidMetalFragmentShader`
+   * hardcodes its light and dark ends at `vec3(.98,.98,1.)` and `vec3(.1,.1,.1)`;
+   * the only hue control it exposes is `u_colorTint`, applied as a colour *burn*,
+   * which can only darken and holes any channel below 0.9 out to black (see
+   * `LiquidMetalSurface`). Copper's green and blue sit at 0.62 and 0.48. So the
+   * shader can be given a warm bias in its shadows and nothing more — fed the
+   * brand hex directly it renders a red-black smear, and fed a safe near-white it
+   * renders silver. Shipped as-is it rendered silver, on the one control the
+   * whole palette change is supposed to be visible on.
+   *
+   * The spec hits the same wall from the other side and says so: `metallic.tsx`
+   * notes that "tint only steers the shader; the light and dark ends drive most
+   * of the perceived hue", and it has a shader that exposes those ends. This one
+   * does not. So the ends move to CSS — the ramp *is* the metal, and the shader
+   * modulates it with `mix-blend-overlay` rather than replacing it.
+   *
+   * The stops are the spec's own `--coral-grad` / `METAL.coral`, single-pass at
+   * 104deg exactly as the spec ships them. `.chromatic-text` tiles the identical
+   * six stops in the identical order twice, because a wordmark is wide enough
+   * that one pass reads as a gradient; a 2px rim is narrow enough that one pass
+   * reads as a lit edge, which is what the spec built it for. So the page has
+   * ONE copper ramp in two presentations — tiled for the wordmark, one pass for
+   * the rim — rather than two orderings of the same six colours.
+   *
+   * It stands on its own with no shader at all — a static polished ring rather
+   * than the flat token fill that was there before — which matters more than it
+   * sounds, because that is what a refused WebGL context now degrades to.
+   */
+  .surface-copper {
+    background-image: linear-gradient(
+      104deg,
+      #a84a30 0%,
+      #ffd9c6 26%,
+      #ff9e7a 46%,
+      #b4553a 66%,
+      #ffc8b0 88%,
+      #c4674a 100%
+    );
   }
 
   /*
@@ -577,9 +1235,32 @@
    * the shadow and it is a sticker. (The shadow used to be described as tinted;
    * see `--shadow-lifted` for why it is neutral now.)
    *
-   * The highlight stays 6% white at 1px, unchanged. White is neutral and the
-   * ground is neutral, so nothing about a hueless brand argues with it, and
-   * anything stronger reads as a bevel, which is a different decade.
+   * The highlight stays 6% NEUTRAL white at 1px. The reason given before —
+   * "white is neutral and the ground is neutral" — is dead, and under a warm
+   * ground it would have argued for tinting the lift copper. Two measurements
+   * say keep it white.
+   *
+   * All four figures below were RE-MEASURED against the surface that ships,
+   * #130F0E. They had been taken against #150F0D — the copper-tinted plate the
+   * surfaces note above records as rejected — so the argument was right and
+   * every number in it belonged to a value this file no longer has.
+   *
+   * First, a neutral white lift over a warm plate does not neutralise the plate,
+   * it lightens it: 6% white over `surface` #130F0E composites to #211D1C, C
+   * 0.0065 against the plate's own C 0.0071. The lift stays inside the warm
+   * neutral band the whole palette runs on (fg-muted 0.0078 to border 0.0145)
+   * and is 19.4× below the accent's 0.1263. It reads as the same material,
+   * lit — which is what an inset highlight is for.
+   *
+   * Second, the alternative was measured and it is worse than "tempting": 6%
+   * ACCENT over the same plate composites to #211814 at C 0.0165, above the top
+   * of the neutral ladder, at h 45.19° — 4.16° off the accent's own hue line,
+   * which at this chroma the eye reads as the same colour. A copper lift is not
+   * a warmer lift, it is the brand colour at low alpha, and §4 rule 1 reserves
+   * that for things you can act on. Structure is carried by neutral white lifts.
+   *
+   * The lift is 1.1404:1 against the plate. Anything stronger reads as a bevel,
+   * which is a different decade.
    */
   .card {
     border-radius: var(--radius-card);
@@ -598,6 +1279,18 @@
    * was written when this page had eight-card grids. It no longer does, so a
    * 2px rise is allowed *per card that is individually interactive*, alongside
    * the edge lighting up. Do not put this on a row in a list.
+   *
+   * The hover edge is `chrome` at 26%, which composites over `surface` to
+   * #3B3839 — 1.6426:1 against the plate, against the rest border's 1.3433:1. It
+   * is deliberately not the accent: a card is not an action, and the edge that
+   * lights on hover has to say "this is one target" without saying "you can act
+   * on this". The lift rises to 9% white, #282524, 1.2522:1. (Restated against
+   * `surface` #130F0E; #3D3838 / 1.6466 / 1.3799 / #2A2523 / 1.2543 were the
+   * same four measurements taken against the rejected #150F0D.)
+   *
+   * None of these is a 3:1 boundary and none has to be — `.card` and
+   * `.card-lift` have no live consumer today (grep: zero `className` uses in
+   * `src`), and a card seam is structure rather than a control state.
    */
   .card-lift {
     transition:
@@ -625,14 +1318,49 @@
    * to full width and weight — so the type resolves the way the field behind it
    * resolves, rather than sliding in from somewhere.
    *
+   * The animation is DECLARABLE on IBM Plex, contrary to the assumption that
+   * Plex Sans has no width axis: the `wdth.css` build imported at the top of
+   * this file carries `font-stretch: 75% 100%` and the package's `metadata.json`
+   * declares wdth 75–100. It is re-solved onto that range, not rebuilt.
+   *
+   * It does NOT currently run on the page, and the word "survives" that used to
+   * open this paragraph was overclaiming. The axis and the transition are both
+   * sound — forcing this class on and holding it walks the h1 to 75/250 in
+   * ~1.1s, sampled per frame — but `Hero`'s `useOpeningSettle` applies and
+   * removes the class inside ~10ms while the transition below is already active,
+   * so the rendered excursion is wdth 82 → 81.355 → 82. The diagnosis and the
+   * two honest repairs are written up at the `.display-settling` call site in
+   * `Hero.tsx`; this block is the start-state declaration and is not itself the
+   * defect.
+   *
+   * `wdth 75`, not the 74 that was here — and this is not a rounding. 74 is
+   * BELOW Plex's floor, so the declaration would have clamped silently and the
+   * width half of the settle would have run from 75 to 82 while the file claimed
+   * 74. 75 is not a compromise either: it is Plex's real condensed master, and
+   * `wdth` is a percentage of normal width by spec, so Archivo 74 and Plex 75
+   * are the same instruction to within one unit.
+   *
+   * `wght 250` maps by named class, not by number — 250 sits where Archivo's 340
+   * sat relative to its own Light.
+   *
+   * THE COST, measured, because it is real and should not be discovered later:
+   * "Your market." travels 565.1px -> 626.8px, +10.9%, where in Archivo it
+   * travelled 465.6px -> 585.3px, +25.7%. The settle is 43% of the gesture it
+   * was. That is the honest price of a 25-unit width axis against a 63-unit one,
+   * and the weight axis compensates as far as it can (250->580 spends 55% of
+   * Plex's range against Archivo's 340->600 at 32.5% of its). The rest end is
+   * 580, not 600: the h1 carries `.display-lead`, not `.display`. It is not
+   * faked back with `transform: scaleX()` — that distorts the stems and is worse
+   * than not animating.
+   *
    * Transitioning `font-variation-settings` re-lays-out text every frame, so it
    * is scoped hard: three short lines, desktop only, and only when motion is
    * welcome. `Hero` gates the rest.
    */
   .display-settling {
     font-variation-settings:
-      'wdth' 74,
-      'wght' 340;
+      'wdth' 75,
+      'wght' 250;
   }
 
   @media (min-width: 768px) and (prefers-reduced-motion: no-preference) {
@@ -660,19 +1388,44 @@
   /*
    * Chrome hairline — a brushed-metal edge, not a flat border. Restraint
    * matters: a metallic edge everywhere just reads as noise, so this is spent
-   * exactly once, on the Stats seam, which sits full-bleed directly on `bg`.
+   * sparingly or not at all.
    *
-   * The percentages went up because `chrome` came down. #c8ccd4 → #a9aeb8 is a
-   * 30% drop in relative luminance (0.602 → 0.422), and a 1px line at 38% of it
-   * composites to 2.12:1 on #050505 — a seam you have to hunt for, where the
-   * old value read at 2.56:1. 52% puts it at 3.08:1, which both restores the
-   * edge it was drawn with and clears the 3:1 non-text floor the old value
-   * never actually reached. The taper scales with the centre (22% → 30%) so the
-   * ratio between them is held at ~1.73; the *shape* of the fade is what this
-   * utility exists for, not any single stop.
+   * RIGHT NOW IT IS NOT SPENT ANYWHERE. This note used to say "exactly once, on
+   * the Stats seam, which sits full-bleed directly on `bg`" — the Stats band was
+   * removed from `App.tsx` (it rendered five unverifiable figures), and a grep of
+   * `className` across `src` returns zero `rule-chrome` call sites; the only
+   * remaining mentions are in prose in Pricing.tsx, Safety.tsx and MobileApp.tsx
+   * explaining why each of them does NOT use it. The utility is kept because the
+   * seam it was cut for is a real seam that will come back, and the measurements
+   * below are what to check it against when it does. It is dead code today and
+   * should be described as such rather than as a live decision.
    *
-   * Brighter is safe here: 3.08:1 still sits well over five times darker than
-   * `accent` at 16.78:1, so the machined edge cannot be read as an action.
+   * The percentages are recomputed against the chrome and the ground that
+   * actually render, because every figure that used to sit here was derived from
+   * a chrome (#c8ccd4 → #a9aeb8) and a ground (#050505) that are both gone.
+   *
+   * Measured, `chrome` #AEAEB2 over `bg` #0A0808:
+   *   30% → #3B3A3B, 1.7641:1   (the taper)
+   *   38% → #484749, 2.1624:1   — a seam you have to hunt for
+   *   52% → #5F5E60, 3.0981:1   (the centre)
+   * 52% is kept because it is the first stop that clears the 3:1 non-text floor
+   * with any margin at all, and 3.0981:1 is a margin of 0.0981. The taper scales
+   * with the centre so the ratio between them holds at 1.76; the *shape* of the
+   * fade is what this utility exists for, not any single stop.
+   *
+   * The percentages survive the ground move by 0.4%: on #050505 the same two
+   * stops read 3.1023:1 and 1.7401:1. Nothing needed retuning; the numbers
+   * needed restating.
+   *
+   * WHY BRIGHTER IS SAFE — and this is the part that changed, not the values. It
+   * used to be a luminance argument: 3.08:1 against `accent` at 16.78:1, five
+   * times darker. The accent is 9.9166:1 now, so that gap is 3.2× and far too
+   * thin to carry a rule. Luminance is not the separator any more and pretending
+   * it is would be the falsified-comment failure this file exists to avoid.
+   * CHROMA is: the 52% centre composites to C 0.0034 against the accent's
+   * C 0.1263 — 37.3× — and lands at h 308.38°, on the cool side of neutral,
+   * 267° from the accent. A machined edge on this page cannot be read as an
+   * action at any brightness, because nothing on it is warm except the action.
    */
   .rule-chrome {
     background-image: linear-gradient(
@@ -691,21 +1444,42 @@
    * DESIGN.md's Refused list bans gradient text outright — emphasis comes from
    * size and weight, and a gradient across a glyph makes the measured contrast
    * of the type a range rather than a number, so it cannot be signed off. The
-   * temptation now is a "chrome sheen" version sweeping accent through chrome;
-   * that is the same banned technique with the hue removed. Display type gets
-   * `.display` and a size step. Nothing referenced the utility.
+   * temptation now is a "copper leaf" version sweeping accent through chrome —
+   * which is the deleted utility with the hue swapped, not a different idea, and
+   * it is more tempting under a warm brand than it ever was under platinum.
+   * Display type gets `.display` and a size step. Nothing referenced the utility.
    *
-   * Brushed-metal surface for premium panels — a wash, not a colour. Subtle by
-   * design: it lies under the whole MobileApp section and under the fee plate in
-   * Pricing, in both cases over the opaque `surface` base laid down by the
-   * second gradient below.
+   * Brushed-metal surface for premium panels — a wash, not a colour. Like
+   * `.rule-chrome` above, it has NO live call site today: its only `className`
+   * use is MobileApp.tsx:122, and `App.tsx` does not import MobileApp; the fee
+   * plate it also served lives in the unmounted Pricing.tsx. Both gradients still
+   * sit over the opaque `surface` base laid down by the second one below.
    *
-   * 7% → 8% and 4% → 5% because the darker `chrome` collapsed the wash toward
-   * the plate it is meant to lift off: against `surface` #0d0d10 the red-channel
-   * delta fell to (169−13)/(200−13) = 0.83 of what it was, on a treatment that
-   * was already at the threshold of visible. The bump restores the delta it was
-   * drawn with. It is deliberately not more than that — this is a sheen, and
-   * anything readable as a gradient panel is a different, worse idea.
+   * The 8% / 5% percentages hold, and the red-channel derivation that used to
+   * justify them is retired rather than adjusted — it was a proxy for a
+   * platinum chrome over a blue-black plate, and both terms have changed. The
+   * direct measurement is simpler and is what to check against.
+   *
+   * These figures were RECOMPUTED after the warm neutrals moved onto the
+   * ground's hue: they had been derived against `surface` #150F0D, which is the
+   * value this change rejected as a copper-tinted plate (h 39.26°, Δ8 — see the
+   * surfaces note above). Against the surface that actually renders, #130F0E:
+   *
+   *   chrome #AEAEB2 at 8% over `surface` #130F0E → #1F1C1B, 1.1250:1
+   *   chrome #AEAEB2 at 5% over `surface` #130F0E → #1B1716, 1.0711:1
+   *
+   * For lineage: the same 8% over the outgoing #0d0d10 read 1.1176:1, so the
+   * warm plate makes the wash 0.7% *stronger*, not weaker. Nothing to restore.
+   * It is deliberately no more than this — a sheen, and anything readable as a
+   * gradient panel is a different, worse idea.
+   *
+   * One thing worth checking rather than assuming: a neutral-steel wash over a
+   * warm plate does not tip the plate cool. At 8% the composite is C 0.0051
+   * against the plate's C 0.0071 — 0.0020 of chroma removed, well under any
+   * noticeable difference — and at C 0.0051 / h 39.38° the composite still
+   * carries more chroma than the ground it sits on (C 0.0038, h 17.62°). The
+   * previous figures here (C 0.0087 against 0.0110) were the same measurement
+   * taken against the rejected #150F0D plate.
    */
   .surface-chrome {
     background-image:
@@ -719,13 +1493,29 @@
   }
 }
 
-@media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-    scroll-behavior: auto !important;
-  }
-}
+/* ---------------------------------------------------------------------------
+   The blanket reduced-motion reset was DELETED here, and it is not coming back.
+
+   It read `*, *::before, *::after { animation-duration: 0.01ms !important }` and
+   it is the pattern that circulates with every animation library. On this page it
+   was actively destructive, because it was overriding fallbacks that had each
+   been authored deliberately — and `!important` at the universal selector wins
+   against every one of them:
+
+     · `.chromatic-text` holds a still frame at `background-position: 12% 50%`,
+       a chosen moment in the copper sweep. The reset turned it into whatever
+       frame a 0.01ms animation happens to land on.
+     · The brand mark's reduced-motion rule sets `animation: none` on the
+       thinking climb — a considered still. The reset re-ran it as a stutter
+       while appearing to have handled it.
+     · `.rule-draw` and `.focus-in` already land on their end values.
+     · The metal shader drops to speed 0, which stops its RAF entirely, and both
+       canvases render one composed still at their most-resolved moment.
+
+   The distinction the blanket rule cannot make: reduced motion means *hold the
+   end state*, not *play the animation faster*. Forcing a considered still to
+   0.01ms replaces it with a stutter, which is strictly worse than either.
+
+   `scroll-behavior` was the one declaration worth keeping, and it has moved to
+   `html` in @layer base under its own query, where it belongs.
+   --------------------------------------------------------------------------- */

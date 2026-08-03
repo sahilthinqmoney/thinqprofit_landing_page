@@ -35,11 +35,22 @@ export const hero: HeroContent = {
    */
   /*
    * docs/art-direction.md §A1's "alt text to ship", verbatim. It replaces a
-   * string that said the edge caught *warm* light — residue from the gold
-   * palette. There is no warm light in this system: §2.4 fixes the key at 5600K
-   * and makes that a colour rule rather than a technical note, because a warm
-   * grade reintroduces the removed brand through the lighting without anyone
-   * naming a colour.
+   * string that said the edge caught *warm* light.
+   *
+   * The rule survives the copper move; its reason does not, so it is restated
+   * rather than carried. It used to be "there is no warm light in this system,
+   * because a warm grade reintroduces the REMOVED brand through the lighting
+   * without anyone naming a colour." The brand is not removed any more — it is
+   * warm by definition, and the ground itself measures OKLCH chroma 0.0038 at
+   * hue 17.6 deg.
+   *
+   * §2.4 still fixes the key at 5600K, and the reason is now the stronger one:
+   * the accent is the most saturated object in the system (chroma 0.1263 against
+   * a warm-neutral axis topping out at 0.0165), and §4 rule 1 says saturated
+   * copper means "you can act on this". A warm grade across a full-bleed plate
+   * would put the brand's own colour on 900px of photograph that cannot be acted
+   * on — the accent spent on the largest non-interactive surface on the page.
+   * Neutral plates are what leave the accent legible as the action.
    */
   mediaAlt:
     'A large brushed aluminium form curving out of darkness, lit along one edge by a single soft light.',

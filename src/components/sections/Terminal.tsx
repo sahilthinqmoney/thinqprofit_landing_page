@@ -4,7 +4,6 @@ import Button from '../ui/Button'
 import MediaSection from '../ui/MediaSection'
 import SectionShell from '../ui/SectionShell'
 import { plateImage } from '../../lib/media'
-
 import { terminalIntro, terminalSections } from '../../data/terminal'
 
 /**
@@ -55,6 +54,25 @@ import { terminalIntro, terminalSections } from '../../data/terminal'
  * buttons here would have put it at the cap, where the failure is silent — the
  * browser drops the oldest context and the hero's button quietly stops moving.
  *
+ * **Numerals: nothing in this run goes on the mono, and that is the rule, not an
+ * omission.** DESIGN.md §5 puts every numeral in IBM Plex Mono, tabular, and the
+ * page's hook for that is `.tabular`. Three of these four bodies carry figures —
+ * "a 20-EMA on the 5-minute", "best-5", "CVD" — and every one of them is a figure
+ * inside a sentence rather than a figure being displayed. IBM Plex Mono advances
+ * lowercase at 600/em against IBM Plex Sans's 504.3/em, so setting one of these
+ * lines in mono would cost 19% of its width and re-rag it inside a 9em measure to
+ * save fixed advances on two digits nobody is going to align against anything.
+ * `.tabular` belongs on figures and codes — the registration band, the rate card,
+ * the © year, the `[BRACKETED]` placeholders — and never on prose that merely
+ * contains a number. Those four are the call sites in SOURCE, and only two of
+ * them reach the page: the rate card lives in `Pricing.tsx`, which App.tsx no
+ * longer imports, and the registration band suppresses its code whenever the
+ * value is still a placeholder, which today is all five. Counted on the rendered
+ * page, `.tabular` matches 3 elements, all in the footer — the © year and two
+ * CopyText placeholders. So the contrast this note draws is real but currently
+ * one-sided: every rendered `.tabular` is a figure or a code, and these four
+ * bodies are all prose-with-a-number.
+ *
  * **The plates are placeholders in one specific sense.** They are rendered,
  * gated and shipped, and they are on-brand. But art-direction §3 permits one
  * thing they are not: a screenshot of the real product. When real captures of
@@ -95,14 +113,8 @@ export default function Terminal() {
           place={section.place}
           anchor="center"
           scale="mid"
-          /* 0.86 across all four so the run reads as one shoot. The dense core
-             moves with the copy instead — `scrimAt` is per section. */
           scrim={0.86}
           scrimAt={section.scrimAt}
-          /* These headings are short — two words a line — so the measure is not
-             what breaks them; the `\n` is. It is stated in `em` rather than px
-             because the heading is a clamp, so a px measure would be correct at
-             exactly one viewport width. */
           measure="9em"
           headline={section.heading}
           body={section.body}

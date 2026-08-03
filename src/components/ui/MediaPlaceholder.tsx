@@ -43,12 +43,12 @@ export default function MediaPlaceholder({
       role="img"
       aria-label={`Placeholder: ${label}`}
       data-pending-alt={alt ?? label}
-      className={`relative grid ${aspect} w-full place-items-center overflow-hidden rounded-2xl border border-dashed border-border bg-surface/60 ${className}`}
+      className={`relative grid ${aspect} w-full place-items-center overflow-hidden rounded-2xl border border-dashed border-accent/40 bg-surface/80 shadow-[0_0_20px_rgba(255,158,122,0.1)] ${className}`}
     >
-      {/* Diagonal hatch so the box reads as "not final" at a glance. */}
+      {/* Diagonal copper hatch overlay */}
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute inset-0 text-fg opacity-[0.07]"
+        className="pointer-events-none absolute inset-0 text-accent opacity-[0.12]"
         style={{
           backgroundImage:
             'repeating-linear-gradient(45deg, currentColor 0, currentColor 1px, transparent 1px, transparent 12px)',
@@ -56,9 +56,11 @@ export default function MediaPlaceholder({
       />
 
       <div className="relative flex flex-col items-center gap-2 px-6 text-center">
-        <Icon className="h-6 w-6 text-fg-muted" strokeWidth={1.5} aria-hidden="true" />
-        <span className="text-xs font-medium uppercase tracking-[0.18em] text-fg-muted">
-          {tag} placeholder
+        <div className="grid h-10 w-10 place-items-center rounded-full border border-accent/30 bg-accent/10 text-accent">
+          <Icon className="h-5 w-5" strokeWidth={1.5} aria-hidden="true" />
+        </div>
+        <span className="text-xs font-semibold uppercase tracking-[0.18em] text-accent">
+          {tag}
         </span>
         <span className="max-w-xs text-xs leading-relaxed text-fg-muted">{label}</span>
       </div>

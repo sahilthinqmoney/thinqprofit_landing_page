@@ -5,6 +5,13 @@ import Reveal from '../ui/Reveal'
 import SectionShell from '../ui/SectionShell'
 import { plateImage, type PlateId } from '../../lib/media'
 
+const PLATE: Record<string, PlateId> = {
+  'stocks-etfs': 'stocks',
+  'futures-options': 'derivatives',
+}
+
+const VOID = 'var(--color-bg)'
+
 /**
  * §5 Products — the half-width-cards module.
  *
@@ -37,14 +44,29 @@ import { plateImage, type PlateId } from '../../lib/media'
  * not copy, and that file is the copy deck's mirror.
  *
  * The previous briefs asked for translucent navy plates under an indigo rim
- * light and cyan filaments at the intersection. That was written for a palette
- * with hue in it. Hue is now reserved entirely for meaning — gain, loss,
- * warning — so a commissioned clip carrying indigo or cyan would put the only
- * coloured light on the page next to a legally required derivatives warning and
- * mean nothing by it. Machined aluminium in an unlit room says the same thing
- * about breadth and interlock, and says it in the material the brand is now
- * made of: depth built from a grazing key on a chamfer, never from one form
- * being a different colour from its neighbour.
+ * light and cyan filaments at the intersection. Those are still refused, but
+ * NOT for the reason this comment used to give. It said "hue is now reserved
+ * entirely for meaning — gain, loss, warning". That is false and is exactly the
+ * sentence a future reader would enforce: the brand is copper, and at OKLCH
+ * chroma 0.1263 `--color-accent` is the most saturated value on the page,
+ * 22.16× the mark metal's 0.0057.
+ *
+ * The rule that replaces it is narrower and still refuses indigo: only the
+ * ACTION is saturated copper, and the whole interface sits on one hue family.
+ * Measured, a commissioned clip in indigo or cyan would not be a second accent,
+ * it would be the OPPOSING one — a mid indigo sits 123.9° from the accent's
+ * 41.03° and a mid cyan 170.5°, where the plate's own warm face sits 3.5° — and
+ * it would put that light next to a legally required derivatives warning and
+ * mean nothing by it. Machined aluminium in an unlit
+ * room says the same thing about breadth and interlock: depth built from a
+ * grazing key on a chamfer, never from one form being a different colour from
+ * its neighbour.
+ *
+ * Measured caveat for whoever shoots these, because it is now a real gap: the
+ * ten plates already in `public/media` are pure greyscale — 0.0% of pixels with
+ * r ≠ g ≠ b, sampled off the shipped WebP — and they were graded for a neutral
+ * ground that no longer exists. A neutral plate on a ground at hue 17.6° reads
+ * cool. These clips should be graded warm to the page, not neutral to it.
  *
  * motion-brief §7 still holds: no numbers, no tickers, no chart forms, nothing
  * green or red, and no upward motion — these are level, lateral and static.
@@ -78,21 +100,6 @@ const MEDIA_BRIEF: Record<string, string> = {
  * `MediaBackdrop`'s designed field, which is the correct behaviour for the six
  * ledger products: they are deliberately not shot (§3 "not briefed here").
  */
-const PLATE: Record<string, PlateId> = {
-  'stocks-etfs': 'stocks',
-  'futures-options': 'derivatives',
-}
-
-/**
- * The letterbox ground behind every plate in the library. It is the page's own
- * ink, read from the token rather than transcribed: the hardcoded `#0B0B0D` it
- * replaces is blue-black, and it flashed as a tinted rectangle in the gap
- * before decode (docs/art-direction.md §4.2). A plate is graded to bottom out
- * on the ground so its frame edge dissolves into the page; that only works if
- * the two are the same value, which a second hex cannot guarantee.
- */
-const VOID = 'var(--color-bg)'
-
 export default function Products() {
   const featured = products.filter((product) => featuredProductIds.includes(product.id))
 

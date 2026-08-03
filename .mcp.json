@@ -1,5 +1,16 @@
 {
   "mcpServers": {
+    "glance": {
+      "type": "stdio",
+      "command": "npx",
+      "args": [
+        "-y",
+        "glance-mcp@latest"
+      ],
+      "env": {
+        "BROWSER_HEADLESS": "false"
+      }
+    },
     "21st": {
       "type": "http",
       "url": "https://21st.dev/api/mcp",

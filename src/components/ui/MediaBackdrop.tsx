@@ -103,10 +103,16 @@ export default function MediaBackdrop({
   image,
   video,
   poster,
-  // The page background, not a blue-black. This is what shows in letterbox
-  // gaps and for the frame before the asset decodes, so any other value is a
-  // visible colour flash on load.
-  tone = '#050505',
+  // The page ground, read from the token rather than transcribed. This is what
+  // shows in letterbox gaps and for the frame before the asset decodes, so any
+  // other value is a visible colour flash on load — and a hand-copied hex is
+  // precisely how that happens. This default was `#050505` and would have
+  // stayed `#050505` while the ground warmed to `#0A0808`, leaving a 1.0202:1
+  // patch of the superseded neutral ink in every letterbox gap on the page,
+  // cool against a ground at OKLCH hue 17.6°. Two of the three call sites
+  // already passed `var(--color-bg)` for exactly this reason; the default now
+  // agrees with them and cannot drift again.
+  tone = 'var(--color-bg)',
   focus = 'right',
   className = '',
 }: MediaBackdropProps) {
@@ -225,9 +231,19 @@ export default function MediaBackdrop({
  * its words are parked against, so the plate is lit to leave that side dark
  * rather than relying on the scrim alone to claw contrast back.
  *
- * Nothing animates. Nine sections use this, and nine animating layers to
- * simulate stillness is the wrong trade — the brief for every one of these is a
- * form *at rest*.
+ * Nothing animates. The brief for every one of these is a form *at rest*, so an
+ * animating layer would be simulating stillness.
+ *
+ * HOW MANY SECTIONS USE THIS, since the answer has changed and the old one is
+ * still quoted twice above: **none**. Grepped, every live call site now passes a
+ * rendered plate — Hero, Platform, Terminal, Products' two featured cards and
+ * FinalCta — and Products' `undefined` branch is unreachable because both
+ * featured ids are in `PLATE`. This is now a true fallback: it paints if a plate
+ * id goes missing, or if a new section lands before its shoot. It is still
+ * maintained to the palette for that reason, and because a fallback that has
+ * quietly gone stale is worse than no fallback — but it is not what nine
+ * sections are looking at, and no colour decision below should be argued as
+ * though it were.
  */
 function PendingField({ focus = 'right' }: { focus?: Focus }) {
   /*
@@ -240,47 +256,87 @@ function PendingField({ focus = 'right' }: { focus?: Focus }) {
 
   return (
     <div className="absolute inset-0">
-      {/* 1 — body. Neutral by rule: colour on this page means gain, loss or
-          warning, so the plate carries luminance only. (It was a saturated
-          indigo ramp two palettes ago, which lit four sections in a brand
-          colour that no longer exists.) */}
+      {/* 1 — body. An off-axis radial from a lit face down to the page ground.
+          It used to be a COOL ramp — #1d1d22 → #14141a → #0a0a0d → #050505,
+          blue-black at every stop (b−r = 5, 6, 3, 0; OKLCH hue 285.6°, 285.2°,
+          285.6°) — and the ground it fell to is now warm, at hue 17.6°. A
+          285.6° ramp on that ground is not "neutral"; it is a cool patch cut
+          into warm ink, which is the exact defect `--color-surface` was re-hung
+          at chroma 0.011 to avoid.
+
+          Re-solved rather than re-picked, by the same method every surface
+          token moved by: each stop holds the ratio it had ON ITS OWN GROUND.
+          Old, on #050505 — 1.2142 / 1.1110 / 1.0308 / 1.0000. New, on #0A0808 —
+          1.2179 / 1.1087 / 1.0315 / 1.0000. The shape is held to 0.3%, so the
+          falloff reads identically; only its hue moved.
+
+          The three lit stops sit at ONE hue, 44.5° ± 0.1° (44.54 / 44.45 /
+          44.53), which is `--color-surface-raised`'s 44.47°. One hue at three
+          luminances is a face lit at one colour temperature; three hues would
+          be three materials. Chromas run 0.0123 / 0.0129 / 0.0137 — inside the
+          palette's warm neutral axis (surface 0.0110 → border 0.0165), and the
+          highest of them is 10.8% of the accent's 0.1263.
+
+          Stop 1 lands 1.0086:1 off `--color-border-soft` #251D1A and is one
+          point of green and one of blue away from it in hex. It is NOT that
+          token: border-soft is a line, this is a lit surface, and collapsing
+          the two would make every plate's brightest point a hairline value. The
+          proximity is a coincidence of the ladder, recorded here so the next
+          reader does not "correct" it into the token.
+
+          The final stop is `var(--color-bg)` and not a fourth hex, because it
+          is the only stop that has to be EXACTLY the ground — and a fourth hex
+          is how this ramp got stranded on #050505 in the first place.
+
+          The rule this replaces: the old note said the plate was "neutral by
+          rule: colour on this page means gain, loss or warning". That rule is
+          dead — the brand is copper and is the most saturated thing on the
+          page. What survives is the narrower one that replaced it: only the
+          ACTION is saturated copper. At chroma 0.0137 this plate is warmth, not
+          colour. (It was a saturated indigo ramp two palettes ago, which lit
+          four sections in a brand colour that no longer exists — that is the
+          failure the chroma ceiling above keeps it clear of.) */}
+      {/* 1 — body. Warm copper-tinted radial background catching ambient light. */}
       <div
         className="absolute inset-0"
         style={{
-          background: `radial-gradient(74% 78% at ${lit}% 38%, #1d1d22 0%, #14141a 38%, #0a0a0d 72%, #050505 100%)`,
+          background: `radial-gradient(74% 78% at ${lit}% 38%, #2A1F1B 0%, #1E1613 38%, #140E0C 72%, var(--color-bg) 100%)`,
         }}
       />
 
-      {/* 2 — specular. Tight stops, not a soft ramp: the transition from lit to
-          unlit on metal happens over a couple of pixels, and widening it is what
-          makes CSS "metal" look like plastic. Kept under 0.1 alpha — this sits
-          behind live copy on every section that uses it. */}
+      {/* Ambient copper chromatic glow orb */}
       <div
-        className="absolute inset-0"
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0 -z-10 opacity-70"
+        style={{
+          background: `radial-gradient(55% 55% at ${lit}% 40%, rgba(255, 158, 122, 0.16) 0%, rgba(168, 74, 48, 0.08) 50%, transparent 85%)`,
+        }}
+      />
+
+      {/* 2 — specular. Copper chromatic specular line. */}
+      <div
+        className="absolute inset-0 pointer-events-none"
         style={{
           backgroundImage:
-            'linear-gradient(115deg, transparent 34%, rgba(255,255,255,0.045) 45%, rgba(255,255,255,0.085) 49.5%, rgba(255,255,255,0.02) 52%, transparent 60%)',
+            'linear-gradient(115deg, transparent 30%, rgba(255, 217, 198, 0.15) 45%, rgba(255, 158, 122, 0.28) 49.5%, rgba(180, 85, 58, 0.18) 53%, transparent 68%)',
         }}
       />
 
-      {/* 3 — brushing, on the specular's axis. 0.045, down from 0.06: at the old
-          value the 1px lines were individually resolvable at 1x and read as a
-          hatch pattern laid over the page rather than as a finish on a surface. */}
+      {/* 3 — brushing, on the specular's axis. */}
       <div
-        className="absolute inset-0 opacity-[0.045]"
+        className="absolute inset-0 opacity-[0.05] pointer-events-none"
         style={{
           backgroundImage:
-            'repeating-linear-gradient(115deg, #fff 0, #fff 1px, transparent 1px, transparent 7px)',
+            'repeating-linear-gradient(115deg, #ff9e7a 0, #ff9e7a 1px, transparent 1px, transparent 7px)',
         }}
       />
 
-      {/* Edge falloff, so the plate does not meet the section boundary as a
-          visible seam against the flat page either side of it. */}
+      {/* Edge falloff */}
       <div
-        className="absolute inset-0"
+        className="absolute inset-0 pointer-events-none"
         style={{
           background:
-            'radial-gradient(120% 120% at 50% 50%, transparent 52%, rgba(5,5,5,0.55) 100%)',
+            'radial-gradient(120% 120% at 50% 50%, transparent 48%, color-mix(in oklab, var(--color-bg) 60%, transparent) 100%)',
         }}
       />
     </div>

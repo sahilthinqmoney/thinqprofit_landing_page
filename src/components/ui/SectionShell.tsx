@@ -6,6 +6,12 @@ import FocusPull from './FocusPull'
  * Heading steps. Assignment is by the section's weight in the page, not by
  * taste at each call site:
  *
+ *   hero     — the H1, and it is not assignable to a section (see the prop type
+ *              below). It lives here because §45 asks that every rendered size
+ *              resolve to a named role, and the page's largest type was the one
+ *              size that named none: `Hero` hand-wrote its clamp inline, and
+ *              `Platform` hand-wrote a copy of `lead`'s while its own comment
+ *              claimed to match it. One ladder, three consumers, no raw px.
  *   lead     — the three sections a visitor came for: what you trade, what it
  *              costs, how you open an account.
  *   standard — everything else that is a section in its own right.
@@ -20,13 +26,59 @@ import FocusPull from './FocusPull'
  * deck, a ratio of 1.56, so on the two widths most people actually use, a
  * section title was barely a step above its own standfirst. Every floor here is
  * set so title:deck clears 2.0 at 375px, which is the width where it was worst.
+ *
+ * SIZES ARE UNCHANGED BY THE MOVE TO IBM PLEX. LEADING IS NOT, and the +0.04em
+ * every step below takes is a measurement rather than a preference.
+ *
+ * What a reader sees as the leading of a display block is not the line-height,
+ * it is the gap between one line's lowest ink and the next line's highest.
+ * Measured on the real woff2 at weight 600, the ascender-to-descender ink span
+ * is 0.952em in IBM Plex Sans against 0.913em in Archivo — Plex's ascenders run
+ * 0.740em to Archivo's 0.723em and its descenders 0.212em to 0.182em. So at an
+ * unchanged line-height every display block on the page closes up by 0.039em.
+ * At `lead`'s 64px ceiling that is 2.5px off an 8.1px gap: a 31% loss, which is
+ * plainly visible in stacked type and is the difference between "tight" and
+ * "touching". Every step therefore gains 0.04em, which is a translation of the
+ * whole ladder — the intervals between the steps are untouched, and leading
+ * still opens as size drops.
+ *
+ * Checked against the mounted headings rather than against the font tables
+ * alone. Worst real pair at `lead` is Products' "One account, every Indian /
+ * market": Archivo gave 8.64px of ink gap, Plex at the old 1.04 gives 6.40px,
+ * Plex at 1.08 gives 8.96px. Worst at `mid` (MediaSection) is "The copilot /
+ * has hands": 10.30px → 7.84px → 10.08px. Across every mounted pair the
+ * correction lands within −0.22px and +2.4px of what Archivo delivered.
+ *
+ * The DECK below does not move, and that is the same measurement run on the
+ * body face. Instrument Sans' 400-weight ink span is 0.955em against Plex's
+ * 0.952em — Plex is marginally SHALLOWER at text weight — so the deck's 17px/1.6
+ * goes from a 10.96px gap to 11.02px, a gain of 0.06px. The two rules that could
+ * justify a change disagree about its direction (holding the ink gap gives 1.597,
+ * holding the x-height-to-leading ratio gives 1.6188) and both sit inside the
+ * 0.02 grid this page expresses. 1.6 stands.
  */
-const SCALE = {
+export const SCALE = {
+  /*
+   * The H1. `Hero` owns the argument for the clamp; this owns the name.
+   *
+   * 0.94 is NOT this step's rendered leading and must not be "corrected" to
+   * match the others. `Hero` sets each line in its own block with a
+   * `pb-[0.14em]` clip allowance, and that padding sits inside the clip box, so
+   * the baseline-to-baseline distance is 0.94 + 0.14 = 1.08em — the same
+   * +0.04em every step here takes, off a previous rendered 1.04em (0.98 + 0.06).
+   * The pair is solved jointly against Plex's 1.300em hhea box so the descender
+   * of "y" is not shaved; the arithmetic is written out at the call site.
+   */
+  hero: 'text-[clamp(3.25rem,8vw,7.5rem)] leading-[0.94]',
   // Matches `MediaSection`'s `tall` exactly, so a flat lead section and a
-  // full-bleed one carry the same rank rather than competing.
-  lead: 'text-[clamp(2.5rem,4.6vw,4rem)] leading-[1.04]',
-  standard: 'text-[clamp(2.125rem,3.9vw,3.25rem)] leading-[1.1]',
-  minor: 'text-[clamp(1.75rem,2.6vw,2.25rem)] leading-[1.16]',
+  // full-bleed one carry the same rank rather than competing. Both moved to
+  // 1.08 together; if one of them is ever edited alone the ladder is broken.
+  // `Platform` is the third consumer and now imports this constant instead of
+  // transcribing it — it had already drifted twice as a hand-copy, most
+  // recently by staying at 1.04 through the move to Plex.
+  lead: 'text-[clamp(2.5rem,4.6vw,4rem)] leading-[1.08]',
+  standard: 'text-[clamp(2.125rem,3.9vw,3.25rem)] leading-[1.14]',
+  minor: 'text-[clamp(1.75rem,2.6vw,2.25rem)] leading-[1.2]',
 } as const
 
 /**
@@ -83,8 +135,15 @@ interface SectionShellProps {
    * `centered` for a section that is genuinely one centred statement.
    */
   centered?: boolean
-  /** Heading step. See SCALE — assign by the section's weight, not by feel. */
-  scale?: keyof typeof SCALE
+  /**
+   * Heading step. See SCALE — assign by the section's weight, not by feel.
+   *
+   * `hero` is excluded in the type, not merely by convention: it is the H1's
+   * step, there is one H1, and a section that reaches for it is claiming to
+   * outrank the page's opening statement. The exclusion is what lets `hero`
+   * live on the shared ladder without becoming assignable.
+   */
+  scale?: Exclude<keyof typeof SCALE, 'hero'>
   /**
    * Fill the viewport and centre the content vertically.
    *
@@ -164,8 +223,27 @@ export default function SectionShell({
 
             The subheading sits in a reading measure even when the rail is wide —
             a single sentence set across 1344px is not a sentence.
+
+            `40em` (640px), up from 38em (608px), and it is the one layout number
+            IBM Plex forces. Plex sets 3–5% wider than Archivo at the same step,
+            and Terminal's H2 — "What the terminal does,\nand what it admits" at
+            `lead`'s 64px ceiling — crosses the old measure by 13.7px: line 1 sets
+            584.4px in Archivo and 621.7px in Plex against 608px, so it broke to
+            THREE lines, ragging as "What the / terminal does, / and what it
+            admits" and taking the block from 133.1px to 207.3px. The axis cannot
+            absorb it: Plex only fits 608px at wdth ≤ 77, which would spend the
+            whole of the hero's settle range to save one heading. So the measure
+            moves and the type does not.
+
+            Verified inert everywhere else, at both widths, in Plex: Products
+            ("One account, every Indian market") holds 2 lines at 496.8/369.7px,
+            Safety ("Your money and your shares stay yours") holds 2 at
+            547.0/450.6px, and Terminal now fits at 621.7px with 18.3px of slack.
+            The deck is untouched by the change because its own `max-w-[30em]`
+            (480px) already binds well inside both — so this widens the heading
+            and nothing else, and the deck needs no cap of its own.
           */}
-          <FocusPull className={`max-w-[38em] ${centered ? 'mx-auto text-center' : ''}`}>
+          <FocusPull className={`max-w-[40em] ${centered ? 'mx-auto text-center' : ''}`}>
             {/*
               `md:whitespace-pre-line` so a `\n` in a heading string is honoured
               here exactly as it is in `MediaSection`. DESIGN.md §3 states that as

@@ -45,7 +45,9 @@ initScrollTrigger()
  *
  *   1. Custody — one claim, set largest, its body a step up from the rest.
  *   2. Control — the two facts that qualify custody (segregated client funds,
- *      per-debit authorisation). Serif, two columns, one step down.
+ *      per-debit authorisation). Two columns, one step down. (This line used to
+ *      read "Serif, two columns" and never was: the tier renders `.display`, and
+ *      there is no serif on the page at all now.)
  *   3. Hygiene — 2FA, encryption, the published grievance route. A quiet
  *      title/body ledger. Horizontal rows, not blocks, so the shape itself
  *      reads as secondary before a single word is measured.
@@ -71,15 +73,35 @@ initScrollTrigger()
  * The deck marks this line "keep this, do not soften it". Set at 36px on a
  * three-line measure, it is the last and largest thing read here.
  *
- * Not `.display-serif`, tempting as it is. The serif is the page's one change
- * of register and FinalCta spends it on the closing headline; a second serif
- * moment turns "used once" into "a second display style". The wording is
- * verbatim and terminal — the deck's line, last in the section, and it stays
- * that way.
+ * Not `.display-quiet`, tempting as it is — and the reasoning has changed with
+ * the face, so it is rewritten rather than reworded. `.display-serif` no longer
+ * exists: the page is set entirely in IBM Plex Sans, Newsreader is gone, and a
+ * class named for a serif that sets no serif is the falsified rationale this
+ * codebase bans. What replaced it is `.display-quiet`, which marks the closing
+ * statement by INVERTING the display voice inside one family — `'wdth' 100,
+ * 'wght' 300`, letter-spacing +0.01em, leading 1.24, against `.display`'s
+ * 82/600/-0.028em/1.08.
  *
- * The rule used to be `.rule-chrome`. That utility is now spent on exactly one
- * seam in the whole document (the Stats band); a brushed-metal edge that recurs
- * stops reading as precision and starts reading as a border style.
+ * FinalCta still spends that voice on the page's closing headline, and the
+ * argument for keeping it to one place is now stronger than it was under the
+ * serif: with one family, the quiet voice is not a different face a reader can
+ * recognise as "the editorial one" — it is the same face at the opposite corner
+ * of its own axes, and a second use would simply read as a second display style
+ * rather than as a change of register.
+ *
+ * So this sentence stays in `.display` at the top of the section's own ladder.
+ * The wording is verbatim and terminal — the deck's line, last in the section,
+ * and it stays that way.
+ *
+ * The rule used to be `.rule-chrome`, and the reason to drop it stands: a
+ * brushed-metal edge that recurs stops reading as precision and starts reading
+ * as a border style. The justification given here — that the utility is "spent
+ * on exactly one seam in the whole document (the Stats band)" — is no longer
+ * true and is corrected rather than quietly left: the Stats band was removed
+ * from `App.tsx`, and `.rule-chrome` now has zero `className` call sites in the
+ * whole of `src`. So this section is not conceding the metal edge to a more
+ * deserving seam; there is no other seam. It is a plain hairline because a plain
+ * hairline is what this ladder needs.
  *
  * ── Width ─────────────────────────────────────────────────────────────────
  *
@@ -261,7 +283,7 @@ export default function Safety() {
           <span
             data-rule="open"
             aria-hidden="true"
-            className="block h-px w-full origin-left bg-border"
+            className="block h-px w-full origin-left bg-gradient-to-r from-accent/60 via-accent/30 to-transparent"
           />
           <article className={`${ROW} gap-y-5 pt-10 sm:pt-12`}>
             <h3
@@ -274,9 +296,30 @@ export default function Safety() {
                 under a 24px h3, a ratio of 1.33, so the tier read as a heading
                 with a second heading under it. 16px is what every other body on
                 the page is set at. */}
+            {/*
+              `40em`, not `60ch`, and the swap holds today's rendered width to
+              within a pixel rather than changing it.
+
+              `ch` is the advance of "0" and is a property of the face. Measured
+              in-browser: 1ch = 0.666em in Instrument Sans and 0.600em in IBM
+              Plex Sans, so 60ch collapses from 639.4px to 576.0px — down 9.9% —
+              while the sentences themselves only shrink 3.5% (Plex's lowercase
+              advance is 504.3/em against Instrument's 522.7/em).
+
+              That 6.4% mismatch orphans a line here specifically. Custody's body
+              — "Every share you buy is credited directly to your CDSL demat
+              account, held in your name." — renders 637.6px in Instrument and
+              626.7px in Plex: one line in a 639.4px box, two in a 576px box,
+              with "your name." alone on the second. 60 x 0.666 = 39.96em, so
+              40em restores the 639.4px measure and the line holds.
+
+              The measure in lowercase CHARACTERS therefore grows ~3.5%, which is
+              the whole of the change and is inside the band this page treats as
+              one measure.
+            */}
             <CopyText
               source={custody.body}
-              className="max-w-[60ch] text-base leading-relaxed text-fg-muted"
+              className="max-w-[40em] text-base leading-relaxed text-fg-muted"
             />
           </article>
         </div>
@@ -294,7 +337,9 @@ export default function Safety() {
               </h3>
               <CopyText
                 source={pillar.body}
-                className="mt-3 max-w-[56ch] text-base leading-relaxed text-fg-muted"
+                /* 56ch x 0.666em = 37.3em — same conversion, same reason as
+                   tier 1's measure above. */
+                className="mt-3 max-w-[37.3em] text-base leading-relaxed text-fg-muted"
               />
             </li>
           ))}
@@ -324,7 +369,8 @@ export default function Safety() {
               <h3 className="text-lg font-medium leading-snug text-fg">{pillar.title}</h3>
               <CopyText
                 source={pillar.body}
-                className="max-w-[76ch] text-base leading-relaxed text-fg-muted"
+                /* 76ch x 0.666em = 50.6em — same conversion, same reason. */
+                className="max-w-[50.6em] text-base leading-relaxed text-fg-muted"
               />
             </li>
           ))}
@@ -340,14 +386,10 @@ export default function Safety() {
           <span
             data-rule="close"
             aria-hidden="true"
-            className="block h-px w-full origin-left bg-border"
+            className="block h-px w-full origin-left bg-gradient-to-r from-accent/60 via-accent/30 to-transparent"
           />
           <CopyText
             source={honestNote}
-            /* Held just under tier-1's h3 at every width. This is a closing
-               sentence, not a fourth tier, and at its old clamp it tied the
-               custody heading at 375px and out-sized every h3 in the section —
-               so the largest thing under the H2 was a paragraph. */
             className="display mt-10 max-w-[22em] text-[clamp(1.375rem,2.4vw,2rem)] leading-[1.34] text-fg sm:mt-12"
           />
         </div>

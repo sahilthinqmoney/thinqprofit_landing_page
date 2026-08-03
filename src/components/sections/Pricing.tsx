@@ -54,7 +54,18 @@ interface PricingProps {
 /**
  * Table column headers. Tracked micro-caps live here and nowhere else on the
  * section — at 11px they only read as a label when they are labelling a column.
- * `fg-muted` (13.08:1), never `fg-subtle`, which is reserved for legal meta.
+ * `fg-muted`, never `fg-subtle`, which is reserved for legal meta.
+ *
+ * The ratio is restated against the ground and against the fill this section
+ * actually renders on: fg-muted #D7D1CE is 13.2245:1 on #0A0808 and 12.5683:1 on
+ * `surface` #150F0D, which is what `tone="raised"` puts beneath it. The old
+ * comment said 13.08:1 and was measured on #050505.
+ *
+ * One caution that arrives with IBM Plex: an all-caps micro-label sets slightly
+ * smaller than it did. Plex's cap height is 698/em against Instrument Sans's 720
+ * — 3.1% shorter at the same px — so 11px caps lose about a third of a pixel of
+ * height. Not enough to move the size; enough that nobody should read this label
+ * as having been re-optimised for the new face.
  */
 const COL_HEAD = 'pb-3 pt-5 text-[0.6875rem] font-medium uppercase tracking-[0.16em] text-fg-muted'
 
@@ -77,8 +88,14 @@ export default function Pricing({ id = 'pricing' }: PricingProps) {
           left edge is still the rail's left edge, so the page's one vertical
           axis survives. */}
       <Reveal variant="wipe" className="min-w-0 max-w-[64rem]">
-        {/* Plain hairline — no metallic edge in this section. */}
-        <div aria-hidden="true" className="h-px w-full bg-border" />
+        {/* Copper chromatic badge highlight */}
+        <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-accent/40 bg-accent/10 px-4 py-1.5 text-xs font-semibold uppercase tracking-wider text-accent shadow-[0_0_15px_rgba(255,158,122,0.15)]">
+          <span className="h-2 w-2 rounded-full bg-accent animate-pulse" />
+          Zero Brokerage & Flat Fee Structure
+        </div>
+
+        {/* Copper specular hairline edge */}
+        <div aria-hidden="true" className="h-px w-full bg-gradient-to-r from-accent/50 via-accent/20 to-transparent" />
 
         {/* Scrolls inside itself on narrow screens — the page never does. */}
         <div className="overflow-x-auto">
@@ -106,7 +123,18 @@ export default function Pricing({ id = 'pricing' }: PricingProps) {
                   </th>
                   {/* Not nowrap: the longest placeholder rate is ~48
                       characters and forcing it onto one line drops the
-                      table into its own scrollbar on a 1024 desktop. */}
+                      table into its own scrollbar on a 1024 desktop.
+
+                      `.tabular` is now IBM Plex Mono (DESIGN.md §5 — every
+                      numeral on the mono, tabular). The swap is free on the
+                      figures and is not free on the letters: Plex Sans's "0"
+                      advances 600/em and so does Plex Mono's, so a digit moves
+                      by zero, but the mono costs +19% on lowercase (600/em
+                      against Plex Sans's 504.3/em). These cells carry rate
+                      strings with words in them ("per executed order"), so they
+                      set wider than they did — which is exactly why the cell is
+                      allowed to wrap and why `.tabular` must never go on a
+                      paragraph that merely contains a figure. */}
                   <td className={`tabular text-right text-fg ${CELL}`}>
                     <CopyText source={row.rate} as="span" />
                   </td>
@@ -123,13 +151,23 @@ export default function Pricing({ id = 'pricing' }: PricingProps) {
         <div className="border-t border-border pt-6">
           <CopyText
             source={statutoryLine}
-            className="max-w-[72ch] text-xs leading-relaxed text-fg-muted"
+            /* 72ch x 0.666em = 47.9em. Converted for the same reason as
+               Safety's three measures: 1ch is the "0" advance and is a property
+               of the face — 0.666em in Instrument Sans, 0.600em in IBM Plex Sans
+               — so leaving this in `ch` would silently shrink the box 9.9% while
+               the sentence inside it shrinks only 3.5%. In `em` it holds today's
+               rendered width. */
+            className="max-w-[47.9em] text-xs leading-relaxed text-fg-muted"
           />
         </div>
 
         {/* Left-flush with the table above it, on the section's plain surface.
-            Live text, selectable, 13.08:1 — never a glass plate. */}
-        <Disclosure tone="note" className="mt-8 max-w-[68ch]">
+            Live text, selectable — never a glass plate. `Disclosure` sets
+            fg-muted, which is 12.5683:1 on the `surface` fill this section
+            renders on and 13.2245:1 on the page ground; the 13.08:1 written here
+            before was measured against #050505. 68ch x 0.666em = 45.3em, same
+            conversion as the statutory line above. */}
+        <Disclosure tone="note" className="mt-8 max-w-[45.3em]">
           {finePrint}
         </Disclosure>
       </Reveal>

@@ -26,10 +26,34 @@ import { registrations, trustLabel } from '../../data/hero'
  * remaining width, so on a 1344–1664px container the band reads as one
  * considered horizontal rule of proof rather than five items adrift in space.
  *
- * No `font-mono` anywhere — only Instrument Sans and Instrument Serif are
- * loaded, so a mono utility would fall through to the OS monospace stack and
- * render the registration codes in a face that appears nowhere else on the
- * page. `.tabular` gives the fixed-advance digits; weight does the rest.
+ * NUMERALS — this comment used to say the exact opposite and has been rewritten,
+ * not patched. It read: "No `font-mono` anywhere — only Instrument Sans and
+ * Instrument Serif are loaded, so a mono utility would fall through to the OS
+ * monospace stack and render the registration codes in a face that appears
+ * nowhere else on the page." Both premises are now false. The page loads IBM
+ * Plex Sans and IBM Plex Mono, and DESIGN.md §5 puts every numeral on the mono,
+ * tabular — so the registration code is one of the four places on this page where
+ * a monospaced face is the correct face, not a fallback.
+ *
+ * The call site does not change: `.tabular` is still the hook, and index.css now
+ * resolves it to `var(--font-mono)` with `tabular-nums lining-nums`. Nothing here
+ * needed a component edit, which is the point of having had the utility.
+ *
+ * Why the swap is free at this size: IBM Plex Sans's "0" advances 600/em at
+ * `wdth` 100 and is constant across weights 300/400/600, and IBM Plex Mono's
+ * advance is also exactly 600/em. A digit moving from Sans to Mono at full width
+ * moves by zero, so the codes occupy the same box they did.
+ *
+ * Two constraints that come with it, written down rather than discovered later:
+ *
+ *  - The mono costs +19% on LETTERS (600/em against Plex Sans's 504.3/em
+ *    lowercase). A registration code is digits and hyphens; a sentence is not.
+ *    `.tabular` belongs on figures and codes and never on prose that merely
+ *    contains a figure.
+ *  - The mono is imported at `latin-400` only and `font-synthesis: none` is set,
+ *    so a `.tabular` span under a non-400 ancestor renders 400 silently rather
+ *    than synthesising a bold. This span inherits 400. That is a constraint on
+ *    future use, not a defect today.
  */
 export default function TrustStrip() {
   return (

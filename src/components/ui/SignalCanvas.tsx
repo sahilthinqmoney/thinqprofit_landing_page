@@ -4,8 +4,8 @@ import { useEffect, useRef } from 'react'
  * Platform background — "signal resolving out of noise along a path".
  *
  * A scattered field of small chrome marks drifts sideways in low disorder.
- * Periodically a route between five or six of them lights up — to the brightest
- * value in the palette, the alloy the primary action is filled with — a head
+ * Periodically a route between five or six of them lights up — to the mark
+ * metal's specular, the brightest value this canvas is permitted — a head
  * travels its length, each mark it reaches flares laterally and settles, and the
  * whole thing decays behind it. One decision being made and committed, then the
  * field going quiet again. The reference is a departure board's flap sequence or
@@ -17,16 +17,19 @@ import { useEffect, useRef } from 'react'
  * the resting state can resolve into a graph.
  *
  * Why a canvas rather than a clip — same argument as HeroCanvas: a few KB
- * instead of megabytes, sharp at any DPR, its colours are the index.css tokens
- * by name, and seamless by construction rather than by crossfade.
+ * instead of megabytes, sharp at any DPR, three of its four colours are named
+ * tokens or named stops of the mark metal, and seamless by construction rather
+ * than by crossfade.
  *
  * Constraints it respects (docs/motion-brief.md §7, design-system landing.md):
- *  - The alloy is the active route and nothing else. The resting field is
- *    `chrome` → `chrome-dim` and the ambient bloom is chrome-dim, so the accent
- *    stays a small fraction of the lit pixels — roughly one route's comet tail
- *    against the whole field. No green, no red: those are market data. Nothing
- *    here has hue at all, so "active" is now a statement about luminance, and
- *    the whole file is tuned to keep that statement legible (see `draw`).
+ *  - The specular is the active route and nothing else. The resting field runs
+ *    `chrome-dim` → `chrome` and the ambient bloom is `chrome-dim`, so the
+ *    brightest metal stays a small fraction of the lit pixels — roughly one
+ *    route's comet tail against the whole field. No green, no red: those are
+ *    market data. And no copper: the accent's role list is closed at the rim
+ *    ring, the copper ramp under the shader and the solid primary fill, and a
+ *    background route is not an action. So "active" is a statement about
+ *    luminance, and the whole file is tuned to keep it legible (see `draw`).
  *  - Motion is lateral and settling. Node drift is horizontal; the only vertical
  *    component is a per-node shear along that drift, randomly signed across the
  *    field, so nothing reads as a rise. Routes are built to meander within one
@@ -95,8 +98,8 @@ const LOOP_SECONDS = 21
 /**
  * Half-width of a route's activation window, in radians of the master loop.
  * `1.5π / ROUTE_COUNT` puts the average concurrency at 1.5 routes: one carrying
- * the frame while another is fading in or out. Widen it and the accent budget
- * goes; narrow it and the section spends most of its time inert.
+ * the frame while another is fading in or out. Widen it and the lit metal stops
+ * being an event; narrow it and the section spends most of its time inert.
  */
 const GATE_HALF = (Math.PI * 1.5) / ROUTE_COUNT
 const GATE_FLOOR = Math.cos(GATE_HALF)
@@ -109,23 +112,59 @@ const TRAIL = 0.2
 const SAMPLES = 88
 
 /**
- * Three luminances of one neutral metal. The alloy is the committed route only;
- * chrome and chrome-dim are everything at rest.
+ * One neutral metal read at four luminances, on a warm ground. Two are tokens —
+ * `chrome-dim` and `chrome` — and two are stops of the ramp those tokens are cut
+ * from: `METAL.white`'s alloy `#E9E9EB` and its highlight `#FFFFFF`, which is
+ * also the `fg` token (design-suite `src/logos.tsx`, DESIGN.md §39).
  *
- * The single hardest thing about this palette is that the route and the field are
- * no longer different *colours*. Before, the route could sit at the same
- * luminance as the field — below it, in fact — and still read as the live one,
- * because it was the only warm thing in the frame. That is gone. `ROUTE_ACTIVE`
- * is now 1.9× the luminance of the brightest resting mark and 4.1× the dimmest,
- * and the alphas downstream widen the rendered gap further: the resting field
- * gives up brightness (§ "The resting field") and the route and its head take
- * it (§ "The active routes"). Move either of those and the section stops saying
+ * THE ROUTE DOES NOT FOLLOW THE ACCENT INTO COPPER, and a draft of this file had
+ * it the other way, so the reasoning is written down rather than implied.
+ *
+ * The role decides it first. The accent is the rim ring, the copper ramp under
+ * the shader and the solid primary fill — nothing else. Under platinum this file
+ * could hold `accent` honestly, because `accent` was then a LUMINANCE role: a
+ * neutral near-white alloy carrying no meaning a backdrop could steal. Copper
+ * makes it a HUE role, and hue here means "you can act on this". A route lighting
+ * up behind body copy is not an action, and 192 marks of ambient copper would
+ * make "only the action is saturated copper" false the moment the section
+ * scrolled into view.
+ *
+ * The measurement forbids it independently. Accent Y is 0.4712 against `chrome`'s
+ * 0.4249 — 1.1091x — so a copper route over a chrome field has no luminance
+ * separation at all, and the copper draft had to drop the field onto hand-picked
+ * steel (#8C8C90 / #656569) to get any. At the alphas below, which are unchanged
+ * and were solved against platinum, that cost the trail 72.7% of its rendered
+ * luminance and the head 69.5%. The section paid for a hue it was not entitled
+ * to by going nearly dark.
+ *
+ * What the neutral ramp buys instead, measured on `#0A0808`: 4.7394 / 9.0349 /
+ * 16.4772 / 19.9782. `ROUTE_ACTIVE` sits 1.9207x the brightest resting mark and
+ * 4.0986x the dimmest, and `ROUTE_HEAD` 1.2255x above the route. Every rung is
+ * WIDER than the copper draft's (1.7885x / 3.5985x / 1.1723x). Against the
+ * platinum ladder these values re-hang (1.9313x / 4.1464x / 1.1302x) the two
+ * field rungs land within 1.2% and the head rung is 8.4% wider — see the
+ * `#FFFFFF` note below, which is the same fact from the other side. Hue
+ * separation on top: steel at hue 286.35 deg is 245.32 deg from the accent's
+ * 41.03 deg, at chroma 0.0027 against 0.1263 — 46.8x — so no overlap and no
+ * alpha in this file can produce something mistakable for the primary action.
+ *
+ * Because the values land on platinum's to within 1.4% at the field and 0.2% at
+ * the route, not one alpha in this file moves. The single exception is stated
+ * rather than hidden: `ROUTE_HEAD` gains 8.64% in luminance, because
+ * `METAL.white`'s highlight is `#FFFFFF` where platinum's `accent-hover` stopped
+ * at `#F4F6FA` (18.4650:1 on this ground). A specular that stops short of the
+ * light source is not a specular, and 8.64% on a 24px glow is inside the
+ * blow-out the head already relies on.
+ *
+ * The alphas downstream widen the rendered gap further: the resting field gives
+ * up brightness (§ "The resting field") and the route and its head take it
+ * (§ "The active routes"). Move either of those and the section stops saying
  * anything.
  */
-const ROUTE_ACTIVE: [number, number, number] = [231, 233, 238] // accent        #E7E9EE 16.78:1
-const ROUTE_HEAD: [number, number, number] = [244, 246, 250] // accent-hover    #F4F6FA
-const FIELD_BRIGHT: [number, number, number] = [169, 174, 184] // chrome        #A9AEB8  9.16:1
-const FIELD_DIM: [number, number, number] = [117, 123, 133] // chrome-dim       #757B85  4.78:1
+const ROUTE_ACTIVE: [number, number, number] = [233, 233, 235] // METAL.white alloy     #E9E9EB 16.4772:1
+const ROUTE_HEAD: [number, number, number] = [255, 255, 255] // fg / METAL.white spec.  #FFFFFF 19.9782:1
+const FIELD_BRIGHT: [number, number, number] = [174, 174, 178] // chrome                #AEAEB2  9.0349:1
+const FIELD_DIM: [number, number, number] = [123, 123, 127] // chrome-dim               #7B7B7F  4.7394:1
 
 function mix(a: number, b: number, t: number) {
   return a + (b - a) * t
@@ -400,13 +439,13 @@ export default function SignalCanvas({ className = '', deadZone }: SignalCanvasP
       ctx.globalCompositeOperation = 'lighter'
 
       // ---- Ambient bloom ----------------------------------------------------
-      // Chrome-dim, never the alloy. It covers a large area, and putting the
-      // accent here would spend the entire accent budget on something that is not
-      // the signal — and worse than before, since the budget is now measured in
-      // luminance: a bright wash this wide raises the floor the route has to beat.
-      // The alphas are unchanged even though chrome-dim is a darker value than
-      // the grey that used to be here; the ambience giving up a little is the
-      // point, not a regression.
+      // `chrome-dim`, never the specular and certainly never the accent. It
+      // covers a large area: a bright wash this wide raises the floor the route
+      // has to beat, and a copper one would put the page's action colour across
+      // most of a section that cannot be acted on. Rendered it lands at 1.0537:1
+      // to 1.1062:1 on the ground — barely above black, which is the job.
+      // The 0.07/0.026 alphas were solved against #757B85; `chrome-dim` #7B7B7F
+      // is +1.36% in luminance, so they stand.
       const liveX = narrow || !zoneSide ? 0.5 : zoneSide === 'left' ? 0.5 + zoneExtent / 2 : (1 - zoneExtent) / 2
       const bloomX = width * liveX + Math.cos(w * t) * width * 0.04
       const bloomY = height * (narrow ? 0.72 : 0.5)
@@ -430,27 +469,29 @@ export default function SignalCanvas({ className = '', deadZone }: SignalCanvasP
         const res = resolve[i]
         const flash = commit[i]
 
-        // The resting term comes down from (0.26 + 0.5·weight) and the two active
-        // terms go up. Both halves of that are the same decision: a resting mark
-        // still has to be legible — a field reading as noise gives a committed
-        // mark nothing to be a *change* against — but it can no longer be as
-        // bright as it was, because brightness is the only thing left that says
-        // "committed". Chrome is also a darker token than the grey this field used
-        // to be drawn in, so the resting value falls about a third overall while
-        // a flapped mark now saturates. Clamped, since the terms can now sum past
-        // 1; `att` multiplies after the clamp so the dead zone still wins.
+        // The resting term came down from (0.26 + 0.5·weight) and the two active
+        // terms went up. Both halves of that are the same decision: a resting
+        // mark still has to be legible — a field reading as noise gives a
+        // committed mark nothing to be a *change* against — but it cannot be as
+        // bright as it was, because brightness is the only thing that says
+        // "committed" once hue is reserved for the primary action. Rendered, the
+        // resting band runs 1.2342:1 (`chrome-dim` at 0.21) to 4.2890:1 (`chrome`
+        // at 0.65) on `#0A0808`. Clamped, since the terms can sum past 1; `att`
+        // multiplies after the clamp so the dead zone still wins.
         const alpha =
           clamp01((0.21 + 0.44 * n.weight) * (0.55 + 0.45 * order) + res * 0.3 + flash * 0.95) *
           att *
           fieldAlpha
         if (alpha <= 0.004) continue
 
-        // A resting mark runs chrome-dim → chrome on its own weight and on the
-        // broad resolve. Only `flash` — the head actually arriving — pulls it to
-        // the alloy, and it pulls nearly all the way (0.85, up from a 0.45
-        // whisper): a hue-tinted hint worked when the accent was warm, but a
-        // 45% step along a neutral ramp is just a slightly lighter grey. A few
-        // marks at a time, a handful of pixels each, so the budget holds.
+        // A resting mark runs `chrome-dim` → `chrome` on its own weight and on
+        // the broad resolve. Only `flash` — the head actually arriving — pulls it
+        // to the specular, and it pulls nearly all the way (0.85, up from a 0.45
+        // whisper): a hue-tinted hint worked when the route was gold, but along a
+        // neutral ramp 0.45 lands on #C9C9CC, only 1.3713x `chrome` in luminance,
+        // which is a slightly lighter grey rather than an event. 0.85 lands on
+        // #E0E0E2 — 15.1794:1 on the ground, 1.7601x `chrome` — and that reads as
+        // a flap. A few marks at a time, a handful of pixels each.
         const tone = clamp01(n.weight * 0.5 + res * 0.5 + flash * 0.8)
         const r = mix(mix(FIELD_DIM[0], FIELD_BRIGHT[0], tone), ROUTE_ACTIVE[0], flash * 0.85)
         const g = mix(mix(FIELD_DIM[1], FIELD_BRIGHT[1], tone), ROUTE_ACTIVE[1], flash * 0.85)
@@ -506,10 +547,13 @@ export default function SignalCanvas({ className = '', deadZone }: SignalCanvasP
             const att = guard((x0 + x1) / 2, (y0 + y1) / 2)
             if (att <= 0.01) continue
 
-            // 0.95, up from 0.7. The trail used to be allowed to sit at partial
-            // alpha because hue carried it; against a field of the same metal it
-            // has to be drawn at nearly the token's full value or the route reads
-            // as one more resting mark that happens to be in a line.
+            // 0.95, up from the 0.7 this ran as gold. The trail was allowed to
+            // sit at partial alpha while hue carried it; against a field of the
+            // same metal it has to be drawn at nearly full value or the route
+            // reads as one more resting mark that happens to be in a line.
+            // Rendered at the head it lands on 14.8369:1 (Y 0.7298) against a
+            // resting band topping out at 4.2890:1 (Y 0.1754) — 4.16x in
+            // luminance, which is the whole of the separation now.
             ctx.strokeStyle = rgba(ROUTE_ACTIVE, a * 0.95 * att * fieldAlpha)
             ctx.lineWidth = 0.9 + 1.5 * a
             ctx.beginPath()
@@ -519,13 +563,22 @@ export default function SignalCanvas({ className = '', deadZone }: SignalCanvasP
           }
         }
 
-        // The head itself — the single brightest thing in the frame, and the only
-        // place the accent gets to bloom. Its core is `accent-hover`, the top of
-        // the palette, at 0.42 rather than 0.3: additively over the trail it lands
-        // the head at effectively full white while staying a 24px radius, so the
-        // brightest pixels on the section are a few hundred of them on one moving
-        // point. That is the whole luminance hierarchy in one place — head, then
-        // trail, then flapped mark, then field.
+        // The head itself — the single brightest thing in the frame. Its core is
+        // `ROUTE_HEAD`, the top of the mark metal, at 0.42 rather than the 0.3
+        // this ran as gold: additively over the trail it blows the head out to
+        // white while staying a 24px radius, so the brightest pixels on the
+        // section are a few hundred of them on one moving point. That is the
+        // whole luminance hierarchy in one place — head, then trail, then flapped
+        // mark, then field. Alone, the core composites to 4.0335:1 on the ground;
+        // it only goes white by landing on the trail underneath it.
+        //
+        // The blow-out is what a lit metal edge does, and it costs nothing here
+        // because the value being overexposed is already neutral: white is where
+        // this ramp was always heading, not a hue being abandoned. That was the
+        // argument the copper draft had to make for the accent, and it is the
+        // reason the accent should not have been here — a colour that has to
+        // leave its own hue to do its job in a canvas is being used for the
+        // wrong thing.
         const hp = pointAt(route, head)
         const hAtt = guard(hp.x, hp.y)
         if (hAtt > 0.01) {

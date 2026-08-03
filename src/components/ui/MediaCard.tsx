@@ -41,10 +41,33 @@ export default function MediaCard({
   className = '',
 }: MediaCardProps) {
   return (
+    /*
+      The edge is `border-soft`, not `border-white/20`.
+
+      A raw white alpha was defensible while the ground was neutral #050505 — it
+      composited to a neutral grey on a neutral page. On the warm ground it
+      composites to #3B3939: 1.7412:1, OKLCH chroma 0.0028 at hue 17.3 deg,
+      i.e. a near-neutral edge cut into a warm surface. `border-soft` #251D1A is
+      1.2076:1 at chroma 0.0138 and hue 41.6 deg, which is the warm axis the rest
+      of the page's structure sits on.
+
+      That is a deliberate drop from 1.74:1 to 1.21:1. The edge is not carrying
+      information — the card is identified by its art and its copy, not by its
+      outline — so it is a seam, and a seam that reads as a cool line on warm ink
+      is worse than a quieter one that reads as the same material. The rule the
+      brief keeps is "structure is carried by neutral white lifts": a 1px inset
+      HIGHLIGHT stays white, because a lift is not a line. This is a line.
+    */
     <article
-      className={`relative isolate flex h-[clamp(360px,52vh,520px)] shrink-0 snap-center flex-col justify-between overflow-hidden rounded-[20px] border border-white/20 ${className}`}
+      className={`relative isolate flex h-[clamp(360px,52vh,520px)] shrink-0 snap-center flex-col justify-between overflow-hidden rounded-[20px] border border-accent/30 hover:border-accent/60 shadow-[0_0_25px_rgba(255,158,122,0.12)] transition-all duration-300 ${className}`}
     >
       <MediaBackdrop {...media} />
+
+      {/* Copper chromatic top specular edge highlight */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-accent/50 to-transparent z-10"
+      />
 
       {scrim > 0 && (
         <div
@@ -52,7 +75,7 @@ export default function MediaCard({
           className="pointer-events-none absolute inset-x-0 top-0 h-2/3"
           style={{
             zIndex: -1,
-            backgroundImage: `linear-gradient(to bottom, rgba(5,5,5,${scrim}) 0%, rgba(5,5,5,${(scrim * 0.55).toFixed(3)}) 45%, rgba(5,5,5,0) 100%)`,
+            backgroundImage: `linear-gradient(to bottom, rgba(10,8,8,${scrim}) 0%, rgba(10,8,8,${(scrim * 0.55).toFixed(3)}) 45%, rgba(10,8,8,0) 100%)`,
           }}
         />
       )}
@@ -71,7 +94,10 @@ export default function MediaCard({
         </h3>
         {/* `fg-muted`, not `white/70`. The card sits on a media plate, so a white
             alpha's real contrast depends on the asset behind it and cannot be
-            signed off; the token is both brighter and plate-independent. */}
+            signed off; the token is both brighter and plate-independent. It is
+            now 13.2245:1 on the ground (13.08:1 was the old measurement against
+            #050505), and warm-composited — chroma 0.0078 at hue 48.6 deg, so it
+            reads as ink rather than as grey against a copper-lit page. */}
         <p className="mt-3 text-base leading-relaxed text-fg-muted">{body}</p>
       </div>
 

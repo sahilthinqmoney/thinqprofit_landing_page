@@ -1,6 +1,7 @@
 import type { LucideIcon } from 'lucide-react'
-import { AtSign, Briefcase, MonitorPlay, TrendingUp } from 'lucide-react'
+import { AtSign, Briefcase, MonitorPlay } from 'lucide-react'
 import ChromaticWordmark from '../ui/ChromaticWordmark'
+import ThinqMark from '../ui/ThinqMark'
 import Container from '../ui/Container'
 import { RAIL } from '../ui/SectionShell'
 import CopyText from '../ui/CopyText'
@@ -37,16 +38,29 @@ import {
  * page — the Hero rail and the FinalCta — so that specific requirement is not
  * lost with this removal, but the other three are.
  *
- * Contrast: all disclosure copy renders at text-fg-muted (13.08:1) or
- * text-warning (7.02:1). Under the previous palette fg-subtle was 3.9:1 and so
- * was banned outright here; it now measures 5.02:1 and clears the floor, but
- * disclosure copy stays on fg-muted anyway. Legal text should not sit at the
- * bottom of the legible range just because it is allowed to — fg-subtle is for
- * footer meta and fine print, and only the bottom bar's separator uses it.
+ * Contrast: every ratio in this block was measured against the old #050505 ground
+ * and every one of them moved. Recomputed against #0A0808: disclosure copy renders
+ * at text-fg-muted, 13.2245:1 (was written 13.08:1), or text-warning #E8A13C at
+ * 9.1275:1 (was written 7.02:1 — a figure that was wrong twice over, since the
+ * outgoing #f97316 measured 7.2711:1 on the old ground, not 7.02:1).
  *
- * Colour: nothing in this footer is coloured except by meaning. With the warning
- * panels gone, every mark, icon and numeral left is `chrome` and `accent-soft` is
- * held to actual links. There is no brand hue to tint anything with.
+ * fg-subtle now measures 5.3087:1 and clears the floor comfortably, but disclosure
+ * copy stays on fg-muted anyway. Legal text should not sit at the bottom of the
+ * legible range just because it is allowed to — fg-subtle is for footer meta and
+ * fine print, and only the bottom bar's separator uses it here.
+ *
+ * Colour: nothing in this footer is coloured except by meaning, and copper does
+ * not change that — it adds a brand hue to the page but grants this footer no new
+ * licence to use it. Every mark and icon is neutral steel `chrome` (OKLCH chroma
+ * 0.0057 against the accent's 0.1263, a 22.16x gap), and `accent-soft` stays held
+ * to actual links. The one warm thing below the fold is the wordmark, which is
+ * the mark itself and the page's single accent carrier — see ChromaticWordmark
+ * for why the lockup rule permits it here and forbids it in the nav.
+ *
+ * Numerals: the © year runs through `.tabular`, which is now IBM Plex Mono
+ * (DESIGN.md §5 puts every numeral on the mono, tabular). It inherits weight 400
+ * from this paragraph, which is the only weight the mono ships here — see the
+ * note in TrustStrip.tsx.
  *
  * The entity name in the copyright line still renders through `CopyText`, so the
  * unfilled `[PLACEHOLDER]` in it can never be mistaken for finished legal copy.
@@ -81,13 +95,23 @@ export default function Footer() {
               className="inline-flex min-h-11 items-center gap-2.5 rounded-lg"
               aria-label={`${brandName} home`}
             >
-              {/* Chrome tile, ink glyph — one mark, identical at every size on
-                  the page. Accent belongs to the newsletter submit sitting in
-                  the same row; the mark stays a luminance step below it. White
-                  on either metal is invisible (1.2:1 / ~2.1:1). */}
-              <span className="grid h-8 w-8 place-items-center rounded-lg bg-chrome">
-                <TrendingUp className="h-[1.125rem] w-[1.125rem] text-bg" strokeWidth={1.5} aria-hidden="true" />
-              </span>
+              {/* The brand mark, in the same neutral steel as the nav bar — one
+                  mark at one tone wherever it sits beside other content (§23).
+                  The lucide `TrendingUp` tile that stood here is gone for the
+                  reason recorded in Navbar.tsx: a rising arrow is a returns
+                  claim, and the spec's constraints forbid it outright.
+
+                  The "luminance step below the accent" clause is deleted rather
+                  than reworded, because there is no step — accent Y 0.4712
+                  against chrome Y 0.4249 is 1.0976:1 as a pair. Chroma does the
+                  work instead, at a 22.16x gap.
+
+                  Copper is one element away, at the giant wordmark below, and
+                  that is the §07 "brand surface where the accent leads" case.
+                  Both are correct because they are different placements: this
+                  mark shares a row with body copy and social controls, that one
+                  owns its own band with nothing to compete with. */}
+              <ThinqMark size={28} tone="copper" className="shrink-0" />
               <span className="text-lg font-semibold tracking-tight text-fg">{brandName}</span>
             </a>
 
@@ -102,9 +126,13 @@ export default function Footer() {
                     <a
                       href={social.href}
                       aria-label={`${brandName} on ${social.label}`}
-                      /* Edge goes to chrome on hover, not accent: five social
-                         circles pulsing at the action value would read as five
-                         primary buttons in the footer. */
+                      /* Edge goes to chrome on hover, not accent: three social
+                         circles pulsing at the action value would read as three
+                         primary buttons in the footer, and §4 rule 1 reserves
+                         the accent for things you can act on. The hover pairs
+                         `border-chrome` with `bg-surface-raised`, so the edge
+                         that actually renders is chrome on #1E1714 — 7.9950:1,
+                         far past the 3:1 WCAG 1.4.11 asks of a boundary. */
                       className="grid h-11 w-11 place-items-center rounded-full border border-border text-fg-muted transition-colors duration-200 hover:border-chrome hover:bg-surface-raised hover:text-fg"
                     >
                       <Icon className="h-[1.125rem] w-[1.125rem]" strokeWidth={1.5} aria-hidden="true" />

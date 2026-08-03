@@ -20,11 +20,13 @@ import { finalCta } from '../../data/footer'
  * not open another chapter.
  *
  * Constraints honoured:
- *  - the primary CTA is the chromatic alloy, never green — landing.md §1
- *    conflict 2, §10. Green and red are market-data values only, and with no hue
- *    left anywhere in the brand a green button would now be the single most
- *    misreadable object on the page: the one coloured thing on a broker page
- *    that is not a number.
+ *  - the primary CTA is the copper alloy, never green — landing.md §1 conflict
+ *    2, §10. Gain and loss are market-data values only. Under platinum the
+ *    argument was that a green button would be the one coloured thing on a
+ *    hueless page; copper takes that away and replaces it with a sharper one —
+ *    the page now has exactly one brand hue, so a second coloured control does
+ *    not read as decoration, it reads as a *different kind* of action, and the
+ *    kind it most resembles is a buy order.
  *  - no urgency mechanics, no countdown, no scarcity line — landing.md §10
  *  - the market-risk disclosure is live text under the CTA, inside the section,
  *    above the scrim and never behind a blur — landing.md §9, §10
@@ -39,11 +41,27 @@ import { finalCta } from '../../data/footer'
  * or red, no upward motion as a promise, people composed and never
  * celebrating), and against the machined-alloy world in docs/art-direction.md —
  * not the indigo→cyan the brief originally specified, which predates the
- * palette. The specular is neutral: a warm note in the falloff would put the one
- * coloured thing in frame directly behind the primary action, and the action is
- * now identified by being the brightest *neutral* surface on screen. Note the
- * dead zone moves: the hero reserves the left 45%, this section is centre-placed,
- * so here it is the centre that stays dark.
+ * palette.
+ *
+ * THE SPECULAR STAYS NEUTRAL, AND THE REASON IS THE OPPOSITE OF WHAT IT WAS.
+ * The old sentence read: "a warm note in the falloff would put the one coloured
+ * thing in frame directly behind the primary action, and the action is now
+ * identified by being the brightest *neutral* surface on screen." Both halves
+ * are dead. There is a brand hue again, and the action is not the brightest
+ * anything — the accent measures 9.9166:1 on the ground where fg is 19.9782:1
+ * and fg-muted is 13.2245:1.
+ *
+ * What replaces it is a tighter rule, not a weaker one: **only the action is
+ * saturated copper.** The accent's OKLCH chroma is 0.1263, the highest of any
+ * token in the palette; the warm neutral axis tops out at 0.0165 on `border`,
+ * 13% of it. A warm grade in this plate's falloff would put unsaturated-but-warm
+ * light behind the one control on the page that means "you can act on this", and
+ * §4 rule 1 reserves that reading for the control alone. Neutral light in frame
+ * is what keeps the only copper object on screen legible AS copper.
+ *
+ * Note the dead zone moves: the hero reserves the left 45%, this section is
+ * centre-placed, so here it is the centre that stays dark. That is now a
+ * contrast requirement with a number attached — see the support line below.
  */
 const closingClip =
   'Closing loop, 8s, seamless. A single machined-aluminium form at rest in near-black, lit from high and behind so only its top edge catches. One cool near-white specular travels the length of that edge, laterally, and settles; nothing rises. Neutral monochrome throughout, no colour cast. Centre of frame stays dark and low-contrast for the centred copy. No numbers, tickers, candles or chart forms. No green, no red.'
@@ -81,13 +99,31 @@ export default function FinalCta() {
       scrimAt="50% 50%"
       measure="9em"
       /*
-       * The page's one serif. Everything above this is set in Archivo; the
-       * closing statement changes register, which is the only way a second face
-       * earns its place. Newsreader at weight 380 — an old-style serif with
-       * moderate contrast, deliberately not the Didone that made an earlier
-       * pass read as a fashion masthead rather than a broker.
+       * The page's one change of register, and it is no longer a change of FACE.
+       *
+       * This read: "the page's one serif. Everything above this is set in
+       * Archivo... Newsreader at weight 380." All three faces are gone. The page
+       * is set entirely in IBM Plex Sans, so the closing statement can no longer
+       * be marked by bringing in a second family — and `voice="serif"` naming a
+       * serif that does not exist is precisely the falsified rationale this
+       * codebase bans, which is why the prop value moved with the class.
+       *
+       * `quiet` (`.display-quiet`) marks it by INVERTING the display voice
+       * inside one family. The page's display voice is defined by three moves —
+       * condense, weight up, track in — and this does all three backwards at
+       * once: `'wdth' 100` against `.display`'s 82, `'wght' 300` against 600,
+       * letter-spacing +0.01em against -0.028em, leading 1.24 against 1.08. In a
+       * variable family that is the opposite corner of the same axes, which is a
+       * legible change of register rather than a size difference.
+       *
+       * It does not re-rag, which is the thing that had to be checked before
+       * trading a face for an axis: "Start with what\nyou have today" at 56px
+       * sets two lines of 374.0px and 370.5px in Plex at 100/300/+0.01em, against
+       * Newsreader's 381.5px and 377.6px — the same break, inside the 9em copy
+       * column at every width tested (504 / 576 / 608px). The block grows about
+       * 18px in height because 1.24 leading replaces 1.08.
        */
-      voice="serif"
+      voice="quiet"
       headline={headline}
       body={finalCta.subheading}
       /*
@@ -110,8 +146,15 @@ export default function FinalCta() {
       /**
        * Live text, selectable, in normal flow above the scrim — nothing is
        * layered over it. `Disclosure` sets its colour on its own element, so it
-       * overrides the slot's inherited white/55 by inheritance rather than
-       * racing it in the cascade, and holds above 4.5:1 on the scrimmed plate.
+       * overrides whatever the slot inherits by inheritance rather than racing
+       * it in the cascade.
+       *
+       * Its colour is `fg-muted` #D7D1CE, and that holds on this plate by
+       * measurement rather than by assumption: at `scrim={0.75}` the backdrop is
+       * 75% ground over the asset, so even against a pure-white plate the
+       * backdrop is #474646 and fg-muted still clears 4.5:1 — it does not cross
+       * the floor at ANY plate luminance here. Over the near-black centre this
+       * plate actually specifies, it is 13.1646:1.
        */
       finePrint={<Disclosure>{finalCta.disclosure}</Disclosure>}
       /*
@@ -141,7 +184,37 @@ export default function FinalCta() {
         poster: platePoster('closing'),
       }}
     >
-      <CopyText source={supportLine} className="mt-6 text-sm leading-relaxed text-white/65" />
+      {/*
+        `text-fg-subtle`, not `text-white/65`, and this is a measured trade with
+        a real cost on one side of it — stated rather than glossed.
+
+        WHAT IT COSTS. `white/65` composites to #A9A9A9 over the ground: 8.5003:1
+        and OKLCH chroma 0.0000. `fg-subtle` #8A827F is 5.3087:1 on the ground
+        and 4.6977:1 on `surface-raised`. So the line gets 1.6x less contrast.
+
+        WHY IT IS STILL RIGHT. Two reasons, both structural.
+        (1) A dead-neutral grey sitting directly under body copy at chroma 0.0078
+        reads cool on a ground that is itself warm (the ground measures chroma
+        0.0038 at hue 17.6 deg). That cool-grey-on-warm-ink defect is the exact
+        thing fg-muted was re-solved to avoid, and leaving an alpha here would
+        reintroduce it in the one place the two colours are read side by side.
+        (2) An alpha's contrast is a property of whatever lands beneath it. This
+        sits over a media plate; `MediaCard` already made this move for the same
+        reason and says so.
+
+        THE CONSTRAINT THE SWAP CREATES, with its number. At `scrim={0.75}` the
+        backdrop is 75% ground over the asset, so the text's contrast is a
+        function of the plate. Solved: fg-subtle holds >= 4.5:1 while the plate
+        behind the copy stays below sRGB grey 90 (#5A5A5A) — at grey 89 it is
+        4.5071:1, and over the near-black centre this plate specifies it is
+        5.2846:1. The asset brief above already requires "centre of frame stays
+        dark and low-contrast for the centred copy"; that sentence now has a
+        number, and if a future plate lands brighter than #5A5A5A in the middle
+        the fix is the plate, not the token.
+
+        14px, so 4.5:1 is the applicable floor (not the 3:1 large-text one).
+      */}
+      <CopyText source={supportLine} className="mt-6 text-sm leading-relaxed text-fg-subtle" />
     </MediaSection>
   )
 }
