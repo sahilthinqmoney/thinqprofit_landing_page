@@ -51,7 +51,24 @@ function safeEqual(a: string, b: string) {
 }
 
 export default function middleware(request: Request) {
-  const password = process.env.SITE_PASSWORD
+  /**
+   * Read through `globalThis` rather than naming `process` directly.
+   *
+   * Vercel type-checks this file with its own tsconfig, not the project's —
+   * middleware.ts sits outside `tsconfig.app.json`'s `include: ["src"]` — and
+   * that config does not list `node` in `types`, so a bare `process` is
+   * TS2591: "Cannot find name 'process'". The obvious patch, a local
+   * `declare const process`, trades that for TS2451 on any build where the Node
+   * types ARE in scope. Naming no global at the type level avoids both.
+   *
+   * The value is still read at build time, so a variable added in the dashboard
+   * after this deployment was built is invisible to it until a redeploy.
+   */
+  const env = (globalThis as unknown as {
+    process?: { env?: Record<string, string | undefined> }
+  }).process?.env
+
+  const password = env?.SITE_PASSWORD
 
   /**
    * Fails closed, and says why. The alternative — serving the site when the
