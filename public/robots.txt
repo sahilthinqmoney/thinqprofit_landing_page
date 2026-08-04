@@ -1,9 +1,10 @@
 # Pre-launch. The page behind this carries unfilled compliance placeholders and
-# a waitlist form that stores nothing — see docs/go-live-checklist.md. Nothing
-# here should be indexed until that list is closed.
+# a waitlist form that stores nothing — see docs/go-live-checklist.md.
 #
-# This file is the polite half of the gate; middleware.ts is the half that does
-# not depend on a crawler's cooperation. Delete both at launch and replace this
-# with a real robots.txt and a sitemap.
+# The deployment is publicly reachable by anyone with the URL; this file and the
+# `noindex` meta in index.html are the only thing keeping the draft out of search
+# results, and they work only for crawlers that choose to honour them.
+#
+# Replace with a real robots.txt and a sitemap at launch.
 User-agent: *
 Disallow: /
