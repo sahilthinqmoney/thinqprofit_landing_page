@@ -2,7 +2,8 @@ import { useRef } from 'react'
 import { gsap, initScrollTrigger, useGSAP } from '../../lib/scrollTrigger'
 import SectionShell from '../ui/SectionShell'
 import CopyText from '../ui/CopyText'
-import { honestNote, pillars, regulatoryProof } from '../../data/security'
+import SpotlightCard from '../ui/SpotlightCard'
+import { honestNote, pillars, securityHeadline } from '../../data/security'
 
 initScrollTrigger()
 
@@ -90,9 +91,7 @@ const custody = pillars[0]
 const control = pillars.slice(1, 3)
 const hygiene = pillars.slice(3)
 
-/** Title column shared by tier 1 and tier 3, and by `Capabilities` above, so
- *  every ledger row on the page starts on the same two axes. */
-const ROW = 'grid gap-x-12 md:grid-cols-[minmax(0,24rem)_minmax(0,1fr)] lg:gap-x-20'
+
 
 export default function Security() {
   const root = useRef<HTMLDivElement>(null)
@@ -164,7 +163,26 @@ export default function Security() {
             0,
           )
           .from(claimBody, { y: -10, opacity: 0, duration: 0.85 }, 0.06)
-          .from(control2, { y: -8, opacity: 0, duration: 0.72, stagger: 0.07 }, 0.14)
+          /*
+           * `fromTo`, not `from`, and this is a bug fix rather than a style
+           * preference. As a staggered `.from()` inside this timeline the two
+           * tier-2 cards took their start state (opacity 0, y -8) at build time
+           * and never reached an end state when the ladder played — tier 1 and
+           * tier 3 resolved and these two stayed invisible, on the dev server
+           * and in the production build alike. Two of the six security
+           * commitments on the page were unreadable.
+           *
+           * A staggered `from` has no declared destination; the destination is
+           * whatever the element measured as when the tween was built. `fromTo`
+           * states both ends, so the cards land at opacity 1 regardless of what
+           * the sub-tweens did on the way.
+           */
+          .fromTo(
+            control2,
+            { y: -8, opacity: 0 },
+            { y: 0, opacity: 1, duration: 0.72, stagger: 0.07 },
+            0.14,
+          )
           .from(tier3, { y: -5, opacity: 0, duration: 0.6 }, 0.26)
 
         /*
@@ -209,101 +227,76 @@ export default function Security() {
       id="security"
       seamless
       scale="lead"
-      heading="Your money sits where it should."
-      subheading={regulatoryProof}
+      heading={securityHeadline}
+      subheading="SEBI-registered broker and member of NSE & BSE. Your funds settle to your bank, securities to your demat, and client funds are strictly segregated."
     >
-      <div ref={root}>
-        {/* 1 — custody. The full-strength rule, against the softer hairlines
-            below it, is the first thing that says which of these six facts the
-            section is actually built around. It is a `bg-*` hairline rather than
-            a `border-t` because a border cannot be scaled from its left edge —
-            only a box can, and the draw is what makes the rule read as growing
-            out of the heading. */}
+      <div ref={root} className="space-y-6">
         <div data-tier="1">
           <span
             data-rule="open"
             aria-hidden="true"
-            className="block h-px w-full origin-left bg-gradient-to-r from-chrome/70 via-chrome/30 to-transparent"
+            className="block h-px w-full origin-left bg-gradient-to-r from-accent-soft/70 via-accent-soft/30 to-transparent"
           />
-          <article className={`${ROW} gap-y-5 pt-10 sm:pt-12`}>
+          <SpotlightCard as="article" className="mt-8 rounded-2xl p-6 sm:p-8">
             <h3
               data-claim
               className="display text-[clamp(1.5rem,2vw,1.875rem)] leading-[1.15] text-fg"
             >
               {custody.title}
             </h3>
-            {/*
-              `40em`, not `60ch`. `ch` is the advance of "0" and is a property of
-              the face — 1ch is 0.600em in IBM Plex Sans, so a `ch` measure moved
-              with the face change while the sentences themselves did not. 40em
-              is the em equivalent of the 60ch this ladder was built at.
-            */}
             <CopyText
               source={custody.body}
-              className="max-w-[40em] text-base leading-relaxed text-fg-muted"
+              className="mt-3 max-w-[44em] text-base leading-relaxed text-fg-muted"
             />
-          </article>
+          </SpotlightCard>
         </div>
 
-        {/* 2 — control. Staggered across the two columns, 70ms apart: they are a
-            pair of qualifiers, so they arrive as a pair, not as two events. */}
         <ul
           data-tier="2"
-          className="mt-16 grid gap-x-12 gap-y-12 sm:mt-20 md:grid-cols-2 lg:gap-x-20"
+          className="grid gap-6 md:grid-cols-2"
         >
           {control.map((pillar) => (
-            <li key={pillar.title} className="border-t border-border-soft pt-7">
+            <SpotlightCard as="li" key={pillar.title} className="rounded-2xl p-6">
               <h3 className="display text-[clamp(1.25rem,1.5vw,1.5rem)] leading-[1.2] text-fg">
                 {pillar.title}
               </h3>
               <CopyText
                 source={pillar.body}
-                /* 56ch × 0.666em = 37.3em — same conversion, same reason. */
-                className="mt-3 max-w-[37.3em] text-base leading-relaxed text-fg-muted"
+                className="mt-3 text-base leading-relaxed text-fg-muted"
               />
-            </li>
+            </SpotlightCard>
           ))}
         </ul>
 
-        {/* 3 — hygiene. One tween for all three rows, no internal stagger: a
-            stagger would make the quietest tier perform.
-
-            Guarded because the tier is data-driven. It is non-empty today (three
-            rows), but the previous build shipped a `pillars` list that shrank to
-            three and left this `<ul>` rendering nothing while still paying its
-            own 80px of margin — directly above the closing statement, which is
-            the one place in this section where the air is supposed to mean
-            something. */}
         {hygiene.length > 0 && (
-          <ul data-tier="3" className="mt-16 sm:mt-20">
+          <div data-tier="3" className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {hygiene.map((pillar) => (
-              <li
+              <SpotlightCard
                 key={pillar.title}
-                className={`${ROW} gap-y-2 border-t border-border-soft py-6 sm:py-7`}
+                className="rounded-2xl p-6"
               >
-                <h3 className="text-lg font-medium leading-snug text-fg">{pillar.title}</h3>
+                <h3 className="text-base font-semibold leading-snug text-fg">{pillar.title}</h3>
                 <CopyText
                   source={pillar.body}
-                  /* 76ch × 0.666em = 50.6em — matches `Capabilities`' rows. */
-                  className="max-w-[50.6em] text-base leading-relaxed text-fg-muted"
+                  className="mt-2.5 text-sm leading-relaxed text-fg-muted"
                 />
-              </li>
+              </SpotlightCard>
             ))}
-          </ul>
+          </div>
         )}
 
-        {/* The terminal statement — no box, no coloured border, no flag. The air
-            above it is deliberately larger than any gap inside the ladder: it is
-            not a fourth tier, it is what the three tiers were leading to. */}
-        <div data-terminal className="mt-24 sm:mt-28 lg:mt-32">
+        <div
+          data-terminal
+          className="glass-card mt-12 rounded-3xl p-8 sm:p-10"
+        >
           <span
             data-rule="close"
             aria-hidden="true"
-            className="block h-px w-full origin-left bg-gradient-to-r from-chrome/70 via-chrome/30 to-transparent"
+            className="block h-px w-full origin-left bg-gradient-to-r from-chrome/70 via-chrome/25 to-transparent"
           />
           <CopyText
             source={honestNote}
-            className="display mt-10 max-w-[22em] text-[clamp(1.375rem,2.4vw,2rem)] leading-[1.34] text-fg sm:mt-12"
+            className="display mt-6 max-w-[28em] text-[clamp(1.25rem,2.2vw,1.875rem)] leading-[1.3] text-fg text-balance"
           />
         </div>
       </div>

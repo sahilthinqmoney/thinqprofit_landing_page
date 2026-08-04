@@ -1,5 +1,14 @@
 {
   "files": [],
+  /* Mirrored here as well as in tsconfig.app.json: this is a solution-style
+     root with `"files": []`, so it type-checks nothing itself, but the shadcn
+     CLI reads the root tsconfig first when resolving the `@/` aliases in
+     components.json. */
+  "compilerOptions": {
+    "paths": {
+      "@/*": ["./src/*"]
+    }
+  },
   "references": [
     { "path": "./tsconfig.app.json" },
     { "path": "./tsconfig.node.json" }

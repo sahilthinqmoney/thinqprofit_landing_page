@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react'
 import Container from '../ui/Container'
 import Disclosure from '../ui/Disclosure'
-import WaitlistForm from '../ui/WaitlistForm'
+import Button from '../ui/Button'
 import { SCALE } from '../ui/SectionShell'
 import { hero, offerQualifier } from '../../data/hero'
-import { cadencePromise, waitlistCount, waitlistCountNoun } from '../../data/waitlist'
+import MediaBackdrop from '../ui/MediaBackdrop'
 
 /**
  * §2 Hero — full-bleed motion with the copy and the form set on top of it.
@@ -37,18 +37,19 @@ import { cadencePromise, waitlistCount, waitlistCountNoun } from '../../data/wai
  *
  * ── The H1 no longer carries art-directed breaks ──────────────────────────
  *
- * "Charts that say everything." is four words. The previous headline was set as
- * three hand-broken lines and this file did the splitting; there is nothing to
- * split now, and a `\n` that agrees with where the text would wrap anyway is a
- * comment rather than a direction. The per-line settle machinery stays — it
- * animates whatever lines the string produces, which today is one on a desktop
- * and two on a phone.
+ * "The chart tells you what just moved." carries no `\n`. An older headline was
+ * set as three hand-broken lines and this file did the splitting; the string
+ * wraps on its own at every width now, and a `\n` that agrees with where the
+ * text would break anyway is a comment rather than a direction. The per-line
+ * settle machinery stays — it animates whatever lines the string produces, which
+ * is two on a desktop and three on a phone.
  *
  * The market-risk disclosure stays in its opaque rail at the foot of the
  * section: mandatory, visible in the first viewport, never collapsed, and never
  * behind a blur. `--header-stack` now sums the announcement bar AND the nav so
  * the rail still lands above the fold.
  */
+
 export default function Hero() {
   const lines = hero.headline.split('\n')
   const settled = useOpeningSettle()
@@ -56,92 +57,45 @@ export default function Hero() {
   return (
     <section
       id="hero"
-      className="relative isolate flex min-h-[calc(100svh-var(--header-stack))] w-full flex-col overflow-hidden bg-bg"
+      className="relative isolate flex min-h-[calc(100svh-var(--header-stack))] w-full flex-col justify-between overflow-hidden bg-bg py-12 lg:py-20"
     >
-      {/* Full-bleed background clip. `aria-hidden` because it carries no
-          information — the alt text that describes it lives in `hero.mediaAlt`
-          for the day this becomes a `<picture>` again. */}
-      <video
-        autoPlay
-        loop
-        muted
-        playsInline
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-0 -z-20 h-full w-full object-cover object-center"
-      >
-        <source src="/media/hero/hero_section_bg.mp4" type="video/mp4" />
-      </video>
+      {/* Full-bleed background media layer (supports /hero-bg.mp4 or hero background image) */}
+      <MediaBackdrop alt={hero.mediaAlt} video="/hero-bg.mp4" focus="center" />
 
-      {/*
-        The scrim is denser than it was, and it has to be: the copy block below
-        it grew from a headline and a button to a headline, a paragraph, an
-        offer line, a form and a count. A gradient tuned for three elements
-        leaves the fifth one sitting on whatever the video is doing.
-
-        It runs left-to-right rather than as a radial core, because the form's
-        input is a `bg-surface` fill that needs a predictable ground behind its
-        border for the full width of the copy column, not a soft falloff that is
-        dark under the headline and thin under the field.
-      */}
+      {/* Top Ambient Keynote Spotlight */}
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute inset-0 -z-10 bg-gradient-to-r from-bg via-bg/85 to-bg/30"
+        className="pointer-events-none absolute inset-x-0 top-0 h-[480px] -z-10 bg-[radial-gradient(ellipse_70%_50%_at_50%_-10%,rgba(255,255,255,0.12),rgba(255,255,255,0))]"
       />
 
-      <div className="flex flex-1 items-center pt-24 pb-16 md:pt-0 md:pb-0">
-        <Container>
-          <div className="md:mr-[42%]">
-            {/*
-              The badge. A bordered chip rather than bare text, because at 12px
-              on a moving video an unbordered line reads as a caption that failed
-              to load; the rule around it is what says "this is a label".
+      {/* Radial scrim overlay ensuring background video graphics ("COMING SOON") & text are crystal clear */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(ellipse_at_center,rgba(5,5,5,0.25)_0%,rgba(5,5,5,0.75)_65%,rgba(5,5,5,0.96)_100%)]"
+      />
 
-              `chrome`, not `accent`. The form's submit button is two elements
-              below and it is the one copper object in this section — a copper
-              chip above it would put the action colour on something that cannot
-              be acted on, which is §4 rule 1 exactly.
-            */}
-            <p
-              className="inline-flex items-center rounded-full border border-border-soft bg-surface/60 px-3 py-1.5 text-xs font-medium tracking-wide text-fg-muted backdrop-blur-sm transition-[opacity,transform] duration-700"
+      <div className="flex flex-1 items-center my-auto">
+        <Container>
+          <div className="mx-auto max-w-[52em] text-center">
+            {/* Premium Glowing Eyebrow Badge */}
+            <div
+              className="inline-flex items-center gap-2.5 rounded-full border border-white/15 bg-surface/80 px-4 py-1.5 text-xs font-mono tracking-wider text-fg-muted backdrop-blur-xl shadow-[0_2px_12px_rgba(0,0,0,0.5),inset_0_1px_0_rgba(255,255,255,0.1)] transition-[opacity,transform] duration-700"
               style={{
                 transitionTimingFunction: 'var(--ease-out-expo)',
                 opacity: settled ? 1 : 0,
                 transform: settled ? 'translateY(0)' : 'translateY(-6px)',
               }}
             >
-              {hero.eyebrow}
-            </p>
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-chrome opacity-75" />
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-chrome" />
+              </span>
+              <span>{hero.eyebrow}</span>
+            </div>
 
-            {/*
-              `SCALE.hero`, imported rather than hand-written, and this is a
-              REGRESSION FIX rather than a refinement — worth recording because
-              the failure was silent and lasted two commits.
-
-              The H1 carried `display-lead font-display leading-[0.94em]` and no
-              font-size at all. None of those three sets one: `.display-lead` is
-              a VOICE (axis coordinates, tracking, `text-wrap`) and deliberately
-              declares no size, because `SectionShell` owns the ladder. Tailwind's
-              preflight resets `h1` to `font-size: inherit`, so the page's largest
-              statement was rendering at 16px body size — visually a bold
-              paragraph. It happened during the copper retheme, which replaced the
-              old inline `text-[clamp(3.25rem,8vw,7.5rem)]` with the voice class
-              and did not put the size back.
-
-              The lesson is the one `SectionShell`'s own note already stated and
-              this file was the exception to: every rendered size resolves to a
-              NAMED role. `SCALE.hero` is the H1's step, it is excluded from
-              `SectionShell`'s assignable steps by its type, and importing it here
-              is what stops the hero's size and the section ladder drifting apart
-              — which is exactly what happened while it was a literal.
-
-              `leading-[0.94em]` goes with it. `SCALE.hero` ships `leading-[0.94]`
-              unitless, which on this element resolves to the same measure, and
-              the +0.14em clip allowance on each line block below makes the real
-              baseline-to-baseline 1.08em. Two declarations of one value is how
-              they end up disagreeing.
-            */}
+            {/* Display H1 Headline with Metallic Depth */}
             <h1
-              className={`display-lead mt-7 font-display tracking-tight text-fg ${SCALE.hero}`}
+              className={`display-lead mt-6 font-display tracking-tight text-balance drop-shadow-[0_4px_24px_rgba(255,255,255,0.12)] ${SCALE.hero}`}
               style={{
                 fontVariationSettings: settled
                   ? '"wdth" 82, "wght" 580'
@@ -149,9 +103,9 @@ export default function Hero() {
               }}
             >
               {lines.map((line: string, index: number) => (
-                <span key={line} className="block overflow-hidden pb-[0.14em]">
+                <span key={line} className="block overflow-hidden pb-[0.12em]">
                   <span
-                    className="block transition-[opacity,transform,filter] duration-[900ms]"
+                    className="block bg-gradient-to-b from-white via-white/95 to-white/70 bg-clip-text text-transparent transition-[opacity,transform,filter] duration-[900ms]"
                     style={{
                       transitionTimingFunction: 'var(--ease-out-expo)',
                       transitionDelay: `${90 + index * 110}ms`,
@@ -166,6 +120,7 @@ export default function Hero() {
               ))}
             </h1>
 
+            {/* Subheadline & Value Proposition */}
             <div
               className="transition-[opacity,transform] duration-700"
               style={{
@@ -175,63 +130,33 @@ export default function Hero() {
                 transform: settled ? 'translateY(0)' : 'translateY(8px)',
               }}
             >
-              <p className="mt-8 max-w-[32em] text-lg leading-relaxed text-fg-muted">
+              <p className="mt-6 max-w-[34em] mx-auto text-[1.0625rem] sm:text-[1.1875rem] leading-[1.65] text-fg-muted text-balance font-normal">
                 {hero.subheadline}
               </p>
 
-              {/*
-                The offer, and its qualifier on the same line at the same size.
+              {/* Glassmorphic Offer Highlight Card */}
+              <div className="mt-7 inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-surface/60 px-5 py-2.5 text-xs sm:text-sm text-fg-muted backdrop-blur-xl shadow-lg">
+                <span className="font-medium text-fg">{hero.primaryCta}</span>
+                <span className="text-fg-subtle">·</span>
+                <span>{offerQualifier}</span>
+              </div>
 
-                `fg` on the claim and `fg-muted` on the limit is a one-step
-                difference — deliberately small. The qualifier is not fine print
-                and must never be set as such: the gap between "six months of
-                zero brokerage" and what a customer actually pays is exactly the
-                gap this sentence exists to close.
-              */}
-              <p className="mt-6 max-w-[32em] text-base leading-relaxed">
-                <span className="font-medium text-fg">{hero.primaryCta}</span>{' '}
-                <span className="text-fg-muted">{offerQualifier}</span>
-              </p>
-
-              <WaitlistForm variant="hero" className="mt-8" />
-
-              {/*
-                Social proof and the frequency promise, on one line.
-
-                The count is set in `.tabular` — IBM Plex Mono, tabular figures —
-                which is DESIGN.md §5's rule for every numeral on the page. It
-                also means the number does not change width as it ticks, so a
-                live count cannot reflow the sentence beside it.
-
-                The cadence promise sits here rather than under the field on
-                purpose. Under the field it reads as a disclaimer about the form;
-                beside the count it reads as what the other 2,412 people
-                receive, which is the same fact stated as evidence.
-              */}
-              <p className="mt-6 flex flex-wrap items-center gap-x-2.5 gap-y-1 text-sm text-fg-muted">
-                <span>
-                  <span className="tabular font-medium text-fg">
-                    {waitlistCount.toLocaleString('en-IN')}
-                  </span>{' '}
-                  {waitlistCountNoun}
-                </span>
-                <span aria-hidden="true" className="text-fg-subtle">
-                  ·
-                </span>
-                <span>{cadencePromise}</span>
-              </p>
+              {/* High-End Primary CTA Button */}
+              <div className="mt-8 flex items-center justify-center">
+                <Button href="#final-cta" size="lg" className="shadow-[0_0_24px_rgba(255,255,255,0.15)] hover:shadow-[0_0_32px_rgba(255,255,255,0.25)] transition-all duration-300">
+                  Get early access
+                </Button>
+              </div>
             </div>
           </div>
         </Container>
       </div>
 
-      {/* The disclosure rail. Opaque, never `backdrop-blur` — landing.md §10
-          rules out glass behind legal copy, because the contrast it yields
-          depends on whatever is scrolling past behind it. */}
-      <div className="relative border-t border-border-soft bg-bg">
+      {/* Statutory Disclosure Rail */}
+      <div className="relative border-t border-white/10 bg-bg/85 backdrop-blur-md mt-12">
         <Container>
-          <div className="py-4">
-            <Disclosure tone="note" className="max-w-3xl">
+          <div className="py-3.5 text-center">
+            <Disclosure tone="note" className="max-w-4xl mx-auto text-xs text-fg-subtle">
               {hero.riskDisclosure}
             </Disclosure>
           </div>

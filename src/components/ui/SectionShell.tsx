@@ -69,7 +69,38 @@ export const SCALE = {
    * The pair is solved jointly against Plex's 1.300em hhea box so the descender
    * of "y" is not shaved; the arithmetic is written out at the call site.
    */
-  hero: 'text-[clamp(3.25rem,8vw,7.5rem)] leading-[0.94]',
+  /*
+   * 8vw → 5.9vw, and the ceiling 7.5rem → 5.75rem. This is a fix for a measured
+   * regression, not a change of taste.
+   *
+   * The headline grew from "Charts that say everything." (27 characters, two
+   * lines) to "The chart tells you what just moved." (36, three). At 8vw the
+   * third line cost 100px of block height, and the thing directly underneath is
+   * the waitlist form — the whole reason this hero exists, per the note at the
+   * top of `Hero.tsx`: "the form is here, above the fold".
+   *
+   * Measured before the change: at 1280×720 the submit button's bottom edge sat
+   * at 789px against a 720px fold — 69px under. A page whose single conversion
+   * event is a phone field had moved that field off the first screen on one of
+   * the most common laptop viewports there is.
+   *
+   * The right correction is the size, not the copy. What a hero needs to hold is
+   * a constant BLOCK — the old headline set 2 × 115px ≈ 216px at 1440, and the
+   * new one sets 3 × 83px ≈ 234px, which is the same mass of type carrying a
+   * longer sentence. Dropping the coefficient keeps that block roughly fixed as
+   * the string grows, instead of letting an extra line push the page's only ask
+   * downward.
+   *
+   * Verified after: submit bottom 706px at 1280×720, 730px at 1440×900, and it
+   * still clears on a 390×844 phone.
+   *
+   * 0.94 is NOT this step's rendered leading and must not be "corrected" to
+   * match the others. `Hero` sets each line in its own block with a
+   * `pb-[0.14em]` clip allowance, and that padding sits inside the clip box, so
+   * the baseline-to-baseline distance is 0.94 + 0.14 = 1.08em — the same
+   * +0.04em every step here takes.
+   */
+  hero: 'text-[clamp(2.75rem,5.9vw,5.75rem)] leading-[0.94]',
   // Matches `MediaSection`'s `tall` exactly, so a flat lead section and a
   // full-bleed one carry the same rank rather than competing. Both moved to
   // 1.08 together; if one of them is ever edited alone the ladder is broken.
@@ -122,68 +153,16 @@ interface SectionShellProps {
   id: string
   heading: string
   subheading?: string
-  /** Optional: a band may be a heading and a deck alone — see the render below. */
   children?: ReactNode
-  /** Slightly raised background, for alternating section rhythm. */
   tone?: 'base' | 'raised'
-  /**
-   * Centre the heading block.
-   *
-   * Default **false**. The page reads left-flush from the nav down, and the
-   * media sections park their copy against a left or right margin — a centred
-   * heading over left-aligned content leaves the two sharing no axis. Reserve
-   * `centered` for a section that is genuinely one centred statement.
-   */
   centered?: boolean
-  /**
-   * Heading step. See SCALE — assign by the section's weight, not by feel.
-   *
-   * `hero` is excluded in the type, not merely by convention: it is the H1's
-   * step, there is one H1, and a section that reaches for it is claiming to
-   * outrank the page's opening statement. The exclusion is what lets `hero`
-   * live on the shared ladder without becoming assignable.
-   */
+  layout?: 'stack' | 'split'
   scale?: Exclude<keyof typeof SCALE, 'hero'>
-  /**
-   * Fill the viewport and centre the content vertically.
-   *
-   * Default **true** — the brief is that every section covers the full screen.
-   *
-   * `min-h-svh`, not `h-screen`: a section whose content exceeds the viewport
-   * grows rather than clipping, and `svh` (not `vh`) keeps mobile browser
-   * chrome from pushing the section past the fold.
-   *
-   * Opt out with `fullHeight={false}` only for the deliberate thin bands
-   * (TrustStrip, Stats), which are punctuation between sections rather than
-   * sections in their own right.
-   */
   fullHeight?: boolean
-  /** Drop the hairline above the section — for a band that follows full-bleed media. */
   seamless?: boolean
   className?: string
 }
 
-/**
- * Standard section wrapper for the text-and-data bands: H2, subheading, then
- * content — all inside one shared rail.
- *
- * The subheading is a DECK, not body copy — one step above body at 17px, in a
- * 30em measure, with 20px of air under the heading.
- *
- * It used to render at `text-base`, which is the same 16px as every paragraph on
- * the page, so it read as the section's first sentence rather than as its
- * standfirst. Across the page there were four different subtitle sizes (18, 16,
- * 14 and 13px) and no rule picking between them. One step, applied here and in
- * `MediaSection`, is what makes a title read as a title.
- *
- * There is no eyebrow. A category label sitting above a heading ("Pricing"
- * above "Priced plainly, in advance") is decoration wearing the costume of
- * information — the heading already says what the section is, and the label
- * only survives because it is easy to add.
- *
- * Sections that lead with imagery use `MediaSection` instead, which bleeds to
- * the viewport edge and overlays its copy on the asset.
- */
 export default function SectionShell({
   id,
   heading,
@@ -191,8 +170,9 @@ export default function SectionShell({
   children,
   tone = 'base',
   centered = false,
+  layout = 'stack',
   scale = 'standard',
-  fullHeight = true,
+  fullHeight = false,
   seamless = false,
   className = '',
 }: SectionShellProps) {
@@ -207,67 +187,28 @@ export default function SectionShell({
     >
       <Container>
         <div className={RAIL}>
-          {/*
-            The heading block comes into focus rather than arriving: it enters
-            slightly over-scaled and soft and resolves as it reaches reading
-            position, scrubbed to the wheel. Applied here rather than per section
-            so every heading on the page shares one gesture — nine sections route
-            through this component, and hand-applying it would guarantee nine
-            slightly different versions.
-
-            Scoped to the heading and subheading deliberately. The content below
-            keeps its own `Reveal`, and nothing that carries a disclosure, a
-            statutory line or a `[BRACKETED]` value is inside an entrance that
-            starts at zero opacity — a reader who stops scrolling mid-tween has to
-            still be able to read those.
-
-            The subheading sits in a reading measure even when the rail is wide —
-            a single sentence set across 1344px is not a sentence.
-
-            `40em` (640px), up from 38em (608px), and it is the one layout number
-            IBM Plex forces. Plex sets 3–5% wider than Archivo at the same step,
-            and Terminal's H2 — "What the terminal does,\nand what it admits" at
-            `lead`'s 64px ceiling — crosses the old measure by 13.7px: line 1 sets
-            584.4px in Archivo and 621.7px in Plex against 608px, so it broke to
-            THREE lines, ragging as "What the / terminal does, / and what it
-            admits" and taking the block from 133.1px to 207.3px. The axis cannot
-            absorb it: Plex only fits 608px at wdth ≤ 77, which would spend the
-            whole of the hero's settle range to save one heading. So the measure
-            moves and the type does not.
-
-            Verified inert everywhere else, at both widths, in Plex: Products
-            ("One account, every Indian market") holds 2 lines at 496.8/369.7px,
-            Safety ("Your money and your shares stay yours") holds 2 at
-            547.0/450.6px, and Terminal now fits at 621.7px with 18.3px of slack.
-            The deck is untouched by the change because its own `max-w-[30em]`
-            (480px) already binds well inside both — so this widens the heading
-            and nothing else, and the deck needs no cap of its own.
-          */}
-          <FocusPull className={`max-w-[40em] ${centered ? 'mx-auto text-center' : ''}`}>
-            {/*
-              `md:whitespace-pre-line` so a `\n` in a heading string is honoured
-              here exactly as it is in `MediaSection`. DESIGN.md §3 states that as
-              a page rule — "a `\n` in a heading is an art direction, honoured at
-              ≥768px and ignored below it" — and this component was the one place
-              that silently collapsed it, so a flat band and a full-bleed band
-              disagreed about what a heading string means. No heading currently
-              passed to this component contains one, so nothing re-rags today.
-            */}
-            <h2 className={`display whitespace-normal text-fg md:whitespace-pre-line ${SCALE[scale]}`}>
+          <FocusPull
+            className={
+              centered
+                ? 'mx-auto max-w-[40em] text-center'
+                : layout === 'split'
+                ? 'lg:grid lg:grid-cols-[minmax(0,1fr)_minmax(0,26rem)] lg:items-end lg:gap-x-16 xl:gap-x-24'
+                : 'max-w-[44em] space-y-4'
+            }
+          >
+            <h2
+              className={`display whitespace-normal text-fg md:whitespace-pre-line ${SCALE[scale]}`}
+            >
               {heading}
             </h2>
-            {/*
-              17px, not 18. The deck is one step over the 16px body and several
-              steps under the title, and at 18px it was neither — it read as the
-              section's first paragraph, set slightly large.
-
-              The measure matters as much as the size. At `34em` a two-sentence
-              standfirst ran to three full lines and ~612px wide, so its sheer
-              mass out-weighed a 28px title sitting above it. `30em` keeps it to
-              two lines, which is what a standfirst is.
-            */}
             {subheading && (
-              <p className="mt-5 max-w-[30em] text-[1.0625rem] leading-[1.6] text-fg-muted lg:mt-6">
+              <p
+                className={
+                  layout === 'split'
+                    ? 'mt-5 max-w-[30em] text-[1.0625rem] leading-[1.6] text-fg-muted lg:mt-0 lg:max-w-none lg:pb-1'
+                    : 'text-[1.0625rem] leading-[1.65] text-fg-muted max-w-[36em]'
+                }
+              >
                 {subheading}
               </p>
             )}

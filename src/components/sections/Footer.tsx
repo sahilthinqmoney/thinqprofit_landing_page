@@ -5,8 +5,6 @@ import { RAIL } from '../ui/SectionShell'
 import CopyText from '../ui/CopyText'
 import Disclosure from '../ui/Disclosure'
 import {
-  bottomBarLinks,
-  brandBlurb,
   brandName,
   copyrightEntity,
   copyrightSuffix,
@@ -92,7 +90,12 @@ export default function Footer() {
             {tagline}
           </p>
 
-          <p className="mt-6 max-w-md text-base leading-relaxed text-fg-muted">{brandBlurb}</p>
+          {/* `brandBlurb` — "A SEBI-registered broker building an AI-native
+              trading terminal for Indian markets" — used to sit here. It said
+              what the announcement bar, the hero badge and §5's regulatory proof
+              had each already said, in the one position on the page reserved for
+              the tagline's closing argument. A sentence under a closing
+              statement dilutes the statement. */}
         </div>
       </Container>
 
@@ -214,33 +217,16 @@ export default function Footer() {
           a rule between them would read as the mark being fenced off. */}
       <div>
         <Container>
-          <div
-            className={`flex flex-col gap-4 py-7 sm:flex-row sm:items-center sm:justify-between ${RAIL}`}
-          >
+          {/* Terms · Privacy · Risk disclosure stood on the right of this bar,
+              and all three pointed at `#`. The note above the deleted link
+              columns argued that a footer full of dead anchors is worse than a
+              short footer, then left three of them in the last line of the
+              document. They come back as links when the documents exist. */}
+          <div className={`py-7 ${RAIL}`}>
             <p className="text-xs leading-relaxed text-fg-muted">
               © <span className="tabular">{year}</span>{' '}
               <CopyText as="span" source={copyrightEntity} />. {copyrightSuffix}
             </p>
-
-            {/* gap-x-2 either side of the separator keeps ~12px between the
-                padded hit areas of adjacent links, past the 8px floor. */}
-            <ul className="flex flex-wrap items-center gap-x-2 text-xs">
-              {bottomBarLinks.map((link, index) => (
-                <li key={link} className="flex items-center gap-2">
-                  {index > 0 && (
-                    <span aria-hidden="true" className="text-fg-subtle">
-                      ·
-                    </span>
-                  )}
-                  <a
-                    href="#"
-                    className="-mx-1 inline-flex min-h-11 items-center rounded px-1 text-fg-muted transition-colors duration-200 hover:text-fg"
-                  >
-                    {link}
-                  </a>
-                </li>
-              ))}
-            </ul>
           </div>
         </Container>
       </div>

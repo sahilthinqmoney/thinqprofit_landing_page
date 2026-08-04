@@ -20,14 +20,14 @@
          they arrive. -->
     <meta
       name="description"
-      content="Thinq is an AI-native trading platform for Indian markets. The chart reads price action back to you. Join the waitlist for six months of zero Thinq brokerage — statutory charges apply."
+      content="Thinq is a trading terminal for Indian markets that watches every instrument you follow and writes what changed in plain English. Join the waitlist for six months of zero Thinq brokerage; statutory charges apply."
     />
 
     <meta property="og:type" content="website" />
-    <meta property="og:title" content="Thinq — Charts that say everything" />
+    <meta property="og:title" content="Thinq — the chart tells you what just moved" />
     <meta
       property="og:description"
-      content="An AI-native trading terminal for Indian markets. Six months of zero Thinq brokerage for everyone on the waitlist; statutory charges apply."
+      content="A trading terminal for Indian markets, not yet open. Six months of zero Thinq brokerage for everyone on the waitlist; statutory charges apply."
     />
     <!-- TODO (blocking, docs/go-live-checklist.md): og-image.png is the OLD
          share card. It is a blue-black plate on #863BFF / #7E14FF / #47BFFF —
@@ -37,7 +37,7 @@
     <meta property="og:image" content="/og-image.png" />
     <meta
       property="og:image:alt"
-      content="Thinq — an AI-native trading platform for Indian markets"
+      content="Thinq — a trading terminal for Indian markets"
     />
     <meta name="twitter:card" content="summary_large_image" />
 
@@ -67,20 +67,15 @@
       }
     </script>
 
-    <!--
-      No font <link> and no preconnects. IBM Plex Sans and IBM Plex Mono are
-      self-hosted through @fontsource and imported at the top of src/index.css,
-      which is the right call here for a reason that has already bitten this
-      file: a hosted stylesheet has to name every variable axis in its URL, and
-      the axis list is the one part of a font declaration nothing validates —
-      drop `wdth` from the query and every `font-variation-settings` rule on the
-      page silently does nothing, including the hero's entire opening. A local
-      @font-face carries the axes in the file. It also removes two DNS+TLS
-      handshakes to a third-party origin from the critical path, and the faces
-      now ship from the same origin as the CSS that references them.
-    -->
+    <!-- Google Fonts for ultra-premium typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Plus+Jakarta+Sans:ital,wght@0,300..800;1,300..800&display=swap"
+      rel="stylesheet"
+    />
 
-    <title>Thinq — Charts that say everything</title>
+    <title>Thinq — the chart tells you what just moved</title>
   </head>
   <body>
     <div id="root"></div>

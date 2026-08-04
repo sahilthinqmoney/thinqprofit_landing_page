@@ -37,6 +37,10 @@ import type { SafetyPillar } from '../types'
  * and options, so a commodities membership displayed under a security heading
  * would be a scope claim made by the section whose job is to be believed.
  */
+export const securityHeadline = 'Where your money sits.'
+export const securityBody =
+  'SEBI-registered broker. Member NSE and BSE. Funds settle to your own bank, securities to your own demat with the depository. Client funds segregated as the regulations require and reported to the exchange. Two-factor on login and on withdrawal. Encrypted in transit and at rest. Every order and modification timestamped. Your data is never sold.'
+
 export const regulatoryProof =
   'Thinq is a SEBI-registered broker and a member of the NSE and the BSE. Funds settle to your own bank account. Securities are held in your own demat account.'
 

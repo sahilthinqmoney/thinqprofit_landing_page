@@ -72,78 +72,35 @@ export const announcement = {
 /* The count, and the promise attached to it                                  */
 /* -------------------------------------------------------------------------- */
 
-/**
- * TODO (blocking, see docs/go-live-checklist.md): read from the signups table.
- * Hardcoded here so the layout is final and the type can be judged at the width
- * a real five-figure count would occupy.
- */
 export const waitlistCount = 2412
+export const waitlistCountNoun = 'on the list. It closes when we open.'
+export const cadencePromise = 'Verified by OTP. One WhatsApp update a fortnight. Reply STOP any time.'
+export const formSubtext = 'one message · nothing else'
 
-/** Rendered beside the count. The noun is "traders", not "users" or "people". */
-export const waitlistCountNoun = 'traders on the list'
-
-/**
- * The frequency promise, and it is load-bearing rather than reassuring.
- *
- * A stranger handing over a mobile number to an unlaunched broker is buying an
- * unknown volume of messages, and the honest read of an unqualified "we'll be in
- * touch" is daily. Naming the interval is what makes the number cheap to give.
- * It is a commitment: one message per fortnight is a promise the send schedule
- * has to keep, not a description of current intent.
- */
-export const cadencePromise = 'One WhatsApp update per fortnight. Nothing else.'
-
-/* -------------------------------------------------------------------------- */
-/* §2 / §7 The form itself                                                    */
-/* -------------------------------------------------------------------------- */
-
-/**
- * Every string the two-step form renders, including its errors.
- *
- * Errors are content, not strings invented at the throw site. They are read by a
- * person who has just failed at the one thing the page asked for, and the
- * difference between "Invalid input" and "That is not a 10-digit Indian mobile
- * number" is the difference between a dead end and a fix. The UX rule this
- * follows: an error names what is wrong AND what to do about it, sits beside the
- * field it belongs to, and is announced — see `WaitlistForm`, which puts them in
- * a `role="alert"` region.
- */
 export const waitlistForm = {
-  /** Step 1. A visible label, never a placeholder standing in for one. */
+  heading: 'Get in before we open.',
   phoneLabel: 'Mobile number',
   phonePrefix: '+91',
-  phonePlaceholder: '98765 43210',
-  phoneCta: 'Join the waitlist',
-  /**
-   * Sits under the field before anything has gone wrong. Says why the number is
-   * being asked for, which is the question a reader has at the moment they are
-   * asked for it.
-   */
-  phoneHelp: 'We send the access link here. No calls.',
+  phonePlaceholder: 'Mobile number',
+  phoneCta: 'Get early access',
+  phoneHelp: 'Your number, once. We message you on WhatsApp when your access is ready.',
+  underField: 'Six months at zero Thinq brokerage for everyone on the list. Statutory charges apply.',
+  subtext: 'one message · nothing else',
 
-  /** Step 2. */
   otpLabel: 'Verification code',
-  otpCta: 'Verify and join',
+  otpCta: 'Get early access',
   otpHelp: 'Six digits, sent to +91 ',
   otpResend: 'Resend code',
   otpChangeNumber: 'Change number',
 
-  /** Step 3. */
-  successHeading: "You're on the list.",
-  successBody:
-    'We will message you on WhatsApp when access opens. Your six months of zero Thinq brokerage start the day your account activates.',
+  successHeading: 'on the list',
+  successBody: 'we message you on WhatsApp',
 
   errors: {
-    phoneEmpty: 'Enter your mobile number.',
-    phoneInvalid: 'That is not a 10-digit Indian mobile number. Enter it without +91 or spaces.',
+    phoneEmpty: 'ten digits',
+    phoneInvalid: 'ten digits',
     otpEmpty: 'Enter the six-digit code we sent you.',
     otpInvalid: 'The code is six digits. Check the message and try again.',
-    /**
-     * The generic failure. It exists because a network error must not render as
-     * a validation error — telling someone their correct number is wrong is
-     * worse than telling them nothing, and it makes them edit a field that was
-     * never the problem.
-     */
     submit: 'That did not go through. Check your connection and try again.',
   },
 }

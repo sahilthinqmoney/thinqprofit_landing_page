@@ -144,6 +144,27 @@ interface MediaSectionProps {
   measure?: string
   body?: ReactNode
   actions?: ReactNode
+  /**
+   * Content for the half of the frame `place` reserves for the asset.
+   *
+   * `place` has always parked the copy against one margin and left 46% of the
+   * frame for the plate to be read in. That reservation is correct when the
+   * plate has a subject in it; it is dead space when the plate is a dark
+   * gradient, which is what §3's terminal crop actually renders as at desktop
+   * widths — a machined edge in the far corner and 46% of near-black between it
+   * and the words.
+   *
+   * So the slot is optional and it is a slot, not a second copy column: it takes
+   * the reserved area on `md` and up, and on a phone it stacks under the copy,
+   * where the percentage margins do not apply at all.
+   *
+   * Absolutely positioned rather than a grid column on purpose. The copy block's
+   * height is what sets the section's height, and a two-column grid would let a
+   * tall aside push the section taller than its own headline needs — which is
+   * how a full-bleed band stops being able to promise `min-h-svh` and starts
+   * being however tall its illustration is.
+   */
+  aside?: ReactNode
   /** Disclosures live inside the section, under the CTA — never in a legal ghetto. */
   finePrint?: ReactNode
   /** Extra content below the CTA, still inside the overlay. */
@@ -183,12 +204,26 @@ export default function MediaSection({
   measure = '11em',
   body,
   actions,
+  aside,
   finePrint,
   children,
   media,
   className = '',
 }: MediaSectionProps) {
   const step = scale ?? height
+
+  /*
+   * The aside takes the margin the copy gives up, mirrored off `place` so the
+   * two can never end up on the same side. `left` copy runs to 54% and the
+   * aside starts at 58%, which leaves a 4% channel between them — enough that
+   * the two blocks read as adjacent rather than as one wrapped column, and not
+   * so much that the aside is pushed into the gutter.
+   */
+  const ASIDE_PLACE = {
+    left: 'md:left-[58%] md:right-0',
+    right: 'md:left-0 md:right-[58%]',
+    center: 'md:inset-x-0',
+  } as const
 
   /*
    * `isolate` is load-bearing, not decoration. `relative` alone does not open a
@@ -341,6 +376,26 @@ export default function MediaSection({
             {finePrint && (
               <div className="mt-8 max-w-[46em] text-[0.8125rem] leading-relaxed text-fg-subtle">
                 {finePrint}
+              </div>
+            )}
+
+            {/*
+              The aside, on a phone. It follows the copy in the DOM at every
+              width, so the reading order and the focus order are the same order
+              at both — the desktop version only moves where it PAINTS, via
+              absolute positioning, and never where it sits in the document.
+
+              That is the whole reason this is one element with a responsive
+              position rather than two elements with a `hidden md:block` pair:
+              duplicating it would put the same content in the accessibility
+              tree twice, and hiding one copy per breakpoint is how a screen
+              reader ends up reading a section that is not on the screen.
+            */}
+            {aside && (
+              <div
+                className={`mt-12 w-full md:absolute md:top-1/2 md:mt-0 md:w-auto md:-translate-y-1/2 ${ASIDE_PLACE[place]}`}
+              >
+                {aside}
               </div>
             )}
           </div>

@@ -74,42 +74,15 @@ export default function FocusPull({
         gsap.fromTo(
           el,
           {
-            scale: 1.045,
-            filter: 'blur(7px)',
-            opacity: 0.45,
-            /*
-             * Scale from the left edge. `transform-origin` defaults to centre, so
-             * a left-aligned heading grows *outward in both directions* and its
-             * left edge drifts left as it scales — measured 14px at 1440, which
-             * put every section heading out of alignment with the content beneath
-             * it for the whole length of the scrub. Origin at the left edge means
-             * the edge is fixed and only the right side moves.
-             */
+            scale: 1.02,
+            opacity: 0.85,
             transformOrigin: 'left center',
           },
           {
             scale: 1,
-            filter: 'blur(0px)',
             opacity: 1,
-            /*
-             * `none` when scrubbed, and this is not a style preference.
-             *
-             * On a scrubbed tween the scroll position already *is* the easing
-             * curve — the reader's wheel provides it. Layering `power3.out` on
-             * top eases an already-eased input, which front-loads the whole
-             * effect: measured, the heading was 97% resolved at the midpoint of
-             * its own scroll range, so the focus pull was over before anyone
-             * could see it happening. Linear maps travel to progress 1:1 and the
-             * gesture becomes legible.
-             *
-             * The fire-once path keeps the ease, because there it is the only
-             * thing shaping the motion.
-             */
             ease: scrub ? 'none' : EASE,
-            // `will-change` for the duration of the tween only. Leaving it on
-            // permanently holds a compositor layer per element for the whole
-            // session, which on a page this long costs more than it saves.
-            willChange: 'transform, filter, opacity',
+            willChange: 'transform, opacity',
             scrollTrigger: {
               trigger: el,
               // Resolves as it travels from just-entered to reading position,

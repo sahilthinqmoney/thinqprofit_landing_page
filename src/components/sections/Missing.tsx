@@ -1,5 +1,4 @@
 import MediaSection from '../ui/MediaSection'
-import { plateImage } from '../../lib/media'
 import { missing } from '../../data/missing'
 
 /**
@@ -52,55 +51,25 @@ export default function Missing() {
       height="tall"
       place="left"
       anchor="center"
-      /*
-       * Denser than `MediaSection`'s 0.82 default. This section carries four
-       * stacked copy blocks rather than the usual headline-and-sentence, so the
-       * dark area under the words has to hold for their full height — and the
-       * plate's own subject is bright along the edge nearest the copy column.
-       */
       scrim={0.88}
       scrimAt="26% 50%"
       measure="13em"
       headline={missing.heading}
-      /*
-       * The `body` slot renders at 17px in a 30em measure — `MediaSection`'s
-       * standfirst step, shared with `SectionShell` so a full-bleed section and a
-       * flat one agree about what a subtitle is.
-       *
-       * The narrative line is passed here rather than as a child because it IS
-       * the standfirst: it is the sentence that qualifies the headline. It takes
-       * `text-fg` and a display step above the slot's default, which is the one
-       * override in this section — see the note above on why this line is set
-       * larger than the prose under it.
-       */
-      body={
-        <span className="display block text-[clamp(1.25rem,2vw,1.625rem)] leading-[1.25] text-fg">
-          {missing.narrative}
-        </span>
-      }
+      body={missing.solution}
       finePrint={missing.finePrint}
+      aside={
+        <div className="relative group flex items-center justify-center">
+          {/* Seamless Floating Mechanical Flip Clock with Ultra-Soft Ambient Fade */}
+          <img
+            src="/media/flip-clock.png"
+            alt="Mechanical flip clock displaying 11:40 market moment"
+            className="w-full h-auto max-h-[520px] object-contain opacity-90 [mask-image:radial-gradient(ellipse_85%_85%_at_center,black_45%,transparent_100%)] drop-shadow-[0_24px_48px_rgba(0,0,0,0.95)] transition-all duration-700 group-hover:scale-[1.03] group-hover:opacity-100"
+          />
+        </div>
+      }
       media={{
-        alt: 'A machined aluminium form receding into darkness, one edge catching a single soft light.',
-        image: plateImage(missing.plate),
+        alt: 'Feature Focus',
       }}
-    >
-      {/*
-        The pain and the solution, in the `children` slot below the standfirst.
-
-        Both are `max-w-[34em]` rather than the slot's default, because they are
-        prose rather than a deck — two sentences that have to be read, not
-        scanned. 34em at 16px is ~544px, which is inside the 45–75 character band
-        this page treats as a reading measure.
-      */}
-      <p className="mt-8 max-w-[34em] text-base leading-relaxed text-fg-muted">{missing.pain}</p>
-
-      {/*
-        The solution paragraph is the only one in the section set in `fg` rather
-        than `fg-muted`. It is the claim; everything above it is the setup, and
-        the one-step lift is what says so without adding a heading, a rule, an
-        icon or a badge to say it instead.
-      */}
-      <p className="mt-6 max-w-[34em] text-base leading-relaxed text-fg">{missing.solution}</p>
-    </MediaSection>
+    />
   )
 }

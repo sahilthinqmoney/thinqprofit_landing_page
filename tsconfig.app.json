@@ -16,6 +16,20 @@
     "noEmit": true,
     "jsx": "react-jsx",
 
+    /* `@/*` — the alias every shadcn-registry component imports through. The
+       shadcn CLI reads it from here (not from vite.config.ts) to resolve the
+       aliases in components.json, so it has to exist in BOTH files or the two
+       halves disagree: `add` writes an import the bundler can't follow.
+
+       No `baseUrl`. The usual shadcn recipe pairs one with `paths`, but this
+       project is on TypeScript 6, where `baseUrl` is a hard TS5101 error rather
+       than a warning and `tsc -b` refuses the build. It is also unnecessary:
+       since TS 4.1 a `paths` entry resolves against the tsconfig's own directory
+       when no `baseUrl` is set, so `./src/*` already means what it looks like. */
+    "paths": {
+      "@/*": ["./src/*"]
+    },
+
     /* Linting */
     "strict": true,
     "noUnusedLocals": true,

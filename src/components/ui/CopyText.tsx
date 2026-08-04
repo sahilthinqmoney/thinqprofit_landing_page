@@ -1,7 +1,7 @@
-import type { ElementType } from 'react'
+import type { ElementType, HTMLAttributes } from 'react'
 import { tokenizeCopy } from '../../lib/copyTokens'
 
-interface CopyTextProps {
+interface CopyTextProps extends HTMLAttributes<HTMLElement> {
   source: string
   className?: string
   /** Defaults to `p`; pass `span`/`dd`/`li` when the parent is already a block. */
@@ -50,9 +50,27 @@ interface CopyTextProps {
  * is one more axis saying so. Digits themselves move by zero — both faces
  * advance "0" at 600/em.
  */
-export default function CopyText({ source, className = '', as: Tag = 'p' }: CopyTextProps) {
+/*
+ * `...rest` exists for ONE reason and it is worth naming, because "spread the
+ * props" is otherwise the kind of change that gets added by reflex and grows a
+ * component's surface for nothing.
+ *
+ * `Security`'s ladder animation resolves its targets by `data-*` hook, and two of
+ * those targets — tier 1's body and the terminal statement — are rendered by this
+ * component. Without a passthrough the attribute is silently dropped: no error,
+ * no warning, the element renders correctly, and the only symptom is that
+ * `querySelector('[data-note]')` returns null, the guard bails, and the ENTIRE
+ * section's entrance never runs. A prop that vanishes quietly is worse than one
+ * that throws.
+ */
+export default function CopyText({
+  source,
+  className = '',
+  as: Tag = 'p',
+  ...rest
+}: CopyTextProps) {
   return (
-    <Tag className={`break-words ${className}`}>
+    <Tag {...rest} className={`break-words ${className}`}>
       {tokenizeCopy(source).map((token, i) => {
         if (token.kind === 'placeholder') {
           return (

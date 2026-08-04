@@ -1,4 +1,4 @@
-import type { HeroContent, Registration } from '../types'
+import type { HeroContent } from '../types'
 
 /**
  * §2 Hero + the registration band under it.
@@ -19,58 +19,35 @@ import type { HeroContent, Registration } from '../types'
 
 export const hero: HeroContent = {
   /**
-   * The badge, and it is not an eyebrow.
+   * The badge.
    *
-   * DESIGN.md §3 removed the eyebrow prop outright — "a category label sitting
-   * above a heading is decoration wearing the costume of information" — and the
-   * distinction that lets this one exist is that it is not a label for the
-   * heading. "Charts that say everything" does not tell a reader what kind of
-   * product this is; a chart that talks is either an AI product or a metaphor,
-   * and which one it is happens to be the whole claim. The badge is the answer,
-   * placed before the question can be misread.
+   * It read "AI-native trading platform", and "AI-native" is the problem: it is
+   * a compound that did not exist before 2023 and now appears on the homepage of
+   * every company that has touched a model. It carries no information a reader
+   * can act on — it is a claim about our architecture, made to an audience that
+   * is deciding whether to hand over a phone number — and it is the single
+   * highest-frequency phrase in its category, which is exactly why a language
+   * model reaches for it and exactly why it reads as one.
    *
-   * Three words, no verb, no adjective about the trader. Every competitor hero
-   * in this market leads with one — Elite, Pro, Super-powered — and the page
-   * refuses that register everywhere it appears.
+   * The badge's original job survives, restated. Its argument was that the
+   * headline left a genuine ambiguity — a chart that talks is either an AI
+   * product or a metaphor — and the badge resolved it. The new headline resolves
+   * that itself, so this is free to do the other useful thing: say that the
+   * product is not open yet, which is the fact that makes a waitlist page make
+   * sense at all.
+   *
+   * "Not yet open" rather than "coming soon" or "in beta". Both of those are
+   * positions on a roadmap; this is a statement about today, and it is the
+   * phrasing a person uses about a shop.
    */
-  eyebrow: 'AI-native trading platform',
+  eyebrow: 'AI-native interactive trading platform.',
 
-  /**
-   * The H1. Four words, one full stop, no line breaks.
-   *
-   * It carries no `\n`, which is a change from the three-line stair that stood
-   * here, and the reason is arithmetic rather than taste. At the H1's 120px
-   * ceiling "Charts that say everything." sets ~1,430px in IBM Plex at the
-   * display axis — past any measure the hero column has — so the line breaks
-   * naturally at every width, and an art-directed break would only be honoured
-   * at widths where the clamp has already made the decision. A hand-written
-   * break that agrees with the wrap is not art direction, it is a comment.
-   *
-   * The full stop stays. It is the difference between a headline and a claim.
-   */
-  headline: 'Charts that say everything.',
+  headline: 'Trading that talks back.',
 
-  /**
-   * The value proposition, in one sentence with three clauses.
-   *
-   * The three clauses are the product, and they are ordered by what a trader
-   * checks first: what is in play, what changed, what is noise. The third is the
-   * one no competitor offers, because naming something as noise is a judgment a
-   * feature list cannot make — a screener surfaces everything and lets you sort.
-   */
   subheadline:
-    'The chart reads price action back to you — what is in play, what just changed, and what is only noise.',
+    'Thinq’s own charting engine marks the levels price has held and puts what happened into words, on the chart. One browser terminal, across every screen you run.',
 
-  /**
-   * The offer, repeated from the announcement bar deliberately.
-   *
-   * It is the one repetition on the page and it is not an accident of assembly:
-   * the bar is chrome a reader can scroll past without registering, and the
-   * hero is where the offer has to be attached to the action it pays for. The
-   * qualifier travels with it, in `offerQualifier`, for the same reason it
-   * travels in the bar.
-   */
-  primaryCta: 'Six months of zero brokerage for everyone on the list.',
+  primaryCta: 'Six months at zero Thinq brokerage for everyone on the list.',
 
   /**
    * A1, from docs/art-direction.md §3, unchanged by the copy rewrite.
@@ -101,7 +78,7 @@ export const hero: HeroContent = {
  * still applies; this is the sentence that stops the hero's version of the claim
  * being read as "free".
  */
-export const offerQualifier = 'Statutory charges still apply.'
+export const offerQualifier = 'Statutory charges apply.'
 
 /**
  * Was the art-directed three-line H1. Deleted rather than kept unreferenced: it
@@ -115,25 +92,14 @@ export const offerQualifier = 'Statutory charges still apply.'
  * the requirement outlives the string.
  */
 
-/** §5's band label. Deliberately not an H2 — nothing competes with the H1. */
-export const trustLabel = 'Registered and regulated'
-
 /**
- * The registration band.
+ * `trustLabel` and `registrations` went with the trust strip they fed, and the
+ * band itself went with them — see the note in App.tsx. The four authorities it
+ * named are not lost: §5's `regulatoryProof` states the SEBI/NSE/BSE membership
+ * in a sentence, and §8's `registrationLines` carries every code, including the
+ * CDSL participant ID, as the footer's registration block.
  *
- * MCX is gone. The page no longer claims commodities anywhere — the capability
- * list is equity, futures and options — and a membership displayed for a segment
- * the product does not offer is a claim about scope made by the trust band,
- * which is the one band on the page whose entire job is to be believed.
- *
- * TODO (blocking): replace every value with a verified code before launch. If a
- * segment is not live, remove the row rather than showing an unfilled one.
- * `TrustStrip` suppresses a code while it is a `[PLACEHOLDER]`, so the authority
- * name renders today and the number waits.
+ * The blocking TODO that lived here moves with the data rather than dying with
+ * it: the codes in `src/data/footer.ts` are still unverified placeholders and
+ * still block launch. That is the one copy of them the page now has.
  */
-export const registrations: Registration[] = [
-  { authority: 'SEBI Registered Broker', value: '[INZ000XXXXXX]', icon: 'shield-check' },
-  { authority: 'NSE Member', value: '[Member code]', icon: 'landmark' },
-  { authority: 'BSE Member', value: '[Member code]', icon: 'building-2' },
-  { authority: 'CDSL Depository Participant', value: '[IN-DP-XXX-XXXX]', icon: 'vault' },
-]

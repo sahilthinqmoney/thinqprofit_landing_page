@@ -1,8 +1,8 @@
 import AnnouncementBar from './components/ui/AnnouncementBar'
 import Navbar from './components/sections/Navbar'
 import Hero from './components/sections/Hero'
-import TrustStrip from './components/sections/TrustStrip'
 import Missing from './components/sections/Missing'
+import SectionTwo from './components/sections/SectionTwo'
 import Capabilities from './components/sections/Capabilities'
 import Security from './components/sections/Security'
 import Offer from './components/sections/Offer'
@@ -18,18 +18,26 @@ import Footer from './components/sections/Footer'
  *
  *  1. Announcement — the offer and the deadline, above everything.
  *  2. Hero — the claim, the value proposition, and the form.
- *  3. Trust strip — "are you real", answered before anything is asked for.
- *  4. Missing — the one feature, in depth, on a plate. The page's argument.
- *  5. Capabilities — everything else, one line each. A summary, shaped as one.
- *  6. Security — where the money and the shares sit. A ladder of claims.
- *  7. Offer — the terms in full, at body size, with the statutory block.
- *  8. Close — the ask again, for the reader who needed the argument first.
- *  9. Footer — registration, disclosures, SCORES.
+ *  3. Missing — the one feature, in depth, on a plate. The page's argument.
+ *  4. Capabilities — everything else, one line each. A summary, shaped as one.
+ *  5. Security — where the money and the shares sit. A ladder of claims.
+ *  6. Offer — the terms in full, at body size, with the statutory block.
+ *  7. Close — the ask again, for the reader who needed the argument first.
+ *  8. Footer — registration, disclosures, SCORES.
  *
- * The order is a decision rather than a template. Proof (3) precedes argument
- * (4–5); safety (6) precedes price (7); the ask appears twice and nowhere in
+ * The order is a decision rather than a template. Argument (3–4) precedes
+ * safety (5), which precedes price (6); the ask appears twice and nowhere in
  * between. A reader convinced by the bar can convert without scrolling; a reader
  * who needs all of it arrives at the same form having read the whole case.
+ *
+ * ── The trust strip is gone ───────────────────────────────────────────────
+ *
+ * It sat between the hero and §3 carrying "Registered and regulated" over four
+ * authority chips — SEBI, NSE, BSE, CDSL. Every one of those facts is stated
+ * twice more on the page: §5 opens on "a SEBI-registered broker and a member of
+ * the NSE and the BSE", and §8 prints the registration numbers themselves. A
+ * band that repeats the section below it and the footer below that is not proof,
+ * it is the same proof charged three times to the scroll.
  *
  * ── What was removed, and why it is not coming back as-is ────────────────
  *
@@ -92,8 +100,8 @@ export default function App() {
 
       <main id="main">
         <Hero />
-        <TrustStrip />
         <Missing />
+        <SectionTwo />
         <Capabilities />
         <Security />
         <Offer />

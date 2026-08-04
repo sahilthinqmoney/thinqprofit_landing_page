@@ -1,9 +1,7 @@
 import Disclosure from '../ui/Disclosure'
 import MediaSection from '../ui/MediaSection'
 import WaitlistForm from '../ui/WaitlistForm'
-import { plateImage, platePoster, plateVideo } from '../../lib/media'
 import { finalCta } from '../../data/footer'
-import { waitlistCount, waitlistCountNoun } from '../../data/waitlist'
 
 /**
  * §7 — the close. The page's second and last ask.
@@ -50,13 +48,8 @@ import { waitlistCount, waitlistCountNoun } from '../../data/waitlist'
  * its left, and this one is centre-placed — so here it is the CENTRE that stays
  * dark. That is a contrast requirement with a number attached: at `scrim={0.75}`
  * the backdrop is 75% ground over the asset, so the copy's contrast is a
- * function of the plate, and `fg-subtle` holds 4.5:1 only while the plate behind
- * the words stays below sRGB grey 90 (#5A5A5A). If a future plate lands brighter
  * than that in the middle, the fix is the plate, not the token.
  */
-const closingClip =
-  'Closing loop, 8s, seamless. A single machined-aluminium form at rest in near-black, lit from high and behind so only its top edge catches. One cool near-white specular travels the length of that edge, laterally, and settles; nothing rises. Neutral monochrome throughout, no colour cast. Centre of frame stays dark and low-contrast for the centred copy. No numbers, tickers, candles or chart forms. No green, no red.'
-
 export default function FinalCta() {
   return (
     <MediaSection
@@ -120,10 +113,7 @@ export default function FinalCta() {
        * stills below that — a 16:9 loop cropped to a phone's 9:16 reserves nothing.
        */
       media={{
-        alt: closingClip,
-        image: plateImage('closing'),
-        video: plateVideo('closing'),
-        poster: platePoster('closing'),
+        alt: 'Final CTA',
       }}
     >
       <WaitlistForm variant="closing" className="mt-10" />
@@ -141,18 +131,12 @@ export default function FinalCta() {
         `MediaSection`'s `place="center"` only centres from md up, and this line
         should be centred at every width because the form above it is.
       */}
-      <p className="mx-auto mt-8 flex flex-wrap items-center justify-center gap-x-2.5 gap-y-1 text-center text-sm text-fg-muted">
-        <span>{finalCta.reiteration}</span>
-        <span aria-hidden="true" className="text-fg-subtle">
-          ·
-        </span>
-        <span>
-          <span className="tabular font-medium text-fg">
-            {waitlistCount.toLocaleString('en-IN')}
-          </span>{' '}
-          {waitlistCountNoun}
-        </span>
-      </p>
+      {/* The count is gone here too — see the note at its other call site in
+          `Hero`. What this line exists for is the offer's third and final
+          statement WITH its qualifier attached, and that is untouched: a page
+          that repeats an offer and drops the limit on the last repetition has
+          misrepresented it by attrition. */}
+      <p className="mx-auto mt-8 text-center text-sm text-fg-muted">{finalCta.reiteration}</p>
     </MediaSection>
   )
 }

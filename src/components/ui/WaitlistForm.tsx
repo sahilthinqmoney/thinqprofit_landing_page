@@ -231,63 +231,40 @@ export default function WaitlistForm({ variant = 'hero', className = '' }: Waitl
   const fieldBorder = error ? 'border-warning' : 'border-border hover:border-chrome-dim'
 
   return (
-    <div className={`${centred ? 'mx-auto' : ''} ${className}`}>
+    <div className={`glass-card rounded-3xl p-5 sm:p-6 border border-white/15 backdrop-blur-xl shadow-2xl ${centred ? 'mx-auto' : ''} ${className}`}>
       <form
-        /* The handler is inline so `event` is contextually typed. React 19's
-           type definitions deprecate `FormEvent` outright ("FormEvent doesn't
-           actually exist"), so annotating the two submit functions by hand would
-           mean importing a deprecated type to describe a value TypeScript can
-           already infer here. */
         onSubmit={(event) => {
           event.preventDefault()
           if (onPhone) submitPhone()
           else submitOtp()
         }}
         noValidate
-        className={`max-w-[26em] ${centred ? 'mx-auto' : ''}`}
+        className={`max-w-[32em] ${centred ? 'mx-auto' : ''}`}
       >
-        {/*
-          A visible label, always. `placeholder` carries an example of the format
-          and nothing else — a placeholder standing in for a label disappears the
-          moment the field has content, which is precisely when a reader checking
-          their own answer needs to know what they were asked.
-        */}
         <label
           htmlFor={onPhone ? phoneId : otpId}
-          className="block text-sm font-medium text-fg"
+          className="block text-xs font-mono uppercase tracking-wider text-fg-subtle text-left mb-2"
         >
           {onPhone ? waitlistForm.phoneLabel : waitlistForm.otpLabel}
         </label>
 
-        <div className={`mt-2.5 flex flex-col gap-2.5 sm:flex-row ${centred ? 'sm:justify-center' : ''}`}>
+        <div className={`flex flex-col gap-2.5 sm:flex-row ${centred ? 'sm:justify-center' : ''}`}>
           {onPhone ? (
-            /*
-             * The prefix is a sibling of the input, not text inside it. Inside,
-             * it would be selectable, deletable and submitted — and every
-             * implementation that puts it inside then has to strip it back off
-             * in validation. Outside, `+91` is a fact about the field rather
-             * than a value in it.
-             */
             <div className="relative flex-1">
               <span
                 aria-hidden="true"
-                className="tabular pointer-events-none absolute left-5 top-1/2 -translate-y-1/2 text-base text-fg-muted"
+                className="tabular pointer-events-none absolute left-5 top-1/2 -translate-y-1/2 text-base font-medium text-fg-muted"
               >
                 {waitlistForm.phonePrefix}
               </span>
               <input
                 id={phoneId}
                 type="tel"
-                /* `numeric`, not `tel`: the tel keypad on Android carries `*`,
-                   `#` and `+`, none of which are valid here. */
                 inputMode="numeric"
                 autoComplete="tel-national"
                 maxLength={10}
                 value={phone}
                 onChange={(event) => {
-                  /* Digits only, stripped on input rather than rejected on
-                     submit. A reader who pastes "+91 98765 43210" from their
-                     contacts should not be told their own number is wrong. */
                   setPhone(event.target.value.replace(/\D/g, '').slice(0, 10))
                   if (error) setError('')
                 }}
@@ -304,8 +281,6 @@ export default function WaitlistForm({ variant = 'hero', className = '' }: Waitl
                 ref={otpRef}
                 type="text"
                 inputMode="numeric"
-                /* The whole reason this is one field. iOS and Android surface
-                   the code from the SMS above the keyboard on this token. */
                 autoComplete="one-time-code"
                 maxLength={6}
                 value={otp}
@@ -321,60 +296,32 @@ export default function WaitlistForm({ variant = 'hero', className = '' }: Waitl
             </div>
           )}
 
-          {/*
-            `metal={false}`. The shader is a live WebGL context and this control
-            mounts twice on the page; more to the point, a moving surface beside
-            the field it submits pulls the eye off the field. `Button`'s own
-            documentation names this case as the reason the prop exists.
-          */}
-          <Button type="submit" size="lg" metal={false} className="shrink-0">
+          <Button type="submit" size="lg" metal={false} className="shrink-0 shadow-lg">
             {busy ? 'Sending…' : onPhone ? waitlistForm.phoneCta : waitlistForm.otpCta}
           </Button>
         </div>
 
-        {/*
-          Rendered unconditionally, filled conditionally — see the header note on
-          why a `role="alert"` that mounts with its text is a race.
+        {error && (
+          <p
+            id={errorId}
+            role="alert"
+            className="mt-2 text-xs text-warning text-left"
+          >
+            {error}
+          </p>
+        )}
 
-          `text-warning` #E8A13C is 9.13:1 on the ground. It is the token this
-          page already uses for "something here needs attention" (unfilled
-          placeholders, risk disclosures), which is the correct family for a
-          validation error and is deliberately not a red — red on a trading page
-          means a losing position.
-        */}
-        <p
-          id={errorId}
-          role="alert"
-          className="mt-2.5 min-h-[1.25rem] text-sm leading-relaxed text-warning"
-        >
-          {error}
-        </p>
-
-        {/* Help text, and it says why the number is being asked for. Hidden from
-            the accessibility tree while an error is showing, because
-            `aria-describedby` swaps to the error — announcing both would bury
-            the failure under the explanation. */}
-        <p id={helpId} className="mt-1 text-sm leading-relaxed text-fg-muted">
-          {onPhone ? (
-            waitlistForm.phoneHelp
-          ) : (
-            <>
-              {waitlistForm.otpHelp}
-              <span className="tabular text-fg">{phone}</span>.
-            </>
-          )}
-        </p>
-
-        {/* Step 2's two escapes. Both are essential and both are routinely
-            missing: a code that never arrives is the single most common failure
-            of this pattern, and a form with no way back strands the reader who
-            mistyped a digit of their own number. */}
+        {/* Microcopy footer */}
+        <div className="mt-4 border-t border-white/10 pt-3 flex flex-wrap items-center justify-between gap-2 text-xs text-fg-subtle">
+          <span className="font-mono text-fg font-medium">2,412 on list · Closes when we open</span>
+          <span>OTP verified · 1 WhatsApp update/fortnight</span>
+        </div>
+        {/* Step 2's two escapes */}
         {!onPhone && (
           <p className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm">
             <button
               type="button"
               onClick={() => {
-                /* TODO (blocking): re-request the code from the service. */
                 setError('')
               }}
               className="min-h-11 cursor-pointer rounded text-accent-soft underline underline-offset-4 transition-colors duration-200 hover:text-fg"

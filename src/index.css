@@ -1,42 +1,10 @@
 @import 'tailwindcss';
 
-/*
- * Type, self-hosted. Two files — and *which file* matters more than which
- * package, because getting it wrong fails silently.
- *
- * `@fontsource-variable/ibm-plex-sans`'s DEFAULT entry (`index.css`) is the
- * wght-only build: `font-weight: 100 700` and NO `font-stretch`. Import the
- * bare package name and the face arrives with no width axis, every `'wdth'`
- * declaration in this file no-ops, and `.display-settling` animates nothing at
- * all while still costing a `font-variation-settings` transition. `wdth.css` is
- * the build that carries it — `font-stretch: 75% 100%`, `font-weight: 100 700`
- * — confirmed against the installed package's own `metadata.json`, which
- * declares wdth 75–100 step 0.1, wght 100–700, ital 0–1. So the width axis is
- * real here and the hero's settle survives the move off Archivo; it is
- * re-solved onto a 25-unit range rather than rebuilt (see `.display-settling`).
- *
- * Mono at `latin-400` only. `.tabular` is its sole consumer, and the gap between
- * how many call sites EXIST and how many RENDER is worth writing down, because
- * the 400-only build is only safe on the ones that render.
- *
- * Four call sites in source — CopyText.tsx:57, TrustStrip.tsx:113,
- * Footer.tsx:205, Pricing.tsx:132. Two of the four emit nothing today:
- * Pricing.tsx is not imported by App.tsx (the section was removed), and
- * TrustStrip's span is behind `!hasPlaceholder(registration.value)` while all
- * five values in `data/hero.ts` are still `[INZ000XXXXXX]`-style placeholders,
- * so it renders zero times. Counted on the rendered 1440 page rather than
- * grepped: `document.querySelectorAll('.tabular')` returns exactly 3 — the ©
- * year and two CopyText placeholders, all three inside the footer, and every one
- * of them computes to IBM Plex Mono at weight 400.
- *
- * `body` sets `font-synthesis: none`, so a `.tabular` placed under a non-400
- * ancestor would quietly render 400 rather than fake a bold. Measured, not
- * assumed: all three live elements report `font-weight: 400`, so the constraint
- * is satisfied today — it is a constraint on future use, which is why it is
- * here. No italic build — grep finds zero italic call sites on the page.
- */
-@import '@fontsource-variable/ibm-plex-sans/wdth.css';
-@import '@fontsource/ibm-plex-mono/latin-400.css';
+/* ---------------------------------------------------------------------------
+   Design tokens — Professional Monochromatic Typography Stack
+   Primary Sans: 'Plus Jakarta Sans' (UI, Headings, Copy)
+   Monospace: 'JetBrains Mono' (Tabular numbers, Order timestamps, Codes)
+   --------------------------------------------------------------------------- */
 
 /* ---------------------------------------------------------------------------
    Design tokens — copper chromatic
@@ -250,20 +218,13 @@
    * lives so it stays next to the thing it governs. Nothing referenced the
    * `font-serif` utility (grep: zero call sites).
    */
-  --font-sans: 'IBM Plex Sans Variable', ui-sans-serif, system-ui, sans-serif;
+  --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Inter', system-ui, sans-serif;
   --font-display: var(--font-sans);
 
   /*
-   * Every numeral on the page, via `.tabular`. The system's `--mono` verbatim.
-   *
-   * §5 puts figures in mono for a reason that is about reading rather than
-   * about texture: in a monospaced face a column of prices is a column, digit
-   * over digit, so a changing figure does not reflow and two figures can be
-   * compared by eye without being aligned by hand. A proportional face makes
-   * "1" narrow and "0" wide and both of those true statements false. The site
-   * inherits the rule from the terminal because the same person reads both.
+   * Every numeral on the page, via `.tabular`.
    */
-  --font-mono: 'IBM Plex Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+  --font-mono: 'JetBrains Mono', 'SF Mono', Menlo, monospace;
 
   /*
    * Card geometry. One radius for every physical surface on the page — a page
@@ -393,8 +354,8 @@
    * codes and the copyright year — §5 puts all of them in IBM Plex Mono, and
    * this one hook covers every live figure site with no component edit:
    * CopyText.tsx:27 (each [BRACKETED] placeholder, which also carries
-   * `text-warning`), TrustStrip.tsx:89 (SEBI/exchange codes), Footer.tsx:180
-   * (the © year), Pricing.tsx:110 (unmounted).
+   * `text-warning`, and that is where the SEBI/exchange codes now render) and
+   * Footer.tsx (the © year).
    *
    * The swap is free at the sizes it renders, which is what makes it safe to
    * apply this broadly: Plex Sans's '0' advances 600/em at wdth 100 and is
@@ -808,65 +769,159 @@
    */
   .display {
     font-family: var(--font-display);
-    font-variation-settings:
-      'wdth' 90,
-      'wght' 620;
-    letter-spacing: -0.018em;
+    font-weight: 650;
+    letter-spacing: -0.028em;
     text-wrap: balance;
   }
 
-  /*
-   * The two largest steps only: the Hero H1 and `MediaSection`'s `tall`. If a
-   * third call site wants this, check its rendered size first — below about
-   * 56px the tracking starts eating the counters this exists to protect.
-   */
   .display-lead {
     font-family: var(--font-display);
-    font-variation-settings:
-      'wdth' 82,
-      'wght' 580;
-    letter-spacing: -0.034em;
+    font-weight: 750;
+    letter-spacing: -0.038em;
+    text-wrap: balance;
+  }
+
+  .display-quiet {
+    font-family: var(--font-display);
+    font-weight: 400;
+    letter-spacing: -0.01em;
+    line-height: 1.28;
     text-wrap: balance;
   }
 
   /*
-   * The closing statement — the page's one change of register, and it is no
-   * longer a change of FAMILY.
+   * The card surface.
    *
-   * This was `.display-serif` and it set Newsreader. Both are gone: a class
-   * named after a serif that sets no serif is exactly the falsified name this
-   * codebase bans, so the class is renamed with the face
-   * (MediaSection's `voice="serif"` becomes `voice="quiet"` with it).
+   * ── It is a machined plate, not a pane of glass ─────────────────────────
    *
-   * What marks it instead: the page's display voice is DEFINED by three moves —
-   * condense, weight up, track in — and the closing statement inverts all three
-   * at once, in the same family, at the opposite corner of it. wdth 100 against
-   * display's 82, wght 300 against 600, +0.01em against -0.028em. A reader does
-   * not need to name the axis to feel that the page has stopped shouting; it is
-   * the same voice speaking quietly, which suits a closing line better than a
-   * borrowed one ever did.
+   * The page's world is brushed metal lit from one side — the plates, the
+   * wordmark, the button's ring are all one material. A card that reads as
+   * frosted glass is a different material dropped into that room, which is the
+   * "glass and blur as decoration" failure rather than as a specific effect.
    *
-   * It does not re-rag, which is why this is a swap and not a layout change:
-   * "Start with what / you have today" at 56px sets two lines of 374.0/370.5px
-   * in Plex 100/300 against Newsreader's 381.5/377.6px — the same break — inside
-   * the copy column at every width the page uses (504/576/608px). The block
-   * grows 18px because 1.24 leading replaces 1.08.
+   * So the fill stays subtle and the EDGE does the work. §17 of the system
+   * design states the rule the wordmark is built on — *a metal reads by two
+   * highlights* — and that is what `::before` is: a hairline along the top edge
+   * that is brightest at the centre and falls off to nothing at both corners,
+   * which is what a light source above and in front of a bevel actually does.
+   * A uniform 1px border is the thing that reads as a box; a graded one reads as
+   * an edge catching light.
    *
-   * `line-height` is declared here deliberately, and it wins where it has to.
-   * `SCALE[step]` in SectionShell ships `leading-[1.08]`, a Tailwind utility at
-   * (0,1,0) emitted at byte 24964 of the built stylesheet against this block's
-   * 45233 — same layer, later source, so this takes it. 1.08 is display leading;
-   * a quiet sentence at display size needs air, and 1.24 is where it stops
-   * reading as a headline.
+   * The base border drops to 0.06 from 0.08 because the top highlight now
+   * carries the definition. Two full-strength edges is a box drawn twice.
    */
-  .display-quiet {
-    font-family: var(--font-display);
-    font-variation-settings:
-      'wdth' 100,
-      'wght' 300;
-    letter-spacing: 0.01em;
-    line-height: 1.24;
-    text-wrap: balance;
+  .glass-card {
+    position: relative;
+    background:
+      linear-gradient(180deg, rgba(255, 255, 255, 0.045) 0%, rgba(255, 255, 255, 0.012) 42%),
+      rgba(255, 255, 255, 0.018);
+    backdrop-filter: blur(16px) saturate(140%);
+    -webkit-backdrop-filter: blur(16px) saturate(140%);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    /*
+     * Offset AND blur, in two stops: a tight contact shadow that seats the card
+     * on the ground, and a wide soft one that gives it height. A single large
+     * blur with no offset is a halo, which is decoration — the craft floor calls
+     * that out by name and the old single `0 8px 32px` was halfway to it.
+     */
+    box-shadow:
+      0 1px 2px rgba(0, 0, 0, 0.55),
+      0 16px 40px -12px rgba(0, 0, 0, 0.7);
+  }
+
+  /* The lit top edge. `inherit` on the radius so it tracks whatever rounding
+     the call site sets, rather than hardcoding a value that goes stale the
+     first time a card uses `rounded-xl` instead of `rounded-2xl`. */
+  .glass-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    padding-top: 1px;
+    background: linear-gradient(
+      90deg,
+      transparent 0%,
+      rgba(255, 255, 255, 0.14) 28%,
+      rgba(255, 255, 255, 0.3) 50%,
+      rgba(255, 255, 255, 0.14) 72%,
+      transparent 100%
+    );
+    /* Masked to the 1px strip only — the gradient paints the whole box
+       otherwise and the card fills with a wash. */
+    mask:
+      linear-gradient(#000 0 0) content-box exclude,
+      linear-gradient(#000 0 0);
+    -webkit-mask:
+      linear-gradient(#000 0 0) content-box exclude,
+      linear-gradient(#000 0 0);
+    pointer-events: none;
+    opacity: 0.75;
+    transition: opacity 350ms var(--ease-out-soft);
+  }
+
+  /*
+   * Hover.
+   *
+   * `transition: all` is gone. It was animating `backdrop-filter` and
+   * `box-shadow` alongside the transform on every card in the viewport, and
+   * `all` also means any property added later is silently animated too. Named
+   * properties only.
+   *
+   * The glow was `rgba(255, 158, 122, 0.15)` — the COPPER accent, left behind by
+   * the retheme to platinum. A warm halo on a card in a greyscale palette is the
+   * one chromatic event on the page, spent on a hover state. It is now the
+   * chrome tone, and it is a rim rather than a bloom.
+   */
+  .glass-card-hover {
+    transition:
+      background-color 350ms var(--ease-out-soft),
+      border-color 350ms var(--ease-out-soft),
+      transform 350ms var(--ease-out-soft),
+      box-shadow 350ms var(--ease-out-soft);
+  }
+  .glass-card-hover:hover {
+    background-color: rgba(255, 255, 255, 0.035);
+    border-color: rgba(255, 255, 255, 0.14);
+    transform: translateY(-3px);
+    box-shadow:
+      0 1px 2px rgba(0, 0, 0, 0.55),
+      0 24px 56px -14px rgba(0, 0, 0, 0.8),
+      0 0 0 1px rgba(169, 174, 184, 0.09);
+  }
+  .glass-card-hover:hover::before {
+    opacity: 1;
+  }
+
+  /*
+   * The pointer-tracked highlight, driven by `--mx`/`--my` which `SpotlightCard`
+   * writes on pointer move. Composited as a plain radial gradient on a layer
+   * that only changes opacity, so following the cursor costs no repaint of the
+   * card's own contents.
+   *
+   * `--spot: 0` at rest and the component tweens it to 1 on enter, so a card
+   * the pointer has never touched has no highlight at an arbitrary corner — the
+   * defect you get when the vars default to 50%/50% and the layer is always on.
+   */
+  .spotlight {
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    pointer-events: none;
+    opacity: var(--spot, 0);
+    transition: opacity 400ms var(--ease-out-soft);
+    background: radial-gradient(
+      340px circle at var(--mx, 50%) var(--my, 50%),
+      rgba(255, 255, 255, 0.07),
+      transparent 68%
+    );
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    /* The highlight is a pointer affordance, not an entrance, so it stays —
+       what goes is the travel, which is the part that moves under the cursor. */
+    .glass-card-hover:hover {
+      transform: none;
+    }
   }
 
   /*
@@ -1358,3 +1413,93 @@
    `scroll-behavior` was the one declaration worth keeping, and it has moved to
    `html` in @layer base under its own query, where it belongs.
    --------------------------------------------------------------------------- */
+
+/* ---------------------------------------------------------------------------
+   shadcn-registry bridge.
+
+   Everything added through `npx shadcn add @magicui/... @smoothui/...
+   @vengeanceui/... @unlumen/...` is authored against shadcn's token names —
+   `bg-background`, `text-muted-foreground`, `border-border`, `ring-ring`. None
+   of those exist in the palette above, which is named for what the tokens DO
+   here (`--color-surface-raised` is "the hover fill") rather than for shadcn's
+   slot vocabulary. Without this block a pasted component compiles and renders
+   invisible: unknown utility, no class, transparent on transparent.
+
+   So: an alias layer, not a second palette. Every value below is a `var()` onto
+   a token already declared in the `@theme` at the top of this file — no new
+   hexes, so the contrast ratios documented up there stay the ones that ship,
+   and re-tuning the palette re-tunes the registry components with it.
+
+   Two names already exist in the palette above and are therefore NOT restated
+   below — `--color-accent` and `--color-border`. Aliasing a token to itself is a
+   custom-property cycle, which CSS resolves to invalid rather than to the
+   obvious no-op, so the "harmless" line would take the token's real value down
+   with it and blank out every consumer already reading it. Both happen to hold
+   the right value for their shadcn slot as-is; only their paired foregrounds
+   needed adding, since the palette spells one of them `--color-on-accent`.
+
+   Worth knowing while reading the mappings: shadcn's `accent` is the
+   hover/highlight fill on menu items and list rows, not a brand colour — the
+   brand accent belongs on `primary`, which is where shadcn puts filled buttons.
+   And `input` is a border colour, not a field background.
+
+   Tailwind v4 merges multiple `@theme` blocks, so this appends to the palette
+   rather than replacing it, and it sits at the end of the file because it is
+   downstream of every token it reads.
+   --------------------------------------------------------------------------- */
+@theme {
+  --color-background: var(--color-bg);
+  --color-foreground: var(--color-fg);
+
+  --color-card: var(--color-surface);
+  --color-card-foreground: var(--color-fg);
+  --color-popover: var(--color-surface-raised);
+  --color-popover-foreground: var(--color-fg);
+
+  /* Filled buttons and the one high-emphasis action per view. */
+  --color-primary: var(--color-accent);
+  --color-primary-foreground: var(--color-on-accent);
+  --color-secondary: var(--color-surface-raised);
+  --color-secondary-foreground: var(--color-fg);
+
+  /* `muted` is the quiet surface; `muted-foreground` is the 5.02:1 subtle text,
+     which is the lowest ratio in the palette that still clears AA at body size. */
+  --color-muted: var(--color-surface-raised);
+  --color-muted-foreground: var(--color-fg-subtle);
+
+  /* `accent` itself is deliberately absent: `--color-accent` is already declared
+     up top at #2c2f38, and re-stating it here as `var(--color-accent)` would be a
+     self-reference — a custom-property cycle is invalid at computed-value time,
+     which would take out not just this line but every existing consumer of the
+     token. It needs no alias anyway; the value it already holds is a dark neutral,
+     which is what shadcn's hover/highlight fill wants. Only the paired foreground
+     is missing, because the palette spells that one `--color-on-accent`. */
+  --color-accent-foreground: var(--color-on-accent);
+
+  --color-destructive: var(--color-loss);
+  --color-destructive-foreground: var(--color-bg);
+
+  /* `border` is likewise already correct and likewise omitted for the same
+     cycle reason. `input` is a BORDER colour in shadcn's vocabulary, not a field
+     background, so it points at the border token rather than a surface. */
+  --color-input: var(--color-border);
+  /* Matches the focus outline in @layer base, which is bound to accent-hover
+     rather than accent-soft — the ring has to follow the same token or a focused
+     registry component rings in a colour nothing else on the page uses. */
+  --color-ring: var(--color-accent-hover);
+
+  --color-chart-1: var(--color-chrome);
+  --color-chart-2: var(--color-gain);
+  --color-chart-3: var(--color-loss);
+  --color-chart-4: var(--color-warning);
+  --color-chart-5: var(--color-accent-soft);
+
+  /* Magic UI / SmoothUI / Unlumen components reach for the whole `rounded-*`
+     ladder, so all four rungs are declared rather than just the `lg` most of
+     them use. */
+  --radius: 0.625rem;
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+}
