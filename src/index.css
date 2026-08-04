@@ -319,20 +319,38 @@
 }
 
 /*
- * Height of everything pinned above the hero — the nav, and nothing else since
- * the announcement bar was removed. The hero subtracts it so its mandatory risk
- * disclosure still lands inside the first viewport: a plain `100svh` hero pushes
- * that rail below the fold by exactly this much. Declared outside `@theme`
- * because it is a layout measurement, not a design token, and it changes with
- * the nav's own scale.
+ * Height of everything above the hero — the announcement bar and the nav. The
+ * hero subtracts it so its mandatory risk disclosure still lands inside the
+ * first viewport: a plain `100svh` hero pushes that rail below the fold by
+ * exactly this much. Declared outside `@theme` because it is a layout
+ * measurement, not a design token, and it changes with the nav's own scale.
+ *
+ * The announcement bar is back (see `AnnouncementBar`), so this is a sum again
+ * rather than a single value. The bar itself is NOT sticky — it scrolls away and
+ * only the nav pins — but it still occupies the first viewport, which is the
+ * only thing this measurement is about.
+ *
+ * `--announce-h` is a declared height rather than an observed one, and the bar
+ * enforces it with a matching `h-*`: a measurement in CSS that the markup is
+ * free to exceed is a measurement that will be wrong the first time the copy
+ * grows. Two steps, because the bar sets its copy in one line from sm and two
+ * lines below it, where the qualifier drops under the offer.
  */
 :root {
-  --header-stack: 4rem; /* 64px nav */
+  --announce-h: 3.5rem; /* 56px — two lines at 12px on a phone */
+  --nav-h: 4rem; /* 64px nav */
+  --header-stack: calc(var(--announce-h) + var(--nav-h));
+}
+
+@media (min-width: 640px) {
+  :root {
+    --announce-h: 2.5rem; /* 40px — one line from sm */
+  }
 }
 
 @media (min-width: 1280px) {
   :root {
-    --header-stack: 5rem; /* nav grows to 80px from xl */
+    --nav-h: 5rem; /* nav grows to 80px from xl */
   }
 }
 

@@ -1,21 +1,32 @@
 /**
- * Shared content contract for the ThinqProfit landing page.
+ * Shared content contract for the Thinq waitlist page.
  * Every file under src/data/ types its exports against these.
  *
- * Copy source: docs/landing-page-copy.md
- * Design source: design-system/thinqprofit/pages/landing.md
+ * ── What was deleted here, and why the file is short now ──────────────────
  *
- * The deck's §1 (announcement bar), §8 (onboarding), §11 (Learn), §12
- * (testimonials), §13 (stats), §14 (FAQ) and §15 (support) shapes are gone with
- * their sections — see the note at the top of src/App.tsx. The numbering below
- * still follows the deck, so the gaps are where those sections were.
+ * `Product`, `Tool`, `BrokerageRow`, `AccountCharge`, `Plan`, `AppFeature`,
+ * `FooterColumn` and `SocialLink` are gone with the sections they typed
+ * (Products, Platform, Pricing, MobileApp, and the footer's link columns and
+ * social row). None had a consumer left.
+ *
+ * They are deleted rather than kept "in case", because a type is a description
+ * of the content the page carries: an exported `Plan` interface with no plan
+ * anywhere in the tree tells the next reader this page has pricing tiers, and
+ * that reader has to open five files to find out it does not. The git history
+ * holds them if a rate card ever ships.
+ *
+ * The remaining interfaces are the ones the page actually renders. Section-local
+ * shapes — `MissingContent`, `Capability`, `OfferContent`, `FinalCtaContent`,
+ * `StatutoryDisclosure`, the waitlist strings — live in their own data files
+ * rather than here, because they have exactly one consumer each and a shared
+ * contract file is for shapes that cross a boundary.
  */
 
 /** Lucide icon name. Components import the component itself from `lucide-react`. */
 export type IconName = string
 
 /* -------------------------------------------------------------------------- */
-/* 2. Navigation                                                              */
+/* Navigation                                                                 */
 /* -------------------------------------------------------------------------- */
 
 export interface MenuItem {
@@ -46,20 +57,22 @@ export interface NavItem {
 }
 
 /* -------------------------------------------------------------------------- */
-/* 3. Hero                                                                    */
+/* §2 Hero                                                                    */
 /* -------------------------------------------------------------------------- */
 
 export interface HeroContent {
+  /** The badge above the H1. Not an eyebrow — see the note in src/data/hero.ts. */
   eyebrow: string
   headline: string
   subheadline: string
+  /** The offer line. Its qualifier is a separate export and travels with it. */
   primaryCta: string
   mediaAlt: string
   riskDisclosure: string
 }
 
 /* -------------------------------------------------------------------------- */
-/* 4. Trust strip                                                             */
+/* §5 Trust strip                                                             */
 /* -------------------------------------------------------------------------- */
 
 export interface Registration {
@@ -70,66 +83,15 @@ export interface Registration {
 }
 
 /* -------------------------------------------------------------------------- */
-/* 5. Products                                                                */
+/* §5 Security                                                                */
 /* -------------------------------------------------------------------------- */
 
-export interface Product {
-  id: string
-  title: string
-  body: string
-  cta: string
-  href: string
-  icon: IconName
-  /** Card-level regulatory disclosure. Rendered in warning styling. */
-  disclosure?: string
-}
-
-/* -------------------------------------------------------------------------- */
-/* 6. Platform & tools                                                        */
-/* -------------------------------------------------------------------------- */
-
-export interface Tool {
-  title: string
-  icon: IconName
-}
-
-/* -------------------------------------------------------------------------- */
-/* 7. Pricing                                                                 */
-/* -------------------------------------------------------------------------- */
-
-export interface BrokerageRow {
-  segment: string
-  rate: string
-}
-
-export interface AccountCharge {
-  item: string
-  amount: string
-}
-
-export interface Plan {
-  name: string
-  price: string
-  cadence: string
-  blurb: string
-  features: string[]
-  cta: string
-  highlighted: boolean
-}
-
-/* -------------------------------------------------------------------------- */
-/* 9. Mobile app                                                              */
-/* -------------------------------------------------------------------------- */
-
-export interface AppFeature {
-  label: string
-  icon: IconName
-}
-
-/* -------------------------------------------------------------------------- */
-/* 10. Safety                                                                 */
-/* -------------------------------------------------------------------------- */
-
+/**
+ * Named `SafetyPillar` rather than `SecurityPillar`, and the name is the only
+ * thing left of the old section. Renaming it would touch two files for no
+ * behavioural change; it is flagged here instead so the mismatch is deliberate
+ * rather than discovered.
+ */
 export interface SafetyPillar {
   title: string
   body: string
@@ -137,19 +99,8 @@ export interface SafetyPillar {
 }
 
 /* -------------------------------------------------------------------------- */
-/* 17. Footer                                                                 */
+/* §8 Footer                                                                  */
 /* -------------------------------------------------------------------------- */
-
-export interface FooterColumn {
-  heading: string
-  links: string[]
-}
-
-export interface SocialLink {
-  label: string
-  href: string
-  icon: IconName
-}
 
 export interface RegistrationLine {
   label: string

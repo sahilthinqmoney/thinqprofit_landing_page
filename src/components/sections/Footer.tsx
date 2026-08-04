@@ -1,189 +1,203 @@
-import type { LucideIcon } from 'lucide-react'
-import { AtSign, Briefcase, MonitorPlay } from 'lucide-react'
 import ChromaticWordmark from '../ui/ChromaticWordmark'
 import ThinqMark from '../ui/ThinqMark'
 import Container from '../ui/Container'
 import { RAIL } from '../ui/SectionShell'
 import CopyText from '../ui/CopyText'
+import Disclosure from '../ui/Disclosure'
 import {
   bottomBarLinks,
   brandBlurb,
   brandName,
   copyrightEntity,
   copyrightSuffix,
-  footerColumns,
-  socials,
+  registrationLines,
+  scoresLink,
+  statutoryDisclosures,
+  tagline,
 } from '../../data/footer'
 
 /**
- * §17 Footer + §18.2 Newsletter. Copy verbatim from docs/landing-page-copy.md.
+ * §8 — Footer and legal.
  *
- * ── The statutory blocks were removed on request ─────────────────────────────
+ * ── The statutory blocks are back, and this is the reversal of a mistake ──
  *
- * §17.3 (registration & entity details), §17.4 (statutory disclosures), §17.5
- * (Attention Investors) and §17.6 (the grievance escalation ladder) are gone.
- * Together they were ~2,100px of the footer's 2,971px.
+ * A previous pass removed the registration block, the statutory disclosures and
+ * the grievance route from this footer, leaving a comment flagging that "a live
+ * Indian broker site has to carry all four somewhere". That flag is now answered
+ * rather than restated: all of it renders, in full, below.
  *
- * They are not dead code: `registrationLines`, `statutoryDisclosures`,
- * `attentionInvestors`, `grievanceLadder`, `grievanceHeading` and
- * `complaintDataLine` all stay in src/data/footer.ts, unreferenced, with their
- * copy intact. Restoring the blocks is a matter of re-rendering them, not of
- * rewriting the notices.
+ * The reason it was removed — ~2,100px of legal text at the foot of a page — was
+ * a real problem with a wrong solution. The problem was that the material was
+ * competing with five columns of navigation links, a newsletter card and a
+ * social row. Those are gone (see src/data/footer.ts), so the legal blocks are
+ * no longer buried under marketing chrome; they are the only thing down here,
+ * which is what a broker's footer is actually for.
  *
- * FLAG FOR COMPLIANCE, recorded here because a comment outlives a conversation:
- * the Attention Investors panel is exchange-mandated, the grievance ladder and
- * the statutory disclosures are SEBI-mandated, and the registration codes are a
- * disclosure requirement. A live Indian broker site has to carry all four
- * somewhere. The mandatory market-risk line itself still appears twice on the
- * page — the Hero rail and the FinalCta — so that specific requirement is not
- * lost with this removal, but the other three are.
+ * ── What the reader gets, in order ───────────────────────────────────────
  *
- * Contrast: every ratio in this block was measured against the old #050505 ground
- * and every one of them moved. Recomputed against #0A0808: disclosure copy renders
- * at text-fg-muted, 13.2245:1 (was written 13.08:1), or text-warning #E8A13C at
- * 9.1275:1 (was written 7.02:1 — a figure that was wrong twice over, since the
- * outgoing #f97316 measured 7.2711:1 on the old ground, not 7.02:1).
+ *   1. The tagline. The page's last argument before its legal obligations.
+ *   2. The registration block — entity, CIN, office, SEBI and exchange codes,
+ *      compliance officer, grievance contact. Every value is an unfilled
+ *      placeholder and renders visibly flagged through `CopyText`.
+ *   3. The SCORES route, as a working link rather than a mention.
+ *   4. Five mandatory disclosures, ordered by which claim on the page each one
+ *      answers — see the note in src/data/footer.ts.
+ *   5. The giant wordmark, then the copyright line.
  *
- * fg-subtle now measures 5.3087:1 and clears the floor comfortably, but disclosure
- * copy stays on fg-muted anyway. Legal text should not sit at the bottom of the
- * legible range just because it is allowed to — fg-subtle is for footer meta and
- * fine print, and only the bottom bar's separator uses it here.
+ * ── Colour ───────────────────────────────────────────────────────────────
  *
- * Colour: nothing in this footer is coloured except by meaning, and copper does
- * not change that — it adds a brand hue to the page but grants this footer no new
- * licence to use it. Every mark and icon is neutral steel `chrome` (OKLCH chroma
- * 0.0057 against the accent's 0.1263, a 22.16x gap), and `accent-soft` stays held
- * to actual links. The one warm thing below the fold is the wordmark, which is
- * the mark itself and the page's single accent carrier — see ChromaticWordmark
- * for why the lockup rule permits it here and forbids it in the nav.
+ * Nothing here is coloured except by meaning. Disclosure copy is `fg-muted`,
+ * never `fg-subtle`: legal text should not sit at the bottom of the legible
+ * range just because it is allowed to. The one `risk`-toned block (derivatives)
+ * takes the warning treatment, which is a box and an icon as well as a hue —
+ * because the amber is the accent's nearest chromatic neighbour and meaning
+ * never rests on hue alone.
  *
- * Numerals: the © year runs through `.tabular`, which is now IBM Plex Mono
- * (DESIGN.md §5 puts every numeral on the mono, tabular). It inherits weight 400
- * from this paragraph, which is the only weight the mono ships here — see the
- * note in TrustStrip.tsx.
- *
- * The entity name in the copyright line still renders through `CopyText`, so the
- * unfilled `[PLACEHOLDER]` in it can never be mistaken for finished legal copy.
+ * The one warm object below the fold is the giant wordmark, which is the page's
+ * §07 "brand surface where the accent leads" case. The small mark in the brand
+ * row above it is neutral steel, because it shares a row with body copy.
  */
-
-/**
- * lucide-react v1.27 has no brand glyphs, so each social uses a neutral icon
- * with an explicit aria-label naming the network. No invented imports.
- */
-const socialIcons: Record<string, LucideIcon> = {
-  AtSign,
-  Briefcase,
-  MonitorPlay,
-}
-
 export default function Footer() {
   const year = new Date().getFullYear()
 
   return (
     <footer id="footer" className="border-t border-border-soft bg-bg">
       {/* ------------------------------------------------------------------ */}
-      {/* 17.1 Brand block                                                    */}
+      {/* 8.1 Brand block and tagline                                         */}
       {/* ------------------------------------------------------------------ */}
       <Container>
-        {/* One column, not two. The right half held a bordered newsletter card;
-            with the email capture gone the brand block keeps the rail and the
-            row reads as a signature rather than as a split banner. */}
-        <div className={`py-12 lg:py-16 ${RAIL}`}>
-          <div>
-            <a
-              href="#hero"
-              className="inline-flex min-h-11 items-center gap-2.5 rounded-lg"
-              aria-label={`${brandName} home`}
-            >
-              {/* The brand mark, in the same neutral steel as the nav bar — one
-                  mark at one tone wherever it sits beside other content (§23).
-                  The lucide `TrendingUp` tile that stood here is gone for the
-                  reason recorded in Navbar.tsx: a rising arrow is a returns
-                  claim, and the spec's constraints forbid it outright.
+        <div className={`py-14 lg:py-20 ${RAIL}`}>
+          <a
+            href="#hero"
+            className="inline-flex min-h-11 items-center gap-2.5 rounded-lg"
+            aria-label={`${brandName} home`}
+          >
+            <ThinqMark size={28} tone="steel" className="shrink-0" />
+            <span className="text-lg font-semibold tracking-tight text-fg">{brandName}</span>
+          </a>
 
-                  The "luminance step below the accent" clause is deleted rather
-                  than reworded, because there is no step — accent Y 0.4712
-                  against chrome Y 0.4249 is 1.0976:1 as a pair. Chroma does the
-                  work instead, at a 22.16x gap.
+          {/*
+            The tagline, set at the section-heading step rather than as body copy.
 
-                  Copper is one element away, at the giant wordmark below, and
-                  that is the §07 "brand surface where the accent leads" case.
-                  Both are correct because they are different placements: this
-                  mark shares a row with body copy and social controls, that one
-                  owns its own band with nothing to compete with. */}
-              <ThinqMark size={28} tone="steel" className="shrink-0" />
-              <span className="text-lg font-semibold tracking-tight text-fg">{brandName}</span>
-            </a>
+            It is the page's closing argument and it earns the size: a broker
+            telling a reader to watch what things cost, at the foot of a page
+            that has just spent four sections on custody, statutory charges and
+            what "zero" excludes. Set small it would read as a slogan; set here
+            it reads as the summary it is.
 
-            {/* Body copy, so it sits at the 16px floor — landing.md §3. */}
-            <p className="mt-4 max-w-md text-base leading-relaxed text-fg-muted">{brandBlurb}</p>
+            `.display` and not `.display-quiet` — that voice belongs to §7's
+            headline and is spent once.
+          */}
+          <p className="display mt-8 max-w-[16em] text-[clamp(1.5rem,3vw,2.5rem)] leading-[1.15] text-fg">
+            {tagline}
+          </p>
 
-            <ul className="mt-6 flex flex-wrap items-center gap-2">
-              {socials.map((social) => {
-                const Icon = socialIcons[social.icon] ?? AtSign
-                return (
-                  <li key={social.label}>
-                    <a
-                      href={social.href}
-                      aria-label={`${brandName} on ${social.label}`}
-                      /* Edge goes to chrome on hover, not accent: three social
-                         circles pulsing at the action value would read as three
-                         primary buttons in the footer, and §4 rule 1 reserves
-                         the accent for things you can act on. The hover pairs
-                         `border-chrome` with `bg-surface-raised`, so the edge
-                         that actually renders is chrome on #1E1714 — 7.9950:1,
-                         far past the 3:1 WCAG 1.4.11 asks of a boundary. */
-                      className="grid h-11 w-11 place-items-center rounded-full border border-border text-fg-muted transition-colors duration-200 hover:border-chrome hover:bg-surface-raised hover:text-fg"
-                    >
-                      <Icon className="h-[1.125rem] w-[1.125rem]" strokeWidth={1.5} aria-hidden="true" />
-                    </a>
-                  </li>
-                )
-              })}
-            </ul>
-          </div>
+          <p className="mt-6 max-w-md text-base leading-relaxed text-fg-muted">{brandBlurb}</p>
         </div>
       </Container>
 
       {/* ------------------------------------------------------------------ */}
-      {/* 17.2 Link columns                                                   */}
+      {/* 8.2 Compliance and registration                                     */}
       {/* ------------------------------------------------------------------ */}
       <div className="border-t border-border-soft">
         <Container>
-          <nav aria-label="Footer" className={`py-12 ${RAIL}`}>
-            {/* Five columns of five. At eight they were 120px strips of grey
-                type; five hold a readable width on one row from lg up, and step
-                to 2-up on a phone where the labels need the measure. */}
-            <div className="grid grid-cols-2 gap-x-8 gap-y-10 sm:grid-cols-3 lg:grid-cols-5">
-              {footerColumns.map((column) => (
-                <div key={column.heading}>
-                  <h3 className="text-xs font-semibold uppercase tracking-[0.16em] text-fg">
-                    {column.heading}
-                  </h3>
-                  {/* min-h-11 gives the 44px tap target; space-y-2 gives the 8px
-                      separation between adjacent targets — landing.md §9. The
-                      two are separate requirements and min-h alone met only one. */}
-                  <ul className="mt-3 space-y-2">
-                    {column.links.map((link) => (
-                      <li key={link}>
-                        <a
-                          href="#"
-                          className="-mx-1 flex min-h-11 items-center rounded px-1 text-[0.8125rem] leading-relaxed text-fg-muted transition-colors duration-200 hover:text-fg"
-                        >
-                          {link}
-                        </a>
-                      </li>
-                    ))}
-                  </ul>
+          <div className={`py-12 lg:py-16 ${RAIL}`}>
+            <h2 className="text-sm font-semibold text-fg">Registration and entity details</h2>
+
+            {/*
+              A `<dl>` of label/value pairs, two columns from md.
+
+              Every value is a `[PLACEHOLDER]` and renders in warning amber with
+              a dotted underline through `CopyText` — which is the entire point:
+              an unfilled SEBI registration number must be impossible to mistake
+              for a real one at a glance. Publishing an invented registration
+              code is a regulatory offence, not a typo, and this treatment is the
+              mechanism that stops it happening by inattention.
+            */}
+            <dl className="mt-6 grid gap-x-12 gap-y-5 md:grid-cols-2 lg:gap-x-20">
+              {registrationLines.map((line) => (
+                <div key={line.label}>
+                  <dt className="text-[0.8125rem] leading-snug text-fg-subtle">{line.label}</dt>
+                  <CopyText
+                    as="dd"
+                    source={line.value}
+                    className="mt-1 text-sm leading-relaxed text-fg-muted"
+                  />
                 </div>
               ))}
-            </div>
-          </nav>
+            </dl>
+
+            {/*
+              SCORES, as a real anchor. `rel="noreferrer"` with `target="_blank"`:
+              a link that opens a new tab and passes `window.opener` gives the
+              destination a handle on this page.
+
+              It is the one non-placeholder link in this footer, because it is the
+              one destination that exists and is not ours.
+            */}
+            <p className="mt-8 max-w-[46em] text-sm leading-relaxed text-fg-muted">
+              {scoresLink.before}
+              <a
+                href={scoresLink.href}
+                target="_blank"
+                rel="noreferrer"
+                className="rounded text-accent-soft underline underline-offset-4 transition-colors duration-200 hover:text-fg"
+              >
+                {scoresLink.linkLabel}
+              </a>
+              {scoresLink.after}
+            </p>
+          </div>
         </Container>
       </div>
 
       {/* ------------------------------------------------------------------ */}
-      {/* 17.7 Brand lockup                                                   */}
+      {/* 8.3 Mandatory disclaimers                                           */}
+      {/* ------------------------------------------------------------------ */}
+      <div className="border-t border-border-soft">
+        <Container>
+          <div className={`py-12 lg:py-16 ${RAIL}`}>
+            <h2 className="text-sm font-semibold text-fg">Disclosures</h2>
+
+            <div className="mt-6 grid gap-8 md:grid-cols-2 lg:gap-x-20">
+              {statutoryDisclosures.map((item) => (
+                <section key={item.id} aria-labelledby={`disclosure-${item.id}`}>
+                  <h3
+                    id={`disclosure-${item.id}`}
+                    className="text-[0.8125rem] font-medium leading-snug text-fg"
+                  >
+                    {item.title}
+                  </h3>
+                  {/*
+                    `risk` blocks route through `Disclosure`, which gives them the
+                    ruled box and the TriangleAlert glyph. `note` blocks render as
+                    plain paragraphs through `CopyText`, which is what keeps their
+                    `[BRACKETED]` compliance placeholders flagged.
+
+                    Only one block is `risk` — the derivatives disclosure. If
+                    every block were boxed, the box would stop meaning anything,
+                    which is the failure mode of a footer where all legal text
+                    looks equally alarming and none of it gets read.
+                  */}
+                  {item.tone === 'risk' ? (
+                    <Disclosure tone="risk" className="mt-2">
+                      {item.body}
+                    </Disclosure>
+                  ) : (
+                    <CopyText
+                      source={item.body}
+                      className="mt-2 text-[0.8125rem] leading-relaxed text-fg-muted"
+                    />
+                  )}
+                </section>
+              ))}
+            </div>
+          </div>
+        </Container>
+      </div>
+
+      {/* ------------------------------------------------------------------ */}
+      {/* 8.4 Brand lockup                                                    */}
       {/* ------------------------------------------------------------------ */}
       {/* Outside Container deliberately — the mark runs to the viewport edges.
           A wordmark this size that stops inside a 1760px rail reads as an
@@ -194,13 +208,15 @@ export default function Footer() {
       </div>
 
       {/* ------------------------------------------------------------------ */}
-      {/* 17.8 Bottom bar                                                     */}
+      {/* 8.5 Bottom bar                                                      */}
       {/* ------------------------------------------------------------------ */}
       {/* No top border: the wordmark above is already the terminal gesture, and
           a rule between them would read as the mark being fenced off. */}
       <div>
         <Container>
-          <div className={`flex flex-col gap-4 py-7 sm:flex-row sm:items-center sm:justify-between ${RAIL}`}>
+          <div
+            className={`flex flex-col gap-4 py-7 sm:flex-row sm:items-center sm:justify-between ${RAIL}`}
+          >
             <p className="text-xs leading-relaxed text-fg-muted">
               © <span className="tabular">{year}</span>{' '}
               <CopyText as="span" source={copyrightEntity} />. {copyrightSuffix}

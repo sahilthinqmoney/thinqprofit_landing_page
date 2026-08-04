@@ -25,6 +25,10 @@ tools/plates/out/
 # from the site itself, and regenerable; the brief in docs/ is the source.
 brag-output/
 
+# Screenshots written by the browser tooling while checking the rendered page.
+# One PNG per capture, regenerated on every run — output, not source.
+.browser-sessions/
+
 # Env — never commit credentials
 .env
 .env.*

@@ -39,7 +39,6 @@ import ThinqMark from '../ui/ThinqMark'
 import { RAIL } from '../ui/SectionShell'
 import {
   directLinks,
-  loginLabel,
   megaMenus,
   mobileOrder,
   signupLabel,
@@ -676,12 +675,20 @@ export default function Navbar() {
                 className="hidden shrink-0 items-center gap-2 md:flex"
                 onPointerEnter={hoverOpen(null)}
               >
-                <Button href="#" variant="ghost" size="sm" className="xl:px-5">
-                  {loginLabel}
-                </Button>
-                {/* The account-opening path is the closing section: there is no
-                    Onboarding section any more, and the close is the one place
-                    on the page that asks for the decision. */}
+                {/* The `Log in` ghost button is gone, and the 8px gap argument
+                    above is now moot rather than wrong — there is no second
+                    control beside the primary for its focus ring to collide
+                    with. The note stays because the collision returns the moment
+                    anything is put back here.
+
+                    Why it went: there is nothing to log in to. The product has
+                    not opened, which is the premise of the entire page, and a
+                    `Log in` control beside `Join the waitlist` invites a reader
+                    to try an account they cannot have. It was pointing at `#`. */}
+                {/* The waitlist path is the closing section, which is the one
+                    place on the page that asks for the decision with the whole
+                    argument behind it. The hero's own form is above this button,
+                    so scrolling up to it would be the wrong direction. */}
                 {/* No `xl:px-5` here, and that is a correction rather than an
                     omission. `className` lands on the OUTER element, which on a
                     metal primary is `RIM_WRAP` — the wrapper whose entire job is
@@ -855,10 +862,10 @@ export default function Navbar() {
           </div>
 
           <div className="shrink-0 border-t border-border-soft bg-surface/40 px-6 pb-[max(1rem,env(safe-area-inset-bottom))] pt-4">
+            {/* One action, matching the desktop bar. The secondary `Log in`
+                button that stood above it is gone for the reason recorded
+                there: there is nothing to log in to yet. */}
             <div className="flex flex-col gap-3">
-              <Button href="#" variant="secondary" size="md" fullWidth>
-                {loginLabel}
-              </Button>
               <Button href="#final-cta" variant="primary" size="md" fullWidth>
                 {signupLabel}
               </Button>

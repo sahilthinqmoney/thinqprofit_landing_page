@@ -1,78 +1,84 @@
+import AnnouncementBar from './components/ui/AnnouncementBar'
 import Navbar from './components/sections/Navbar'
 import Hero from './components/sections/Hero'
 import TrustStrip from './components/sections/TrustStrip'
-import Products from './components/sections/Products'
-import Platform from './components/sections/Platform'
-import Terminal from './components/sections/Terminal'
-import Safety from './components/sections/Safety'
+import Missing from './components/sections/Missing'
+import Capabilities from './components/sections/Capabilities'
+import Security from './components/sections/Security'
+import Offer from './components/sections/Offer'
 import FinalCta from './components/sections/FinalCta'
 import Footer from './components/sections/Footer'
 
 /**
- * Seven sections and a footer, in the Trust & Authority order of
- * design-system/thinqprofit/pages/landing.md §7 — proof before price, safety
- * before the app pitch.
+ * A waitlist page: a bar, a hero that contains the ask, four sections of
+ * argument, a close that repeats the ask, and the legal footer a SEBI-registered
+ * broker has to carry.
  *
- * The page was fourteen sections. It is seven, and the cut was the point: a
- * broker page earns trust by saying less with more certainty, so each remaining
- * section states one thing and stops. What went, and why:
+ * ── The spine ─────────────────────────────────────────────────────────────
  *
- *  - Announcement bar — a dismissable strip above the nav, carrying copy nobody
- *    arrived for. The header is now the nav alone (see `--header-stack`).
- *  - Onboarding — a full viewport of "how to open an account" ahead of any
- *    reason to want one. The account-opening CTAs point at the closing section
- *    instead, which is the one place on the page that asks for the decision.
- *  - Learn, Testimonials, FAQ, Support — four consecutive sections of secondary
- *    material.
+ *  1. Announcement — the offer and the deadline, above everything.
+ *  2. Hero — the claim, the value proposition, and the form.
+ *  3. Trust strip — "are you real", answered before anything is asked for.
+ *  4. Missing — the one feature, in depth, on a plate. The page's argument.
+ *  5. Capabilities — everything else, one line each. A summary, shaped as one.
+ *  6. Security — where the money and the shares sit. A ladder of claims.
+ *  7. Offer — the terms in full, at body size, with the statutory block.
+ *  8. Close — the ask again, for the reader who needed the argument first.
+ *  9. Footer — registration, disclosures, SCORES.
  *
- *    NOTE: this previously read "support channels and the escalation ladder
- *    render in full in the footer". That is no longer true. The footer's
- *    statutory blocks — registration & entity details, statutory disclosures,
- *    Attention Investors and the grievance escalation ladder — were removed on
- *    request in the same pass, so the escalation route is not currently stated
- *    anywhere on the page. Flagged, not fixed: see the note in Footer.tsx.
- *  - Stats — five figures, none of them yet verifiable, so the band rendered
- *    nothing at all.
- *  - Pricing — removed on request. Every rate in both tables was an unfilled
- *    `[₹X per executed order]`-style placeholder, so the section's own heading
- *    ("Priced plainly, in advance") was the one claim on the page the section
- *    could not support. Products still names what can be traded; nothing on the
- *    page now states what it costs. `Pricing.tsx` and `src/data/pricing.ts` are
- *    left in place, unreferenced, with the rate card and the statutory
- *    pass-through line intact.
+ * The order is a decision rather than a template. Proof (3) precedes argument
+ * (4–5); safety (6) precedes price (7); the ask appears twice and nowhere in
+ * between. A reader convinced by the bar can convert without scrolling; a reader
+ * who needs all of it arrives at the same form having read the whole case.
  *
- * Every section covers the full screen (`min-h-svh`, content vertically
- * centred). `svh` rather than `vh` so mobile browser chrome doesn't push a
- * section past the fold, and `min-` rather than a fixed height so the two
- * content-heavy sections (Products, Footer) grow instead of clipping.
+ * ── What was removed, and why it is not coming back as-is ────────────────
  *
- * TrustStrip is the one deliberate exception: a thin band of registrations
- * between the hero and the first section, not a section in its own right.
+ * Five sections went with the content rewrite: Products, Platform, Terminal,
+ * MobileApp and Pricing, along with their data files. They described an
+ * account-opening product with an instrument list and a rate card — a page for a
+ * broker that has launched. Every rate in Pricing was an unfilled placeholder,
+ * which made its own heading ("Priced plainly, in advance") the one claim it
+ * could not support.
+ *
+ * They are in git, not in the tree. Leaving five unreferenced sections in place
+ * "in case" is how a codebase acquires two descriptions of the product, and the
+ * second one is always the one someone edits by mistake.
+ *
+ * ── Composition ──────────────────────────────────────────────────────────
+ *
+ * Two full-bleed plate sections (4, 7) alternate their copy side — left, then
+ * right — and the close (8) is centred. DESIGN.md §5.5 rejects two neighbours
+ * sharing a composition, because if two sections put their subject in the same
+ * place the scroll flattens. The flat sections (5, 6) sit between them, which is
+ * what keeps four consecutive full-bleed frames from happening.
  */
 export default function App() {
   return (
     /*
      * `grain` lays a fixed, pointer-events-none noise field over the whole
      * document at ~4% opacity. A page this dark is mostly one flat ink value,
-     * and flat ink at scale reads as absence rather than as a surface; the
-     * grain gives it something to be. Fixed rather than in flow so it never
-     * repaints with a scrolling layer.
-     */
-    /*
+     * and flat ink at scale reads as absence rather than as a surface; the grain
+     * gives it something to be. Fixed rather than in flow so it never repaints
+     * with a scrolling layer.
+     *
      * `overflow-x-clip`, not `hidden`: clip contains horizontal overflow without
      * making this element a scroll container, so `position: sticky` and
-     * ScrollTrigger's pinning still work against the document scroller. A
-     * full-bleed section that miscalculates its gutter can then no longer add
-     * horizontal scroll to the whole page — which is what 140px of overflow was
-     * doing before this.
+     * ScrollTrigger's pinning still work against the document scroller.
+     *
+     * `bg-bg` alone. It read `bg-[#050505] bg-bg`, which set the background
+     * twice — harmless only while the token happens to equal that hex, and
+     * silently wrong the moment `--color-bg` moves. The token is the single
+     * source; an arbitrary value beside it is a second one.
      */
-    <div className="grain min-h-screen overflow-x-clip bg-[#050505] bg-bg text-fg">
+    <div className="grain min-h-screen overflow-x-clip bg-bg text-fg">
       {/*
         The skip link is one of the page's two genuinely SOLID accent fills (the
         other is `Button`'s primary variant), and that is why it takes ink rather
-        than white.
+        than white: `on-accent` #050505 on `accent` #E7E9EE measures 16.78:1.
 
-        `on-accent` #050505 on `accent` #E7E9EE measures 16.78:1. A solid fill takes dark ink text.
+        It targets `#main`, which now sits below the announcement bar and the nav
+        — so a keyboard user skips the bar as well as the navigation, which is
+        the point of it.
       */}
       <a
         href="#main"
@@ -81,15 +87,16 @@ export default function App() {
         Skip to content
       </a>
 
+      <AnnouncementBar />
       <Navbar />
 
       <main id="main">
         <Hero />
         <TrustStrip />
-        <Products />
-        <Platform />
-        <Terminal />
-        <Safety />
+        <Missing />
+        <Capabilities />
+        <Security />
+        <Offer />
         <FinalCta />
       </main>
 

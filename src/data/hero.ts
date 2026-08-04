@@ -1,97 +1,139 @@
 import type { HeroContent, Registration } from '../types'
 
 /**
- * §3 Hero + §4 Trust strip — docs/landing-page-copy.md
- * All strings verbatim from the copy deck. [SQUARE BRACKET] values are
- * deliberate compliance placeholders — do not invent replacements.
+ * §2 Hero + the registration band under it.
+ *
+ * ── What changed, and the one rule that survived intact ────────────────────
+ *
+ * The page used to sell a brokerage account. It now sells a place on a list for
+ * a product that has not opened, and that inverts what the hero has to do: a
+ * broker's hero answers "what can I trade here", a waitlist hero answers "why
+ * should I care before it exists". Those are different sentences and the old
+ * one — "Stocks, ETFs, F&O, commodities and direct mutual funds" — is an
+ * inventory, which is exactly the answer nobody is asking for yet.
+ *
+ * What survived is the rule underneath it: the hero STATES, it does not argue.
+ * A hero that argues is one the reader has to evaluate; a hero that states gets
+ * scanned and passed. Everything below is a statement.
  */
 
 export const hero: HeroContent = {
-  eyebrow: 'SEBI-registered broker · NSE · BSE · MCX · CDSL',
-  headline: 'Your money. Your market. One app.',
-  /*
-   * The instrument list, and nothing else.
+  /**
+   * The badge, and it is not an eyebrow.
    *
-   * This has been cut twice. The deck ran three trailing claims — "loads fast,
-   * prices plainly, and stays out of your way" — and the first pass kept one of
-   * them. That last one goes too: Platform owns speed ("the ten seconds that
-   * matter"), Pricing owns plain pricing ("Priced plainly, in advance"), and
-   * "stays out of your way" is a claim about the product that the product's own
-   * section is better placed to make.
+   * DESIGN.md §3 removed the eyebrow prop outright — "a category label sitting
+   * above a heading is decoration wearing the costume of information" — and the
+   * distinction that lets this one exist is that it is not a label for the
+   * heading. "Charts that say everything" does not tell a reader what kind of
+   * product this is; a chart that talks is either an AI product or a metaphor,
+   * and which one it is happens to be the whole claim. The badge is the answer,
+   * placed before the question can be misread.
    *
-   * What a first-time visitor needs from a broker's hero is *what can I trade
-   * here*. That is substance, it is unarguable, and the H1 above already carries
-   * the consolidation promise in three words. A hero that argues is a hero the
-   * reader has to evaluate; a hero that states gets scanned and passed.
+   * Three words, no verb, no adjective about the trader. Every competitor hero
+   * in this market leads with one — Elite, Pro, Super-powered — and the page
+   * refuses that register everywhere it appears.
    */
-  subheadline: 'Stocks, ETFs, F&O, commodities and direct mutual funds.',
-  primaryCta: 'Open free account',
-  /*
-   * The deck asked for "a Nifty 50 chart with an open buy order". That is a
-   * fabricated interface showing invented market data, which motion-brief §7
-   * rules out — a rendered candlestick is made-up price history no matter how
-   * it is labelled. The hero carries an abstract plate instead, and this string
-   * describes what actually ships. See docs/art-direction.md.
+  eyebrow: 'AI-native trading platform',
+
+  /**
+   * The H1. Four words, one full stop, no line breaks.
+   *
+   * It carries no `\n`, which is a change from the three-line stair that stood
+   * here, and the reason is arithmetic rather than taste. At the H1's 120px
+   * ceiling "Charts that say everything." sets ~1,430px in IBM Plex at the
+   * display axis — past any measure the hero column has — so the line breaks
+   * naturally at every width, and an art-directed break would only be honoured
+   * at widths where the clamp has already made the decision. A hand-written
+   * break that agrees with the wrap is not art direction, it is a comment.
+   *
+   * The full stop stays. It is the difference between a headline and a claim.
    */
-  /*
-   * docs/art-direction.md §A1's "alt text to ship", verbatim. It replaces a
-   * string that said the edge caught *warm* light.
+  headline: 'Charts that say everything.',
+
+  /**
+   * The value proposition, in one sentence with three clauses.
    *
-   * The rule survives the copper move; its reason does not, so it is restated
-   * rather than carried. It used to be "there is no warm light in this system,
-   * because a warm grade reintroduces the REMOVED brand through the lighting
-   * without anyone naming a colour." The brand is not removed any more — it is
-   * warm by definition, and the ground itself measures OKLCH chroma 0.0038 at
-   * hue 17.6 deg.
+   * The three clauses are the product, and they are ordered by what a trader
+   * checks first: what is in play, what changed, what is noise. The third is the
+   * one no competitor offers, because naming something as noise is a judgment a
+   * feature list cannot make — a screener surfaces everything and lets you sort.
+   */
+  subheadline:
+    'The chart reads price action back to you — what is in play, what just changed, and what is only noise.',
+
+  /**
+   * The offer, repeated from the announcement bar deliberately.
    *
-   * §2.4 still fixes the key at 5600K, and the reason is now the stronger one:
-   * the accent is the most saturated object in the system (chroma 0.1263 against
-   * a warm-neutral axis topping out at 0.0165), and §4 rule 1 says saturated
-   * copper means "you can act on this". A warm grade across a full-bleed plate
-   * would put the brand's own colour on 900px of photograph that cannot be acted
-   * on — the accent spent on the largest non-interactive surface on the page.
-   * Neutral plates are what leave the accent legible as the action.
+   * It is the one repetition on the page and it is not an accident of assembly:
+   * the bar is chrome a reader can scroll past without registering, and the
+   * hero is where the offer has to be attached to the action it pays for. The
+   * qualifier travels with it, in `offerQualifier`, for the same reason it
+   * travels in the bar.
+   */
+  primaryCta: 'Six months of zero brokerage for everyone on the list.',
+
+  /**
+   * A1, from docs/art-direction.md §3, unchanged by the copy rewrite.
+   *
+   * The alt text describes what actually ships behind the copy — a machined
+   * form, not a chart. §2.1 bans any price, percentage, currency symbol or P&L
+   * in a plate "including partial, out of focus, or on a reflected surface", and
+   * the constraint tightened rather than relaxed when the headline started
+   * talking about charts: a hero that says "charts that say everything" over a
+   * rendered candlestick is inventing the market data the sentence is about.
    */
   mediaAlt:
     'A large brushed aluminium form curving out of darkness, lit along one edge by a single soft light.',
+
+  /**
+   * Mandatory, visible in the first viewport, never collapsed, never behind a
+   * blur. This requirement is independent of what the page is selling — a
+   * waitlist for a broker is still a broker's page.
+   */
   riskDisclosure:
     'Investments in the securities market are subject to market risk. Read all the related documents carefully before investing.',
 }
 
 /**
- * The H1 as it is set, with art-directed line breaks.
+ * The offer's qualifier. Rendered adjacent to `primaryCta`, at the same size.
  *
- * `hero.headline` stays the flat string for meta tags and anywhere the breaks
- * would be wrong. Here the ragging is a design decision, not a consequence of
- * whatever width the viewport happens to be — the same reason the H1's measure
- * is expressed in `em` rather than pixels. Honoured at ≥768px only; below that
- * the copy wraps naturally.
+ * "Zero brokerage" is a claim about our fee and nothing else. §6 itemises what
+ * still applies; this is the sentence that stops the hero's version of the claim
+ * being read as "free".
  */
-export const heroHeadlineDisplay = 'Your money.\nYour market.\nOne app.'
-
+export const offerQualifier = 'Statutory charges still apply.'
 
 /**
- * Was: the mandated "Illustrative" stamp for the hero visual (§3, landing.md §9
- * accessibility gate). It exists to stop a real-looking P&L being mistaken for
- * live data — and there is no longer a fabricated screenshot on the page to
- * stamp. Kept, unreferenced, because the requirement returns the moment anyone
- * puts a product mock back in the hero.
+ * Was the art-directed three-line H1. Deleted rather than kept unreferenced: it
+ * held copy that no longer exists anywhere on the page, and an exported string
+ * nothing imports is a copy deck pretending to be code.
+ *
+ * The `heroIllustrativeStamp` export went with it, and that one is worth a note.
+ * It existed to stamp a fabricated P&L screenshot as illustrative. There is no
+ * product mock on this page — and the moment anyone puts one back, the stamp is
+ * a requirement, not an option. It is recorded in docs/go-live-checklist.md so
+ * the requirement outlives the string.
  */
-export const heroIllustrativeStamp = 'Illustrative. Not a recommendation.'
 
-/** §4 label. Deliberately not an H2 — nothing competes with the H1. */
+/** §5's band label. Deliberately not an H2 — nothing competes with the H1. */
 export const trustLabel = 'Registered and regulated'
 
 /**
- * §4 items.
- * TODO (compliance): replace all five with verified registration and member
- * codes before launch. If any segment is not yet live, remove the row entirely —
- * do not display an unregistered segment.
+ * The registration band.
+ *
+ * MCX is gone. The page no longer claims commodities anywhere — the capability
+ * list is equity, futures and options — and a membership displayed for a segment
+ * the product does not offer is a claim about scope made by the trust band,
+ * which is the one band on the page whose entire job is to be believed.
+ *
+ * TODO (blocking): replace every value with a verified code before launch. If a
+ * segment is not live, remove the row rather than showing an unfilled one.
+ * `TrustStrip` suppresses a code while it is a `[PLACEHOLDER]`, so the authority
+ * name renders today and the number waits.
  */
 export const registrations: Registration[] = [
   { authority: 'SEBI Registered Broker', value: '[INZ000XXXXXX]', icon: 'shield-check' },
   { authority: 'NSE Member', value: '[Member code]', icon: 'landmark' },
   { authority: 'BSE Member', value: '[Member code]', icon: 'building-2' },
-  { authority: 'MCX Member', value: '[Member code]', icon: 'boxes' },
   { authority: 'CDSL Depository Participant', value: '[IN-DP-XXX-XXXX]', icon: 'vault' },
 ]

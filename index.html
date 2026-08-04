@@ -12,34 +12,48 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <!-- Must track --color-bg in src/index.css (#050505) -->
     <meta name="theme-color" content="#050505" />
+    <!-- The head now describes a waitlist, not a brokerage account, and every
+         string below moved with the page. The old set sold "flat-fee pricing"
+         and "open your demat account in minutes" — a share preview promising an
+         account a visitor cannot yet open is a worse first impression than no
+         preview, because it is the one part of the page a reader sees before
+         they arrive. -->
     <meta
       name="description"
-      content="Open a free demat account with ThinqProfit. Trade stocks, ETFs, F&amp;O, commodities and mutual funds with flat-fee pricing and a platform built for speed."
+      content="Thinq is an AI-native trading platform for Indian markets. The chart reads price action back to you. Join the waitlist for six months of zero Thinq brokerage — statutory charges apply."
     />
 
     <meta property="og:type" content="website" />
-    <meta property="og:title" content="ThinqProfit — Trade Stocks, F&amp;O and Mutual Funds in India" />
+    <meta property="og:title" content="Thinq — Charts that say everything" />
     <meta
       property="og:description"
-      content="Flat-fee trading, direct mutual funds, and a platform that keeps up with the market. Open your demat account in minutes."
+      content="An AI-native trading terminal for Indian markets. Six months of zero Thinq brokerage for everyone on the waitlist; statutory charges apply."
     />
+    <!-- TODO (blocking, docs/go-live-checklist.md): og-image.png is the OLD
+         share card. It is a blue-black plate on #863BFF / #7E14FF / #47BFFF —
+         hues that exist nowhere in this token set — and it renders a fabricated
+         Nifty chart with an order ticket, which docs/art-direction.md §2.1
+         refuses outright. It also advertises a product that has not opened. -->
     <meta property="og:image" content="/og-image.png" />
     <meta
       property="og:image:alt"
-      content="ThinqProfit app showing a Nifty 50 chart and an open order ticket"
+      content="Thinq — an AI-native trading platform for Indian markets"
     />
     <meta name="twitter:card" content="summary_large_image" />
 
-    <!-- TODO: replace the bracketed values once the legal entity details are confirmed. -->
-    <link rel="canonical" href="https://[thinqprofit.com]/" />
+    <!-- TODO (blocking): replace the bracketed values once the legal entity
+         details are confirmed. These are structured data a search engine reads
+         as fact, so an invented legal name here is the same offence as an
+         invented registration number in the footer. -->
+    <link rel="canonical" href="https://[thinq-domain.example]/" />
     <script type="application/ld+json">
       {
         "@context": "https://schema.org",
         "@type": ["Organization", "FinancialService"],
-        "name": "ThinqProfit",
-        "legalName": "[ThinqProfit Securities Private Limited]",
-        "url": "https://[thinqprofit.com]/",
-        "email": "[support@thinqprofit.com]",
+        "name": "Thinq",
+        "legalName": "[Legal entity name Private Limited]",
+        "url": "https://[thinq-domain.example]/",
+        "email": "[support@thinq.example]",
         "telephone": "[+91 XXXXX XXXXX]",
         "address": {
           "@type": "PostalAddress",
@@ -66,7 +80,7 @@
       now ship from the same origin as the CSS that references them.
     -->
 
-    <title>ThinqProfit — Trade Stocks, F&amp;O and Mutual Funds in India</title>
+    <title>Thinq — Charts that say everything</title>
   </head>
   <body>
     <div id="root"></div>
