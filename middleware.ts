@@ -17,16 +17,23 @@
  * revoking means rotating SITE_PASSWORD and locking out everyone at once. It is
  * enough to keep a half-finished broker page away from strangers and crawlers.
  * It is not enough to sit in front of anything holding customer data.
+ *
+ * ── Two constraints this file is written around ─────────────────────────────
+ *
+ * The first draft failed the Vercel build with `Unhandled type: "ColonToken"`
+ * after the Vite build had already succeeded — thrown while compiling this file,
+ * not the site. It carried return type annotations (`): Response | undefined {`)
+ * and an `export const config` matcher, neither of which appears in any of
+ * Vercel's own middleware examples. Both are gone: parameter annotations only,
+ * which the documented examples do use, and no config export at all. Middleware
+ * runs on every route by default, which is the matcher this needs anyway.
+ *
+ * Second: on non-Next.js projects, falling off the end of the function is not
+ * how a request is passed through. `next()` from `@vercel/functions` is, and
+ * returning nothing instead would have gated the site behind a blank response.
  */
 
-export const config = {
-  /**
-   * Everything. No carve-out for /media or /assets — an unlisted deployment URL
-   * with a public asset tree still tells a reader what is being built, and the
-   * plates are the most legible part of it.
-   */
-  matcher: '/:path*',
-}
+import { next } from '@vercel/functions'
 
 /** The username half is fixed; only the password is secret. */
 const USER = 'thinq'
@@ -36,14 +43,14 @@ const USER = 'thinq'
  * A remote timing attack across the public internet against a header comparison
  * is close to theoretical, but the constant-time version is four lines.
  */
-function safeEqual(a: string, b: string): boolean {
+function safeEqual(a: string, b: string) {
   if (a.length !== b.length) return false
   let diff = 0
   for (let i = 0; i < a.length; i++) diff |= a.charCodeAt(i) ^ b.charCodeAt(i)
   return diff === 0
 }
 
-export default function middleware(request: Request): Response | undefined {
+export default function middleware(request: Request) {
   const password = process.env.SITE_PASSWORD
 
   /**
@@ -54,7 +61,7 @@ export default function middleware(request: Request): Response | undefined {
    */
   if (!password) {
     return new Response(
-      'SITE_PASSWORD is not set on this deployment. Set it in Vercel → Settings → Environment Variables.',
+      'SITE_PASSWORD is not set on this deployment. Set it in Vercel > Settings > Environment Variables.',
       { status: 503, headers: { 'Cache-Control': 'no-store' } },
     )
   }
@@ -62,12 +69,12 @@ export default function middleware(request: Request): Response | undefined {
   const header = request.headers.get('authorization') ?? ''
   const expected = `Basic ${btoa(`${USER}:${password}`)}`
 
-  if (safeEqual(header, expected)) return
+  if (safeEqual(header, expected)) return next()
 
   return new Response('Authentication required.', {
     status: 401,
     headers: {
-      'WWW-Authenticate': 'Basic realm="Thinq — pre-launch", charset="UTF-8"',
+      'WWW-Authenticate': 'Basic realm="Thinq pre-launch", charset="UTF-8"',
       /**
        * A 401 must never be cached: a shared cache holding it would keep
        * challenging a reader who has already authenticated.
