@@ -57,10 +57,10 @@ export default function Hero() {
   return (
     <section
       id="hero"
-      className="relative isolate flex min-h-[calc(100svh-var(--header-stack))] w-full flex-col justify-between overflow-hidden bg-bg py-12 lg:py-20"
+      className="relative isolate flex min-h-[calc(100svh-var(--header-stack))] w-full flex-col justify-between overflow-hidden bg-bg pt-16 pb-0 lg:pt-24"
     >
-      {/* Full-bleed background media layer (supports /hero-bg.mp4 or hero background image) */}
-      <MediaBackdrop alt={hero.mediaAlt} video="/hero-bg.mp4" focus="center" />
+      {/* Full-bleed background media layer */}
+      <MediaBackdrop alt={hero.mediaAlt} video="/media/hero/hero_section_bg.mp4" focus="center" />
 
       {/* Top Ambient Keynote Spotlight */}
       <div
@@ -68,13 +68,13 @@ export default function Hero() {
         className="pointer-events-none absolute inset-x-0 top-0 h-[480px] -z-10 bg-[radial-gradient(ellipse_70%_50%_at_50%_-10%,rgba(255,255,255,0.12),rgba(255,255,255,0))]"
       />
 
-      {/* Radial scrim overlay ensuring background video graphics ("COMING SOON") & text are crystal clear */}
+      {/* Light radial scrim overlay ensuring video details are 60% visible */}
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(ellipse_at_center,rgba(5,5,5,0.25)_0%,rgba(5,5,5,0.75)_65%,rgba(5,5,5,0.96)_100%)]"
+        className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(ellipse_at_center,rgba(5,5,5,0.08)_0%,rgba(5,5,5,0.35)_70%,rgba(5,5,5,0.75)_100%)]"
       />
 
-      <div className="flex flex-1 items-center my-auto">
+      <div className="flex flex-1 items-center my-auto py-8">
         <Container>
           <div className="mx-auto max-w-[52em] text-center">
             {/* Premium Glowing Eyebrow Badge */}
@@ -152,8 +152,8 @@ export default function Hero() {
         </Container>
       </div>
 
-      {/* Statutory Disclosure Rail */}
-      <div className="relative border-t border-white/10 bg-bg/85 backdrop-blur-md mt-12">
+      {/* Statutory Disclosure Rail pinned seamlessly at bottom fold */}
+      <div className="relative w-full border-t border-white/10 bg-surface/40 backdrop-blur-xl mt-auto">
         <Container>
           <div className="py-3.5 text-center">
             <Disclosure tone="note" className="max-w-4xl mx-auto text-xs text-fg-subtle">

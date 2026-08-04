@@ -10,6 +10,12 @@
          assets, not markup, so they are flagged here rather than patched here. -->
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- Pre-launch. Paired with public/robots.txt and middleware.ts, and removed
+         with them: the canonical below is still a placeholder domain and the
+         footer still renders bracketed SEBI registrations, so an indexed copy of
+         this page would outlive the draft it was taken from. `noarchive` is here
+         because `noindex` alone does not stop a cached copy being served. -->
+    <meta name="robots" content="noindex, nofollow, noarchive" />
     <!-- Must track --color-bg in src/index.css (#050505) -->
     <meta name="theme-color" content="#050505" />
     <!-- The head now describes a waitlist, not a brokerage account, and every

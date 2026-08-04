@@ -49,7 +49,7 @@ export default function MediaBackdrop({
           muted
           playsInline
           poster={poster}
-          className="absolute inset-0 h-full w-full object-cover opacity-50 transition-opacity duration-1000"
+          className="absolute inset-0 h-full w-full object-cover opacity-60 transition-opacity duration-1000"
         >
           {typeof video === 'string' ? (
             <source src={video} type="video/mp4" />
@@ -67,7 +67,7 @@ export default function MediaBackdrop({
         <img
           src={typeof image === 'string' ? image : image.desktop}
           alt={alt}
-          className="absolute inset-0 h-full w-full object-cover opacity-40 transition-opacity duration-1000"
+          className="absolute inset-0 h-full w-full object-cover opacity-60 transition-opacity duration-1000"
         />
       )}
 
@@ -76,31 +76,15 @@ export default function MediaBackdrop({
         className="absolute inset-0"
         style={{
           background: `radial-gradient(72% 78% at ${litX}% 40%, color-mix(in srgb, var(--color-accent) 22%, var(--color-surface)) 0%, color-mix(in srgb, var(--color-surface) 50%, var(--color-bg)) 55%, var(--color-bg) 100%)`,
-          opacity: video || image ? 0.6 : 1,
+          opacity: video || image ? 0.15 : 1,
         }}
       />
 
       {/* Secondary Chromatic Glow Orb */}
       <div
-        className="absolute inset-0 opacity-60"
+        className="absolute inset-0 opacity-40"
         style={{
           background: `radial-gradient(55% 55% at ${litX}% 42%, color-mix(in srgb, var(--color-chrome) 14%, transparent) 0%, color-mix(in srgb, var(--color-accent-soft) 8%, transparent) 55%, transparent 85%)`,
-        }}
-      />
-
-      {/* Subtle Metallic Specular Beam */}
-      <div
-        className="absolute inset-0 opacity-30"
-        style={{
-          backgroundImage: `linear-gradient(115deg, transparent 25%, color-mix(in srgb, var(--color-chrome) 14%, transparent) 45%, color-mix(in srgb, var(--color-on-accent) 18%, transparent) 50%, color-mix(in srgb, var(--color-chrome) 10%, transparent) 55%, transparent 75%)`,
-        }}
-      />
-
-      {/* Fine Metallic Texture Brushing */}
-      <div
-        className="absolute inset-0 opacity-[0.02]"
-        style={{
-          backgroundImage: `repeating-linear-gradient(115deg, var(--color-chrome) 0, var(--color-chrome) 1px, transparent 1px, transparent 8px)`,
         }}
       />
 
@@ -108,7 +92,7 @@ export default function MediaBackdrop({
       <div
         className="absolute inset-0 pointer-events-none"
         style={{
-          background: `radial-gradient(ellipse at center, rgba(5,5,5,0.3) 0%, rgba(5,5,5,0.75) 70%, rgba(5,5,5,0.95) 100%)`,
+          background: `radial-gradient(ellipse at center, rgba(5,5,5,0.1) 0%, rgba(5,5,5,0.45) 70%, rgba(5,5,5,0.75) 100%)`,
         }}
       />
     </div>
