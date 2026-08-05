@@ -1,5 +1,4 @@
 import { useState } from 'react'
-import Container from '../ui/Container'
 import SectionShell from '../ui/SectionShell'
 import SpotlightCard from '../ui/SpotlightCard'
 import AgenticHandsSection from './AgenticHandsSection'
@@ -70,38 +69,6 @@ export default function SectionTwo() {
           </div>
         </SpotlightCard>
       </SectionShell>
-
-      {/* ------------------------------------------------------------------ */}
-      {/* Section 03 · Every screen you run, in one browser                  */}
-      {/* ------------------------------------------------------------------ */}
-      <section id="section-03" className="scroll-mt-24 py-16 sm:py-20 lg:py-24 border-t border-border-soft">
-        <Container>
-          <div className="mx-auto w-full max-w-[84rem] grid gap-8 lg:grid-cols-2 lg:items-center xl:gap-16">
-            {/* Embedded 3D Dual-Monitor Setup (Left) */}
-            <div className="relative group flex items-center justify-center p-2 sm:p-4 order-2 lg:order-1">
-              {/* Soft ambient backglow behind monitors */}
-              <div className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 h-[75%] w-[85%] rounded-full bg-accent/15 blur-3xl opacity-60 transition-opacity duration-500 group-hover:opacity-90" />
-              
-              {/* Dual Monitors Image */}
-              <img
-                src="/dual_monitors.png"
-                alt="Every screen you run, in one browser - Dual Monitor Pop-Out Setup"
-                className="relative z-10 w-full h-auto object-contain max-h-[560px] filter drop-shadow-[0_20px_40px_rgba(0,0,0,0.85)] transition-transform duration-500 group-hover:scale-[1.02]"
-              />
-            </div>
-
-            {/* Text Block (Right) */}
-            <div className="max-w-[36em] space-y-4 order-1 lg:order-2">
-              <h2 className="display text-[clamp(2.5rem,4.6vw,4rem)] leading-[1.08] text-fg">
-                Every screen you run, in one browser.
-              </h2>
-              <p className="text-[1.0625rem] leading-[1.65] text-fg-muted">
-                Pop a window onto the second monitor and it stays linked to the first. Orders leave from the screen you are watching, routed in milliseconds.
-              </p>
-            </div>
-          </div>
-        </Container>
-      </section>
 
 
       {/* ------------------------------------------------------------------ */}
