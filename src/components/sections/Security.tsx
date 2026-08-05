@@ -73,15 +73,32 @@ export default function Security() {
       const el = root.current
       if (!el) return
 
-      const items = gsap.utils.toArray<HTMLElement>(el.querySelectorAll('[data-feature-item]'))
-      const logoMark = el.querySelector<HTMLElement>('[data-logo-mark]')
-      const cyanChan = el.querySelector<HTMLElement>('[data-chromatic-cyan]')
-      const redChan = el.querySelector<HTMLElement>('[data-chromatic-red]')
-      const textLeft = el.querySelector<HTMLElement>('[data-logo-text-left]')
-      const textRight = el.querySelector<HTMLElement>('[data-logo-text-right]')
       const orbitWrapper = orbitContainerRef.current
 
-      if (items.length === 0 || !logoMark || !textLeft || !textRight || !orbitWrapper) return
+      /*
+       * Scoped to the orbit container, NOT to the section.
+       *
+       * `[data-feature-item]` is emitted by two sibling blocks — the desktop
+       * orbit and the `lg:hidden` mobile grid — so a section-wide query returns
+       * 14 elements for 7 positions. The polar tween below indexes
+       * `polarPositions` by the element's position in this array, so items 7–13
+       * read `undefined.left` and the whole timeline throws at init: the
+       * constellation never builds and the mobile grid never fades in either,
+       * because one bad tween takes the timeline down with it.
+       *
+       * The mobile grid is laid out in normal flow and must never be positioned
+       * by this timeline anyway, so the container is the correct scope rather
+       * than a length guard on the array.
+       */
+      const items = orbitWrapper
+        ? gsap.utils.toArray<HTMLElement>(orbitWrapper.querySelectorAll('[data-feature-item]'))
+        : []
+      const logoMark = el.querySelector<HTMLElement>('[data-logo-mark]')
+      const logoTextContainer = el.querySelector<HTMLElement>('[data-logo-text-container]')
+      const cyanChan = el.querySelector<HTMLElement>('[data-chromatic-cyan]')
+      const redChan = el.querySelector<HTMLElement>('[data-chromatic-red]')
+
+      if (items.length === 0 || !logoMark || !logoTextContainer || !orbitWrapper) return
 
       const mm = gsap.matchMedia()
 
@@ -94,42 +111,43 @@ export default function Security() {
           },
         })
 
-        // Phase 1: Logo shutter zoom in + Chromatic Aberration RGB glitch split effect
+        // Phase 1: Logo shutter zoom in first on scroll + Chromatic Aberration split
         tl.fromTo(
           logoMark,
-          { scale: 0, opacity: 0 },
-          { scale: 1.45, opacity: 1, duration: 0.5, ease: 'power2.out' },
+          { scale: 0, opacity: 0, rotation: -30 },
+          { scale: 1.35, opacity: 1, rotation: 0, duration: 0.55, ease: 'back.out(1.5)' },
         )
 
         if (cyanChan && redChan) {
           tl.fromTo(
             [cyanChan, redChan],
-            { opacity: 0.95, x: (i) => (i === 0 ? -7 : 7) },
-            { opacity: 0, x: 0, duration: 0.45, ease: 'power3.out' },
+            { opacity: 0.95, x: (i) => (i === 0 ? -8 : 8) },
+            { opacity: 0, x: 0, duration: 0.4, ease: 'power3.out' },
             '-=0.25',
           )
         }
 
         tl.to(
           logoMark,
-          { scale: 1, duration: 0.35, ease: 'power3.out' },
-          '-=0.35',
+          { scale: 1, duration: 0.3, ease: 'power2.out' },
+          '-=0.2',
         )
 
-        // Phase 1b: Thin and Trust text slide out to merge with Logo Mark as "Thin[Q] Trust"
-        tl.to(
-          [textLeft, textRight],
+        // Phase 2: THEN "Thinq Trust" text reveals BENEATH the logo mark
+        tl.fromTo(
+          logoTextContainer,
+          { opacity: 0, y: 24, scale: 0.95 },
           {
             opacity: 1,
-            x: 0,
-            duration: 0.45,
-            stagger: 0.05,
-            ease: 'power2.out',
+            y: 0,
+            scale: 1,
+            duration: 0.55,
+            ease: 'power3.out',
           },
-          '-=0.15',
+          '+=0.05',
         )
 
-        // Phase 2: Instant feature circles burst out from behind logo to polar positions
+        // Phase 3: Instant feature circles burst out from behind logo to polar positions
         tl.fromTo(
           items,
           { scale: 0.15, opacity: 0, left: '50%', top: '50%' },
@@ -139,13 +157,15 @@ export default function Security() {
             duration: 0.9,
             stagger: 0.08,
             ease: 'back.out(1.25)',
-            left: (index) => polarPositions[index].left,
-            top: (index) => polarPositions[index].top,
+            // Falls back to centre rather than throwing if the node count and
+            // the position table ever diverge again.
+            left: (index) => polarPositions[index]?.left ?? '50%',
+            top: (index) => polarPositions[index]?.top ?? '50%',
           },
-          '-=0.2', // Triggers as Thin[Q] Trust settles
+          '-=0.2', // Triggers as logo lockup settles
         )
 
-        // Phase 3: Continuous 360-degree polar orbit revolution around Thin[Q] Trust
+        // Phase 4: Continuous 360-degree polar orbit revolution around Thinq Trust
         const orbitObj = { angle: 0 }
         tl.to(orbitObj, {
           angle: Math.PI * 2,
@@ -155,7 +175,7 @@ export default function Security() {
           onUpdate: () => {
             const currentAngle = orbitObj.angle
             items.forEach((item, i) => {
-              const baseAngle = (i * 2 * Math.PI) / 7 - Math.PI / 2
+              const baseAngle = (i * 2 * Math.PI) / items.length - Math.PI / 2
               const totalAngle = baseAngle + currentAngle
               const leftVal = 50 + 38.5 * Math.cos(totalAngle)
               const topVal = 50 + 42.5 * Math.sin(totalAngle)
@@ -183,50 +203,47 @@ export default function Security() {
       subheading="SEBI-registered broker and member of NSE & BSE. Your funds settle to your bank, securities to your demat, and client funds are strictly segregated."
     >
       <div ref={root} className="py-16 lg:py-24 overflow-hidden">
-        {/* Desktop 7-Node Radial Orbital System - Expanded Radius */}
+        {/* Desktop 7-Node Radial Orbital System */}
         <div className="hidden lg:relative lg:block lg:h-[1100px] lg:w-[1360px] lg:mx-auto">
-          {/* 1. CENTER BRAND LOGO LOCKUP: Thin[Q] Trust */}
+          {/* 1. CENTER BRAND LOGO LOCKUP: Separate Logo on Top, Thinq Trust Beneath */}
           <div
             data-logo-center
-            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-20 flex items-center justify-center group"
+            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-20 flex flex-col items-center justify-center gap-3.5 text-center group"
           >
-            {/* Left Text: Thin */}
-            <span
-              data-logo-text-left
-              className="font-display text-4xl lg:text-5xl font-bold tracking-tight text-fg opacity-0 -translate-x-6 whitespace-nowrap leading-none"
-            >
-              Thin
-            </span>
-
-            {/* Center Mark with Chromatic Aberration Effect - Aligned precisely with x-height */}
+            {/* Top: Logo Mark (Animated First) */}
             <div
               data-logo-mark
-              className="relative flex items-center justify-center shrink-0 mx-0.5 translate-y-[12px] transition-transform duration-500 group-hover:scale-105"
+              className="relative flex items-center justify-center shrink-0 transition-transform duration-500 group-hover:scale-105"
             >
               {/* Cyan Chromatic Split Channel */}
               <div data-chromatic-cyan className="absolute inset-0 flex items-center justify-center text-cyan-400 opacity-0 pointer-events-none mix-blend-screen">
-                <ThinqMark size={68} tone="steel" className="filter drop-shadow-none" />
+                <ThinqMark size={80} tone="steel" className="filter drop-shadow-none" />
               </div>
 
               {/* Rose Chromatic Split Channel */}
               <div data-chromatic-red className="absolute inset-0 flex items-center justify-center text-rose-500 opacity-0 pointer-events-none mix-blend-screen">
-                <ThinqMark size={68} tone="steel" className="filter drop-shadow-none" />
+                <ThinqMark size={80} tone="steel" className="filter drop-shadow-none" />
               </div>
 
-              {/* Primary Metallic Vector Mark acting as 'q' */}
-              <ThinqMark size={68} tone="copper" />
+              {/* Primary Metallic Vector Mark */}
+              <ThinqMark size={80} tone="copper" />
             </div>
 
-            {/* Right Text: Trust */}
-            <span
-              data-logo-text-right
-              className="font-display text-4xl lg:text-5xl font-bold tracking-tight text-fg opacity-0 translate-x-6 whitespace-nowrap leading-none ml-2"
+            {/* Bottom: Thinq Trust Text Beneath Logo (Animated Second) */}
+            <div
+              data-logo-text-container
+              className="flex items-center justify-center gap-3 opacity-0"
             >
-              Trust
-            </span>
+              <span className="font-display text-4xl lg:text-5xl font-bold tracking-tight text-fg whitespace-nowrap leading-none">
+                Thinq
+              </span>
+              <span className="font-display text-4xl lg:text-5xl font-bold tracking-tight text-fg whitespace-nowrap leading-none">
+                Trust
+              </span>
+            </div>
           </div>
 
-          {/* 2. REVOLVING ORBIT CONTAINER (7 Satellite Nodes with Fixed Width w-[320px]) */}
+          {/* 2. REVOLVING ORBIT CONTAINER (7 Satellite Nodes) */}
           <div ref={orbitContainerRef} className="absolute inset-0 z-10 pointer-events-none">
             {allSecurityItems.map((item, i) => {
               const Icon = item.Icon
@@ -255,17 +272,19 @@ export default function Security() {
 
         {/* Responsive Layout for Mobile & Tablet (< lg) */}
         <div className="block lg:hidden max-w-5xl mx-auto space-y-16 px-4 sm:px-6">
-          {/* Mobile Center Logo Lockup */}
-          <div data-logo-center className="py-8 flex items-center justify-center text-center group my-4">
-            <span className="font-display text-2xl sm:text-3xl font-bold tracking-tight text-fg leading-none">
-              Thin
-            </span>
-            <div className="flex items-center justify-center shrink-0 mx-0.5 translate-y-[2px]">
-              <ThinqMark size={48} tone="copper" />
+          {/* Mobile Center Logo Lockup: Separate Logo and Text Beneath */}
+          <div data-logo-center className="py-8 flex flex-col items-center justify-center text-center group my-4 gap-3">
+            <div className="flex items-center justify-center shrink-0">
+              <ThinqMark size={60} tone="copper" />
             </div>
-            <span className="font-display text-2xl sm:text-3xl font-bold tracking-tight text-fg leading-none ml-1.5">
-              Trust
-            </span>
+            <div className="flex items-center justify-center gap-2.5">
+              <span className="font-display text-3xl font-bold tracking-tight text-fg leading-none">
+                Thinq
+              </span>
+              <span className="font-display text-3xl font-bold tracking-tight text-fg leading-none">
+                Trust
+              </span>
+            </div>
           </div>
 
           <div className="grid gap-x-10 gap-y-16 sm:grid-cols-2">

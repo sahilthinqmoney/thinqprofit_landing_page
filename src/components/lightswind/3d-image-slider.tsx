@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useEffect, useRef } from 'react'
 import { Bell, Compass, Languages, Layers, LayoutGrid, Zap } from 'lucide-react'
 
 export interface SliderCardItem {
@@ -77,7 +77,6 @@ export default function ImageSlider3D({
 }: ImageSlider3DProps) {
   const containerRef = useRef<HTMLDivElement>(null)
   const trackRef = useRef<HTMLDivElement>(null)
-  const [isHovered, setIsHovered] = useState(false)
 
   // Repeat items 3 times for seamless infinite looping
   const triplicatedItems = [...items, ...items, ...items]
@@ -92,7 +91,9 @@ export default function ImageSlider3D({
     const updateCardTransforms = () => {
       const containerRect = container.getBoundingClientRect()
       const containerCenter = containerRect.left + containerRect.width / 2
-      const radius = containerRect.width * 0.42
+
+      // Tightly focused focal radius so ONLY ONE card peaks at the center at a time
+      const focalRadius = Math.min(containerRect.width * 0.22, 320)
 
       const cardElements = track.querySelectorAll<HTMLDivElement>('[data-slider-card]')
 
@@ -100,29 +101,30 @@ export default function ImageSlider3D({
         const cardRect = card.getBoundingClientRect()
         const cardCenter = cardRect.left + cardRect.width / 2
 
-        // Distance from horizontal center
+        // Distance from exact center
         const distFromCenter = Math.abs(cardCenter - containerCenter)
 
-        // Smooth cosine bell-curve factor (1.0 at center, smoothly tapering to 0 at radius)
+        // Steep cosine curve so only 1 card peaks in front
         let centerFactor = 0
-        if (distFromCenter < radius) {
-          const norm = distFromCenter / radius
-          // Smooth cosine curve for ultra-fluid easing
-          centerFactor = Math.pow(Math.cos(norm * (Math.PI / 2)), 1.4)
+        if (distFromCenter < focalRadius * 1.8) {
+          const norm = distFromCenter / (focalRadius * 1.8)
+          centerFactor = Math.pow(Math.cos(norm * (Math.PI / 2)), 3.2)
         }
 
         // Calculate 3D pop up scale & depth elevation:
-        // Middle card pops up smoothly to ~1.28x scale, higher z-index & glow
-        const scale = 0.85 + centerFactor * 0.43 // Ranges from 0.85 up to 1.28
-        const opacity = 0.55 + centerFactor * 0.45 // Ranges from 0.55 up to 1.0
-        const translateZ = centerFactor * 80 // 3D depth pop out up to 80px
+        // ONLY the single focal card pops up to ~1.26x scale, side cards stay at ~0.82x
+        const scale = 0.82 + centerFactor * 0.44
+        const opacity = 0.45 + centerFactor * 0.55
+        const translateZ = centerFactor * 90
         const zIndex = Math.round(centerFactor * 100)
-        const shadowAlpha = centerFactor * 0.5
 
         card.style.transform = `perspective(1200px) translateZ(${translateZ}px) scale(${scale})`
         card.style.opacity = `${opacity}`
         card.style.zIndex = `${zIndex}`
-        card.style.boxShadow = `0 ${24 * centerFactor}px ${48 * centerFactor}px rgba(0, 0, 0, ${0.4 + shadowAlpha}), 0 0 ${35 * centerFactor}px rgba(255, 180, 140, ${shadowAlpha * 0.45})`
+
+        // Sleek metallic steel/grey glow around active card (no copper/orange)
+        const glowAlpha = centerFactor * 0.35
+        card.style.boxShadow = `0 ${20 * centerFactor}px ${40 * centerFactor}px rgba(0, 0, 0, ${0.5 + centerFactor * 0.3}), 0 0 ${35 * centerFactor}px rgba(220, 225, 235, ${glowAlpha})`
       })
 
       animationFrameId = requestAnimationFrame(updateCardTransforms)
@@ -138,8 +140,6 @@ export default function ImageSlider3D({
   return (
     <div
       ref={containerRef}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
       className={`relative w-full overflow-hidden py-16 sm:py-20 select-none ${className}`}
       style={{ perspective: '1200px' }}
     >
@@ -147,7 +147,7 @@ export default function ImageSlider3D({
       <div className="pointer-events-none absolute left-0 top-0 bottom-0 z-40 w-20 sm:w-40 bg-gradient-to-r from-bg via-bg/85 to-transparent" />
       <div className="pointer-events-none absolute right-0 top-0 bottom-0 z-40 w-20 sm:w-40 bg-gradient-to-l from-bg via-bg/85 to-transparent" />
 
-      {/* Infinite Scrolling Track (Moving in RIGHT direction with increased card spacing) */}
+      {/* Infinite Scrolling Track (Continuously runs WITHOUT pausing on hover) */}
       <div
         ref={trackRef}
         className="flex w-max items-center gap-12 sm:gap-16 md:gap-20 transition-transform"
@@ -156,7 +156,7 @@ export default function ImageSlider3D({
           animationDuration: `${duration}s`,
           animationTimingFunction: 'linear',
           animationIterationCount: 'infinite',
-          animationPlayState: isHovered ? 'paused' : 'running',
+          animationPlayState: 'running', // Continuous animation on hover
         }}
       >
         {triplicatedItems.map((item, idx) => {
@@ -165,21 +165,21 @@ export default function ImageSlider3D({
             <div
               key={`${item.id}-${idx}`}
               data-slider-card
-              className="group relative flex shrink-0 flex-col justify-between rounded-2xl border border-white/10 bg-white/[0.04] p-7 sm:p-8 backdrop-blur-xl transition-all duration-300 ease-out"
+              className="group relative flex shrink-0 flex-col justify-between rounded-2xl border border-white/15 bg-white/[0.04] p-7 sm:p-8 backdrop-blur-xl transition-all duration-300 ease-out"
               style={{
                 width: cardWidth,
                 willChange: 'transform, opacity',
                 transformStyle: 'preserve-3d',
               }}
             >
-              {/* Subtle top edge specular light highlight */}
-              <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/25 to-transparent" />
+              {/* Subtle top edge specular steel light highlight */}
+              <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/30 to-transparent" />
 
               <div>
                 {/* Header row: Badge + Icon */}
                 <div className="flex items-center justify-between">
                   {Icon ? (
-                    <div className="inline-flex h-11 w-11 items-center justify-center rounded-xl border border-white/10 bg-white/5 text-chrome group-hover:border-white/20 group-hover:text-fg transition-colors">
+                    <div className="inline-flex h-11 w-11 items-center justify-center rounded-xl border border-white/15 bg-white/5 text-chrome group-hover:border-white/30 group-hover:text-fg transition-colors">
                       <Icon className="h-5 w-5" strokeWidth={1.75} />
                     </div>
                   ) : null}
@@ -203,7 +203,7 @@ export default function ImageSlider3D({
               </div>
 
               {/* Card Footer indicator */}
-              <div className="mt-7 flex items-center justify-between border-t border-white/5 pt-3.5 text-xs font-medium text-fg-subtle group-hover:text-accent-soft transition-colors">
+              <div className="mt-7 flex items-center justify-between border-t border-white/10 pt-3.5 text-xs font-medium text-fg-subtle group-hover:text-fg transition-colors">
                 <span>Explore Feature</span>
                 <span aria-hidden="true" className="transition-transform group-hover:translate-x-1">→</span>
               </div>
@@ -237,7 +237,7 @@ export default function ImageSlider3D({
 
 export function ThreeDImageSliderDemo() {
   return (
-    <div className="w-full h-[600px] flex items-center justify-center bg-[#fff3ed] dark:bg-black rounded-xl overflow-hidden relative">
+    <div className="w-full h-[600px] flex items-center justify-center bg-black rounded-xl overflow-hidden relative">
       <ImageSlider3D duration={36} cardWidth="16em" />
     </div>
   )
