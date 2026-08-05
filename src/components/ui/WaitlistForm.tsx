@@ -313,7 +313,7 @@ export default function WaitlistForm({ variant = 'hero', className = '' }: Waitl
 
         {/* Microcopy footer */}
         <div className="mt-4 border-t border-white/10 pt-3 flex flex-wrap items-center justify-between gap-2 text-xs text-fg-subtle">
-          <span className="font-mono text-fg font-medium">2,412 on list · Closes when we open</span>
+          <span>Closes when we open</span>
           <span>OTP verified · 1 WhatsApp update/fortnight</span>
         </div>
         {/* Step 2's two escapes */}

@@ -39,22 +39,11 @@ import type { SafetyPillar } from '../types'
  */
 export const securityHeadline = 'Where your money sits.'
 export const securityBody =
-  'SEBI-registered broker. Member NSE and BSE. Funds settle to your own bank, securities to your own demat with the depository. Client funds segregated as the regulations require and reported to the exchange. Two-factor on login and on withdrawal. Encrypted in transit and at rest. Every order and modification timestamped. Your data is never sold.'
+  'SEBI-registered broker and member of NSE & BSE. Your funds settle to your bank, securities to your demat, and client funds are strictly segregated.'
 
 export const regulatoryProof =
   'Thinq is a SEBI-registered broker and a member of the NSE and the BSE. Funds settle to your own bank account. Securities are held in your own demat account.'
 
-/**
- * The three tiers, flattened into one ordered list — `Security.tsx` slices it as
- * [0], [1..3) and [3..]. The order is fixed by that slicing and is not cosmetic;
- * reordering this array silently re-ranks the section.
- *
- * Tier 1 (index 0) — custody. The answer to the only question that matters.
- * Tier 2 (index 1–2) — the two facts that qualify custody: whose money it is
- *   while it sits there, and who is watching.
- * Tier 3 (index 3+) — hygiene. Real commitments, quietly set, because saying
- *   them loudly invites the reader to wonder why they needed saying.
- */
 export const pillars: SafetyPillar[] = [
   {
     title: 'Securities sit in your demat account',
@@ -68,12 +57,6 @@ export const pillars: SafetyPillar[] = [
   },
   {
     title: 'Two-factor on login and on withdrawal',
-    /*
-     * The withdrawal half is the half that matters and it is stated second so it
-     * lands last. Every broker has 2FA on login. Requiring a second factor on
-     * the request that moves money out is the one a reader should check for, and
-     * most do not have it.
-     */
     body: 'Every login is behind two factors, and so is every request to withdraw money — the second one is where it counts.',
     icon: 'key-round',
   },
@@ -84,38 +67,14 @@ export const pillars: SafetyPillar[] = [
   },
   {
     title: 'Sessions you can end from anywhere',
-    /*
-     * "Instantly" is a commitment to a system property — the kill has to
-     * propagate, not be queued. Flagged in the checklist for exactly that
-     * reason: an "instant" logout that takes effect on the next token refresh is
-     * not instant, and the word is the claim.
-     */
     body: 'See every active session and end any of them instantly, from any device you are still signed in on.',
     icon: 'shield-check',
   },
   {
     title: 'A complete, timestamped order trail',
-    /*
-     * "Retrievable by you" is the operative clause. Every broker keeps an audit
-     * trail because regulation requires one; the claim here is that the customer
-     * can pull their own, which is the version that is useful in a dispute.
-     */
     body: 'Every order, modification and cancellation is timestamped and retrievable by you, not just by us.',
     icon: 'message-square-warning',
   },
 ]
 
-/**
- * The section's terminal statement — the largest sentence in it, set below the
- * ladder with a rule above it and a large measure of air.
- *
- * It is the data-privacy commitment, promoted out of the hygiene tier and given
- * the closing position, because it is the only claim in the list a competitor
- * would find genuinely expensive to match. "Never traded against" is a statement
- * about the business model: it says the firm does not take the other side of its
- * customers' orders. That is a real constraint on how revenue can be earned, and
- * it is the sentence to fight for if anyone proposes softening it.
- *
- * Keep it, do not soften it, and do not move it into the ledger.
- */
 export const honestNote = 'Your data is never sold, and your order flow is never traded against.'

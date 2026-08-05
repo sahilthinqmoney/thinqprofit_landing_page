@@ -111,39 +111,7 @@ export default function SectionTwo() {
         scale="lead"
         heading="Agentic trading follows shortly."
         subheading="AI-native agentic trading features. Details when we open."
-      >
-        <div className="mx-auto max-w-[42em] text-left">
-          <SpotlightCard className="rounded-3xl p-6 sm:p-10 border border-white/15 space-y-6 relative overflow-hidden bg-gradient-to-b from-white/10 via-surface/80 to-surface/90 backdrop-blur-xl shadow-2xl">
-            {/* Top Badge & Status */}
-            <div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/10 pb-4">
-              <div className="flex items-center gap-2 text-xs font-mono tracking-wider uppercase text-fg-muted">
-                <span className="h-2 w-2 rounded-full bg-chrome animate-pulse" />
-                <span>Agentic Trading Core</span>
-              </div>
-              <span className="rounded-full border border-white/15 bg-white/5 px-3 py-1 text-[11px] font-mono uppercase tracking-wider text-fg-subtle">
-                In Development
-              </span>
-            </div>
-
-            {/* Simulated Agentic Command Prompt */}
-            <div className="rounded-2xl border border-white/10 bg-black/40 p-5 font-mono text-xs sm:text-sm space-y-3 shadow-inner">
-              <div className="flex items-center gap-2 text-fg-muted">
-                <span className="text-chrome font-bold">›</span>
-                <span>System prompt: <span className="text-fg font-medium">"Execute multi-leg hedge if Nifty breaks 24,750 support"</span></span>
-              </div>
-              <div className="flex items-center gap-2 text-fg pt-1 border-t border-white/5">
-                <span className="text-emerald-400 font-bold">✓</span>
-                <span className="text-fg-muted">Agent status: <span className="text-fg font-semibold">Autonomous trigger armed · zero manual latency</span></span>
-              </div>
-            </div>
-
-            {/* Bottom Statement */}
-            <p className="text-xs sm:text-sm text-fg-subtle leading-relaxed text-center font-mono pt-1">
-              Where Thinq acts on the plan rather than merely describing it.
-            </p>
-          </SpotlightCard>
-        </div>
-      </SectionShell>
+      />
     </>
   )
 }

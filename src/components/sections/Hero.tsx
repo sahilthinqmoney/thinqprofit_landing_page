@@ -3,7 +3,7 @@ import Container from '../ui/Container'
 import Disclosure from '../ui/Disclosure'
 import Button from '../ui/Button'
 import { SCALE } from '../ui/SectionShell'
-import { hero, offerQualifier } from '../../data/hero'
+import { hero } from '../../data/hero'
 import MediaBackdrop from '../ui/MediaBackdrop'
 
 /**
@@ -77,25 +77,9 @@ export default function Hero() {
       <div className="flex flex-1 items-center my-auto py-8">
         <Container>
           <div className="mx-auto max-w-[52em] text-center">
-            {/* Premium Glowing Eyebrow Badge */}
-            <div
-              className="inline-flex items-center gap-2.5 rounded-full border border-white/15 bg-surface/80 px-4 py-1.5 text-xs font-mono tracking-wider text-fg-muted backdrop-blur-xl shadow-[0_2px_12px_rgba(0,0,0,0.5),inset_0_1px_0_rgba(255,255,255,0.1)] transition-[opacity,transform] duration-700"
-              style={{
-                transitionTimingFunction: 'var(--ease-out-expo)',
-                opacity: settled ? 1 : 0,
-                transform: settled ? 'translateY(0)' : 'translateY(-6px)',
-              }}
-            >
-              <span className="relative flex h-2 w-2">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-chrome opacity-75" />
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-chrome" />
-              </span>
-              <span>{hero.eyebrow}</span>
-            </div>
-
             {/* Display H1 Headline with Metallic Depth */}
             <h1
-              className={`display-lead mt-6 font-display tracking-tight text-balance drop-shadow-[0_4px_24px_rgba(255,255,255,0.12)] ${SCALE.hero}`}
+              className={`display-lead mt-4 font-display tracking-tight text-balance drop-shadow-[0_4px_24px_rgba(255,255,255,0.12)] ${SCALE.hero}`}
               style={{
                 fontVariationSettings: settled
                   ? '"wdth" 82, "wght" 580'
@@ -133,13 +117,6 @@ export default function Hero() {
               <p className="mt-6 max-w-[34em] mx-auto text-[1.0625rem] sm:text-[1.1875rem] leading-[1.65] text-fg-muted text-balance font-normal">
                 {hero.subheadline}
               </p>
-
-              {/* Glassmorphic Offer Highlight Card */}
-              <div className="mt-7 inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-surface/60 px-5 py-2.5 text-xs sm:text-sm text-fg-muted backdrop-blur-xl shadow-lg">
-                <span className="font-medium text-fg">{hero.primaryCta}</span>
-                <span className="text-fg-subtle">·</span>
-                <span>{offerQualifier}</span>
-              </div>
 
               {/* High-End Primary CTA Button */}
               <div className="mt-8 flex items-center justify-center">
