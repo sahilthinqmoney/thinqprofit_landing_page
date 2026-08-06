@@ -103,6 +103,33 @@ export default function Security() {
       const mm = gsap.matchMedia()
 
       mm.add('(prefers-reduced-motion: no-preference)', () => {
+        // Pre-position nodes precisely on their 3D Solar Orbit track
+        const rx = 44.0 // % horizontal width
+        const ry = 36.0 // % vertical height
+
+        const calculateNodeState = (index: number, angleOffset: number = 0) => {
+          const baseAngle = (index * 2 * Math.PI) / items.length - Math.PI / 2
+          const totalAngle = baseAngle + angleOffset
+          const leftVal = 50 + rx * Math.cos(totalAngle)
+          const topVal = 50 + ry * Math.sin(totalAngle)
+          const sinVal = Math.sin(totalAngle)
+          const depthNorm = (sinVal + 1) / 2
+          const scale = 0.78 + depthNorm * 0.32
+          const opacity = 0.50 + depthNorm * 0.50
+          const zIndex = Math.round(10 + depthNorm * 30)
+          return { leftVal, topVal, scale, opacity, zIndex }
+        }
+
+        // Initialize starting position for each node
+        items.forEach((item, i) => {
+          const state = calculateNodeState(i, 0)
+          item.style.left = `${state.leftVal}%`
+          item.style.top = `${state.topVal}%`
+          item.style.transform = `translate(-50%, -50%) scale(${state.scale})`
+          item.style.opacity = '0'
+          item.style.zIndex = `${state.zIndex}`
+        })
+
         const tl = gsap.timeline({
           scrollTrigger: {
             trigger: el,
@@ -111,61 +138,49 @@ export default function Security() {
           },
         })
 
-        // Phase 1: Logo shutter zoom in first on scroll + Chromatic Aberration split
+        // Phase 1: Logo zoom in smoothly on scroll
         tl.fromTo(
           logoMark,
-          { scale: 0, opacity: 0, rotation: -30 },
-          { scale: 1.35, opacity: 1, rotation: 0, duration: 0.55, ease: 'back.out(1.5)' },
+          { scale: 0.4, opacity: 0 },
+          { scale: 1, opacity: 1, duration: 0.7, ease: 'power3.out' },
         )
 
         if (cyanChan && redChan) {
           tl.fromTo(
             [cyanChan, redChan],
-            { opacity: 0.95, x: (i) => (i === 0 ? -8 : 8) },
+            { opacity: 0.8, x: (i) => (i === 0 ? -6 : 6) },
             { opacity: 0, x: 0, duration: 0.4, ease: 'power3.out' },
-            '-=0.25',
+            '-=0.3',
           )
         }
 
-        tl.to(
-          logoMark,
-          { scale: 1, duration: 0.3, ease: 'power2.out' },
-          '-=0.2',
-        )
-
-        // Phase 2: THEN "Thinq Trust" text reveals BENEATH the logo mark
+        // Phase 2: "Thinq Trust" text reveals smoothly beneath logo
         tl.fromTo(
           logoTextContainer,
-          { opacity: 0, y: 24, scale: 0.95 },
+          { opacity: 0, y: 16 },
           {
             opacity: 1,
             y: 0,
-            scale: 1,
-            duration: 0.55,
+            duration: 0.6,
             ease: 'power3.out',
           },
-          '+=0.05',
+          '-=0.2',
         )
 
-        // Phase 3: Instant feature circles burst out from behind logo to polar positions
+        // Phase 3: Satellite nodes fade & scale smoothly into view directly on their orbit slots
         tl.fromTo(
           items,
-          { scale: 0.15, opacity: 0, left: '50%', top: '50%' },
+          { opacity: 0 },
           {
-            scale: 1,
-            opacity: 1,
-            duration: 0.9,
-            stagger: 0.08,
-            ease: 'back.out(1.25)',
-            // Falls back to centre rather than throwing if the node count and
-            // the position table ever diverge again.
-            left: (index) => polarPositions[index]?.left ?? '50%',
-            top: (index) => polarPositions[index]?.top ?? '50%',
+            opacity: (i) => calculateNodeState(i, 0).opacity,
+            duration: 0.7,
+            stagger: 0.06,
+            ease: 'power2.out',
           },
-          '-=0.2', // Triggers as logo lockup settles
+          '-=0.3',
         )
 
-        // Phase 4: Continuous 360-degree polar orbit revolution around Thinq Trust
+        // Phase 4: Continuous 360-degree solar system eclipse revolving orbit around Thinq Trust
         const orbitObj = { angle: 0 }
         tl.to(orbitObj, {
           angle: Math.PI * 2,
@@ -175,15 +190,12 @@ export default function Security() {
           onUpdate: () => {
             const currentAngle = orbitObj.angle
             items.forEach((item, i) => {
-              const baseAngle = (i * 2 * Math.PI) / items.length - Math.PI / 2
-              const totalAngle = baseAngle + currentAngle
-              const leftVal = 50 + 38.5 * Math.cos(totalAngle)
-              const topVal = 50 + 42.5 * Math.sin(totalAngle)
-
-              gsap.set(item, {
-                left: `${leftVal}%`,
-                top: `${topVal}%`,
-              })
+              const state = calculateNodeState(i, currentAngle)
+              item.style.left = `${state.leftVal}%`
+              item.style.top = `${state.topVal}%`
+              item.style.transform = `translate(-50%, -50%) scale(${state.scale})`
+              item.style.opacity = `${state.opacity}`
+              item.style.zIndex = `${state.zIndex}`
             })
           },
         })
@@ -194,6 +206,7 @@ export default function Security() {
     { scope: root },
   )
 
+
   return (
     <SectionShell
       id="security"
@@ -202,13 +215,19 @@ export default function Security() {
       heading={securityHeadline}
       subheading="SEBI-registered broker and member of NSE & BSE. Your funds settle to your bank, securities to your demat, and client funds are strictly segregated."
     >
-      <div ref={root} className="py-16 lg:py-24 overflow-hidden">
+      <div ref={root} className="-mt-2 sm:-mt-4 lg:-mt-6 pb-6 overflow-hidden">
         {/* Desktop 7-Node Radial Orbital System */}
-        <div className="hidden lg:relative lg:block lg:h-[1100px] lg:w-[1360px] lg:mx-auto">
+        <div className="hidden lg:relative lg:block lg:h-[620px] lg:w-[1140px] lg:mx-auto">
+          {/* 3D Solar Eclipse Elliptical Orbit Ring Track */}
+          <div
+            aria-hidden="true"
+            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[88%] h-[72%] rounded-[50%] border border-white/10 pointer-events-none z-0 shadow-[0_0_60px_rgba(8,45,54,0.15)]"
+          />
+
           {/* 1. CENTER BRAND LOGO LOCKUP: Separate Logo on Top, Thinq Trust Beneath */}
           <div
             data-logo-center
-            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-20 flex flex-col items-center justify-center gap-3.5 text-center group"
+            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-20 flex flex-col items-center justify-center gap-3 text-center group"
           >
             {/* Top: Logo Mark (Animated First) */}
             <div
@@ -217,27 +236,27 @@ export default function Security() {
             >
               {/* Cyan Chromatic Split Channel */}
               <div data-chromatic-cyan className="absolute inset-0 flex items-center justify-center text-cyan-400 opacity-0 pointer-events-none mix-blend-screen">
-                <ThinqMark size={80} tone="steel" className="filter drop-shadow-none" />
+                <ThinqMark size={64} tone="steel" className="filter drop-shadow-none" />
               </div>
 
               {/* Rose Chromatic Split Channel */}
               <div data-chromatic-red className="absolute inset-0 flex items-center justify-center text-rose-500 opacity-0 pointer-events-none mix-blend-screen">
-                <ThinqMark size={80} tone="steel" className="filter drop-shadow-none" />
+                <ThinqMark size={64} tone="steel" className="filter drop-shadow-none" />
               </div>
 
               {/* Primary Metallic Vector Mark */}
-              <ThinqMark size={80} tone="copper" />
+              <ThinqMark size={64} tone="copper" />
             </div>
 
             {/* Bottom: Thinq Trust Text Beneath Logo (Animated Second) */}
             <div
               data-logo-text-container
-              className="flex items-center justify-center gap-3 opacity-0"
+              className="flex items-center justify-center gap-2.5 opacity-0"
             >
-              <span className="font-display text-4xl lg:text-5xl font-bold tracking-tight text-fg whitespace-nowrap leading-none">
+              <span className="font-display text-3xl lg:text-4xl font-bold tracking-tight text-fg whitespace-nowrap leading-none">
                 Thinq
               </span>
-              <span className="font-display text-4xl lg:text-5xl font-bold tracking-tight text-fg whitespace-nowrap leading-none">
+              <span className="font-display text-3xl lg:text-4xl font-bold tracking-tight text-fg whitespace-nowrap leading-none">
                 Trust
               </span>
             </div>
@@ -252,23 +271,24 @@ export default function Security() {
                 <div
                   key={item.title}
                   data-feature-item
-                  className="absolute flex flex-col items-center text-center group w-[320px] shrink-0 -translate-x-1/2 -translate-y-1/2 pointer-events-auto"
+                  className="absolute flex flex-col items-center text-center group w-[240px] shrink-0 pointer-events-auto will-change-transform"
                   style={{ left: pos.left, top: pos.top }}
                 >
-                  {/* Circular Glass Badge */}
-                  <div className="mb-4 flex h-28 w-28 sm:h-32 sm:w-32 items-center justify-center rounded-full border border-white/15 bg-surface/85 p-5 backdrop-blur-xl shadow-2xl transition-all duration-500 group-hover:border-white/40 group-hover:bg-surface/95 group-hover:scale-105">
-                    <Icon className="h-20 w-20 sm:h-22 sm:w-22 text-white/90 transition-transform duration-500 group-hover:scale-110" />
+                  {/* Clean Icon Floating Directly on Orbit Track */}
+                  <div className="mb-3 flex items-center justify-center transition-transform duration-500 group-hover:scale-110">
+                    <Icon className="h-14 w-14 sm:h-16 sm:w-16 text-white/90 filter drop-shadow-[0_2px_12px_rgba(255,255,255,0.15)]" />
                   </div>
-                  <h3 className="text-base sm:text-lg font-display font-semibold text-fg leading-snug w-full px-2">{item.title}</h3>
+                  <h3 className="text-sm sm:text-base font-display font-semibold text-fg leading-snug w-full px-1">{item.title}</h3>
                   {/* Subtitle text revealed smoothly on hover */}
-                  <div className="opacity-0 max-h-0 overflow-hidden transition-all duration-300 ease-out group-hover:opacity-100 group-hover:max-h-36 group-hover:mt-2 pointer-events-none group-hover:pointer-events-auto w-full px-2">
-                    <CopyText source={item.body} className="text-xs sm:text-sm text-fg-muted leading-relaxed" />
+                  <div className="opacity-0 max-h-0 overflow-hidden transition-all duration-300 ease-out group-hover:opacity-100 group-hover:max-h-28 group-hover:mt-1.5 pointer-events-none group-hover:pointer-events-auto w-full px-1">
+                    <CopyText source={item.body} className="text-xs text-fg-muted leading-tight" />
                   </div>
                 </div>
               )
             })}
           </div>
         </div>
+
 
         {/* Responsive Layout for Mobile & Tablet (< lg) */}
         <div className="block lg:hidden max-w-5xl mx-auto space-y-16 px-4 sm:px-6">
@@ -292,10 +312,11 @@ export default function Security() {
               const Icon = item.Icon
               return (
                 <div key={item.title} data-feature-item className="flex flex-col items-center text-center group">
-                  <div className="mb-5 flex h-28 w-28 items-center justify-center rounded-full border border-white/15 bg-surface/75 p-5 backdrop-blur-xl shadow-xl">
-                    <Icon className="h-20 w-20 text-white/90" />
+                  <div className="mb-4 flex items-center justify-center">
+                    <Icon className="h-16 w-16 text-white/90 filter drop-shadow-[0_2px_12px_rgba(255,255,255,0.15)]" />
                   </div>
                   <h3 className="text-lg font-display font-semibold text-fg text-balance">{item.title}</h3>
+
                   {/* Subtitle text revealed on hover */}
                   <div className="opacity-0 max-h-0 overflow-hidden transition-all duration-300 ease-out group-hover:opacity-100 group-hover:max-h-36 group-hover:mt-2.5 pointer-events-none group-hover:pointer-events-auto">
                     <CopyText source={item.body} className="text-sm text-fg-muted max-w-[21em]" />

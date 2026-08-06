@@ -45,7 +45,10 @@ export const hero: HeroContent = {
   headline: 'Trading that talks back.',
 
   subheadline:
-    'Thinq’s own charting engine marks the levels price has held and puts what happened into words, on the chart. One browser terminal, across every screen you run.',
+    '6 months at ₹0 brokerage on equity, futures and options — no tiers or conditions.',
+
+
+
 
   primaryCta: 'Six months at zero Thinq brokerage for everyone on the list.',
 

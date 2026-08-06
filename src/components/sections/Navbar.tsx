@@ -121,12 +121,14 @@ function focusFragmentTarget(href: string) {
   if (!href.startsWith('#') || href.length < 2) return
   const target = document.getElementById(href.slice(1))
   if (!target) return
+  target.scrollIntoView({ behavior: 'smooth', block: 'start' })
   if (!target.hasAttribute('tabindex')) {
     target.setAttribute('tabindex', '-1')
     target.addEventListener('blur', () => target.removeAttribute('tabindex'), { once: true })
   }
   target.focus({ preventScroll: true })
 }
+
 
 interface MenuLinkProps {
   item: MenuItem
@@ -378,12 +380,14 @@ export default function Navbar() {
           while the background and border cross-faded. Name the properties. */}
       <header
         inert={mobileOpen}
-        className={`sticky top-0 z-50 border-b transition-[background-color,border-color,backdrop-filter] duration-200 ${
+        className={`sticky top-[var(--announce-h)] z-40 transition-[background-color,border-color,backdrop-filter] duration-200 border-b ${
           scrolled
-            ? 'border-border-soft bg-bg/85 backdrop-blur-xl'
-            : 'border-border-soft/0 bg-bg/0'
+            ? 'border-white/15 bg-bg/40 backdrop-blur-2xl shadow-xl shadow-black/40'
+            : 'border-white/10 bg-bg/30 backdrop-blur-xl'
         }`}
       >
+
+
         <Container>
           {/* The nav sits on `SectionShell`'s rail, not on Container's full
               1760px. Once the sections centre at 84rem, a nav that keeps
@@ -631,6 +635,7 @@ export default function Navbar() {
                       <li key={link.label} className={`flex ${BAR_HEIGHT} items-center`}>
                         <a
                           href={link.href}
+                          onClick={() => focusFragmentTarget(link.href)}
                           onPointerEnter={hoverOpen(null)}
                           className="inline-flex min-h-11 items-center rounded-full px-1.5 text-[0.8125rem] font-medium text-fg-muted transition-colors duration-200 hover:text-fg lg:px-3 lg:text-sm xl:px-4 xl:text-[0.9375rem]"
                         >
@@ -638,6 +643,7 @@ export default function Navbar() {
                         </a>
                       </li>
                     ))}
+
                   </ul>
                 </nav>
               </div>

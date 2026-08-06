@@ -5,6 +5,8 @@ import Button from '../ui/Button'
 import { SCALE } from '../ui/SectionShell'
 import { hero } from '../../data/hero'
 import MediaBackdrop from '../ui/MediaBackdrop'
+import ThinqMark from '../ui/ThinqMark'
+
 
 /**
  * §2 Hero — full-bleed motion with the copy and the form set on top of it.
@@ -57,10 +59,11 @@ export default function Hero() {
   return (
     <section
       id="hero"
-      className="relative isolate flex min-h-[calc(100svh-var(--header-stack))] w-full flex-col justify-between overflow-hidden bg-bg pt-16 pb-0 lg:pt-24"
+      className="relative isolate flex min-h-svh w-full flex-col justify-between overflow-hidden bg-bg pt-0 pb-0"
     >
+
       {/* Full-bleed background media layer */}
-      <MediaBackdrop alt={hero.mediaAlt} video="/media/hero/hero_section_bg.mp4" focus="center" />
+      <MediaBackdrop alt={hero.mediaAlt} video="/clips/thinq_hero_section_bg.mp4" focus="center" />
 
       {/* Top Ambient Keynote Spotlight */}
       <div
@@ -68,18 +71,29 @@ export default function Hero() {
         className="pointer-events-none absolute inset-x-0 top-0 h-[480px] -z-10 bg-[radial-gradient(ellipse_70%_50%_at_50%_-10%,rgba(255,255,255,0.12),rgba(255,255,255,0))]"
       />
 
-      {/* Light radial scrim overlay ensuring video details are 60% visible */}
+      {/* Dark black overlay ensuring front text is 100% legible against bright video */}
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(ellipse_at_center,rgba(5,5,5,0.08)_0%,rgba(5,5,5,0.35)_70%,rgba(5,5,5,0.75)_100%)]"
+        className="pointer-events-none absolute inset-0 -z-10 bg-black/40 bg-[radial-gradient(ellipse_80%_80%_at_50%_45%,rgba(0,0,0,0.45)_0%,rgba(0,0,0,0.75)_100%)]"
       />
 
-      <div className="flex flex-1 items-center my-auto py-8">
+      <div className="flex flex-1 flex-col items-center justify-center my-auto py-0">
+
+
         <Container>
           <div className="mx-auto max-w-[52em] text-center">
+            {/* Centered Clean Brand Lockup (Borderless & Larger) */}
+            <div className="mb-6 inline-flex items-center justify-center gap-3.5 select-none drop-shadow-[0_2px_20px_rgba(0,0,0,0.8)]">
+              <ThinqMark size={38} tone="steel" className="shrink-0 xl:h-[44px] xl:w-[44px]" />
+              <span className="font-display text-2xl sm:text-3xl font-semibold tracking-tight text-white">
+                Thinq
+              </span>
+            </div>
+
+
             {/* Display H1 Headline with Metallic Depth */}
             <h1
-              className={`display-lead mt-4 font-display tracking-tight text-balance drop-shadow-[0_4px_24px_rgba(255,255,255,0.12)] ${SCALE.hero}`}
+              className={`display-lead mt-4 font-display tracking-tight text-balance drop-shadow-[0_4px_30px_rgba(0,0,0,0.9)] ${SCALE.hero}`}
               style={{
                 fontVariationSettings: settled
                   ? '"wdth" 82, "wght" 580'
@@ -89,13 +103,12 @@ export default function Hero() {
               {lines.map((line: string, index: number) => (
                 <span key={line} className="block overflow-hidden pb-[0.12em]">
                   <span
-                    className="block bg-gradient-to-b from-white via-white/95 to-white/70 bg-clip-text text-transparent transition-[opacity,transform,filter] duration-[900ms]"
+                    className="block bg-gradient-to-b from-white via-white/95 to-white/80 bg-clip-text text-transparent transition-[opacity,transform] duration-[900ms]"
                     style={{
                       transitionTimingFunction: 'var(--ease-out-expo)',
                       transitionDelay: `${90 + index * 110}ms`,
                       opacity: settled ? 1 : 0,
                       transform: settled ? 'translateY(0)' : 'translateY(-0.14em)',
-                      filter: settled ? 'blur(0)' : 'blur(10px)',
                     }}
                   >
                     {line}
@@ -114,23 +127,58 @@ export default function Hero() {
                 transform: settled ? 'translateY(0)' : 'translateY(8px)',
               }}
             >
-              <p className="mt-6 max-w-[34em] mx-auto text-[1.0625rem] sm:text-[1.1875rem] leading-[1.65] text-fg-muted text-balance font-normal">
-                {hero.subheadline}
+              <p className="mt-6 max-w-[34em] mx-auto text-[1.0625rem] sm:text-[1.1875rem] leading-[1.65] text-white/80 drop-shadow-[0_2px_16px_rgba(0,0,0,0.9)] text-balance font-normal">
+                <span className="font-semibold text-white drop-shadow-[0_0_12px_rgba(255,255,255,0.6)]">6 months</span> at{' '}
+                <span className="font-semibold text-white drop-shadow-[0_0_12px_rgba(255,255,255,0.6)]">₹0 brokerage</span> on equity, futures and options — no tiers or conditions.
               </p>
 
-              {/* High-End Primary CTA Button */}
-              <div className="mt-8 flex items-center justify-center">
-                <Button href="#final-cta" size="lg" className="shadow-[0_0_24px_rgba(255,255,255,0.15)] hover:shadow-[0_0_32px_rgba(255,255,255,0.25)] transition-all duration-300">
-                  Get early access
-                </Button>
+
+
+              {/* High-End Mobile Number Input + Join the waitlist CTA Lockup */}
+              <div className="mt-8 flex flex-col items-center justify-center max-w-lg mx-auto w-full">
+                <div className="w-full flex flex-col items-start gap-1.5">
+                  <span className="text-[10px] font-mono tracking-widest text-white/60 uppercase ml-4">
+                    MOBILE NUMBER
+                  </span>
+                  <form
+                    onSubmit={(e) => {
+                      e.preventDefault()
+                      const el = document.getElementById('final-cta')
+                      el?.scrollIntoView({ behavior: 'smooth' })
+                    }}
+                    className="w-full flex flex-col sm:flex-row items-stretch sm:items-center gap-3"
+                  >
+                    <div className="relative flex-1 w-full flex items-center rounded-full border border-white/20 bg-black/40 backdrop-blur-xl px-5 py-3 text-white transition-all duration-300 focus-within:border-white/50 focus-within:bg-black/60 shadow-[0_0_20px_rgba(0,0,0,0.5)]">
+                      <span className="text-white/80 font-mono text-sm font-medium mr-3 border-r border-white/20 pr-3 shrink-0">
+                        +91
+                      </span>
+                      <input
+                        type="tel"
+                        maxLength={10}
+                        placeholder="Mobile number"
+                        className="w-full bg-transparent text-sm text-white placeholder-white/40 outline-none font-normal"
+                      />
+                    </div>
+                    <Button
+                      type="submit"
+                      size="lg"
+                      className="w-full sm:w-auto shrink-0 shadow-[0_0_24px_rgba(255,255,255,0.15)] hover:shadow-[0_0_32px_rgba(255,255,255,0.25)] transition-all duration-300"
+                    >
+                      Join the waitlist
+                    </Button>
+                  </form>
+                </div>
               </div>
+
+
             </div>
           </div>
         </Container>
       </div>
 
       {/* Statutory Disclosure Rail pinned seamlessly at bottom fold */}
-      <div className="relative w-full border-t border-white/10 bg-surface/40 backdrop-blur-xl mt-auto">
+      <div className="relative w-full border-t border-white/10 bg-surface/40 mt-auto">
+
         <Container>
           <div className="py-3.5 text-center">
             <Disclosure tone="note" className="max-w-4xl mx-auto text-xs text-fg-subtle">

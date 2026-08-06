@@ -49,37 +49,117 @@ export interface NavMegaMenu extends Omit<MegaMenu, 'footer'> {
 }
 
 /** See the header note. Empty by design, not by accident. */
-export const megaMenus: NavMegaMenu[] = []
-
-/**
- * Three anchors, in scroll order, and each one names a question rather than a
- * category. "The offer" is a thing a reader wants; "Pricing" is a page a company
- * has. The distinction is the whole reason these are not called Product,
- * Features and Pricing.
- *
- * §4 (the capability summary) is deliberately not in here. It is a list that
- * supports §3 rather than a section a reader would navigate TO, and a nav entry
- * for it would put four links in a bar that reads better with three.
- */
-export const directLinks: NavItem[] = [
-  { label: 'What you’re missing', href: '#missing' },
-  { label: 'Security', href: '#security' },
-  { label: 'The offer', href: '#offer' },
+export const megaMenus: NavMegaMenu[] = [
+  {
+    id: 'products',
+    label: 'Products',
+    wide: true,
+    columns: [
+      {
+        heading: 'AI-Native Trading',
+        items: [
+          {
+            icon: 'Rocket',
+            label: 'AI Copilot',
+            href: '#capabilities',
+          },
+          {
+            icon: 'Timer',
+            label: 'Strategy Replay',
+            href: '#capabilities',
+          },
+          {
+            icon: 'TrendingUp',
+            label: 'Algorithmic Signals',
+            href: '#capabilities',
+          },
+        ],
+      },
+      {
+        heading: 'Charting Engine',
+        items: [
+          {
+            icon: 'ChartCandlestick',
+            label: 'Live Chart Levels',
+            href: '#section-02',
+          },
+          {
+            icon: 'ChartPie',
+            label: 'Options Matrix',
+            href: '#section-02',
+          },
+          {
+            icon: 'Boxes',
+            label: 'Multi-Leg Execution',
+            href: '#section-02',
+          },
+        ],
+      },
+      {
+        heading: 'Trust & Infrastructure',
+        items: [
+          {
+            icon: 'Scale',
+            label: 'SEBI Registered Broker',
+            href: '#security',
+          },
+          {
+            icon: 'Gem',
+            label: 'Bank-Grade Encryption',
+            href: '#security',
+          },
+        ],
+      },
+    ],
+    footer: {
+      text: '6 months zero brokerage offer active for everyone on the waitlist.',
+      linkLabel: 'Join waitlist',
+      href: '#final-cta',
+    },
+  },
+  {
+    id: 'features',
+    label: 'Features',
+    wide: false,
+    columns: [
+      {
+        heading: 'Platform Highlights',
+        items: [
+          {
+            icon: 'FlaskConical',
+            label: 'What You’re Missing',
+            href: '#missing',
+          },
+          {
+            icon: 'BookOpen',
+            label: 'Native Charting',
+            href: '#section-02',
+          },
+          {
+            icon: 'Code',
+            label: 'AI Capabilities',
+            href: '#capabilities',
+          },
+          {
+            icon: 'Landmark',
+            label: 'Security & Custody',
+            href: '#security',
+          },
+        ],
+      },
+    ],
+  },
 ]
 
-/**
- * The single action label, used by the desktop bar and the mobile sheet.
- *
- * `loginLabel` is deleted rather than emptied. There is nothing to log in to —
- * the product has not opened, which is the premise of the entire page — and a
- * "Log in" control beside a "Join the waitlist" button invites the reader to try
- * an account they cannot have. It was pointing at `#`.
- */
+export const directLinks: NavItem[] = [
+  { label: 'Why Thinq', href: '#missing' },
+  { label: 'Charting', href: '#section-02' },
+  { label: 'Capabilities', href: '#capabilities' },
+  { label: 'Security', href: '#security' },
+]
+
 export const signupLabel = 'Join the waitlist'
 
-/**
- * Mobile sheet order. Matches `directLinks` exactly: `Navbar` resolves each
- * label against `megaMenus` first and `directLinks` second, so with no menus
- * left these three resolve straight to links.
- */
-export const mobileOrder: string[] = ['What you’re missing', 'Security', 'The offer']
+export const mobileOrder: string[] = ['Products', 'Features', 'Why Thinq', 'Charting', 'Capabilities', 'Security']
+
+

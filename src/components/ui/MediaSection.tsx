@@ -28,9 +28,11 @@ import type { ImageSources, VideoSources } from './MediaBackdrop'
 const HEIGHT = {
   epic: 'min-h-svh',
   tall: 'min-h-svh',
-  mid: 'min-h-svh',
-  short: 'min-h-svh',
+  mid: 'min-h-[65vh] py-12',
+  short: 'min-h-[50vh] py-8',
 } as const
+
+
 
 /**
  * Copy is parked with percentage margins, not a grid column, so the asset can
@@ -171,13 +173,16 @@ interface MediaSectionProps {
   children?: ReactNode
   media: {
     alt: string
-    image?: ImageSources
-    video?: VideoSources
+    image?: ImageSources | string
+    video?: VideoSources | string
     poster?: string
     tone?: string
+    blur?: boolean
   }
+
   className?: string
 }
+
 
 /**
  * Full-bleed section: media pinned behind, copy overlaid on it.

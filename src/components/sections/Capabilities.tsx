@@ -12,7 +12,7 @@ export default function Capabilities() {
     >
       {/* 3D Image Slider covering full width of screen */}
       <div className="-mx-4 sm:-mx-8 lg:-mx-16 xl:-mx-24 overflow-visible py-4 sm:py-8">
-        <ImageSlider3D duration={30} cardWidth="18em" direction="right" />
+        <ImageSlider3D duration={32} cardWidth="16.5em" direction="right" />
       </div>
     </SectionShell>
   )

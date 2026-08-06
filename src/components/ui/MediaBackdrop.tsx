@@ -20,6 +20,7 @@ interface MediaBackdropProps {
   poster?: string
   tone?: string
   focus?: Focus
+  blur?: boolean
   className?: string
 }
 
@@ -28,18 +29,15 @@ export default function MediaBackdrop({
   image,
   video,
   poster,
-  tone = 'var(--color-bg)',
-  focus = 'center',
+  blur = false,
   className = '',
 }: MediaBackdropProps) {
-  const litX = focus === 'left' ? 25 : focus === 'center' ? 50 : 75
-
   return (
     <div
       aria-hidden="true"
       aria-label={alt}
       className={`absolute inset-0 overflow-hidden select-none pointer-events-none ${className}`}
-      style={{ backgroundColor: tone, zIndex: -999 }}
+      style={{ backgroundColor: '#070709', zIndex: -999 }}
     >
       {/* Video Background Layer */}
       {video && (
@@ -49,7 +47,7 @@ export default function MediaBackdrop({
           muted
           playsInline
           poster={poster}
-          className="absolute inset-0 h-full w-full object-cover opacity-60 transition-opacity duration-1000"
+          className="absolute inset-0 h-full w-full object-cover scale-[1.08] origin-top opacity-100 transition-opacity duration-1000"
         >
           {typeof video === 'string' ? (
             <source src={video} type="video/mp4" />
@@ -67,34 +65,39 @@ export default function MediaBackdrop({
         <img
           src={typeof image === 'string' ? image : image.desktop}
           alt={alt}
-          className="absolute inset-0 h-full w-full object-cover opacity-60 transition-opacity duration-1000"
+          className="absolute inset-0 h-full w-full object-cover scale-[1.08] origin-top opacity-100 transition-opacity duration-1000"
         />
       )}
 
-      {/* Primary Theme Ambient Mesh Fallback */}
-      <div
-        className="absolute inset-0"
-        style={{
-          background: `radial-gradient(72% 78% at ${litX}% 40%, color-mix(in srgb, var(--color-accent) 22%, var(--color-surface)) 0%, color-mix(in srgb, var(--color-surface) 50%, var(--color-bg)) 55%, var(--color-bg) 100%)`,
-          opacity: video || image ? 0.15 : 1,
-        }}
-      />
 
-      {/* Secondary Chromatic Glow Orb */}
-      <div
-        className="absolute inset-0 opacity-40"
-        style={{
-          background: `radial-gradient(55% 55% at ${litX}% 42%, color-mix(in srgb, var(--color-chrome) 14%, transparent) 0%, color-mix(in srgb, var(--color-accent-soft) 8%, transparent) 55%, transparent 85%)`,
-        }}
-      />
+      {/* Optional Backdrop blur layer - rendered when blur is explicitly set */}
+      {blur && (
+        <div className="absolute inset-0 backdrop-blur-md backdrop-saturate-150 bg-black/35 pointer-events-none" />
+      )}
 
-      {/* Edge Falloff Vignette for Seamless Text Readability */}
+
+      {/* Smooth Left & Right Edge Dark Falloff Gradient */}
       <div
         className="absolute inset-0 pointer-events-none"
         style={{
-          background: `radial-gradient(ellipse at center, rgba(5,5,5,0.1) 0%, rgba(5,5,5,0.45) 70%, rgba(5,5,5,0.75) 100%)`,
+          background: `linear-gradient(to right, #070709 0%, rgba(7,7,9,0.7) 15%, transparent 35%, transparent 65%, rgba(7,7,9,0.7) 85%, #070709 100%)`,
+        }}
+      />
+
+      {/* Subtle Ambient Radial Vignette */}
+      <div
+        className="absolute inset-0 pointer-events-none"
+        style={{
+          background: `radial-gradient(ellipse 80% 80% at 50% 50%, transparent 40%, rgba(5,5,5,0.3) 100%)`,
         }}
       />
     </div>
+
   )
 }
+
+
+
+
+
+

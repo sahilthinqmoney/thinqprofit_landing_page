@@ -82,13 +82,14 @@ export const waitlistForm = {
   phoneLabel: 'Mobile number',
   phonePrefix: '+91',
   phonePlaceholder: 'Mobile number',
-  phoneCta: 'Get early access',
+  phoneCta: 'Join the waitlist',
   phoneHelp: 'Your number, once. We message you on WhatsApp when your access is ready.',
   underField: 'Six months at zero Thinq brokerage for everyone on the list. Statutory charges apply.',
   subtext: 'one message · nothing else',
 
   otpLabel: 'Verification code',
-  otpCta: 'Get early access',
+  otpCta: 'Join the waitlist',
+
   otpHelp: 'Six digits, sent to +91 ',
   otpResend: 'Resend code',
   otpChangeNumber: 'Change number',

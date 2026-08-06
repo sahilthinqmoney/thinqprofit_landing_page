@@ -17,6 +17,7 @@ const DEFAULT_CARDS: SliderCardItem[] = [
     description: 'Tracks whether open positions are moving with or against the market, not just whether they are up.',
     icon: Compass,
     badge: 'AI Analytics',
+    image: '/images/capabilities/compass.png',
   },
   {
     id: 2,
@@ -24,6 +25,7 @@ const DEFAULT_CARDS: SliderCardItem[] = [
     description: 'Build multi-leg structures by tapping bids & asks, previewing complete payoff curves before execution.',
     icon: Layers,
     badge: 'Options F&O',
+    image: '/images/capabilities/option_chain.png',
   },
   {
     id: 3,
@@ -31,6 +33,7 @@ const DEFAULT_CARDS: SliderCardItem[] = [
     description: 'Delta, theta and vega translated into real-time plain English sentences about P&L drivers.',
     icon: Languages,
     badge: 'Risk Engine',
+    image: '/images/capabilities/greeks_prism.png',
   },
   {
     id: 4,
@@ -38,6 +41,7 @@ const DEFAULT_CARDS: SliderCardItem[] = [
     description: 'Orders routed in milliseconds to minimize slippage between what you see and what you get.',
     icon: Zap,
     badge: 'Ultra Fast',
+    image: '/images/capabilities/low_latency.png',
   },
   {
     id: 5,
@@ -45,6 +49,7 @@ const DEFAULT_CARDS: SliderCardItem[] = [
     description: 'Customizable widget grid, symbol group linking, second monitor pop-outs, and zero-install accessibility.',
     icon: LayoutGrid,
     badge: 'Multi-Monitor',
+    image: '/images/capabilities/workspace.jpg',
   },
   {
     id: 6,
@@ -52,7 +57,9 @@ const DEFAULT_CARDS: SliderCardItem[] = [
     description: 'Set a condition once and it keeps watching market triggers, whether or not your browser tab is open.',
     icon: Bell,
     badge: 'Cloud Alerts',
+    image: '/images/capabilities/alerts.png',
   },
+
 ]
 
 interface ImageSlider3DProps {
@@ -70,7 +77,7 @@ interface ImageSlider3DProps {
 
 export default function ImageSlider3D({
   duration = 38,
-  cardWidth = '18em',
+  cardWidth = '16.5em',
   items = DEFAULT_CARDS,
   className = '',
   direction = 'right',
@@ -92,8 +99,8 @@ export default function ImageSlider3D({
       const containerRect = container.getBoundingClientRect()
       const containerCenter = containerRect.left + containerRect.width / 2
 
-      // Tightly focused focal radius so ONLY ONE card peaks at the center at a time
-      const focalRadius = Math.min(containerRect.width * 0.22, 320)
+      // Smooth focal radius for fluid 3D scale & depth transition
+      const focalRadius = Math.min(containerRect.width * 0.28, 360)
 
       const cardElements = track.querySelectorAll<HTMLDivElement>('[data-slider-card]')
 
@@ -101,36 +108,40 @@ export default function ImageSlider3D({
         const cardRect = card.getBoundingClientRect()
         const cardCenter = cardRect.left + cardRect.width / 2
 
-        // Distance from exact center
+        // Distance from exact viewport center
         const distFromCenter = Math.abs(cardCenter - containerCenter)
 
-        // Steep cosine curve so only 1 card peaks in front
+        // Smooth continuous cosine curve for fluid motion
         let centerFactor = 0
-        if (distFromCenter < focalRadius * 1.8) {
-          const norm = distFromCenter / (focalRadius * 1.8)
-          centerFactor = Math.pow(Math.cos(norm * (Math.PI / 2)), 3.2)
+        if (distFromCenter < focalRadius) {
+          const norm = distFromCenter / focalRadius
+          centerFactor = Math.pow(Math.cos(norm * (Math.PI / 2)), 2.6)
         }
 
-        // Calculate 3D pop up scale & depth elevation:
-        // ONLY the single focal card pops up to ~1.26x scale, side cards stay at ~0.82x
-        const scale = 0.82 + centerFactor * 0.44
-        const opacity = 0.45 + centerFactor * 0.55
-        const translateZ = centerFactor * 90
+        // Fluid 3D scale, opacity, and Z-elevation
+        const scale = 0.86 + centerFactor * 0.32
+        const opacity = 0.65 + centerFactor * 0.35
+        const translateZ = centerFactor * 80
         const zIndex = Math.round(centerFactor * 100)
 
         card.style.transform = `perspective(1200px) translateZ(${translateZ}px) scale(${scale})`
         card.style.opacity = `${opacity}`
         card.style.zIndex = `${zIndex}`
 
-        // Sleek metallic steel/grey glow around active card (no copper/orange)
-        const glowAlpha = centerFactor * 0.35
-        card.style.boxShadow = `0 ${20 * centerFactor}px ${40 * centerFactor}px rgba(0, 0, 0, ${0.5 + centerFactor * 0.3}), 0 0 ${35 * centerFactor}px rgba(220, 225, 235, ${glowAlpha})`
+        // Rich ocean cyan (#082d36) ambient glow for active focal card
+        const glowAlpha = centerFactor * 0.75
+        card.style.boxShadow = centerFactor > 0.08
+          ? `0 ${18 * centerFactor}px ${36 * centerFactor}px rgba(0, 0, 0, ${0.4 + centerFactor * 0.3}), 0 0 ${35 * centerFactor}px rgba(8, 45, 54, ${glowAlpha}), 0 0 ${18 * centerFactor}px rgba(12, 70, 84, ${glowAlpha * 0.8})`
+          : '0 8px 20px rgba(0, 0, 0, 0.4)'
+
       })
 
       animationFrameId = requestAnimationFrame(updateCardTransforms)
     }
 
     animationFrameId = requestAnimationFrame(updateCardTransforms)
+
+
 
     return () => {
       cancelAnimationFrame(animationFrameId)
@@ -140,7 +151,7 @@ export default function ImageSlider3D({
   return (
     <div
       ref={containerRef}
-      className={`relative w-full overflow-hidden py-16 sm:py-20 select-none ${className}`}
+      className={`relative w-full overflow-hidden py-12 sm:py-16 select-none ${className}`}
       style={{ perspective: '1200px' }}
     >
       {/* Edge gradient fade masks for seamless full-width immersion */}
@@ -150,7 +161,8 @@ export default function ImageSlider3D({
       {/* Infinite Scrolling Track (Continuously runs WITHOUT pausing on hover) */}
       <div
         ref={trackRef}
-        className="flex w-max items-center gap-12 sm:gap-16 md:gap-20 transition-transform"
+        className="flex w-max items-center gap-8 sm:gap-10 md:gap-12 transition-transform"
+
         style={{
           animationName: direction === 'right' ? 'marquee-right' : 'marquee-left',
           animationDuration: `${duration}s`,
@@ -165,7 +177,7 @@ export default function ImageSlider3D({
             <div
               key={`${item.id}-${idx}`}
               data-slider-card
-              className="group relative flex shrink-0 flex-col justify-between rounded-2xl border border-white/15 bg-white/[0.04] p-7 sm:p-8 backdrop-blur-xl transition-all duration-300 ease-out"
+              className="group relative flex shrink-0 flex-col justify-between rounded-2xl border border-white/15 bg-[#09090b] p-4 sm:p-5 backdrop-blur-xl transition-all duration-300 ease-out overflow-hidden"
               style={{
                 width: cardWidth,
                 willChange: 'transform, opacity',
@@ -173,44 +185,52 @@ export default function ImageSlider3D({
               }}
             >
               {/* Subtle top edge specular steel light highlight */}
-              <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/30 to-transparent" />
+              <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/30 to-transparent z-10" />
 
               <div>
                 {/* Header row: Badge + Icon */}
-                <div className="flex items-center justify-between">
+                <div className="flex items-center justify-between relative z-10">
                   {Icon ? (
-                    <div className="inline-flex h-11 w-11 items-center justify-center rounded-xl border border-white/15 bg-white/5 text-chrome group-hover:border-white/30 group-hover:text-fg transition-colors">
-                      <Icon className="h-5 w-5" strokeWidth={1.75} />
+                    <div className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-white/15 bg-white/10 text-chrome group-hover:border-white/30 group-hover:text-fg transition-colors">
+                      <Icon className="h-4 w-4" strokeWidth={1.75} />
                     </div>
                   ) : null}
 
                   {item.badge ? (
-                    <span className="rounded-full border border-border-soft bg-surface/60 px-3 py-1 text-[10px] font-semibold tracking-wider text-fg-muted uppercase backdrop-blur-md">
+                    <span className="rounded-full border border-border-soft bg-surface/80 px-2.5 py-0.5 text-[9px] font-semibold tracking-wider text-fg-muted uppercase backdrop-blur-md">
                       {item.badge}
                     </span>
                   ) : null}
                 </div>
 
+                {/* Seamless Integrated 3D Feature Asset */}
+                {item.image ? (
+                  <div className="relative mt-3 h-36 w-full flex items-center justify-center overflow-hidden">
+                    <img
+                      src={item.image}
+                      alt={item.title}
+                      className="h-full w-full object-contain mix-blend-lighten transition-transform duration-500 group-hover:scale-108"
+                    />
+                  </div>
+                ) : null}
+
+
                 {/* Card Title */}
-                <h3 className="mt-6 text-lg font-semibold tracking-tight text-fg text-balance">
+                <h3 className="mt-3.5 text-base font-semibold tracking-tight text-fg text-balance relative z-10">
                   {item.title}
                 </h3>
 
                 {/* Description */}
-                <p className="mt-2.5 text-xs sm:text-sm leading-relaxed text-fg-muted">
+                <p className="mt-1.5 text-xs leading-relaxed text-fg-muted relative z-10">
                   {item.description}
                 </p>
-              </div>
-
-              {/* Card Footer indicator */}
-              <div className="mt-7 flex items-center justify-between border-t border-white/10 pt-3.5 text-xs font-medium text-fg-subtle group-hover:text-fg transition-colors">
-                <span>Explore Feature</span>
-                <span aria-hidden="true" className="transition-transform group-hover:translate-x-1">→</span>
               </div>
             </div>
           )
         })}
       </div>
+
+
 
       {/* Embedded Animation Styles */}
       <style>{`

@@ -61,8 +61,9 @@ export default function AnnouncementBar() {
     <div
       role="region"
       aria-label="Announcement"
-      className="relative z-40 border-b border-border-soft bg-surface/60"
+      className="sticky top-0 z-50 border-b border-white/15 bg-bg/85 backdrop-blur-2xl shadow-md"
     >
+
       <Container>
         <div
           className={`flex h-[var(--announce-h)] items-center justify-center ${RAIL}`}
