@@ -65,7 +65,7 @@ function FlipClock() {
         muted
         playsInline
         aria-hidden="true"
-        className="w-full h-auto max-h-[850px] lg:max-h-[960px] object-contain opacity-95 scale-110 sm:scale-120 translate-x-3 sm:translate-x-6 [mask-image:radial-gradient(ellipse_85%_85%_at_center,black_45%,transparent_100%)] drop-shadow-[0_24px_48px_rgba(0,0,0,0.95)] transition-all duration-700 group-hover:scale-125 group-hover:opacity-100 pointer-events-none"
+        className="w-full h-auto max-h-[360px] sm:max-h-[580px] md:max-h-[850px] lg:max-h-[960px] object-contain opacity-95 scale-100 sm:scale-120 md:translate-x-3 sm:translate-x-6 [mask-image:radial-gradient(ellipse_85%_85%_at_center,black_45%,transparent_100%)] drop-shadow-[0_24px_48px_rgba(0,0,0,0.95)] transition-all duration-700 group-hover:scale-125 group-hover:opacity-100 pointer-events-none"
       >
         <source src="/clips/flip-clock.webm" type="video/webm" />
       </video>

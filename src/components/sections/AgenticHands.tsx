@@ -74,7 +74,7 @@ export default function AgenticHands() {
     <section
       ref={sectionRef}
       id="agentic"
-      className="relative scroll-mt-24 py-28 sm:py-36 lg:py-44 overflow-hidden bg-transparent select-none"
+      className="relative scroll-mt-24 py-10 sm:py-36 lg:py-44 overflow-hidden bg-transparent select-none"
     >
       {/* Left, pointing at the "A" of "Agentic". */}
       <div className="absolute left-0 sm:left-2 lg:left-6 top-[44%] sm:top-[46%] lg:top-[48%] -translate-y-1/2 z-10 pointer-events-none w-[32%] max-w-[440px] min-w-[180px]">

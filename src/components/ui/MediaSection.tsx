@@ -16,10 +16,10 @@ import type { ImageSources, VideoSources } from './MediaBackdrop'
  * out of it. Below 768px every section is content-sized instead.
  */
 const HEIGHT = {
-  epic: 'min-h-svh',
-  tall: 'min-h-svh',
-  mid: 'min-h-[65vh] py-12',
-  short: 'min-h-[50vh] py-8',
+  epic: 'min-h-0 md:min-h-svh',
+  tall: 'min-h-0 md:min-h-svh',
+  mid: 'min-h-0 md:min-h-[65vh] py-8 md:py-12',
+  short: 'min-h-0 md:min-h-[50vh] py-6 md:py-8',
 } as const
 
 
@@ -344,7 +344,7 @@ export default function MediaSection({
             */}
             {aside && (
               <div
-                className={`mt-12 w-full md:absolute md:top-1/2 md:mt-0 md:w-auto md:-translate-y-1/2 ${ASIDE_PLACE[place]}`}
+                className={`mt-4 w-full md:absolute md:top-1/2 md:mt-0 md:w-auto md:-translate-y-1/2 ${ASIDE_PLACE[place]}`}
               >
                 {aside}
               </div>
