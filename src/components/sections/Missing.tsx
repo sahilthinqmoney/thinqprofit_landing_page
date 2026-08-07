@@ -51,20 +51,41 @@ export default function Missing() {
       height="tall"
       place="left"
       anchor="center"
-      scrim={0.88}
-      scrimAt="26% 50%"
+      scrim={0}
       measure="13em"
       headline={missing.heading}
       body={missing.solution}
       finePrint={missing.finePrint}
-      aside={
-        <div className="relative group flex items-center justify-center">
-          {/* Seamless Floating Mechanical Flip Clock with Ultra-Soft Ambient Fade */}
-          <img
-            src="/media/flip-clock.png"
-            alt="Mechanical flip clock displaying 11:40 market moment"
-            className="w-full h-auto max-h-[520px] object-contain opacity-90 [mask-image:radial-gradient(ellipse_85%_85%_at_center,black_45%,transparent_100%)] drop-shadow-[0_24px_48px_rgba(0,0,0,0.95)] transition-all duration-700 group-hover:scale-[1.03] group-hover:opacity-100"
+      bgAmbient={
+        /* Full-bleed #082d36 Left Ambient Gradient - Zero Box Boundaries */
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-0 z-[-1] overflow-hidden"
+        >
+          <div
+            className="h-full w-[65vw] max-w-[950px] opacity-85 blur-[130px]"
+            style={{
+              background:
+                'radial-gradient(ellipse at 0% 50%, rgba(8, 45, 54, 0.85) 0%, rgba(8, 45, 54, 0.4) 45%, rgba(8, 45, 54, 0.1) 75%, transparent 100%)',
+            }}
           />
+        </div>
+      }
+      aside={
+        <div className="relative group flex items-center justify-end w-full ml-auto">
+          {/* Seamless Floating Mechanical Flip Clock Video - Shifted Right */}
+          <video
+            autoPlay
+            loop
+            muted
+            playsInline
+            className="w-full h-auto max-h-[850px] lg:max-h-[960px] object-contain opacity-95 scale-110 sm:scale-120 translate-x-3 sm:translate-x-6 [mask-image:radial-gradient(ellipse_85%_85%_at_center,black_45%,transparent_100%)] drop-shadow-[0_24px_48px_rgba(0,0,0,0.95)] transition-all duration-700 group-hover:scale-125 group-hover:opacity-100 pointer-events-none"
+          >
+            <source
+              src="/Mechanical_flip_clock_changing_time_202608071234-Picsart-BackgroundRemover.webm"
+              type="video/webm"
+            />
+          </video>
         </div>
       }
       media={{

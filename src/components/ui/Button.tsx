@@ -12,7 +12,8 @@ interface ButtonProps {
   size?: Size
   className?: string
   type?: 'button' | 'submit'
-  onClick?: () => void
+  onClick?: (e?: MouseEvent<HTMLElement>) => void
+
   fullWidth?: boolean
   /**
    * Render a trailing glyph seated in its own well at the button's right edge.
@@ -352,10 +353,9 @@ export default function Button({
       <LiquidMetalSurface state={pointer} blend="rim" />
 
       <span
-        className={`relative inline-flex items-center justify-center gap-2 ${RIM_CORE} ${sizing} ${
-          fullWidth ? 'w-full' : ''
-        }`}
+        className={`relative inline-flex items-center justify-center gap-2 ${RIM_CORE} ${sizing} w-full flex-1`}
       >
+
         {label}
         {ripples.map((r) => (
           <span

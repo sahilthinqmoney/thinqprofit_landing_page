@@ -20,7 +20,7 @@ import {
   GraduationCap,
   Landmark,
   LayoutGrid,
-  Menu as MenuIcon,
+
   Newspaper,
   Repeat,
   Rocket,
@@ -181,6 +181,7 @@ function MenuLink({ item, onNavigate }: MenuLinkProps) {
  */
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false)
+  const [pastHero, setPastHero] = useState(false)
   const [openMenu, setOpenMenu] = useState<string | null>(null)
   const [mobileOpen, setMobileOpen] = useState(false)
   const [openAccordion, setOpenAccordion] = useState<string | null>(null)
@@ -197,13 +198,19 @@ export default function Navbar() {
    */
   const restoreFocus = useRef(false)
 
-  /* Border + blur only once the page has moved (~12px). */
+  /* Border + blur once page moves (~12px), and track when user scrolls past Hero section. */
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 12)
+    const onScroll = () => {
+      setScrolled(window.scrollY > 12)
+      const hero = document.getElementById('hero')
+      const heroThreshold = hero ? hero.offsetHeight - 140 : 350
+      setPastHero(window.scrollY > heroThreshold)
+    }
     onScroll()
     window.addEventListener('scroll', onScroll, { passive: true })
     return () => window.removeEventListener('scroll', onScroll)
   }, [])
+
 
   /* Lock body scroll while the mobile sheet is open; restore on close. */
   useEffect(() => {
@@ -380,12 +387,13 @@ export default function Navbar() {
           while the background and border cross-faded. Name the properties. */}
       <header
         inert={mobileOpen}
-        className={`sticky top-[var(--announce-h)] z-40 transition-[background-color,border-color,backdrop-filter] duration-200 border-b ${
+        className={`sticky z-40 transition-all duration-200 border-b top-0 ${
           scrolled
             ? 'border-white/15 bg-bg/40 backdrop-blur-2xl shadow-xl shadow-black/40'
             : 'border-white/10 bg-bg/30 backdrop-blur-xl'
         }`}
       >
+
 
 
         <Container>
@@ -497,14 +505,15 @@ export default function Navbar() {
                       units, which renders 2.68px at 28 and 3.26px at 34. That is
                       what holds the ring's weight against the wordmark. */}
                   <ThinqMark
-                    size={28}
+                    size={36}
                     tone="steel"
                     small
-                    className="shrink-0 xl:h-[34px] xl:w-[34px]"
+                    className="shrink-0 h-[34px] w-[34px] xl:h-[40px] xl:w-[40px]"
                   />
-                  <span className="text-[0.9375rem] font-semibold tracking-tight text-fg lg:text-base xl:text-lg">
+                  <span className="text-lg font-bold tracking-tight text-fg lg:text-xl xl:text-2xl">
                     {wordmark}
                   </span>
+
                 </a>
 
                 {/* Desktop nav */}
@@ -678,55 +687,27 @@ export default function Navbar() {
                 collision.
               */}
               <div
-                className="hidden shrink-0 items-center gap-2 md:flex"
+                className={`flex shrink-0 items-center gap-2 transition-all duration-300 ease-[var(--ease-out-soft)] ${
+                  pastHero
+                    ? 'opacity-100 translate-y-0 pointer-events-auto'
+                    : 'opacity-0 -translate-y-1 pointer-events-none'
+                }`}
                 onPointerEnter={hoverOpen(null)}
               >
-                {/* The `Log in` ghost button is gone, and the 8px gap argument
-                    above is now moot rather than wrong — there is no second
-                    control beside the primary for its focus ring to collide
-                    with. The note stays because the collision returns the moment
-                    anything is put back here.
-
-                    Why it went: there is nothing to log in to. The product has
-                    not opened, which is the premise of the entire page, and a
-                    `Log in` control beside `Join the waitlist` invites a reader
-                    to try an account they cannot have. It was pointing at `#`. */}
-                {/* The waitlist path is the closing section, which is the one
-                    place on the page that asks for the decision with the whole
-                    argument behind it. The hero's own form is above this button,
-                    so scrolling up to it would be the wrong direction. */}
-                {/* No `xl:px-5` here, and that is a correction rather than an
-                    omission. `className` lands on the OUTER element, which on a
-                    metal primary is `RIM_WRAP` — the wrapper whose entire job is
-                    to be the 2px the shader paints. Measured at xl the override
-                    resolved to `padding: 2px 20px`, so the ring rendered 20px
-                    wide down both sides while every other primary on the page
-                    stayed at 2px: a bright copper slab in the nav against a
-                    hairline rim in the hero, from one utility class.
-
-                    The ghost login above keeps `xl:px-5` because it has no rim —
-                    there its padding IS the control's padding. On the rim
-                    variant the size prop already carries the core's padding
-                    inward, which is where a wider button has to come from. */}
-                <Button href="#final-cta" variant="primary" size="sm">
+                <Button
+                  href="#hero"
+                  onClick={(e) => {
+                    e?.preventDefault()
+                    window.scrollTo({ top: 0, behavior: 'smooth' })
+                  }}
+                  variant="primary"
+                  size="sm"
+                >
                   {signupLabel}
                 </Button>
               </div>
 
-              {/* Mobile trigger. Open-only: the header is inert while the sheet
-                  is up, so this button is unreachable then and a "Close menu"
-                  label would be a state the user can never observe. The sheet
-                  carries its own close button. */}
-              <button
-                type="button"
-                ref={hamburgerRef}
-                onClick={() => setMobileOpen(true)}
-                aria-label="Open menu"
-                aria-expanded={mobileOpen}
-                className="-mr-2 grid h-11 w-11 shrink-0 cursor-pointer place-items-center rounded-full text-fg transition-colors duration-200 hover:bg-surface-raised md:hidden"
-              >
-                <MenuIcon className="h-5 w-5" strokeWidth={1.5} aria-hidden="true" />
-              </button>
+
             </div>
           </div>
         </Container>
@@ -872,9 +853,21 @@ export default function Navbar() {
                 button that stood above it is gone for the reason recorded
                 there: there is nothing to log in to yet. */}
             <div className="flex flex-col gap-3">
-              <Button href="#final-cta" variant="primary" size="md" fullWidth>
+              <Button
+                href="#hero"
+                onClick={(e) => {
+                  e?.preventDefault()
+                  setMobileOpen(false)
+                  window.scrollTo({ top: 0, behavior: 'smooth' })
+                }}
+                variant="primary"
+                size="md"
+                fullWidth
+              >
                 {signupLabel}
               </Button>
+
+
             </div>
           </div>
         </div>

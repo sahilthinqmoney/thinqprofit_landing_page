@@ -49,117 +49,13 @@ export interface NavMegaMenu extends Omit<MegaMenu, 'footer'> {
 }
 
 /** See the header note. Empty by design, not by accident. */
-export const megaMenus: NavMegaMenu[] = [
-  {
-    id: 'products',
-    label: 'Products',
-    wide: true,
-    columns: [
-      {
-        heading: 'AI-Native Trading',
-        items: [
-          {
-            icon: 'Rocket',
-            label: 'AI Copilot',
-            href: '#capabilities',
-          },
-          {
-            icon: 'Timer',
-            label: 'Strategy Replay',
-            href: '#capabilities',
-          },
-          {
-            icon: 'TrendingUp',
-            label: 'Algorithmic Signals',
-            href: '#capabilities',
-          },
-        ],
-      },
-      {
-        heading: 'Charting Engine',
-        items: [
-          {
-            icon: 'ChartCandlestick',
-            label: 'Live Chart Levels',
-            href: '#section-02',
-          },
-          {
-            icon: 'ChartPie',
-            label: 'Options Matrix',
-            href: '#section-02',
-          },
-          {
-            icon: 'Boxes',
-            label: 'Multi-Leg Execution',
-            href: '#section-02',
-          },
-        ],
-      },
-      {
-        heading: 'Trust & Infrastructure',
-        items: [
-          {
-            icon: 'Scale',
-            label: 'SEBI Registered Broker',
-            href: '#security',
-          },
-          {
-            icon: 'Gem',
-            label: 'Bank-Grade Encryption',
-            href: '#security',
-          },
-        ],
-      },
-    ],
-    footer: {
-      text: '6 months zero brokerage offer active for everyone on the waitlist.',
-      linkLabel: 'Join waitlist',
-      href: '#final-cta',
-    },
-  },
-  {
-    id: 'features',
-    label: 'Features',
-    wide: false,
-    columns: [
-      {
-        heading: 'Platform Highlights',
-        items: [
-          {
-            icon: 'FlaskConical',
-            label: 'What You’re Missing',
-            href: '#missing',
-          },
-          {
-            icon: 'BookOpen',
-            label: 'Native Charting',
-            href: '#section-02',
-          },
-          {
-            icon: 'Code',
-            label: 'AI Capabilities',
-            href: '#capabilities',
-          },
-          {
-            icon: 'Landmark',
-            label: 'Security & Custody',
-            href: '#security',
-          },
-        ],
-      },
-    ],
-  },
-]
+export const megaMenus: NavMegaMenu[] = []
 
-export const directLinks: NavItem[] = [
-  { label: 'Why Thinq', href: '#missing' },
-  { label: 'Charting', href: '#section-02' },
-  { label: 'Capabilities', href: '#capabilities' },
-  { label: 'Security', href: '#security' },
-]
+export const directLinks: NavItem[] = []
 
 export const signupLabel = 'Join the waitlist'
 
-export const mobileOrder: string[] = ['Products', 'Features', 'Why Thinq', 'Charting', 'Capabilities', 'Security']
+export const mobileOrder: string[] = []
+
 
 

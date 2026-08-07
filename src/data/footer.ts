@@ -100,7 +100,7 @@ export const statutoryDisclosures: StatutoryDisclosure[] = [
 /* -------------------------------------------------------------------------- */
 
 /** Year is computed at render; the entity name stays a placeholder. */
-export const copyrightEntity = 'Thinq Financial Technologies Pvt. Ltd.'
+export const copyrightEntity = 'Thinq'
 export const copyrightSuffix = 'All rights reserved.'
 
 /*

@@ -1,5 +1,5 @@
-import React, { useEffect, useRef } from 'react'
-import { Bell, Compass, Languages, Layers, LayoutGrid, Zap } from 'lucide-react'
+import React, { useEffect, useRef, useState } from 'react'
+import { Compass, Languages, Layers, Zap } from 'lucide-react'
 
 export interface SliderCardItem {
   id: string | number
@@ -10,7 +10,7 @@ export interface SliderCardItem {
   image?: string
 }
 
-const DEFAULT_CARDS: SliderCardItem[] = [
+export const DEFAULT_CARDS: SliderCardItem[] = [
   {
     id: 1,
     title: 'Position Compass',
@@ -43,23 +43,6 @@ const DEFAULT_CARDS: SliderCardItem[] = [
     badge: 'Ultra Fast',
     image: '/images/capabilities/low_latency.png',
   },
-  {
-    id: 5,
-    title: 'Your Workspace',
-    description: 'Customizable widget grid, symbol group linking, second monitor pop-outs, and zero-install accessibility.',
-    icon: LayoutGrid,
-    badge: 'Multi-Monitor',
-    image: '/images/capabilities/workspace.jpg',
-  },
-  {
-    id: 6,
-    title: 'Alerts That Hold',
-    description: 'Set a condition once and it keeps watching market triggers, whether or not your browser tab is open.',
-    icon: Bell,
-    badge: 'Cloud Alerts',
-    image: '/images/capabilities/alerts.png',
-  },
-
 ]
 
 interface ImageSlider3DProps {
@@ -76,7 +59,6 @@ interface ImageSlider3DProps {
 }
 
 export default function ImageSlider3D({
-  duration = 38,
   cardWidth = '16.5em',
   items = DEFAULT_CARDS,
   className = '',
@@ -84,6 +66,17 @@ export default function ImageSlider3D({
 }: ImageSlider3DProps) {
   const containerRef = useRef<HTMLDivElement>(null)
   const trackRef = useRef<HTMLDivElement>(null)
+
+  const [isDraggingState, setIsDraggingState] = useState(false)
+
+  // Drag & Motion state refs
+  const isDragging = useRef(false)
+  const startX = useRef(0)
+  const startOffset = useRef(0)
+  const currentOffset = useRef(0)
+  const velocity = useRef(0)
+  const lastX = useRef(0)
+  const lastTime = useRef(0)
 
   // Repeat items 3 times for seamless infinite looping
   const triplicatedItems = [...items, ...items, ...items]
@@ -95,12 +88,40 @@ export default function ImageSlider3D({
 
     let animationFrameId: number
 
-    const updateCardTransforms = () => {
+    // Base auto scroll speed in px per frame
+    const baseSpeed = direction === 'right' ? 0.75 : -0.75
+
+    const loop = () => {
+      const oneSetWidth = track.scrollWidth / 3
+
+      if (oneSetWidth > 0) {
+        if (!isDragging.current) {
+          // Apply decaying momentum velocity after drag release
+          velocity.current *= 0.92
+          if (Math.abs(velocity.current) < 0.05) velocity.current = 0
+
+          currentOffset.current += baseSpeed + velocity.current
+
+          // Infinite seamless wrap
+          if (currentOffset.current > 0) {
+            currentOffset.current -= oneSetWidth
+          } else if (currentOffset.current < -oneSetWidth) {
+            currentOffset.current += oneSetWidth
+          }
+        }
+
+        // Apply 1D horizontal transform to track
+        track.style.transform = `translate3d(${currentOffset.current}px, 0px, 0px)`
+      }
+
+      // Calculate 3D focal perspective & depth for each card
       const containerRect = container.getBoundingClientRect()
       const containerCenter = containerRect.left + containerRect.width / 2
 
-      // Smooth focal radius for fluid 3D scale & depth transition
-      const focalRadius = Math.min(containerRect.width * 0.28, 360)
+      const isMobile = containerRect.width < 640
+      const focalRadius = isMobile
+        ? Math.min(containerRect.width * 0.45, 300)
+        : Math.min(containerRect.width * 0.28, 360)
 
       const cardElements = track.querySelectorAll<HTMLDivElement>('[data-slider-card]')
 
@@ -108,68 +129,109 @@ export default function ImageSlider3D({
         const cardRect = card.getBoundingClientRect()
         const cardCenter = cardRect.left + cardRect.width / 2
 
-        // Distance from exact viewport center
         const distFromCenter = Math.abs(cardCenter - containerCenter)
 
-        // Smooth continuous cosine curve for fluid motion
         let centerFactor = 0
         if (distFromCenter < focalRadius) {
           const norm = distFromCenter / focalRadius
-          centerFactor = Math.pow(Math.cos(norm * (Math.PI / 2)), 2.6)
+          centerFactor = Math.pow(Math.cos(norm * (Math.PI / 2)), isMobile ? 1.6 : 2.6)
         }
 
-        // Fluid 3D scale, opacity, and Z-elevation
-        const scale = 0.86 + centerFactor * 0.32
-        const opacity = 0.65 + centerFactor * 0.35
-        const translateZ = centerFactor * 80
+        const baseScale = isMobile ? 0.92 : 0.86
+        const baseOpacity = isMobile ? 0.82 : 0.65
+        const scale = baseScale + centerFactor * (1 - baseScale)
+        const opacity = baseOpacity + centerFactor * (1 - baseOpacity)
+        const translateZ = centerFactor * (isMobile ? 35 : 80)
         const zIndex = Math.round(centerFactor * 100)
 
         card.style.transform = `perspective(1200px) translateZ(${translateZ}px) scale(${scale})`
         card.style.opacity = `${opacity}`
         card.style.zIndex = `${zIndex}`
 
-        // Rich ocean cyan (#082d36) ambient glow for active focal card
         const glowAlpha = centerFactor * 0.75
         card.style.boxShadow = centerFactor > 0.08
           ? `0 ${18 * centerFactor}px ${36 * centerFactor}px rgba(0, 0, 0, ${0.4 + centerFactor * 0.3}), 0 0 ${35 * centerFactor}px rgba(8, 45, 54, ${glowAlpha}), 0 0 ${18 * centerFactor}px rgba(12, 70, 84, ${glowAlpha * 0.8})`
           : '0 8px 20px rgba(0, 0, 0, 0.4)'
-
       })
 
-      animationFrameId = requestAnimationFrame(updateCardTransforms)
+      animationFrameId = requestAnimationFrame(loop)
     }
 
-    animationFrameId = requestAnimationFrame(updateCardTransforms)
-
-
+    animationFrameId = requestAnimationFrame(loop)
 
     return () => {
       cancelAnimationFrame(animationFrameId)
     }
-  }, [])
+  }, [direction])
+
+  // Drag Handlers
+  const handlePointerDown = (e: React.PointerEvent) => {
+    isDragging.current = true
+    setIsDraggingState(true)
+    startX.current = e.clientX
+    startOffset.current = currentOffset.current
+    lastX.current = e.clientX
+    lastTime.current = performance.now()
+    velocity.current = 0
+  }
+
+  const handlePointerMove = (e: React.PointerEvent) => {
+    if (!isDragging.current) return
+    const diff = e.clientX - startX.current
+    currentOffset.current = startOffset.current + diff
+
+    // Calculate instantaneous swipe velocity
+    const now = performance.now()
+    const dt = now - lastTime.current
+    if (dt > 10) {
+      velocity.current = (e.clientX - lastX.current) * (16 / dt)
+      lastX.current = e.clientX
+      lastTime.current = now
+    }
+
+    // Keep offset within bounds
+    const track = trackRef.current
+    if (track) {
+      const oneSetWidth = track.scrollWidth / 3
+      if (oneSetWidth > 0) {
+        if (currentOffset.current > 0) {
+          currentOffset.current -= oneSetWidth
+          startX.current += oneSetWidth
+        } else if (currentOffset.current < -oneSetWidth) {
+          currentOffset.current += oneSetWidth
+          startX.current -= oneSetWidth
+        }
+      }
+    }
+  }
+
+  const handlePointerUp = () => {
+    if (isDragging.current) {
+      isDragging.current = false
+      setIsDraggingState(false)
+    }
+  }
 
   return (
     <div
       ref={containerRef}
-      className={`relative w-full overflow-hidden py-12 sm:py-16 select-none ${className}`}
+      onPointerDown={handlePointerDown}
+      onPointerMove={handlePointerMove}
+      onPointerUp={handlePointerUp}
+      onPointerCancel={handlePointerUp}
+      className={`relative w-full overflow-hidden py-6 sm:py-12 md:py-16 select-none touch-pan-y ${
+        isDraggingState ? 'cursor-grabbing' : 'cursor-grab'
+      } ${className}`}
       style={{ perspective: '1200px' }}
     >
       {/* Edge gradient fade masks for seamless full-width immersion */}
-      <div className="pointer-events-none absolute left-0 top-0 bottom-0 z-40 w-20 sm:w-40 bg-gradient-to-r from-bg via-bg/85 to-transparent" />
-      <div className="pointer-events-none absolute right-0 top-0 bottom-0 z-40 w-20 sm:w-40 bg-gradient-to-l from-bg via-bg/85 to-transparent" />
+      <div className="pointer-events-none absolute left-0 top-0 bottom-0 z-40 w-4 sm:w-24 md:w-40 bg-gradient-to-r from-bg via-bg/80 to-transparent" />
+      <div className="pointer-events-none absolute right-0 top-0 bottom-0 z-40 w-4 sm:w-24 md:w-40 bg-gradient-to-l from-bg via-bg/80 to-transparent" />
 
-      {/* Infinite Scrolling Track (Continuously runs WITHOUT pausing on hover) */}
+      {/* Infinite Interactive Track */}
       <div
         ref={trackRef}
-        className="flex w-max items-center gap-8 sm:gap-10 md:gap-12 transition-transform"
-
-        style={{
-          animationName: direction === 'right' ? 'marquee-right' : 'marquee-left',
-          animationDuration: `${duration}s`,
-          animationTimingFunction: 'linear',
-          animationIterationCount: 'infinite',
-          animationPlayState: 'running', // Continuous animation on hover
-        }}
+        className="flex w-max items-center gap-5 sm:gap-10 md:gap-12 pointer-events-auto"
       >
         {triplicatedItems.map((item, idx) => {
           const Icon = item.icon
@@ -177,27 +239,25 @@ export default function ImageSlider3D({
             <div
               key={`${item.id}-${idx}`}
               data-slider-card
-              className="group relative flex shrink-0 flex-col justify-between rounded-2xl border border-white/15 bg-[#09090b] p-4 sm:p-5 backdrop-blur-xl transition-all duration-300 ease-out overflow-hidden"
+              className="group relative flex shrink-0 flex-col justify-between rounded-2xl border border-white/15 bg-[#09090b] p-5 sm:p-6 backdrop-blur-xl transition-shadow duration-300 ease-out overflow-hidden min-h-[380px] sm:min-h-[420px]"
               style={{
                 width: cardWidth,
                 willChange: 'transform, opacity',
                 transformStyle: 'preserve-3d',
               }}
             >
-              {/* Subtle top edge specular steel light highlight */}
+              {/* Top edge specular highlight */}
               <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/30 to-transparent z-10" />
 
-              <div>
+              <div className="flex flex-col justify-between h-full">
                 {/* Header row: Badge + Icon */}
                 <div className="flex items-center justify-between relative z-10">
                   {Icon ? (
-                    <div className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-white/15 bg-white/10 text-chrome group-hover:border-white/30 group-hover:text-fg transition-colors">
-                      <Icon className="h-4 w-4" strokeWidth={1.75} />
-                    </div>
+                    <Icon className="h-5 w-5 text-chrome group-hover:text-fg transition-colors" strokeWidth={1.75} />
                   ) : null}
 
                   {item.badge ? (
-                    <span className="rounded-full border border-border-soft bg-surface/80 px-2.5 py-0.5 text-[9px] font-semibold tracking-wider text-fg-muted uppercase backdrop-blur-md">
+                    <span className="text-[10px] font-semibold tracking-wider text-fg-muted uppercase">
                       {item.badge}
                     </span>
                   ) : null}
@@ -205,7 +265,7 @@ export default function ImageSlider3D({
 
                 {/* Seamless Integrated 3D Feature Asset */}
                 {item.image ? (
-                  <div className="relative mt-3 h-36 w-full flex items-center justify-center overflow-hidden">
+                  <div className="relative mt-4 h-40 sm:h-48 w-full flex items-center justify-center overflow-hidden pointer-events-none">
                     <img
                       src={item.image}
                       alt={item.title}
@@ -214,51 +274,22 @@ export default function ImageSlider3D({
                   </div>
                 ) : null}
 
+                <div>
+                  {/* Card Title */}
+                  <h3 className="mt-4 text-base sm:text-lg font-semibold tracking-tight text-fg text-balance relative z-10">
+                    {item.title}
+                  </h3>
 
-                {/* Card Title */}
-                <h3 className="mt-3.5 text-base font-semibold tracking-tight text-fg text-balance relative z-10">
-                  {item.title}
-                </h3>
-
-                {/* Description */}
-                <p className="mt-1.5 text-xs leading-relaxed text-fg-muted relative z-10">
-                  {item.description}
-                </p>
+                  {/* Description */}
+                  <p className="mt-1.5 text-xs sm:text-sm leading-relaxed text-fg-muted relative z-10">
+                    {item.description}
+                  </p>
+                </div>
               </div>
             </div>
           )
         })}
       </div>
-
-
-
-      {/* Embedded Animation Styles */}
-      <style>{`
-        @keyframes marquee-right {
-          0% {
-            transform: translateX(-33.333%);
-          }
-          100% {
-            transform: translateX(0%);
-          }
-        }
-        @keyframes marquee-left {
-          0% {
-            transform: translateX(0%);
-          }
-          100% {
-            transform: translateX(-33.333%);
-          }
-        }
-      `}</style>
-    </div>
-  )
-}
-
-export function ThreeDImageSliderDemo() {
-  return (
-    <div className="w-full h-[600px] flex items-center justify-center bg-black rounded-xl overflow-hidden relative">
-      <ImageSlider3D duration={36} cardWidth="16em" />
     </div>
   )
 }

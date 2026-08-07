@@ -5,7 +5,6 @@ import Button from '../ui/Button'
 import { SCALE } from '../ui/SectionShell'
 import { hero } from '../../data/hero'
 import MediaBackdrop from '../ui/MediaBackdrop'
-import ThinqMark from '../ui/ThinqMark'
 
 
 /**
@@ -65,32 +64,26 @@ export default function Hero() {
       {/* Full-bleed background media layer */}
       <MediaBackdrop alt={hero.mediaAlt} video="/clips/thinq_hero_section_bg.mp4" focus="center" />
 
+
+
       {/* Top Ambient Keynote Spotlight */}
       <div
         aria-hidden="true"
         className="pointer-events-none absolute inset-x-0 top-0 h-[480px] -z-10 bg-[radial-gradient(ellipse_70%_50%_at_50%_-10%,rgba(255,255,255,0.12),rgba(255,255,255,0))]"
       />
 
-      {/* Dark black overlay ensuring front text is 100% legible against bright video */}
+      {/* Dark overlay with balanced opacity to enhance background visibility */}
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute inset-0 -z-10 bg-black/40 bg-[radial-gradient(ellipse_80%_80%_at_50%_45%,rgba(0,0,0,0.45)_0%,rgba(0,0,0,0.75)_100%)]"
+        className="pointer-events-none absolute inset-0 -z-10 bg-black/20 bg-[radial-gradient(ellipse_80%_80%_at_50%_45%,rgba(0,0,0,0.2)_0%,rgba(0,0,0,0.5)_100%)]"
       />
+
 
       <div className="flex flex-1 flex-col items-center justify-center my-auto py-0">
 
 
         <Container>
           <div className="mx-auto max-w-[52em] text-center">
-            {/* Centered Clean Brand Lockup (Borderless & Larger) */}
-            <div className="mb-6 inline-flex items-center justify-center gap-3.5 select-none drop-shadow-[0_2px_20px_rgba(0,0,0,0.8)]">
-              <ThinqMark size={38} tone="steel" className="shrink-0 xl:h-[44px] xl:w-[44px]" />
-              <span className="font-display text-2xl sm:text-3xl font-semibold tracking-tight text-white">
-                Thinq
-              </span>
-            </div>
-
-
             {/* Display H1 Headline with Metallic Depth */}
             <h1
               className={`display-lead mt-4 font-display tracking-tight text-balance drop-shadow-[0_4px_30px_rgba(0,0,0,0.9)] ${SCALE.hero}`}

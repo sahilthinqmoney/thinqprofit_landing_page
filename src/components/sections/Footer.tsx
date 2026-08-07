@@ -1,17 +1,14 @@
 import ChromaticWordmark from '../ui/ChromaticWordmark'
-import ThinqMark from '../ui/ThinqMark'
 import Container from '../ui/Container'
 import { RAIL } from '../ui/SectionShell'
 import CopyText from '../ui/CopyText'
 import Disclosure from '../ui/Disclosure'
 import {
-  brandName,
   copyrightEntity,
   copyrightSuffix,
   registrationLines,
   scoresLink,
   statutoryDisclosures,
-  tagline,
 } from '../../data/footer'
 
 /**
@@ -59,45 +56,9 @@ export default function Footer() {
   const year = new Date().getFullYear()
 
   return (
-    <footer id="footer" className="border-t border-border-soft bg-bg">
-      {/* ------------------------------------------------------------------ */}
-      {/* 8.1 Brand block and tagline                                         */}
-      {/* ------------------------------------------------------------------ */}
-      <Container>
-        <div className={`py-14 lg:py-20 ${RAIL}`}>
-          <a
-            href="#hero"
-            className="inline-flex min-h-11 items-center gap-2.5 rounded-lg"
-            aria-label={`${brandName} home`}
-          >
-            <ThinqMark size={28} tone="steel" className="shrink-0" />
-            <span className="text-lg font-semibold tracking-tight text-fg">{brandName}</span>
-          </a>
+    <footer id="footer" className="border-t border-border-soft bg-transparent">
 
-          {/*
-            The tagline, set at the section-heading step rather than as body copy.
 
-            It is the page's closing argument and it earns the size: a broker
-            telling a reader to watch what things cost, at the foot of a page
-            that has just spent four sections on custody, statutory charges and
-            what "zero" excludes. Set small it would read as a slogan; set here
-            it reads as the summary it is.
-
-            `.display` and not `.display-quiet` — that voice belongs to §7's
-            headline and is spent once.
-          */}
-          <p className="display mt-8 max-w-[16em] text-[clamp(1.5rem,3vw,2.5rem)] leading-[1.15] text-fg">
-            {tagline}
-          </p>
-
-          {/* `brandBlurb` — "A SEBI-registered broker building an AI-native
-              trading terminal for Indian markets" — used to sit here. It said
-              what the announcement bar, the hero badge and §5's regulatory proof
-              had each already said, in the one position on the page reserved for
-              the tagline's closing argument. A sentence under a closing
-              statement dilutes the statement. */}
-        </div>
-      </Container>
 
       {/* ------------------------------------------------------------------ */}
       {/* 8.2 Compliance and registration                                     */}

@@ -47,34 +47,35 @@ export const regulatoryProof =
 export const pillars: SafetyPillar[] = [
   {
     title: 'Securities sit in your demat account',
-    body: 'Every share you buy is credited directly to your own demat account, held in your name, not in a pooled account we control.',
+    body: 'Every share is credited directly to your own demat account held in your name.',
     icon: 'vault',
   },
   {
     title: 'Client funds are segregated and reported',
-    body: 'Client money is held separately from the company’s own, and the balances are reported to the exchange.',
+    body: 'Client money is strictly separated from company funds and reported daily to exchanges.',
     icon: 'split',
   },
   {
     title: 'Two-factor on login and on withdrawal',
-    body: 'Every login is behind two factors, and so is every request to withdraw money — the second one is where it counts.',
+    body: 'Mandatory 2FA authentication for all account logins and money withdrawals.',
     icon: 'key-round',
   },
   {
     title: 'Encrypted in transit and at rest',
-    body: 'Data is encrypted end to end on the wire and encrypted again where it is stored.',
+    body: 'Bank-grade end-to-end encryption for data in transit and stored at rest.',
     icon: 'lock',
   },
   {
     title: 'Sessions you can end from anywhere',
-    body: 'See every active session and end any of them instantly, from any device you are still signed in on.',
+    body: 'View active device sessions and terminate any session remotely in one tap.',
     icon: 'shield-check',
   },
   {
     title: 'A complete, timestamped order trail',
-    body: 'Every order, modification and cancellation is timestamped and retrievable by you, not just by us.',
+    body: 'Every order, modification, and cancellation is permanently logged and accessible.',
     icon: 'message-square-warning',
   },
 ]
 
-export const honestNote = 'Your data is never sold, and your order flow is never traded against.'
+export const honestNote = 'Your trade data is never sold, and your order flow is never traded against.'
+

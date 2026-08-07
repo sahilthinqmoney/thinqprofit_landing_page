@@ -179,7 +179,8 @@ interface MediaSectionProps {
     tone?: string
     blur?: boolean
   }
-
+  /** Optional top-level background ambient layer (full bleed) */
+  bgAmbient?: ReactNode
   className?: string
 }
 
@@ -213,6 +214,7 @@ export default function MediaSection({
   finePrint,
   children,
   media,
+  bgAmbient,
   className = '',
 }: MediaSectionProps) {
   const step = scale ?? height
@@ -225,8 +227,8 @@ export default function MediaSection({
    * so much that the aside is pushed into the gutter.
    */
   const ASIDE_PLACE = {
-    left: 'md:left-[58%] md:right-0',
-    right: 'md:left-0 md:right-[58%]',
+    left: 'md:left-[48%] md:right-0',
+    right: 'md:left-0 md:right-[48%]',
     center: 'md:inset-x-0',
   } as const
 
@@ -241,6 +243,9 @@ export default function MediaSection({
       id={id}
       className={`relative isolate flex w-full scroll-mt-24 flex-col overflow-hidden ${HEIGHT[height]} ${className}`}
     >
+      {bgAmbient}
+
+
       {/*
         The plate is lit on the side the copy is NOT on. `place` already encodes
         that, so the caller never has to state it twice and the two cannot drift

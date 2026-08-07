@@ -298,14 +298,14 @@
  * lines below it, where the qualifier drops under the offer.
  */
 :root {
-  --announce-h: 3.5rem; /* 56px — two lines at 12px on a phone */
+  --announce-h: 0rem;
   --nav-h: 4rem; /* 64px nav */
   --header-stack: calc(var(--announce-h) + var(--nav-h));
 }
 
 @media (min-width: 640px) {
   :root {
-    --announce-h: 2.5rem; /* 40px — one line from sm */
+    --announce-h: 0rem;
   }
 }
 

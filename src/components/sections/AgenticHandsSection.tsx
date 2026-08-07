@@ -64,10 +64,12 @@ export default function AgenticHandsSection() {
     <section
       ref={containerRef}
       id="section-04"
-      className="relative scroll-mt-24 py-28 sm:py-36 lg:py-44 border-t border-border-soft overflow-hidden bg-bg select-none"
+      className="relative scroll-mt-24 py-28 sm:py-36 lg:py-44 overflow-hidden bg-transparent select-none"
     >
-      {/* Background Radial Glow around center lockup */}
-      <div className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-0 h-[450px] w-[700px] rounded-full bg-gradient-radial from-white/10 via-white/5 to-transparent blur-3xl opacity-70" />
+
+
+
+
 
       {/* Left Hand: Robotic AI Hand (Positioned to point directly at capital letter "A") */}
       <div className="absolute left-0 sm:left-2 lg:left-6 top-[44%] sm:top-[46%] lg:top-[48%] -translate-y-1/2 z-10 pointer-events-none w-[32%] max-w-[440px] min-w-[180px]">

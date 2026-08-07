@@ -80,7 +80,7 @@ export default function MediaBackdrop({
       <div
         className="absolute inset-0 pointer-events-none"
         style={{
-          background: `linear-gradient(to right, #070709 0%, rgba(7,7,9,0.7) 15%, transparent 35%, transparent 65%, rgba(7,7,9,0.7) 85%, #070709 100%)`,
+          background: `linear-gradient(to right, #070709 0%, rgba(7,7,9,0.4) 15%, transparent 35%, transparent 65%, rgba(7,7,9,0.4) 85%, #070709 100%)`,
         }}
       />
 
@@ -88,7 +88,7 @@ export default function MediaBackdrop({
       <div
         className="absolute inset-0 pointer-events-none"
         style={{
-          background: `radial-gradient(ellipse 80% 80% at 50% 50%, transparent 40%, rgba(5,5,5,0.3) 100%)`,
+          background: `radial-gradient(ellipse 80% 80% at 50% 50%, transparent 40%, rgba(5,5,5,0.15) 100%)`,
         }}
       />
     </div>

@@ -54,62 +54,27 @@ export const capabilitiesIntro = {
 export const capabilities: Capability[] = [
   {
     title: 'Position Compass',
-    /*
-     * "With or against" is the whole feature and it is deliberately not
-     * "profitable or losing". A position can be green and moving against the
-     * market it sits in, which is the case the compass exists to surface — and a
-     * P&L colour on a landing page is a claim about returns, which DESIGN.md §2
-     * quarantines to live market data.
-     */
-    body: 'Shows whether each open position is moving with the market or against it, not just whether it is up.',
+    body: 'Track whether open positions are moving with or against the market in real time.',
   },
   {
     title: 'Option Chain Builder',
-    /*
-     * The claim is the input method, not the strategy library. "Tapping bids and
-     * asks" says a multi-leg structure is built by touching the prices you want,
-     * which is what separates it from a dropdown of named strategies — and it
-     * describes an interaction rather than promising an outcome.
-     */
-    body: 'Build a multi-leg structure by tapping the bids and asks you want, and see the whole thing before it is sent.',
+    body: 'Tap bids and asks to build and preview multi-leg structures before execution.',
   },
   {
     title: 'Greeks, in plain English',
-    /*
-     * "What is actually driving this position" is the sentence, and it stops
-     * short of "so you know what to do". Explaining a number is education;
-     * telling someone what the number means for their next order is advice, and
-     * that boundary is the one this whole page is built to stay inside.
-     */
-    body: 'Delta, theta and vega translated into a sentence about what is actually driving the position today.',
+    body: 'Delta, theta, and vega translated into real-time plain English risk drivers.',
   },
   {
     title: 'Low-latency execution',
-    /*
-     * Slippage is named because it is what the reader actually cares about;
-     * "minimise" rather than "eliminate" because no broker eliminates it, and a
-     * page that says otherwise has made its first unkeepable promise on the
-     * subject a trader is least willing to be lied to about.
-     */
-    body: 'Orders are routed in milliseconds, because the gap between the price you saw and the price you got is the one nobody advertises.',
+    body: 'Orders routed in milliseconds to minimize slippage between signal and fill.',
   },
   {
     title: 'Your workspace',
-    /*
-     * Five facts in one sentence, and "nothing to install" is last because it is
-     * the one that changes the decision — a terminal that needs a desktop
-     * install is a terminal you evaluate on a weekend rather than at 09:15.
-     */
-    body: 'A widget grid you arrange, symbol groups that move together, pop-outs for a second monitor, saved layouts you switch between, and nothing to install.',
+    body: 'Customizable widget grids, symbol linking, multi-monitor pop-outs, and zero install.',
   },
   {
     title: 'Alerts that hold',
-    /*
-     * "Set once" is the claim. The failure mode this names — an alert that has
-     * to be re-armed after it fires, or that dies when the tab closes — is
-     * specific enough that a reader who has hit it recognises it immediately,
-     * which is the only kind of feature sentence worth writing.
-     */
-    body: 'Set a condition once and it keeps watching, whether or not the tab is open.',
+    body: 'Persistent trigger conditions that stay active even when your browser tab is closed.',
   },
 ]
+
