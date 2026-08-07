@@ -1,6 +1,6 @@
 import ChromaticWordmark from '../ui/ChromaticWordmark'
 import Container from '../ui/Container'
-import { RAIL } from '../ui/SectionShell'
+import { RAIL } from '../../lib/layout'
 import CopyText from '../ui/CopyText'
 import Disclosure from '../ui/Disclosure'
 import {

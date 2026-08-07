@@ -1,17 +1,25 @@
-import type { ReactNode } from 'react'
-import Container from './Container'
-import FocusPull from './FocusPull'
-
 /**
- * Heading steps. Assignment is by the section's weight in the page, not by
- * taste at each call site:
+ * The page's layout constants — the heading ladder, the content rail, the
+ * vertical rhythm and the gutter.
  *
- *   hero     — the H1, and it is not assignable to a section (see the prop type
- *              below). It lives here because §45 asks that every rendered size
- *              resolve to a named role, and the page's largest type was the one
- *              size that named none: `Hero` hand-wrote its clamp inline, and
- *              `Platform` hand-wrote a copy of `lead`'s while its own comment
- *              claimed to match it. One ladder, three consumers, no raw px.
+ * This was `components/ui/SectionShell.tsx`, a section wrapper that owned these
+ * four constants as a side effect. The wrapper itself had no call site left —
+ * every section on the page is either full-bleed through `MediaSection` or
+ * hand-rolled — while all four constants stayed in use across `MediaSection`,
+ * `Hero`, `Navbar` and `Footer`. A component file whose component nothing
+ * renders is a tokens module wearing the wrong extension, so the component is
+ * deleted and the tokens moved here under their own name.
+ *
+ * ── Heading steps ──────────────────────────────────────────────────────────
+ *
+ * Assignment is by the section's weight in the page, not by taste at each call
+ * site:
+ *
+ *   hero     — the H1, and only ever the H1. It lives here because §45 asks that
+ *              every rendered size resolve to a named role, and the page's
+ *              largest type was the one size that named none: `Hero` hand-wrote
+ *              its clamp inline, and `Platform` hand-wrote a copy of `lead`'s
+ *              while its own comment claimed to match it. One ladder, no raw px.
  *   lead     — the three sections a visitor came for: what you trade, what it
  *              costs, how you open an account.
  *   standard — everything else that is a section in its own right.
@@ -149,95 +157,3 @@ export const SECTION_Y = 'py-16 sm:py-20 lg:py-24'
 /** The one page gutter. Mirrors `Container`, for sections that bleed past it. */
 export const GUTTER_X = 'px-5 sm:px-6 lg:px-8 xl:px-12'
 
-interface SectionShellProps {
-  id: string
-  heading: string
-  subheading?: string
-  children?: ReactNode
-  tone?: 'base' | 'raised'
-  centered?: boolean
-  layout?: 'stack' | 'split'
-  scale?: Exclude<keyof typeof SCALE, 'hero'>
-  fullHeight?: boolean
-  seamless?: boolean
-  className?: string
-}
-
-export default function SectionShell({
-  id,
-  heading,
-  subheading,
-  children,
-  tone = 'base',
-  centered = false,
-  layout = 'stack',
-  scale = 'standard',
-  fullHeight = false,
-  seamless = false,
-  className = '',
-}: SectionShellProps) {
-  return (
-    <section
-      id={id}
-      className={`scroll-mt-24 ${SECTION_Y} ${
-        seamless ? '' : 'border-t border-border-soft'
-      } ${fullHeight ? 'flex min-h-svh flex-col justify-center' : ''} ${
-        tone === 'raised' ? 'bg-surface/30' : ''
-      } ${className}`}
-    >
-
-
-
-      <Container>
-        <div className={RAIL}>
-          <FocusPull
-            className={
-              centered
-                ? 'mx-auto max-w-[40em] text-center'
-                : layout === 'split'
-                ? 'lg:grid lg:grid-cols-[minmax(0,1fr)_minmax(0,26rem)] lg:items-end lg:gap-x-16 xl:gap-x-24'
-                : 'max-w-[44em] space-y-4'
-            }
-          >
-            <h2
-              className={`display whitespace-normal text-fg md:whitespace-pre-line ${SCALE[scale]}`}
-            >
-              {heading}
-            </h2>
-            {subheading && (
-              <p
-                className={
-                  layout === 'split'
-                    ? 'mt-5 max-w-[30em] text-[1.0625rem] leading-[1.6] text-fg-muted lg:mt-0 lg:max-w-none lg:pb-1'
-                    : 'text-[1.0625rem] leading-[1.65] text-fg-muted max-w-[36em]'
-                }
-              >
-                {subheading}
-              </p>
-            )}
-          </FocusPull>
-
-          {/*
-            The break comes AFTER the deck, not between the title and the deck.
-
-            Those two are one optical group — 20px apart — and the gap that
-            tells a reader the heading block is finished has to be visibly
-            larger than the gap inside it. It was `mt-8` (32px) against `mt-5`
-            (20px), a ratio of 1.6, which is not enough separation to register;
-            the deck read as the top of the content rather than the bottom of
-            the heading. At 56/64/80px the ratio is 2.8–3.3, and the
-            heading-block break is now the largest gap in the section.
-          */}
-          {/*
-            Omitted entirely when there is no content, rather than rendered
-            empty. A heading-and-deck band is a legitimate section — it opens a
-            run of full-bleed claims below it — and an empty wrapper would put
-            56–80px of dead air under the deck, which reads as content that
-            failed to load rather than as a section that ends there.
-          */}
-          {children && <div className="mt-14 sm:mt-16 lg:mt-20">{children}</div>}
-        </div>
-      </Container>
-    </section>
-  )
-}

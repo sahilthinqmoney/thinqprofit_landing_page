@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react'
 import FocusPull from './FocusPull'
 import MediaBackdrop from './MediaBackdrop'
-import { GUTTER_X, RAIL, SECTION_Y } from './SectionShell'
+import { GUTTER_X, RAIL, SECTION_Y } from '../../lib/layout'
 import type { ImageSources, VideoSources } from './MediaBackdrop'
 
 /**

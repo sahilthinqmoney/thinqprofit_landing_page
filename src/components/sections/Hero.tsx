@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import Container from '../ui/Container'
 import Disclosure from '../ui/Disclosure'
 import Button from '../ui/Button'
-import { SCALE } from '../ui/SectionShell'
+import { SCALE } from '../../lib/layout'
 import { hero } from '../../data/hero'
 import MediaBackdrop from '../ui/MediaBackdrop'
 

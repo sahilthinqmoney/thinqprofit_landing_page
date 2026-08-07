@@ -18,39 +18,7 @@ import type { HeroContent } from '../types'
  */
 
 export const hero: HeroContent = {
-  /**
-   * The badge.
-   *
-   * It read "AI-native trading platform", and "AI-native" is the problem: it is
-   * a compound that did not exist before 2023 and now appears on the homepage of
-   * every company that has touched a model. It carries no information a reader
-   * can act on — it is a claim about our architecture, made to an audience that
-   * is deciding whether to hand over a phone number — and it is the single
-   * highest-frequency phrase in its category, which is exactly why a language
-   * model reaches for it and exactly why it reads as one.
-   *
-   * The badge's original job survives, restated. Its argument was that the
-   * headline left a genuine ambiguity — a chart that talks is either an AI
-   * product or a metaphor — and the badge resolved it. The new headline resolves
-   * that itself, so this is free to do the other useful thing: say that the
-   * product is not open yet, which is the fact that makes a waitlist page make
-   * sense at all.
-   *
-   * "Not yet open" rather than "coming soon" or "in beta". Both of those are
-   * positions on a roadmap; this is a statement about today, and it is the
-   * phrasing a person uses about a shop.
-   */
-  eyebrow: 'AI-native interactive trading platform.',
-
   headline: 'Trading that talks back.',
-
-  subheadline:
-    '6 Months at ₹0 brokerage on equity, futures and options — no tiers or conditions.',
-
-
-
-
-  primaryCta: 'Six months at zero Thinq brokerage for everyone on the list.',
 
   /**
    * A1, from docs/art-direction.md §3, unchanged by the copy rewrite.
@@ -75,6 +43,13 @@ export const hero: HeroContent = {
 }
 
 /**
+ * `eyebrow`, `subheadline` and `primaryCta` went the same way, and the
+ * subheadline is the one worth recording. Hero.tsx renders that sentence as
+ * markup — two `<span>`s carrying the emphasis on "6 Months" and "₹0
+ * brokerage" — so it never read the string, and the two copies drifted apart
+ * until a capitalisation fix had to be applied twice. A copy deck that the page
+ * does not read is not a source of truth; it is a second place to be wrong.
+ *
  * Was the art-directed three-line H1. Deleted rather than kept unreferenced: it
  * held copy that no longer exists anywhere on the page, and an exported string
  * nothing imports is a copy deck pretending to be code.
