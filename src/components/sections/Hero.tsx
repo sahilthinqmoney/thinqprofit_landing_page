@@ -121,7 +121,7 @@ export default function Hero() {
               }}
             >
               <p className="mt-6 max-w-[34em] mx-auto text-[1.0625rem] sm:text-[1.1875rem] leading-[1.65] text-white/80 drop-shadow-[0_2px_16px_rgba(0,0,0,0.9)] text-balance font-normal">
-                <span className="font-semibold text-white drop-shadow-[0_0_12px_rgba(255,255,255,0.6)]">6 months</span> at{' '}
+                <span className="font-semibold text-white drop-shadow-[0_0_12px_rgba(255,255,255,0.6)]">6 Months</span> at{' '}
                 <span className="font-semibold text-white drop-shadow-[0_0_12px_rgba(255,255,255,0.6)]">₹0 brokerage</span> on equity, futures and options — no tiers or conditions.
               </p>
 

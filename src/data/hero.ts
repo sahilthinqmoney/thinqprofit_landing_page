@@ -45,7 +45,7 @@ export const hero: HeroContent = {
   headline: 'Trading that talks back.',
 
   subheadline:
-    '6 months at ₹0 brokerage on equity, futures and options — no tiers or conditions.',
+    '6 Months at ₹0 brokerage on equity, futures and options — no tiers or conditions.',
 
 
 

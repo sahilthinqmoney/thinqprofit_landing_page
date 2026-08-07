@@ -16,7 +16,7 @@ function StackedCardMobile({
   total: number
   scrollYProgress: MotionValue<number>
 }) {
-  const step = 1 / total // 0.25 per card
+  const step = 1 / total
 
   const start = Math.max(0, index * step - 0.05)
   const end = Math.min(1, index * step + 0.15)
@@ -123,7 +123,7 @@ function StackedCardMobile({
   )
 }
 
-function MobileCapabilities() {
+export default function Capabilities() {
   const containerRef = useRef<HTMLDivElement>(null)
   const [activeIndex, setActiveIndex] = useState(0)
 
@@ -143,55 +143,9 @@ function MobileCapabilities() {
   })
 
   return (
-    <div ref={containerRef} className="relative h-[300vh] w-full">
-      <div className="sticky top-0 flex h-screen w-full flex-col justify-between overflow-hidden pt-16 pb-5">
-        <Container>
-          <div className="mx-auto max-w-3xl text-center">
-            <h2 className="display-lead font-display text-2xl font-bold tracking-tight text-fg">
-              {capabilitiesIntro.heading}
-            </h2>
-            <p className="mt-1.5 text-xs text-fg-muted max-w-xl mx-auto leading-relaxed">
-              {capabilitiesIntro.subheading}
-            </p>
-          </div>
-        </Container>
-
-        {/* Mobile Cards Stack Container */}
-        <div className="relative flex-1 w-full max-w-4xl mx-auto flex items-center justify-center p-3 my-auto min-h-[470px]">
-          {DEFAULT_CARDS.map((item, index) => (
-            <StackedCardMobile
-              key={item.id}
-              item={item}
-              index={index}
-              total={DEFAULT_CARDS.length}
-              scrollYProgress={scrollYProgress}
-            />
-          ))}
-        </div>
-
-        {/* Bottom Progress Step Indicators */}
-        <div className="flex items-center justify-center gap-2 pb-2 z-50">
-          {DEFAULT_CARDS.map((card, idx) => (
-            <div
-              key={card.id}
-              className={`h-2 rounded-full transition-all duration-300 ${
-                idx === activeIndex
-                  ? 'w-7 bg-white opacity-100'
-                  : 'w-2 bg-white/30 opacity-40'
-              }`}
-            />
-          ))}
-        </div>
-      </div>
-    </div>
-  )
-}
-
-export default function Capabilities() {
-  return (
     <section id="capabilities" className="relative w-full isolate">
       {/* =================================================================== */}
-      {/* DESKTOP VIEW (md:block): Interactive 3D Card Carousel               */}
+      {/* DESKTOP VIEW (md:block): Restored Interactive 3D Card Slider        */}
       {/* =================================================================== */}
       <div className="hidden md:block py-16 lg:py-24">
         <Container>
@@ -215,7 +169,47 @@ export default function Capabilities() {
       {/* MOBILE VIEW (md:hidden): Pinned Card Stacking Scroll Track          */}
       {/* =================================================================== */}
       <div className="block md:hidden">
-        <MobileCapabilities />
+        <div ref={containerRef} className="relative h-[300vh] w-full">
+          <div className="sticky top-0 flex h-screen w-full flex-col justify-between overflow-hidden pt-16 pb-5">
+            <Container>
+              <div className="mx-auto max-w-3xl text-center">
+                <h2 className="display-lead font-display text-2xl font-bold tracking-tight text-fg">
+                  {capabilitiesIntro.heading}
+                </h2>
+                <p className="mt-1.5 text-xs text-fg-muted max-w-xl mx-auto leading-relaxed">
+                  {capabilitiesIntro.subheading}
+                </p>
+              </div>
+            </Container>
+
+            {/* Mobile Cards Stack Container */}
+            <div className="relative flex-1 w-full max-w-4xl mx-auto flex items-center justify-center p-3 my-auto min-h-[470px]">
+              {DEFAULT_CARDS.map((item, index) => (
+                <StackedCardMobile
+                  key={item.id}
+                  item={item}
+                  index={index}
+                  total={DEFAULT_CARDS.length}
+                  scrollYProgress={scrollYProgress}
+                />
+              ))}
+            </div>
+
+            {/* Bottom Progress Step Indicators */}
+            <div className="flex items-center justify-center gap-2 pb-2 z-50">
+              {DEFAULT_CARDS.map((card, idx) => (
+                <div
+                  key={card.id}
+                  className={`h-2 rounded-full transition-all duration-300 ${
+                    idx === activeIndex
+                      ? 'w-7 bg-white opacity-100'
+                      : 'w-2 bg-white/30 opacity-40'
+                  }`}
+                />
+              ))}
+            </div>
+          </div>
+        </div>
       </div>
     </section>
   )
