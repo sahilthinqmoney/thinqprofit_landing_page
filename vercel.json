@@ -6,7 +6,7 @@
   "installCommand": "npm ci",
   "cleanUrls": true,
   "trailingSlash": false,
-  "rewrites": [{ "source": "/((?!assets/|media/|.*\\..*).*)", "destination": "/index.html" }],
+  "rewrites": [{ "source": "/((?!assets/|clips/|images/|.*\\..*).*)", "destination": "/index.html" }],
   "headers": [
     {
       "source": "/assets/(.*)",
@@ -15,7 +15,7 @@
       ]
     },
     {
-      "source": "/media/(.*)",
+      "source": "/(clips|images)/(.*)",
       "headers": [
         { "key": "Cache-Control", "value": "public, max-age=604800, stale-while-revalidate=86400" }
       ]

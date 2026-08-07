@@ -1,7 +1,6 @@
 # Not needed to build the site — keeps the upload small.
 docs/
 design-system/
-tools/
 brag-output/
 .browser-sessions/
 .agents/

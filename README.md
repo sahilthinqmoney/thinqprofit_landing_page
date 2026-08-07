@@ -43,32 +43,32 @@ Copy changes belong in `src/data/`, not in components.
 
 ```
 src/
-  App.tsx                    17-section composition, Trust & Authority order
+  App.tsx                    the composition: Navbar, four sections, Footer
   types.ts                   shared content contract
   index.css                  Tailwind v4 @theme tokens
   lib/copyTokens.ts          tokenises [PLACEHOLDER] / **bold** / [link](href)
-  data/                      all copy — nav, hero, products, platform, pricing,
-                             onboarding, safety, app, learn, social, faq, footer
+  lib/scrollTrigger.ts       the single gsap + ScrollTrigger registration
+  data/                      all copy — nav, hero, missing, capabilities, footer
   components/
-    ui/                      Container, SectionShell, Button, Reveal,
-                             MediaPlaceholder, Disclosure, CopyText
-    sections/                AnnouncementBar, Navbar, Hero, TrustStrip,
-                             Products, Platform, Pricing, Onboarding, Safety,
-                             MobileApp, Learn, Stats, Testimonials, Faq,
-                             Support, FinalCta, Footer
+    ui/                      Container, SectionShell, Button, Disclosure,
+                             CopyText, MediaBackdrop, MediaSection, FocusPull,
+                             ThinqMark, ChromaticWordmark, LiquidMetalSurface
+    sections/                Navbar, Hero, Missing, SectionTwo,
+                             AgenticHandsSection, Capabilities, Footer
+    lightswind/              3d-image-slider, the desktop capabilities carousel
 ```
 
 ## Design decisions worth knowing
 
-- **CTAs are indigo, never green.** Green and red are reserved for market data. A green "Open free account" button beside a green day-change figure teaches the eye the wrong association.
+- **The page is a waitlist, not a storefront.** One action — the phone-number form in the hero — and four sections of argument leading back to it. There is nothing to navigate between, which is why `megaMenus` in `src/data/nav.ts` is an empty array; the reasoning is written at the top of that file.
 - **`--color-gain` / `--color-loss` appear on no button, badge, link or illustration.** Market data only, and never signalled by colour alone.
-- **`--color-fg-subtle` (#64748B) is 3.9:1** on the page background — footer meta and legal fine print only. Never body copy, never a disclosure.
-- **Section order is Trust & Authority**, not app-store: the registration strip sits at position 4, directly after the hero, and Safety precedes the mobile-app pitch. Someone deciding where to keep their money asks "are you real" before "what do you cost".
+- **`--color-fg-subtle` is footer meta and legal fine print only.** Never body copy, never a disclosure.
+- **No fabricated market data.** No invented tickers, levels, P&L or order tickets — `docs/art-direction.md` §2.1 refuses them outright. The flip clock in §3 is deliberately not market data.
 - **No urgency mechanics** — no countdowns, no scarcity counters, no screenshots showing large gains.
 
-## Media placeholders
+## Media
 
-All imagery is the `MediaPlaceholder` component: a dashed hatched box that reserves its aspect ratio so nothing shifts when real assets drop in. No `<img>` tags, no external requests. Replace them with real assets; the intended content is described in each `label`.
+Every asset the page loads lives in `public/` and is referenced by an explicit path. There are ten of them: the hero clip, the flip-clock loop, two hand stills, four capability card images, the favicon and the share card. Nothing else is committed — an asset that no component names is not kept.
 
 ## Verified
 

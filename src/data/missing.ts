@@ -1,5 +1,3 @@
-import type { PlateId } from '../lib/media'
-
 /**
  * §3 — "What you're missing". One feature, in depth, and nothing else.
  *
@@ -33,7 +31,6 @@ import type { PlateId } from '../lib/media'
  */
 
 export interface MissingContent {
-  plate: PlateId
   heading: string
   narrative: string
   pain: string
@@ -44,7 +41,6 @@ export interface MissingContent {
 }
 
 export const missing: MissingContent = {
-  plate: 'terminal',
   heading: 'It happened at 11:40. You saw it at 12:15.',
   narrative: '',
   pain: '',

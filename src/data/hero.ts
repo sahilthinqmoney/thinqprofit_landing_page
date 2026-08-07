@@ -75,15 +75,6 @@ export const hero: HeroContent = {
 }
 
 /**
- * The offer's qualifier. Rendered adjacent to `primaryCta`, at the same size.
- *
- * "Zero brokerage" is a claim about our fee and nothing else. §6 itemises what
- * still applies; this is the sentence that stops the hero's version of the claim
- * being read as "free".
- */
-export const offerQualifier = 'Statutory charges apply.'
-
-/**
  * Was the art-directed three-line H1. Deleted rather than kept unreferenced: it
  * held copy that no longer exists anywhere on the page, and an exported string
  * nothing imports is a copy deck pretending to be code.

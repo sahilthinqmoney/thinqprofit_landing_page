@@ -16,27 +16,6 @@ import type { RegistrationLine } from '../types'
  * blocking item in docs/go-live-checklist.md.
  */
 
-/* -------------------------------------------------------------------------- */
-/* §7 Close                                                                   */
-/* -------------------------------------------------------------------------- */
-
-export interface FinalCtaContent {
-  heading: string
-  subheading: string
-  /** Sits under the form, with the count. */
-  reiteration: string
-  /** Required disclosure directly beneath the form. Never collapse or hide. */
-  disclosure: string
-}
-
-export const finalCta: FinalCtaContent = {
-  heading: 'Get in before we open.',
-  subheading: 'Your number, once. We message you on WhatsApp when your access is ready.',
-  reiteration: 'Six months at zero Thinq brokerage for everyone on the list. Statutory charges apply.',
-  disclosure: 'Investments in the securities market are subject to market risks; read all the related documents carefully before investing.',
-}
-
-export const brandName = 'Thinq'
 export const tagline = 'It’s your money. Don’t give it away.'
 
 export const registrationLines: RegistrationLine[] = [

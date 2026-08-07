@@ -44,21 +44,3 @@ export function tokenizeCopy(input: string): CopyToken[] {
 
   return tokens
 }
-
-/**
- * Whether a deck string still carries an unfilled `[PLACEHOLDER]`.
- *
- * Exists so a section can decide *not to render* a fact it cannot yet state,
- * rather than printing our TODO to the reader. `CopyText` flags placeholders in
- * warning colour, which is right for a sentence with one unverified figure in it
- * — the sentence still says something. It is wrong for a claim whose entire
- * content is the number: `[X lakh+]` accounts opened is not a fact rendered
- * imperfectly, it is the absence of a fact, styled.
- *
- * The registrations list already works this way by written instruction ("If any
- * segment is not yet live, remove the row entirely — do not display an
- * unregistered segment"). This is that rule, made checkable.
- */
-export function hasPlaceholder(input: string): boolean {
-  return tokenizeCopy(input).some((token) => token.kind === 'placeholder')
-}
