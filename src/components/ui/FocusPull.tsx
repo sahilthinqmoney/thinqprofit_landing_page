@@ -8,28 +8,20 @@ initScrollTrigger()
 /**
  * The page's scroll language: a **focus pull**.
  *
- * Every existing animation here is optical rather than spatial. The hero
- * headline resolves out of a 10px blur while the field behind it settles; the
- * button's ring is light breaking across metal; the footer wordmark is a
- * specular travelling along an edge. Nothing on this page flies in from
- * off-screen, and adding that now would read as a different site bolted on.
+ * Every animation on this page is optical rather than spatial — the hero
+ * headline resolving out of a blur, light breaking across the button's metal
+ * rim. Nothing flies in from off-screen. So a section does not *arrive*, it
+ * comes **into focus**: it enters slightly over-scaled and soft, and resolves to
+ * 1.0 and sharp as it reaches reading position.
  *
- * So a section does not *arrive* — it comes **into focus**. It enters slightly
- * over-scaled and soft, and resolves to 1.0 and sharp as it reaches reading
- * position. That is the "zoom out, then the section reveals" gesture, built from
- * the vocabulary the page already speaks.
+ * Two constraints shaped this:
  *
- * Two constraints shaped the implementation:
- *
- * **It scales down, never up, and nothing rises.** motion-brief §7 rules out
- * upward motion on a broker page because the eye reads it as a claim about
- * returns. A settle inward is the one arrival direction that carries no promise.
- *
- * **Blur is scoped to headings.** `filter: blur()` cannot be composited on the
- * GPU the way transform and opacity can, so scrubbing it across a full-height
- * section repaints that whole area every frame. Headings are small, so they get
- * the focus pull; section bodies get `SceneReveal`, which is transform and
- * opacity only.
+ *  - It scales DOWN and nothing rises. motion-brief §7 rules out upward motion
+ *    on a broker page, because the eye reads it as a claim about returns. A
+ *    settle inward is the one arrival direction carrying no promise.
+ *  - Use it on headings, not on full-height blocks. `filter: blur()` cannot be
+ *    GPU-composited the way transform and opacity can, so scrubbing it across a
+ *    tall section repaints that whole area every frame.
  */
 
 /** Exponential ease-out, matching `--ease-out-expo` in index.css. */

@@ -3,38 +3,24 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { useGSAP } from '@gsap/react'
 
 /**
- * Single place that registers the GSAP plugins and — more importantly — refreshes
- * ScrollTrigger once the page has stopped changing height.
+ * Registers the GSAP plugins once, and refreshes ScrollTrigger after the page
+ * has stopped changing height.
  *
- * ScrollTrigger resolves `start: 'top 88%'` into absolute pixel offsets the moment
- * a trigger is created, and does not re-measure on its own. This page changes
- * height substantially *after* first paint, for three reasons:
+ * The refreshes are the point. ScrollTrigger resolves `start: 'top 85%'` into
+ * absolute pixel offsets when a trigger is created and never re-measures on its
+ * own, but this page keeps growing after first paint:
  *
- *  1. **Webfonts.** IBM Plex Sans Variable and IBM Plex Mono load async. Until
- *     they swap in, every headline is measured in the fallback metrics — and the
- *     display type runs to 120px, so the error is tens of pixels per heading and
- *     compounds down the page.
+ *  1. Webfonts. Plus Jakarta Sans and JetBrains Mono load async from Google
+ *     Fonts. Until they swap in, every heading is measured in fallback metrics —
+ *     and display type runs past 90px, so the error is tens of pixels per
+ *     heading and compounds down the page.
+ *  2. `min-h-svh` sections, whose height depends on the visual viewport — which
+ *     on mobile settles only once browser chrome does.
+ *  3. Late-decoding images and video posters.
  *
- *     The faces changed (Archivo + Instrument Sans + Newsreader → one Plex
- *     family) and the error got LARGER, not smaller, which is worth stating
- *     because the obvious assumption is the reverse. Two measured reasons. Plex's
- *     font box is 1.300em against Archivo's 1.088em, so every line reserves 19.5%
- *     more vertical space than the `system-ui` fallback is likely to. And the
- *     variable face is loaded from `wdth.css`, whose axis the display styles
- *     actually use (`'wdth' 75 → 82`) — until it arrives the fallback sets at
- *     full width with no axis at all, so headings are wider AND taller mid-swap.
- *     Self-hosted via `@fontsource`, so there is no third-party connection in the
- *     path, but "self-hosted" is not "synchronous" and this refresh is still the
- *     only thing making the triggers correct.
- *  2. **`min-h-svh` sections.** Their resolved height depends on the visual
- *     viewport, which on mobile settles only after browser chrome does.
- *  3. **The canvases.** HeroCanvas and SignalCanvas size themselves to their
- *     parent on mount.
- *
- * Without a refresh, triggers computed against the pre-font layout never fire, and
- * the tween sits permanently at its from-state: the symptom is a heading stuck at
- * 45% opacity behind a 7px blur, which is exactly what shipped before this module
- * existed.
+ * Without the refresh, triggers computed against the pre-font layout never fire
+ * and their tweens sit permanently at the from-state — a heading stuck at 45%
+ * opacity behind a blur, which is what shipped before this module existed.
  */
 
 let registered = false
@@ -47,26 +33,22 @@ export function initScrollTrigger() {
 
   if (typeof document === 'undefined') return
 
-  // Fonts are the big one, and `document.fonts.ready` is the only reliable signal
-  // for it. Guarded because the API is absent in some older engines.
+  // Fonts are the big one; `document.fonts.ready` is the only reliable signal.
+  // Guarded because the API is absent in some older engines.
   if (document.fonts?.ready) {
     void document.fonts.ready.then(() => ScrollTrigger.refresh())
   }
 
-  /*
-   * A second refresh after the first frames have settled, for the canvas and
-   * `svh` cases that `fonts.ready` does not cover. Two rAFs plus a short timeout
-   * rather than a long single timeout: it lands as early as it safely can, and a
-   * refresh is cheap compared with being wrong for the rest of the session.
-   */
+  // Covers the `svh` and late-layout cases that `fonts.ready` does not. Two
+  // rAFs plus a short timeout lands as early as it safely can, and a refresh is
+  // cheap next to being wrong for the rest of the session.
   requestAnimationFrame(() => {
     requestAnimationFrame(() => {
       window.setTimeout(() => ScrollTrigger.refresh(), 240)
     })
   })
 
-  // Late-loading media changes document height too, and ScrollTrigger's own
-  // resize handling does not see an image finishing decode.
+  // ScrollTrigger's own resize handling does not see an image finishing decode.
   window.addEventListener('load', () => ScrollTrigger.refresh(), { once: true })
 }
 

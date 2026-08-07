@@ -5,25 +5,15 @@ import { GUTTER_X, RAIL, SECTION_Y } from '../../lib/layout'
 import type { ImageSources, VideoSources } from './MediaBackdrop'
 
 /**
- * Desktop heights are deliberately unequal. This is the single biggest
- * departure from the old page, where eleven consecutive `min-h-svh` sections
- * scrolled past as identical slabs. Below 768px every section is content-sized
- * instead — a fixed height on a phone just clips copy.
+ * Section heights. `epic` and `tall` both resolve to the full viewport — they
+ * are kept as distinct names because they still pick the type step below
+ * (`step = scale ?? height`), and because unequal heights are the first thing to
+ * reach for if the full-screen rhythm is relaxed.
  *
- * `min-h`, not `h`: the section carries `overflow-hidden` so the scrim's
- * overscan never escapes it, which means a hard height would silently clip any
- * section whose copy outgrew the frame — and the copy here comes from a deck
- * that is still being edited.
- */
-/**
- * The brief is that every section covers the full screen, so all four steps
- * resolve to the viewport. They are kept as distinct names because they still
- * drive the type scale below (`step = scale ?? height`) and because unequal
- * heights are the first thing to reach for if the full-screen rhythm is ever
- * relaxed.
- *
- * `min-h-svh`, not a fixed px height: content taller than the viewport grows
- * rather than clipping, and `svh` keeps mobile browser chrome out of it.
+ * `min-h`, never a fixed height: the section carries `overflow-hidden` so the
+ * scrim's overscan cannot escape, which means a hard height would silently clip
+ * any section whose copy outgrew the frame. `svh` keeps mobile browser chrome
+ * out of it. Below 768px every section is content-sized instead.
  */
 const HEIGHT = {
   epic: 'min-h-svh',
@@ -41,20 +31,11 @@ const HEIGHT = {
  */
 const PLACE = {
   /*
-   * `left` takes NO left margin. The gutter comes from the wrapper below, which
-   * now runs Container's exact padding ladder — so a full-bleed section's copy
-   * starts on the same left edge as every flat section's heading.
-   *
-   * It used to be `md:ml-[6%]`, and that was a unit mismatch rather than a
-   * design decision: 6% of the frame is 86px at 1440 against Container's fixed
-   * 48px, so Onboarding's headline sat 38px inboard of the nine headings above
-   * and below it. One left edge from the nav to the footer is the page's rule,
-   * and a percentage cannot hold it — the offset changes with every viewport
-   * width, so the two edges were never wrong by the same amount twice.
-   *
-   * The percentage stays on the OPPOSITE margin, which is where it belongs: how
-   * much of the frame the copy leaves for the asset genuinely is a fraction of
-   * the frame, and has no edge to align to.
+   * Note the asymmetry: the percentage is always on the margin AWAY from the
+   * copy, never on the side it starts from. How much frame the copy leaves for
+   * the asset is genuinely a fraction of the frame; the edge it starts on has to
+   * align with every other section's heading, and a percentage cannot hold that
+   * — it changes with viewport width.
    */
   left: 'md:mr-[46%] md:items-start md:text-left',
   right: 'md:ml-[46%] md:items-start md:text-left',
@@ -69,34 +50,15 @@ const ANCHOR = {
 } as const
 
 /**
- * Display steps, on ONE ladder with `SectionShell`.
+ * Display steps for a full-bleed section, sharing one ladder with
+ * `lib/layout.ts`. `tall` is identical to that file's `lead` on purpose — a
+ * full-bleed section and a flat one must carry the same rank, or nothing on the
+ * page reads as primary. `SCALE.hero` is the only step above these.
  *
- * `tall` used to render at 72px against SectionShell's `lead` at 52 — so Platform
- * and Onboarding, both mid-page, outranked Products and Pricing, which are the
- * sections a visitor arrives for. With two competing ladders nothing read as
- * primary. `tall` now matches `lead` exactly, and `SCALE.hero` — the H1's step,
- * exported from `SectionShell` — is the only thing on the page above this scale.
- *
- * Leading opens up as the size drops: a display cut this tight needs the air at
- * 2.125rem that it does not need at 4.5rem, where the line length itself does
- * the separating. Tracking and the variable-axis coordinate come from
- * `.display`; setting them per step would fight the face.
- *
- * EVERY LEADING HERE GAINED +0.04em ON THE MOVE TO IBM PLEX, and the sizes did
- * not. The full derivation is in `SectionShell`'s SCALE, because both ladders
- * take the same correction and it must not be re-argued in two places; the short
- * form is that Plex's ascender-to-descender ink span measures 0.952em at weight
- * 600 against Archivo's 0.913em, so at an unchanged line-height the gap between
- * lines closes by 0.039em everywhere.
- *
- * Checked at the two steps that render. `mid` carries all four Terminal claim
- * plates: worst pair is "The copilot / has hands", where Archivo gave a 10.30px
- * ink gap, Plex at the old 1.08 gives 7.84px, and Plex at 1.12 gives 10.08px.
- * The art-directed `\n` breaks all hold inside the 9em (504px) measure those
- * plates use — widest line 346.7px in Plex against 337.1px in Archivo — so this
- * is leading alone and no plate re-rags. `mid` also carries the closing
- * statement, where it is overridden: `.display-quiet` declares its own 1.24 and
- * wins on source order, which is deliberate and documented in index.css.
+ * Leading opens as size drops: type cut this tight needs air at 2.125rem that it
+ * does not need at 4.5rem, where line length does the separating. Tracking and
+ * the variable-axis coordinate come from `.display` — setting them per step
+ * would fight the face.
  */
 const SCALE = {
   epic: 'text-[clamp(2.75rem,5.2vw,4.5rem)] leading-[1.06]',
@@ -123,20 +85,9 @@ interface MediaSectionProps {
   /** `\n` is an art-directed line break, honoured at ≥768px only. */
   headline: string
   /**
-   * Which voice the headline is set in.
-   *
-   * `quiet` is reserved for the page's single editorial moment — the closing
-   * statement. Used once it is a change of register and lands; used in three
-   * places it is just a second default. If you are reaching for this on a
-   * second section, the answer is no.
-   *
-   * It was `serif` and it selected `.display-serif`, which set Newsreader. Both
-   * are gone with the move to a single IBM Plex family, and the rename is not
-   * cosmetic: a prop value naming a face the page no longer loads is exactly
-   * the falsified rationale this codebase refuses, and the class it pointed at
-   * had already been deleted — so `voice="quiet"` was silently falling through
-   * this ternary to `.display` and the closing statement was rendering in the
-   * loud voice, with the whole argument for a quiet one written and unapplied.
+   * Which voice the headline is set in. `quiet` is reserved for a single
+   * editorial moment on the page — used once it is a change of register, used
+   * three times it is just a second default.
    */
   voice?: 'display' | 'quiet'
   /**
@@ -147,24 +98,14 @@ interface MediaSectionProps {
   body?: ReactNode
   actions?: ReactNode
   /**
-   * Content for the half of the frame `place` reserves for the asset.
+   * Fills the 46% of the frame that `place` reserves for the asset — useful when
+   * the backdrop alone would leave that half as dead space. A slot, not a second
+   * copy column: it takes the reserved area from `md` up and stacks under the
+   * copy on a phone.
    *
-   * `place` has always parked the copy against one margin and left 46% of the
-   * frame for the plate to be read in. That reservation is correct when the
-   * plate has a subject in it; it is dead space when the plate is a dark
-   * gradient, which is what §3's terminal crop actually renders as at desktop
-   * widths — a machined edge in the far corner and 46% of near-black between it
-   * and the words.
-   *
-   * So the slot is optional and it is a slot, not a second copy column: it takes
-   * the reserved area on `md` and up, and on a phone it stacks under the copy,
-   * where the percentage margins do not apply at all.
-   *
-   * Absolutely positioned rather than a grid column on purpose. The copy block's
-   * height is what sets the section's height, and a two-column grid would let a
-   * tall aside push the section taller than its own headline needs — which is
-   * how a full-bleed band stops being able to promise `min-h-svh` and starts
-   * being however tall its illustration is.
+   * Absolutely positioned rather than a grid column on purpose. The copy block
+   * sets the section's height, and a grid would let a tall aside push the
+   * section past what its own headline needs.
    */
   aside?: ReactNode
   /** Disclosures live inside the section, under the CTA — never in a legal ghetto. */

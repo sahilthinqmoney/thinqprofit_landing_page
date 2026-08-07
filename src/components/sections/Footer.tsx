@@ -12,45 +12,22 @@ import {
 } from '../../data/footer'
 
 /**
- * §8 — Footer and legal.
+ * §8 — Footer and legal. What an Indian broker's footer is actually for, with no
+ * marketing chrome competing with it.
  *
- * ── The statutory blocks are back, and this is the reversal of a mistake ──
+ * In order: the tagline, the registration block (entity, CIN, office, SEBI and
+ * exchange codes, compliance officer, grievance contact), the SCORES route as a
+ * working link, the mandatory disclosures, then the giant wordmark and the
+ * copyright line.
  *
- * A previous pass removed the registration block, the statutory disclosures and
- * the grievance route from this footer, leaving a comment flagging that "a live
- * Indian broker site has to carry all four somewhere". That flag is now answered
- * rather than restated: all of it renders, in full, below.
- *
- * The reason it was removed — ~2,100px of legal text at the foot of a page — was
- * a real problem with a wrong solution. The problem was that the material was
- * competing with five columns of navigation links, a newsletter card and a
- * social row. Those are gone (see src/data/footer.ts), so the legal blocks are
- * no longer buried under marketing chrome; they are the only thing down here,
- * which is what a broker's footer is actually for.
- *
- * ── What the reader gets, in order ───────────────────────────────────────
- *
- *   1. The tagline. The page's last argument before its legal obligations.
- *   2. The registration block — entity, CIN, office, SEBI and exchange codes,
- *      compliance officer, grievance contact. Every value is an unfilled
- *      placeholder and renders visibly flagged through `CopyText`.
- *   3. The SCORES route, as a working link rather than a mention.
- *   4. Five mandatory disclosures, ordered by which claim on the page each one
- *      answers — see the note in src/data/footer.ts.
- *   5. The giant wordmark, then the copyright line.
- *
- * ── Colour ───────────────────────────────────────────────────────────────
+ * Every registration value is still an unfilled placeholder and renders visibly
+ * flagged through `CopyText` — see the launch blocker in README.
  *
  * Nothing here is coloured except by meaning. Disclosure copy is `fg-muted`,
  * never `fg-subtle`: legal text should not sit at the bottom of the legible
- * range just because it is allowed to. The one `risk`-toned block (derivatives)
- * takes the warning treatment, which is a box and an icon as well as a hue —
- * because the amber is the accent's nearest chromatic neighbour and meaning
- * never rests on hue alone.
- *
- * The one warm object below the fold is the giant wordmark, which is the page's
- * §07 "brand surface where the accent leads" case. The small mark in the brand
- * row above it is neutral steel, because it shares a row with body copy.
+ * range just because it is allowed to. The giant wordmark is the one warm object
+ * below the fold — the brand-surface case where the accent leads — while the
+ * small mark above it is neutral steel, because it shares a row with body copy.
  */
 export default function Footer() {
   const year = new Date().getFullYear()

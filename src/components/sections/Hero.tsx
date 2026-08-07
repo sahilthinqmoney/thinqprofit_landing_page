@@ -8,47 +8,26 @@ import MediaBackdrop from '../ui/MediaBackdrop'
 
 
 /**
- * §2 Hero — full-bleed motion with the copy and the form set on top of it.
+ * §2 Hero — full-bleed clip with the copy and the phone field on top of it.
  *
- * ── What changed: the hero now contains the conversion, not a link to it ───
+ * The hero CONTAINS the conversion rather than linking to it. The ask is a phone
+ * number and the cost of giving it is a fortnightly message, so a reader already
+ * convinced by the offer should not have to scroll four sections to act on it.
  *
- * It used to carry a button that scrolled 5,000px to a closing section. That is
- * the right structure for a page selling an account-opening journey, where the
- * decision needs the whole argument first. It is the wrong structure for a
- * waitlist: the ask is a phone number, the cost of giving it is a fortnightly
- * message, and a reader who is already convinced by the offer in the
- * announcement bar should not have to scroll past four sections of persuasion to
- * act on it.
+ * Two rules govern the opening motion:
  *
- * So the form is here, above the fold, and the closing section carries the same
- * component for the reader who needed the argument. `WaitlistForm` is one
- * component mounted twice precisely so those two cannot drift.
+ *  - The headline settles out of a blur, a line at a time, while the field
+ *    behind it resolves. This is the page's one authored motion moment.
+ *  - Nothing rises. The motion damps DOWNWARD into place, because
+ *    docs/motion-brief.md §7 reads upward motion on a broker page as a claim
+ *    about returns.
  *
- * ── The opening motion is unchanged, and the reason it survives ────────────
+ * The headline is split on `\n`, so it animates whatever lines the string
+ * produces — the current copy carries no breaks and wraps on its own.
  *
- * The headline arrives a line at a time, settling out of a blur while the field
- * behind it resolves — the page's one authored motion moment. Everything below
- * the fold uses the quiet `Reveal` and nothing else.
- *
- * Nothing rises as a promise. The motion damps DOWNWARD into place, never up:
- * docs/motion-brief.md §7 rules out upward motion on a broker page because the
- * eye reads it as a claim about returns. That rule is independent of what the
- * page is selling and it applies to a waitlist page exactly as it applied to an
- * account-opening one.
- *
- * ── The H1 no longer carries art-directed breaks ──────────────────────────
- *
- * "The chart tells you what just moved." carries no `\n`. An older headline was
- * set as three hand-broken lines and this file did the splitting; the string
- * wraps on its own at every width now, and a `\n` that agrees with where the
- * text would break anyway is a comment rather than a direction. The per-line
- * settle machinery stays — it animates whatever lines the string produces, which
- * is two on a desktop and three on a phone.
- *
- * The market-risk disclosure stays in its opaque rail at the foot of the
- * section: mandatory, visible in the first viewport, never collapsed, and never
- * behind a blur. `--header-stack` now sums the announcement bar AND the nav so
- * the rail still lands above the fold.
+ * The market-risk disclosure sits in an opaque rail at the foot of the section:
+ * mandatory, visible in the first viewport, never collapsed, never behind a
+ * blur.
  */
 
 export default function Hero() {
@@ -62,7 +41,7 @@ export default function Hero() {
     >
 
       {/* Full-bleed background media layer */}
-      <MediaBackdrop alt={hero.mediaAlt} video="/clips/thinq_hero_section_bg.mp4" focus="center" />
+      <MediaBackdrop alt={hero.mediaAlt} video="/clips/hero-backdrop.mp4" focus="center" />
 
 
 

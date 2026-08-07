@@ -1,69 +1,31 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { Compass, Languages, Layers, Zap } from 'lucide-react'
+import type { CapabilityCard } from '../../data/capabilities'
 
-export interface SliderCardItem {
-  id: string | number
-  title: string
-  description: string
-  icon?: React.ElementType
-  badge?: string
-  image?: string
-}
-
-export const DEFAULT_CARDS: SliderCardItem[] = [
-  {
-    id: 1,
-    title: 'Position Compass',
-    description: 'Tracks whether open positions are moving with or against the market, not just whether they are up.',
-    icon: Compass,
-    badge: 'AI Analytics',
-    image: '/images/capabilities/compass.png',
-  },
-  {
-    id: 2,
-    title: 'Option Chain Builder',
-    description: 'Build multi-leg structures by tapping bids & asks, previewing complete payoff curves before execution.',
-    icon: Layers,
-    badge: 'Options F&O',
-    image: '/images/capabilities/option_chain.png',
-  },
-  {
-    id: 3,
-    title: 'Greeks, in Plain English',
-    description: 'Delta, theta and vega translated into real-time plain English sentences about P&L drivers.',
-    icon: Languages,
-    badge: 'Risk Engine',
-    image: '/images/capabilities/greeks_prism.png',
-  },
-  {
-    id: 4,
-    title: 'Low-Latency Execution',
-    description: 'Orders routed in milliseconds to minimize slippage between what you see and what you get.',
-    icon: Zap,
-    badge: 'Ultra Fast',
-    image: '/images/capabilities/low_latency.png',
-  },
-]
-
-interface ImageSlider3DProps {
-  /** Speed of the continuous loop in seconds */
-  duration?: number
-  /** Width of each card element, e.g. "16em" or "20rem" */
+interface CardSlider3DProps {
+  /** The cards to show, in order. */
+  items: CapabilityCard[]
+  /** Width of each card, e.g. "16em". */
   cardWidth?: string
-  /** Custom list of cards to display */
-  items?: SliderCardItem[]
-  /** Custom container class */
   className?: string
-  /** Auto-scroll direction: 'right' | 'left' (defaults to 'right') */
+  /** Which way the loop drifts when it is not being dragged. */
   direction?: 'right' | 'left'
 }
 
-export default function ImageSlider3D({
+/**
+ * A horizontal loop of cards on a 3D focal curve: cards scale and lift as they
+ * pass the container's centre, and fall back as they leave it.
+ *
+ * The track holds three copies of `items` so the wrap is seamless — the offset
+ * resets by exactly one set width, which is invisible because the neighbouring
+ * copy is already drawn there. Drag takes over from the drift and hands back
+ * with decaying momentum.
+ */
+export default function CardSlider3D({
+  items,
   cardWidth = '16.5em',
-  items = DEFAULT_CARDS,
   className = '',
   direction = 'right',
-}: ImageSlider3DProps) {
+}: CardSlider3DProps) {
   const containerRef = useRef<HTMLDivElement>(null)
   const trackRef = useRef<HTMLDivElement>(null)
 

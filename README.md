@@ -41,21 +41,32 @@ Copy changes belong in `src/data/`, not in components.
 
 ## Structure
 
+Every section component is named for what it says, and `App.tsx` lists them in
+the order a visitor meets them.
+
 ```
 src/
-  App.tsx                    the composition: Navbar, four sections, Footer
-  types.ts                   shared content contract
+  App.tsx                    the composition, in page order
+  types.ts                   shapes shared by more than one file
   index.css                  Tailwind v4 @theme tokens
-  lib/copyTokens.ts          tokenises [PLACEHOLDER] / **bold** / [link](href)
-  lib/scrollTrigger.ts       the single gsap + ScrollTrigger registration
-  data/                      all copy — nav, hero, missing, capabilities, footer
+  data/                      ALL page copy — one file per section
+    nav · hero · theGap · agenticHands · capabilities · footer
+  lib/
+    layout.ts                SCALE / RAIL / SECTION_Y / GUTTER_X
+    copyTokens.ts            parses [PLACEHOLDER] / **bold** / [link](href)
+    scrollTrigger.ts         the one gsap + ScrollTrigger registration
   components/
-    ui/                      Container, SectionShell, Button, Disclosure,
-                             CopyText, MediaBackdrop, MediaSection, FocusPull,
-                             ThinqMark, ChromaticWordmark, LiquidMetalSurface
-    sections/                Navbar, Hero, Missing, SectionTwo,
-                             AgenticHandsSection, Capabilities, Footer
-    lightswind/              3d-image-slider, the desktop capabilities carousel
+    sections/                Navbar, Hero, TheGap, AgenticHands,
+                             Capabilities, Footer
+    ui/                      Container, Button, Disclosure, CopyText,
+                             MediaBackdrop, MediaSection, CardSlider3D,
+                             FocusPull, ThinqMark, ChromaticWordmark,
+                             LiquidMetalSurface
+
+public/
+  clips/                     hero-backdrop.mp4, flip-clock.webm
+  images/capabilities/       one still per capability card
+  images/hands/              robot.png, human.png
 ```
 
 ## Design decisions worth knowing
@@ -68,7 +79,13 @@ src/
 
 ## Media
 
-Every asset the page loads lives in `public/` and is referenced by an explicit path. There are ten of them: the hero clip, the flip-clock loop, two hand stills, four capability card images, the favicon and the share card. Nothing else is committed — an asset that no component names is not kept.
+Every asset the page loads lives in `public/` under an explicit path. There are ten: the hero clip, the flip-clock loop, two hand stills, four capability card images, the favicon and the share card. Nothing else is committed — an asset that no component names is not kept.
+
+## Known discrepancy: the copper retheme was never applied
+
+Comments across `index.css`, `Button.tsx`, `LiquidMetalSurface.tsx` and `ThinqMark.tsx` used to describe a **copper** brand — a warm ground `#0A0808`, a coral accent `#FF9E7A`, a six-stop copper metal ramp. None of it renders. The shipped tokens are the earlier **platinum** system: a neutral `#050505` ground, a dark blue-grey accent `#2c2f38`, and metal ramps whose stops are greys. `ThinqMark`'s `copper` and `steel` ramps are byte-identical.
+
+The rationale has been rewritten to describe what actually ships. **The values were deliberately left alone** — repainting the site is a design decision, not a documentation fix. If copper is wanted, the places to change are the `@theme` block in `index.css`, `.surface-copper`, `RIM_WRAP`/`RIM_CORE` in `Button.tsx`, `TINT`/`BACK` in `LiquidMetalSurface.tsx`, and `RAMPS` in `ThinqMark.tsx`.
 
 ## Verified
 
