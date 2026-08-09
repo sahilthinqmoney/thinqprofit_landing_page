@@ -15,9 +15,11 @@ export default function Capabilities() {
           <h2 className="display-lead font-display text-4xl lg:text-5xl font-bold tracking-tight text-fg">
             {capabilitiesIntro.heading}
           </h2>
-          <p className="mt-3 text-base lg:text-lg text-fg-muted max-w-xl mx-auto leading-relaxed">
-            {capabilitiesIntro.subheading}
-          </p>
+          {capabilitiesIntro.subheading ? (
+            <p className="mt-3 text-base lg:text-lg text-fg-muted max-w-xl mx-auto leading-relaxed">
+              {capabilitiesIntro.subheading}
+            </p>
+          ) : null}
         </div>
       </Container>
 

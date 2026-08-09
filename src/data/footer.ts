@@ -136,7 +136,7 @@ export const disclaimers = [
   {
     title: 'Market Risk & Brokerage Limit',
     content:
-      'Investments in the securities market are subject to market risks; read all the related documents carefully before investing. Brokerage will not exceed the SEBI prescribed limit.',
+      'Investments in the securities market are subject to market risk. Read all the related documents carefully before investing. Brokerage will not exceed the SEBI prescribed limit.',
   },
   {
     title: 'Order Collection & Execution Disclaimer (BSE StarMF)',

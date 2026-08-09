@@ -199,7 +199,7 @@ export default function LiquidMetalSurface({
        * per-channel composite rather than an attenuation, so it changes what the
        * shader lands ON, not how much of it lands.
        */
-      className={`pointer-events-none absolute inset-0 overflow-hidden [&>canvas]:absolute [&>canvas]:inset-0 [&>canvas]:h-full [&>canvas]:w-full ${
+      className={`pointer-events-none absolute inset-0 overflow-hidden rounded-full [webkit-mask-image:-webkit-radial-gradient(white,black)] [mask-image:-webkit-radial-gradient(white,black)] [clip-path:inset(0_round_9999px)] transform-gpu [&>canvas]:absolute [&>canvas]:inset-0 [&>canvas]:h-full [&>canvas]:w-full [&>canvas]:rounded-full ${
         blend === 'screen' ? 'opacity-50 mix-blend-screen' : 'mix-blend-overlay'
       } ${className}`}
     />

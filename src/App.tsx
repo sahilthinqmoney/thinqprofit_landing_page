@@ -32,8 +32,8 @@ export default function App() {
       <main id="main" className="relative z-10">
         <Hero />
         <TheGap />
-        <AgenticHands />
         <Capabilities />
+        <AgenticHands />
       </main>
 
       <Footer />

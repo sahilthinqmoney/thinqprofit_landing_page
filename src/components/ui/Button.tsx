@@ -170,6 +170,7 @@ export default function Button({
 
   const classes = [
     'group relative isolate inline-flex cursor-pointer items-center justify-center gap-2 overflow-hidden rounded-full font-medium',
+    '[webkit-mask-image:-webkit-radial-gradient(white,black)] [mask-image:-webkit-radial-gradient(white,black)] [clip-path:inset(0_round_9999px)] transform-gpu',
     // Exponential ease-out on colour and transform, and a press that actually
     // gives: a control that does not move under the finger reads as an image
     // of a button. 250ms is long enough to feel weighted, short enough to
@@ -186,7 +187,7 @@ export default function Button({
     // ring into wide metal slabs either side of the label — which is what it did
     // on mobile before this. Any caller that genuinely wants a full-width button
     // asks for it, and `w-full` below then applies to the core as well.
-    withMetal && !fullWidth ? 'self-start' : '',
+    withMetal && !fullWidth && !className.includes('w-full') ? 'self-start' : '',
     fullWidth ? 'w-full' : '',
     className,
   ]

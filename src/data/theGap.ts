@@ -27,5 +27,5 @@ export const theGap: GapContent = {
   heading: 'It happened at 11:40. You saw it at 12:15.',
   solution:
     'You were on another instrument. There are forty of them and the session is six hours long.',
-  finePrint: 'Thinq writes market commentary, not investment advice.',
+  finePrint: '',
 }

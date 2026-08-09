@@ -615,6 +615,10 @@
       #fdfdfe 88%,
       #b6b6ba 100%
     );
+    -webkit-mask-image: -webkit-radial-gradient(white, black);
+    mask-image: -webkit-radial-gradient(white, black);
+    clip-path: inset(0 round 9999px);
+    transform: translateZ(0);
   }
 
   /*

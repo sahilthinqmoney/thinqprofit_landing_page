@@ -74,6 +74,5 @@ export const capabilityCards: CapabilityCard[] = [
  */
 export const capabilitiesIntro = {
   heading: 'What else is in it',
-  subheading:
-    'The rest of the terminal, one line each. Agentic trading — where Thinq acts on the plan rather than describing it — is what we are building next.',
+  subheading: 'Everything you need to analyze, decide, and execute—with precision.',
 }
