@@ -1,0 +1,13 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "thinqprofit-landing-page",
+  "compatibility_date": "2026-08-10",
+  // No "main": this is a static-asset Worker, so Cloudflare serves dist/
+  // directly off its edge with no script in front of it.
+  "assets": {
+    "directory": "./dist",
+    // Every unmatched path renders index.html so client-side routing works,
+    // which is what vercel.json's rewrite did.
+    "not_found_handling": "single-page-application"
+  }
+}
