@@ -27,6 +27,12 @@ brag-output/
 .env
 .env.*
 !.env.example
+# Local-only values for `wrangler dev`; the real ones live as Worker secrets.
+.dev.vars
+.dev.vars.*
+
+# wrangler's local state: the miniflare sandbox and build cache, rebuilt on demand.
+.wrangler/
 
 # Editor directories and files
 .vscode/*
@@ -46,3 +52,15 @@ brag-output/
 # .claude/skills holds only symlinks into .agents, which don't travel well in git.
 .agents/
 .claude/skills/
+
+# Obsidian's per-vault state. The repo root is a vault so the codebase can be
+# browsed and edited in Obsidian; the notes and code are source and stay in git,
+# but workspace layout, window state and the downloaded community plugins are
+# per-machine. `app.json` (ignore filters, link style) and `core-plugins.json`
+# define how the vault behaves for everyone, so they are the exceptions —
+# same reasoning as .agents/: lock the config, don't vendor the plugin code.
+.obsidian/*
+!.obsidian/app.json
+!.obsidian/core-plugins.json
+!.obsidian/community-plugins.json
+docs/.obsidian/
