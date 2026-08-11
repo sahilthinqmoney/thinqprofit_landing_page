@@ -1,3 +1,5 @@
+import { useEffect, useRef } from 'react'
+
 export interface ImageSources {
   mobile?: string
   tablet?: string
@@ -32,6 +34,17 @@ export default function MediaBackdrop({
   blur = false,
   className = '',
 }: MediaBackdropProps) {
+  const videoRef = useRef<HTMLVideoElement>(null)
+
+  useEffect(() => {
+    const videoEl = videoRef.current
+    if (videoEl) {
+      videoEl.play().catch(() => {
+        // Fallback for browser autoplay policies
+      })
+    }
+  }, [])
+
   return (
     <div
       aria-hidden="true"
@@ -42,12 +55,14 @@ export default function MediaBackdrop({
       {/* Video Background Layer */}
       {video && (
         <video
+          ref={videoRef}
           autoPlay
           loop
           muted
           playsInline
+          preload="auto"
           poster={poster}
-          className="absolute inset-0 h-full w-full object-cover scale-[1.08] origin-top opacity-100 transition-opacity duration-1000"
+          className="absolute inset-0 h-full w-full object-cover scale-[1.08] origin-top opacity-100"
         >
           {typeof video === 'string' ? (
             <source src={video} type="video/mp4" />
