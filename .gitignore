@@ -27,7 +27,8 @@ brag-output/
 .env
 .env.*
 !.env.example
-# Local-only values for `wrangler dev`; the real ones live as Worker secrets.
+# Local-only bindings for `wrangler dev`. Nothing uses them now that the site
+# deploys as pure static assets, but the ignore stays so a future one is covered.
 .dev.vars
 .dev.vars.*
 

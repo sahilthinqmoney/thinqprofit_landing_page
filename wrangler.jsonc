@@ -2,19 +2,14 @@
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "thinqprofit-landing-page",
   // Pinned to what the installed wrangler's bundled runtime supports, so
-  // `wrangler dev` runs the same Worker locally that gets deployed.
+  // `wrangler dev` serves the same thing locally that gets deployed.
   "compatibility_date": "2026-08-08",
-  // The script only exists to gate the site behind Basic Auth; every request
-  // it approves is handed straight back to the asset server below.
-  "main": "worker/index.ts",
+  // No `main`: there is no script in front of the assets, so this deploys as a
+  // pure static-asset Worker and the edge serves `dist/` directly.
   "assets": {
     "directory": "./dist",
     // Every unmatched path renders index.html so client-side routing works,
     // which is what vercel.json's rewrite did.
-    "not_found_handling": "single-page-application",
-    "binding": "ASSETS",
-    // Without this the edge serves matching files before the script ever runs,
-    // so the auth check would only cover the SPA fallback.
-    "run_worker_first": true
+    "not_found_handling": "single-page-application"
   }
 }
