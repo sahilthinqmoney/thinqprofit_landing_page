@@ -1,23 +1,26 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="512" height="512">
-  <defs>
+  <rect width="24" height="24" fill="#050505" />
+  <g transform="translate(2.640 2.640) scale(0.78)">
+    <defs>
     <linearGradient id="r" gradientUnits="userSpaceOnUse" x1="3" y1="3" x2="14.6" y2="12.86">
-      <stop offset="0%" stop-color="#a0a0a5" />
-      <stop offset="26%" stop-color="#ffffff" />
-      <stop offset="46%" stop-color="#f0f0f5" />
-      <stop offset="66%" stop-color="#b0b0b5" />
-      <stop offset="88%" stop-color="#ffffff" />
-      <stop offset="100%" stop-color="#d0d0d5" />
+    <stop offset="0%" stop-color="#a0a0a5" />
+    <stop offset="26%" stop-color="#ffffff" />
+    <stop offset="46%" stop-color="#f0f0f5" />
+    <stop offset="66%" stop-color="#b0b0b5" />
+    <stop offset="88%" stop-color="#ffffff" />
+    <stop offset="100%" stop-color="#d0d0d5" />
     </linearGradient>
     <linearGradient id="t" gradientUnits="userSpaceOnUse" x1="14.35" y1="14.35" x2="22.25" y2="21.07">
-      <stop offset="0%" stop-color="#a0a0a5" />
-      <stop offset="26%" stop-color="#ffffff" />
-      <stop offset="46%" stop-color="#f0f0f5" />
-      <stop offset="66%" stop-color="#b0b0b5" />
-      <stop offset="88%" stop-color="#ffffff" />
-      <stop offset="100%" stop-color="#d0d0d5" />
+    <stop offset="0%" stop-color="#a0a0a5" />
+    <stop offset="26%" stop-color="#ffffff" />
+    <stop offset="46%" stop-color="#f0f0f5" />
+    <stop offset="66%" stop-color="#b0b0b5" />
+    <stop offset="88%" stop-color="#ffffff" />
+    <stop offset="100%" stop-color="#d0d0d5" />
     </linearGradient>
-  </defs>
-  <circle cx="8.8" cy="8.8" r="5.8" fill="none" stroke="url(#r)" stroke-width="2.3" />
-  <circle cx="16.2" cy="16.2" r="1.85" fill="url(#t)" />
-  <circle cx="21" cy="21" r="1.25" fill="url(#t)" />
+    </defs>
+    <circle cx="8.8" cy="8.8" r="5.8" fill="none" stroke="url(#r)" stroke-width="2.3" />
+    <circle cx="16.2" cy="16.2" r="1.85" fill="url(#t)" />
+    <circle cx="21" cy="21" r="1.25" fill="url(#t)" />
+  </g>
 </svg>

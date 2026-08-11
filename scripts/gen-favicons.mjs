@@ -1,4 +1,5 @@
-// Generates every favicon size from one source: public/favicon.svg.
+// Generates every favicon — .ico, PNGs and the SVG — from one source:
+// scripts/assets/thinq-mark.svg.
 //
 // ── Why the icons are an opaque tile and not a transparent mark ────────────
 //
@@ -24,7 +25,13 @@ import { readFile, writeFile, rm } from 'node:fs/promises'
 import path from 'node:path'
 
 const PUBLIC = path.resolve(import.meta.dirname, '../public')
-const SOURCE = path.join(PUBLIC, 'favicon.svg')
+
+// The bare mark, white on transparency. It lives OUTSIDE public/ because it must
+// never be served: white on transparency is invisible on a light tab strip, and
+// while it sat at public/favicon.svg any browser that preferred an SVG favicon —
+// Chrome and Firefox both do — was handed the invisible one no matter how good
+// the PNGs were. public/favicon.svg is now generated, opaque, and safe to link.
+const SOURCE = path.resolve(import.meta.dirname, 'assets/thinq-mark.svg')
 
 /** `--color-bg`. Must track src/index.css and the `theme-color` meta. */
 const GROUND = { r: 5, g: 5, b: 5, alpha: 1 }
@@ -100,6 +107,35 @@ function ico(images) {
 }
 
 const svg = await readFile(SOURCE)
+
+/**
+ * The shipped SVG: the same tile as the rasters, as a vector.
+ *
+ * Chrome and Firefox prefer `type="image/svg+xml"` when it is offered, so this
+ * is what those two actually draw — it has to carry the ground itself. The mark
+ * is nested at MARK_SCALE inside a full-bleed ground rect, which is the exact
+ * composition `tile()` builds for the PNGs, so every browser gets one design.
+ */
+function tileSvg(markSvg) {
+  const inner = markSvg
+    .toString()
+    .replace(/^[\s\S]*?<svg[^>]*>/, '')
+    .replace(/<\/svg>\s*$/, '')
+    .trim()
+  const pad = ((1 - MARK_SCALE) / 2) * 24
+  const scale = MARK_SCALE
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="512" height="512">
+  <rect width="24" height="24" fill="#050505" />
+  <g transform="translate(${pad.toFixed(3)} ${pad.toFixed(3)}) scale(${scale})">
+${inner
+  .split('\n')
+  .map((line) => (line.trim() ? '    ' + line.trim() : line))
+  .join('\n')}
+  </g>
+</svg>
+`
+}
+
 const forIco = []
 
 for (const target of TARGETS) {
@@ -116,4 +152,6 @@ console.log(`favicons: favicon.ico                  ${ico(forIco).length} bytes 
 // file in it is a byte-identical duplicate of one at the root, and public/ ships
 // verbatim, so it was a second copy of the icon set on the CDN.
 await rm(path.join(PUBLIC, 'favicon_io-2'), { recursive: true, force: true })
-console.log('favicons: removed duplicate favicon_io-2/')
+
+await writeFile(path.join(PUBLIC, 'favicon.svg'), tileSvg(svg))
+console.log('favicons: favicon.svg                  (opaque tile, vector)')
