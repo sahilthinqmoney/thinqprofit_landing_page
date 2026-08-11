@@ -52,6 +52,8 @@ export interface MediaGate {
    * is stopped for this, because this is a request about motion itself.
    */
   motionRefused: boolean
+  /** True when this connection should be served the smaller encode. */
+  lightMedia: boolean
   /** Call when the rung being waited on is on screen. Cancels the deadline. */
   settle: () => void
 }
@@ -128,8 +130,9 @@ export function useMediaGate(
       stopped: status === 'stopped',
       videoAllowed: tier.allowVideo && wantsVideo,
       motionRefused: tier.motionRefused,
+      lightMedia: tier.lightMedia,
       settle,
     }),
-    [ref, status, tier.allowVideo, tier.motionRefused, wantsVideo, settle],
+    [ref, status, tier.allowVideo, tier.motionRefused, tier.lightMedia, wantsVideo, settle],
   )
 }

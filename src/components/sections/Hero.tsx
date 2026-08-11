@@ -60,7 +60,15 @@ export default function Hero() {
         alt={hero.mediaAlt}
         lqip={lqipFor(HERO_POSTER)}
         poster={HERO_POSTER}
-        video="/clips/hero-backdrop.mp4"
+        video={{
+          // The light encode first for phones and 3g-class links: 960x540 at
+          // 450kbps, 0.93 MB against the full clip's 2.71 MB. Measured at the
+          // size a phone actually renders it, that is 34.3 dB — the backdrop is
+          // dark, slow and sits under a scrim, so the bytes buy far more than
+          // the resolution does.
+          mobile: '/clips/hero-backdrop-mobile.mp4',
+          mp4: '/clips/hero-backdrop.mp4',
+        }}
         deadlineMs={MEDIA_DEADLINE_MS.hero}
         focus="center"
         priority

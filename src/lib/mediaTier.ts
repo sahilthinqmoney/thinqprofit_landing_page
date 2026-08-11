@@ -26,8 +26,20 @@ interface NetworkInformationLike {
   removeEventListener?: (type: string, listener: () => void) => void
 }
 
-/** Connections on which a multi-megabyte clip is not worth the reader's data. */
-const REFUSED_EFFECTIVE_TYPES: ReadonlySet<string> = new Set(['slow-2g', '2g', '3g'])
+/**
+ * Connections on which no clip is worth the reader's data.
+ *
+ * `3g` used to be in here, and that was the bug behind "mobile just shows a
+ * still". `effectiveType` is a bucketed estimate of throughput and round-trip
+ * time, NOT the radio in the phone — plenty of ordinary LTE reports `3g`, so
+ * this refused the hero clip outright for a large share of real phones while
+ * every emulator said `4g` and looked fine. A 3g-class link is now served the
+ * light encode instead of nothing; only genuinely 2g-class links are refused.
+ */
+const REFUSED_EFFECTIVE_TYPES: ReadonlySet<string> = new Set(['slow-2g', '2g'])
+
+/** Connections good enough for a clip, but not for the full-size one. */
+const LIGHT_EFFECTIVE_TYPES: ReadonlySet<string> = new Set(['3g'])
 
 /** Below this, decoding video competes with rendering the page. In gigabytes. */
 const MIN_DEVICE_MEMORY_GB = 2
@@ -49,6 +61,15 @@ export interface MediaTier {
    * the reader asks for less motion, because that is a request about motion.
    */
   motionRefused: boolean
+  /**
+   * This connection should get the smaller encode of anything that has one.
+   *
+   * Separate from `allowVideo` on purpose: the answer to a modest connection is
+   * a smaller file, not a still. Refusing outright is reserved for links that
+   * cannot carry a clip at all, and for readers who have asked us not to spend
+   * their data.
+   */
+  lightMedia: boolean
 }
 
 function connection(): NetworkInformationLike | undefined {
@@ -70,6 +91,7 @@ const SERVER_TIER: MediaTier = Object.freeze({
   allowVideo: false,
   reason: 'no-window',
   motionRefused: false,
+  lightMedia: true,
 })
 
 function computeTier(): MediaTier {
@@ -78,29 +100,30 @@ function computeTier(): MediaTier {
   }
 
   if (window.matchMedia?.(REDUCED_MOTION_QUERY).matches) {
-    return { allowVideo: false, reason: 'reduced-motion', motionRefused: true }
+    return { allowVideo: false, reason: 'reduced-motion', motionRefused: true, lightMedia: true }
   }
 
   const link = connection()
 
   if (link?.saveData) {
-    return { allowVideo: false, reason: 'save-data', motionRefused: false }
+    return { allowVideo: false, reason: 'save-data', motionRefused: false, lightMedia: true }
   }
 
   const effectiveType = link?.effectiveType
   if (effectiveType && REFUSED_EFFECTIVE_TYPES.has(effectiveType)) {
-    return { allowVideo: false, reason: `effective-type:${effectiveType}`, motionRefused: false }
+    return { allowVideo: false, reason: `effective-type:${effectiveType}`, motionRefused: false, lightMedia: true }
   }
 
   const deviceMemory = (navigator as Navigator & { deviceMemory?: number }).deviceMemory
   if (typeof deviceMemory === 'number' && deviceMemory <= MIN_DEVICE_MEMORY_GB) {
-    return { allowVideo: false, reason: `device-memory:${deviceMemory}`, motionRefused: false }
+    return { allowVideo: false, reason: `device-memory:${deviceMemory}`, motionRefused: false, lightMedia: true }
   }
 
   return {
     allowVideo: true,
     reason: link ? 'capable' : 'capable-no-connection-api',
     motionRefused: false,
+    lightMedia: effectiveType ? LIGHT_EFFECTIVE_TYPES.has(effectiveType) : false,
   }
 }
 
@@ -109,7 +132,7 @@ const listeners = new Set<() => void>()
 let pendingUpgrade: number | undefined
 
 function same(a: MediaTier, b: MediaTier): boolean {
-  return a.allowVideo === b.allowVideo && a.reason === b.reason
+  return a.allowVideo === b.allowVideo && a.reason === b.reason && a.lightMedia === b.lightMedia
 }
 
 function commit(next: MediaTier): void {

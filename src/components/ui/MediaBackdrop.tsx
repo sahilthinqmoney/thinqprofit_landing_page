@@ -11,6 +11,13 @@ export interface ImageSources {
 }
 
 export interface VideoSources {
+  /**
+   * A smaller encode of the same clip, for phones and modest connections.
+   *
+   * This field existed and was never read, so every phone was sent the full
+   * 2.7 MB hero — on a link the tier then judged too weak to use it on at all.
+   * A modest connection deserves a smaller file, not a still photograph.
+   */
   mobile?: string
   webm?: string
   mp4: string
@@ -49,6 +56,31 @@ interface MediaBackdropProps {
 const CROSS_FADE_MS = 300
 
 /**
+ * Above this, a viewport is a laptop and gets the full encode.
+ *
+ * Phones are the case the light encode exists for: the hero box is portrait
+ * there, so a 16:9 clip is already scaled up about three times under a scrim,
+ * and the resolution it was authored at buys nothing while the bytes cost real
+ * seconds on a phone connection.
+ */
+const COMPACT_VIEWPORT = '(max-width: 768px)'
+
+/** Tracks a media query without reading `window` during render. */
+function useMediaQuery(query: string): boolean {
+  const [matches, setMatches] = useState(false)
+
+  useEffect(() => {
+    const mql = window.matchMedia(query)
+    setMatches(mql.matches)
+    const onChange = () => setMatches(mql.matches)
+    mql.addEventListener('change', onChange)
+    return () => mql.removeEventListener('change', onChange)
+  }, [query])
+
+  return matches
+}
+
+/**
  * The page's full-bleed backdrop, loaded as a three-rung ladder:
  *
  *   1. LQIP    — a ~20px blurred thumbnail, inlined in the bundle. It is in the
@@ -79,6 +111,13 @@ export default function MediaBackdrop({
   const gate = useMediaGate(deadlineMs, Boolean(video))
   const posterRef = useRef<HTMLImageElement>(null)
   const clip = useVideoPlayback(gate.settle)
+  const compact = useMediaQuery(COMPACT_VIEWPORT)
+
+  // Prefer the light encode on a phone-sized viewport or a 3g-class link. The
+  // choice is made before the element mounts — the gate has not started yet on
+  // the first render — so no `<source>` is ever swapped under a live video,
+  // which would not reload it anyway.
+  const preferLight = compact || gate.lightMedia
 
   /** The still to show: an explicit poster, else the plain image prop. */
   const still = poster ?? (typeof image === 'string' ? image : image?.desktop)
@@ -195,6 +234,7 @@ export default function MediaBackdrop({
           ) : (
             <>
               {video?.webm && <source src={video.webm} type="video/webm" />}
+              {preferLight && video?.mobile && <source src={video.mobile} type="video/mp4" />}
               {video?.mp4 && <source src={video.mp4} type="video/mp4" />}
             </>
           )}
