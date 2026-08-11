@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react'
 import ChromaticWordmark from '../ui/ChromaticWordmark'
 import Container from '../ui/Container'
 import { RAIL } from '../../lib/layout'
@@ -16,7 +17,7 @@ import {
 } from '../../data/footer'
 
 export default function Footer() {
-  const year = new Date().getFullYear()
+  const year = useCopyrightYear()
 
   return (
     <footer id="footer" className="border-t border-border-soft bg-transparent text-fg-muted">
@@ -232,4 +233,29 @@ export default function Footer() {
       </div>
     </footer>
   )
+}
+
+/**
+ * The copyright year, without making it a hydration mismatch.
+ *
+ * The page is prerendered, so anything computed during render happens twice:
+ * once at build time and once in the reader's browser. `new Date()` is the
+ * classic way to get two different answers — a build in December read in
+ * January — and in React 19 a single mismatched text node is not a local
+ * repair. It fails hydration for the whole root and re-renders the entire page
+ * client-side, which is precisely the rebuild the prerender exists to avoid.
+ * A stale footer year would have cost the page its opening animation.
+ *
+ * So the first render is the build year on both sides, exactly, and the live
+ * year is applied afterwards — a no-op update on every day but one.
+ */
+function useCopyrightYear(): number {
+  const [year, setYear] = useState(__BUILD_YEAR__)
+
+  useEffect(() => {
+    const now = new Date().getFullYear()
+    setYear((current) => (current === now ? current : now))
+  }, [])
+
+  return year
 }
