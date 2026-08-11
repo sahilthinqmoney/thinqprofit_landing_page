@@ -3,6 +3,8 @@ import MediaSection from '../ui/MediaSection'
 import { theGap } from '../../data/theGap'
 import { lqipFor } from '../../data/lqip'
 import { MEDIA_DEADLINE_MS, useMediaGate } from '../../hooks/useMediaGate'
+import { useImageReveal } from '../../hooks/useImageReveal'
+import { useVideoPlayback } from '../../hooks/useVideoPlayback'
 
 /**
  * §3 — the gap between a move happening and the reader seeing it.
@@ -106,52 +108,34 @@ const CLOCK_BOX =
 function FlipClock() {
   const gate = useMediaGate(MEDIA_DEADLINE_MS.belowFold, true)
   const posterRef = useRef<HTMLImageElement>(null)
-  const videoRef = useRef<HTMLVideoElement>(null)
-  const [posterReady, setPosterReady] = useState(false)
-  const [videoReady, setVideoReady] = useState(false)
 
-  const mountPoster = posterReady || gate.started
+  // Once the still has been asked for it stays asked for. It used to unmount
+  // again when the gate expired, and if the decode had not finished by then the
+  // reader was left on the blurred placeholder with nothing coming.
+  const [mountPoster, setMountPoster] = useState(false)
+  useEffect(() => {
+    if (gate.started) setMountPoster(true)
+  }, [gate.started])
+
+  const posterReady = useImageReveal(mountPoster, posterRef, () => {
+    // If this device is never getting the clip, the still is the top rung.
+    if (!gate.videoAllowed) gate.settle()
+  })
 
   // A clip already playing survives a network dip — those bytes are spent — but
   // not a Reduce Motion request, which is about the motion rather than the data.
-  const keepPlaying = videoReady && !gate.motionRefused
+  const video = useVideoPlayback(gate.settle)
+  const keepPlaying = video.playing && !gate.motionRefused
   const mountVideo = !gate.motionRefused && (keepPlaying || (gate.videoAllowed && gate.started))
 
-  /** The clip is only the visible rung while it is actually mounted. */
-  const videoActive = mountVideo && videoReady
+  /** The clip is the visible rung only while it is genuinely running. */
+  const videoActive = mountVideo && video.playing
 
-  // If the clip is dropped, forget it was ready so the still comes back up
+  // If the clip is dropped, forget it was playing so the still comes back up
   // rather than both fading out and leaving the box empty.
   useEffect(() => {
-    if (!mountVideo && videoReady) setVideoReady(false)
-  }, [mountVideo, videoReady])
-
-  useEffect(() => {
-    if (!mountPoster) return
-    const poster = posterRef.current
-    if (!poster) return
-
-    let cancelled = false
-    const reveal = () => {
-      if (cancelled) return
-      setPosterReady(true)
-      if (!gate.videoAllowed) gate.settle()
-    }
-    poster.decode().then(reveal, () => {
-      if (poster.complete && poster.naturalWidth > 0) reveal()
-    })
-    return () => {
-      cancelled = true
-    }
-  }, [mountPoster, gate])
-
-  const handleVideoReady = () => {
-    setVideoReady(true)
-    gate.settle()
-    videoRef.current?.play().catch(() => {
-      // Autoplay refused. The poster underneath is already the whole picture.
-    })
-  }
+    if (!mountVideo) video.reset()
+  }, [mountVideo, video])
 
   return (
     <div
@@ -196,20 +180,31 @@ function FlipClock() {
         {/* Rung 3 — the clip, only where the tier allows one. */}
         {mountVideo && (
           <video
-            ref={videoRef}
+            ref={video.ref}
             loop
             muted
             playsInline
             preload="auto"
             aria-hidden="true"
-            onCanPlayThrough={handleVideoReady}
+            {...video.handlers}
             className="absolute inset-0 h-full w-full object-contain"
             style={{
               opacity: videoActive ? 1 : 0,
               transition: `opacity ${CROSS_FADE_MS}ms ease-out`,
             }}
           >
+            {/* WebM first: it is the encode that carries an alpha channel, and
+                the engines that take it get the cleanest composite.
+                The MP4 is for everything that cannot decode VP8 — which on a
+                phone is not an edge case. Safari only gained WebM in 17.4, so
+                every iPhone and iPad below that had no source it could play at
+                all and sat on the still forever. H.264 carries no alpha, but
+                nothing here depends on one: the elliptical mask and the screen
+                blend on the box are what dissolve this clip into the page, and
+                they were put there precisely because WebKit ignores both the
+                alpha and the blend on a video. */}
             <source src="/clips/flip-clock.webm" type="video/webm" />
+            <source src="/clips/flip-clock.mp4" type="video/mp4" />
           </video>
         )}
       </div>

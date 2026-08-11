@@ -56,9 +56,25 @@ function connection(): NetworkInformationLike | undefined {
   return (navigator as Navigator & { connection?: NetworkInformationLike }).connection
 }
 
+/**
+ * The answer with no browser to ask.
+ *
+ * One frozen object rather than a fresh one per call, because it is also the
+ * snapshot `useSyncExternalStore` reads during hydration: a new object each
+ * time is a new identity each time, which React treats as a store that changed
+ * mid-render and loops on. It refuses video, which is the only safe answer
+ * before anything is known about the connection — and it is what the prerender
+ * renders, so the browser's first render agrees with the HTML it is adopting.
+ */
+const SERVER_TIER: MediaTier = Object.freeze({
+  allowVideo: false,
+  reason: 'no-window',
+  motionRefused: false,
+})
+
 function computeTier(): MediaTier {
   if (typeof window === 'undefined' || typeof navigator === 'undefined') {
-    return { allowVideo: false, reason: 'no-window', motionRefused: false }
+    return SERVER_TIER
   }
 
   if (window.matchMedia?.(REDUCED_MOTION_QUERY).matches) {
@@ -131,10 +147,35 @@ if (typeof window !== 'undefined') {
   window.matchMedia?.(REDUCED_MOTION_QUERY).addEventListener?.('change', reevaluate)
   // Coming back from offline does not always fire a `connection` change.
   window.addEventListener('online', reevaluate)
+  /*
+   * Restored from the back/forward cache.
+   *
+   * Safari is the engine that actually does this: it freezes the whole page —
+   * DOM, JavaScript state, this module's `current` — and thaws it later,
+   * possibly on a different network, without firing `connection` change or
+   * `online`. The tier would then be an answer about a connection the reader no
+   * longer has, held for the rest of the visit. Re-asking on restore is the
+   * only way to notice.
+   */
+  window.addEventListener('pageshow', (event) => {
+    if ((event as PageTransitionEvent).persisted) reevaluate()
+  })
 }
 
 export function getMediaTier(): MediaTier {
   return current
+}
+
+/**
+ * The snapshot used while rendering on the server and while hydrating.
+ *
+ * React calls this rather than `getMediaTier` during hydration, so the first
+ * client render reproduces the prerendered HTML exactly instead of contradicting
+ * it with a tier the server had no way to know. The live value is picked up on
+ * the re-render immediately afterwards.
+ */
+export function getServerMediaTier(): MediaTier {
+  return SERVER_TIER
 }
 
 export function subscribeMediaTier(onChange: () => void): () => void {

@@ -1,4 +1,3 @@
-import { useEffect, useState } from 'react'
 import Container from '../ui/Container'
 import Button from '../ui/Button'
 import { hero } from '../../data/hero'
@@ -25,6 +24,17 @@ const HERO_POSTER = '/clips/hero-backdrop-poster.webp'
  *    docs/motion-brief.md §7 reads upward motion on a broker page as a claim
  *    about returns.
  *
+ * The settle is CSS (`.hero-settle-*` in index.css), driven by nothing but the
+ * delay each line carries. It used to be a React state flip — mounted settled,
+ * unsettled in an effect, settled again two frames later — and that stopped
+ * working the moment the page began arriving prerendered: the headline was
+ * already on screen and finished, so the effect took it back to opacity 0 and
+ * played the intro a second time, seconds late. Worse, whether the reader saw
+ * that depended on their engine. WebKit painted the collapse; Chromium batched
+ * it away. In CSS the animation belongs to the element the HTML delivered, so
+ * it runs exactly once, at first paint, before any script has loaded, and
+ * hydration cannot restart it.
+ *
  * The headline is split on `\n`, so it animates whatever lines the string
  * produces — the current copy carries no breaks and wraps on its own.
  *
@@ -33,9 +43,12 @@ const HERO_POSTER = '/clips/hero-backdrop-poster.webp'
  * blur.
  */
 
+/** Line n starts at `SETTLE_LEAD + n * SETTLE_STAGGER`. */
+const SETTLE_LEAD_MS = 90
+const SETTLE_STAGGER_MS = 110
+
 export default function Hero() {
   const lines = hero.headline.split('\n')
-  const settled = useOpeningSettle()
 
   return (
     <section
@@ -50,6 +63,7 @@ export default function Hero() {
         video="/clips/hero-backdrop.mp4"
         deadlineMs={MEDIA_DEADLINE_MS.hero}
         focus="center"
+        priority
       />
 
       {/* Top Ambient Keynote Spotlight */}
@@ -68,29 +82,16 @@ export default function Hero() {
         <Container>
           <div className="mx-auto max-w-[56em] text-center flex flex-col items-center">
             {/* Display H1 Headline with Metallic Depth */}
-            <h1
-              className="display-lead font-display tracking-tight text-balance drop-shadow-[0_4px_30px_rgba(0,0,0,0.9)] text-[clamp(2.75rem,5.9vw,5.75rem)] leading-[1.12]"
-              style={{
-                fontVariationSettings: settled
-                  ? '"wdth" 82, "wght" 580'
-                  : '"wdth" 75, "wght" 250',
-              }}
-            >
+            <h1 className="hero-settle-axis display-lead font-display tracking-tight text-balance drop-shadow-[0_4px_30px_rgba(0,0,0,0.9)] text-[clamp(2.75rem,5.9vw,5.75rem)] leading-[1.12]">
               {lines.map((line: string, index: number) => (
-                <span
-                  key={line}
-                  className={`block py-1 ${
-                    settled ? 'overflow-visible' : 'overflow-hidden'
-                  }`}
-                >
+                <span key={line} className="block py-1">
                   <span
-                    className="block bg-gradient-to-b from-white via-white/95 to-white/80 bg-clip-text text-transparent transition-[opacity,transform] duration-[900ms] py-2 leading-[1.15]"
-                    style={{
-                      transitionTimingFunction: 'var(--ease-out-expo)',
-                      transitionDelay: `${90 + index * 110}ms`,
-                      opacity: settled ? 1 : 0,
-                      transform: settled ? 'translateY(0)' : 'translateY(-0.14em)',
-                    }}
+                    className="hero-settle-line block bg-gradient-to-b from-white via-white/95 to-white/80 bg-clip-text text-transparent py-2 leading-[1.15]"
+                    style={
+                      {
+                        '--settle-delay': `${SETTLE_LEAD_MS + index * SETTLE_STAGGER_MS}ms`,
+                      } as React.CSSProperties
+                    }
                   >
                     {line}
                   </span>
@@ -100,13 +101,12 @@ export default function Hero() {
 
             {/* Subheadline & Value Proposition Container */}
             <div
-              className="mt-6 sm:mt-8 flex flex-col items-center transition-[opacity,transform] duration-700 w-full"
-              style={{
-                transitionTimingFunction: 'var(--ease-out-expo)',
-                transitionDelay: `${90 + lines.length * 110}ms`,
-                opacity: settled ? 1 : 0,
-                transform: settled ? 'translateY(0)' : 'translateY(8px)',
-              }}
+              className="hero-settle-block mt-6 sm:mt-8 flex flex-col items-center w-full"
+              style={
+                {
+                  '--settle-delay': `${SETTLE_LEAD_MS + lines.length * SETTLE_STAGGER_MS}ms`,
+                } as React.CSSProperties
+              }
             >
               {/* Subheadline Paragraph */}
               <p className="max-w-[36em] mx-auto text-base sm:text-lg lg:text-xl leading-relaxed text-white/85 drop-shadow-[0_2px_16px_rgba(0,0,0,0.9)] text-balance font-normal">
@@ -175,34 +175,4 @@ export default function Hero() {
       </div>
     </section>
   )
-}
-
-/**
- * Drives the opening. Returns `true` once the settle should run — immediately
- * and without animation under Reduce Motion, otherwise on the frame after mount
- * so the transition has a start state to move from.
- *
- * Two nested frames, not one: a single rAF can land in the same paint as the
- * initial render, in which case the browser never observes the "before" values
- * and the headline simply appears.
- */
-function useOpeningSettle() {
-  const [settled, setSettled] = useState(true)
-
-  useEffect(() => {
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
-
-    setSettled(false)
-    let inner = 0
-    const outer = requestAnimationFrame(() => {
-      inner = requestAnimationFrame(() => setSettled(true))
-    })
-
-    return () => {
-      cancelAnimationFrame(outer)
-      cancelAnimationFrame(inner)
-    }
-  }, [])
-
-  return settled
 }

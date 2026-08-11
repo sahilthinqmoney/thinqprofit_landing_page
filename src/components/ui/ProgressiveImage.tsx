@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { lqipFor } from '../../data/lqip'
 import { IN_VIEW_MARGIN } from '../../hooks/useInView'
 import { MEDIA_DEADLINE_MS, useMediaGate } from '../../hooks/useMediaGate'
+import { useImageReveal } from '../../hooks/useImageReveal'
 
 /** Matches the backdrop's fade, so every rung on the page resolves alike. */
 const CROSS_FADE_MS = 300
@@ -50,7 +51,6 @@ export default function ProgressiveImage({
 }: ProgressiveImageProps) {
   const gate = useMediaGate(MEDIA_DEADLINE_MS.belowFold, false, IN_VIEW_MARGIN.image)
   const imageRef = useRef<HTMLImageElement>(null)
-  const [ready, setReady] = useState(false)
   const placeholder = lqipFor(src)
 
   // The wrapper is both the gate's observation target and, for callers that
@@ -64,30 +64,14 @@ export default function ProgressiveImage({
     [gate.ref, elementRef],
   )
 
-  // Once decoded it stays; otherwise it follows the gate, so a paused
-  // attempt drops the request and a later one can pick it up again.
-  const mounted = ready || gate.started
-
+  // Once asked for it stays: an element that unmounts mid-decode can never
+  // finish decoding, and the reader keeps the placeholder for good.
+  const [asked, setAsked] = useState(false)
   useEffect(() => {
-    if (!mounted) return
-    const image = imageRef.current
-    if (!image) return
+    if (gate.started) setAsked(true)
+  }, [gate.started])
 
-    let cancelled = false
-    const reveal = () => {
-      if (cancelled) return
-      setReady(true)
-      gate.settle()
-    }
-
-    image.decode().then(reveal, () => {
-      if (image.complete && image.naturalWidth > 0) reveal()
-    })
-
-    return () => {
-      cancelled = true
-    }
-  }, [mounted, gate])
+  const ready = useImageReveal(asked, imageRef, gate.settle)
 
   return (
     <div
@@ -109,7 +93,7 @@ export default function ProgressiveImage({
         />
       )}
 
-      {mounted && (
+      {asked && (
         <img
           ref={imageRef}
           src={src}

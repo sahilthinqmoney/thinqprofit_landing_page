@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { MEDIA_DEADLINE_MS, useMediaGate } from '../../hooks/useMediaGate'
+import { useImageReveal } from '../../hooks/useImageReveal'
+import { useVideoPlayback } from '../../hooks/useVideoPlayback'
 
 export interface ImageSources {
   mobile?: string
@@ -29,6 +31,18 @@ interface MediaBackdropProps {
   className?: string
   /** How long this backdrop may spend climbing before it holds where it is. */
   deadlineMs?: number
+  /**
+   * This backdrop is in the first viewport and is the page's largest paint.
+   *
+   * It skips the viewport gate for its still — the gate exists to avoid
+   * fetching what may never be seen, and this is seen by definition — so the
+   * `<img>` is present in the prerendered HTML and starts downloading from the
+   * markup rather than waiting for React, an IntersectionObserver and a state
+   * update. The still is also shown as soon as it decodes rather than being
+   * faded in, because a cross-fade here would need JavaScript to start it and
+   * would hold the reader on the placeholder until it did.
+   */
+  priority?: boolean
 }
 
 /** Every rung fades in over this. A hard swap reads as a glitch, not a load. */
@@ -60,70 +74,51 @@ export default function MediaBackdrop({
   blur = false,
   className = '',
   deadlineMs = MEDIA_DEADLINE_MS.belowFold,
+  priority = false,
 }: MediaBackdropProps) {
   const gate = useMediaGate(deadlineMs, Boolean(video))
   const posterRef = useRef<HTMLImageElement>(null)
-  const videoRef = useRef<HTMLVideoElement>(null)
-  const [posterReady, setPosterReady] = useState(false)
-  const [videoReady, setVideoReady] = useState(false)
+  const clip = useVideoPlayback(gate.settle)
 
   /** The still to show: an explicit poster, else the plain image prop. */
   const still = poster ?? (typeof image === 'string' ? image : image?.desktop)
 
-  // A rung that has already been revealed stays mounted, because taking a
-  // picture back off the screen is the one thing worse than never showing it.
-  const mountStill = Boolean(still) && (posterReady || gate.started)
+  // A rung that has already been asked for stays mounted, because taking a
+  // picture back off the screen is the one thing worse than never showing it —
+  // and an element unmounted mid-decode can never finish decoding, which left
+  // readers on the blurred placeholder for good.
+  //
+  // A priority still is mounted from the start: it is in the first viewport, so
+  // there is nothing for the gate to decide and nothing gained by making the
+  // request wait for JavaScript to run.
+  const [asked, setAsked] = useState(false)
+  useEffect(() => {
+    if (gate.started) setAsked(true)
+  }, [gate.started])
+
+  const mountStill = Boolean(still) && (priority || asked)
+
+  // Reveal the still only once the pixels are decoded and ready to paint.
+  const posterReady = useImageReveal(mountStill, posterRef, () => {
+    // If this device is never getting the clip, the still is the top rung.
+    if (!gate.videoAllowed) gate.settle()
+  })
 
   // A clip already playing survives a network dip — those bytes are spent and
   // stopping it would help nobody — but not a Reduce Motion request, which is
   // about the motion rather than the bandwidth.
-  const keepPlaying = videoReady && !gate.motionRefused
+  const keepPlaying = clip.playing && !gate.motionRefused
   const mountVideo =
     Boolean(video) && !gate.motionRefused && (keepPlaying || (gate.videoAllowed && gate.started))
 
-  /** The clip is only the visible rung while it is actually mounted. */
-  const videoActive = mountVideo && videoReady
+  /** The clip is the visible rung only while it is genuinely running. */
+  const videoActive = mountVideo && clip.playing
 
-  // If the clip is dropped, forget that it was ready so the still comes back up
+  // If the clip is dropped, forget it was playing so the still comes back up
   // rather than both fading out and leaving the box empty.
   useEffect(() => {
-    if (!mountVideo && videoReady) setVideoReady(false)
-  }, [mountVideo, videoReady])
-
-  // Reveal the still only once the pixels are decoded and ready to paint.
-  useEffect(() => {
-    if (!mountStill) return
-    const img = posterRef.current
-    if (!img) return
-
-    let cancelled = false
-    const reveal = () => {
-      if (cancelled) return
-      setPosterReady(true)
-      // If this device is never getting the clip, the still is the top rung.
-      if (!gate.videoAllowed) gate.settle()
-    }
-
-    // `decode()` resolves after the bitmap is ready, so the cross-fade cannot
-    // start against a frame the compositor has not got yet.
-    img.decode().then(reveal, () => {
-      // Decode can reject on a cached-but-not-yet-attached image; fall back to
-      // the load event rather than leaving the reader on the blur forever.
-      if (img.complete && img.naturalWidth > 0) reveal()
-    })
-
-    return () => {
-      cancelled = true
-    }
-  }, [mountStill, gate])
-
-  const handleVideoReady = () => {
-    setVideoReady(true)
-    gate.settle()
-    videoRef.current?.play().catch(() => {
-      // Autoplay refused. The still underneath is already a complete picture.
-    })
-  }
+    if (!mountVideo) clip.reset()
+  }, [mountVideo, clip])
 
   return (
     <div
@@ -133,16 +128,20 @@ export default function MediaBackdrop({
       className={`absolute inset-0 overflow-hidden select-none pointer-events-none ${className}`}
       style={{ backgroundColor: '#070709', zIndex: -999 }}
     >
-      {/* Rung 1 — always present, never fetched. */}
+      {/* Rung 1 — always present, never fetched. It fades once a real rung is
+          up: left at full opacity it is a second full-bleed layer, blurred,
+          composited on every frame for the life of the page. */}
       {lqip && (
         <div
-          className="absolute inset-0 h-full w-full bg-cover bg-center scale-[1.08] origin-top"
+          className="absolute inset-0 h-full w-full bg-cover bg-center origin-top"
           style={{
             backgroundImage: `url("${lqip}")`,
             // The thumbnail is ~20px wide; the blur hides the upscale rather
             // than letting it read as a broken image.
             filter: 'blur(24px)',
             transform: 'scale(1.12)',
+            opacity: posterReady || videoActive ? 0 : 1,
+            transition: `opacity ${CROSS_FADE_MS}ms ease-out`,
           }}
         />
       )}
@@ -154,13 +153,21 @@ export default function MediaBackdrop({
           src={still}
           alt=""
           decoding="async"
+          fetchPriority={priority ? 'high' : undefined}
           className="absolute inset-0 h-full w-full object-cover scale-[1.08] origin-top"
           style={{
             // Hands off once the clip is running, and comes back if the clip is
             // ever dropped. The clip is opaque here so nothing shows through,
             // but leaving a second full-bleed layer lit underneath it is a
             // composite the compositor pays for every frame.
-            opacity: posterReady && !videoActive ? 1 : 0,
+            //
+            // A priority still is simply opaque. Starting it at 0 and waiting
+            // for `decode()` to raise it would mean the largest paint on the
+            // page could not appear until React had mounted — which is the one
+            // thing this backdrop must not depend on. The browser does not
+            // paint a half-decoded image anyway, so nothing is lost by letting
+            // it arrive on its own; the placeholder beneath still fades out.
+            opacity: videoActive ? 0 : priority || posterReady ? 1 : 0,
             transition: `opacity ${CROSS_FADE_MS}ms ease-out`,
           }}
         />
@@ -171,15 +178,15 @@ export default function MediaBackdrop({
           decides whether these bytes are ever requested. */}
       {mountVideo && (
         <video
-          ref={videoRef}
+          ref={clip.ref}
           loop
           muted
           playsInline
           preload="auto"
-          onCanPlayThrough={handleVideoReady}
+          {...clip.handlers}
           className="absolute inset-0 h-full w-full object-cover scale-[1.08] origin-top"
           style={{
-            opacity: videoReady ? 1 : 0,
+            opacity: videoActive ? 1 : 0,
             transition: `opacity ${CROSS_FADE_MS}ms ease-out`,
           }}
         >

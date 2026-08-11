@@ -50,6 +50,20 @@ export function initScrollTrigger() {
 
   // ScrollTrigger's own resize handling does not see an image finishing decode.
   window.addEventListener('load', () => ScrollTrigger.refresh(), { once: true })
+
+  /*
+   * Restored from the back/forward cache.
+   *
+   * Safari freezes the page rather than rebuilding it, so a reader who leaves,
+   * rotates the device or resizes the window, and comes back gets every trigger
+   * still holding pixel offsets measured against the old layout. Nothing else
+   * here fires on a restore — not `load`, not the rAF pair, not `fonts.ready` —
+   * so without this the whole page's scroll animation stays wrong until reload,
+   * which is exactly the kind of fault that only some readers ever see.
+   */
+  window.addEventListener('pageshow', (event) => {
+    if ((event as PageTransitionEvent).persisted) ScrollTrigger.refresh()
+  })
 }
 
 export { gsap, ScrollTrigger, useGSAP }

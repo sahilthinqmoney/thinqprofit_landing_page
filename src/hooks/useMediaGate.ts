@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { IN_VIEW_MARGIN, useInView } from './useInView'
 import { useMediaTier } from './useMediaTier'
 
@@ -114,12 +114,22 @@ export function useMediaGate(
     setStatus(attemptsRef.current >= MAX_ATTEMPTS ? 'stopped' : 'paused')
   }, [status, inView])
 
-  return {
-    ref,
-    started: status === 'loading' || status === 'settled',
-    stopped: status === 'stopped',
-    videoAllowed: tier.allowVideo && wantsVideo,
-    motionRefused: tier.motionRefused,
-    settle,
-  }
+  // Memoised, and that is load-bearing rather than an optimisation. Callers put
+  // this object in effect dependency arrays, and those effects own `img.decode()`
+  // — which is cancelled by their cleanup. A fresh object each render therefore
+  // tore the decode down and restarted it on every render, and while the gate
+  // was cycling attempts the decode never got to resolve at all. The symptom was
+  // a still that never arrived: the reader kept the 20px blurred placeholder for
+  // the life of the visit, with the real image sitting decoded in cache.
+  return useMemo(
+    () => ({
+      ref,
+      started: status === 'loading' || status === 'settled',
+      stopped: status === 'stopped',
+      videoAllowed: tier.allowVideo && wantsVideo,
+      motionRefused: tier.motionRefused,
+      settle,
+    }),
+    [ref, status, tier.allowVideo, tier.motionRefused, wantsVideo, settle],
+  )
 }

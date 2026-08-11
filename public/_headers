@@ -1,3 +1,40 @@
+# The document must be revalidated every visit, and this is the rule the rest
+# of the file depends on.
+#
+# index.html is no longer a stub. It carries the prerendered page, the entire
+# stylesheet inline, and the hashed filenames of every script and every piece of
+# media. So a cached copy is not a stale page — it is a stale copy of
+# EVERYTHING, pinned to whatever the build looked like when that reader first
+# arrived, and immune to any deploy after it. Two readers on two different
+# cached documents see two different sites and neither is the one that shipped.
+#
+# `max-age=0, must-revalidate` still allows a 304, so the cost is a conditional
+# request, not a re-download.
+/
+  Cache-Control: public, max-age=0, must-revalidate
+
+/index.html
+  Cache-Control: public, max-age=0, must-revalidate
+
+# Icons carry no content hash, and Safari asks for /favicon.ico at the root
+# without the ?v= the markup uses — so the query string cannot be relied on to
+# expire them. An hour keeps a corrected icon from being stuck on a reader's
+# machine, and these are 300 bytes to 21 KB, so revalidation costs nothing.
+/favicon.ico
+  Cache-Control: public, max-age=3600, must-revalidate
+
+/favicon-*.png
+  Cache-Control: public, max-age=3600, must-revalidate
+
+/apple-touch-icon.png
+  Cache-Control: public, max-age=3600, must-revalidate
+
+/android-chrome-*.png
+  Cache-Control: public, max-age=3600, must-revalidate
+
+/site.webmanifest
+  Cache-Control: public, max-age=3600, must-revalidate
+
 /assets/*
   Cache-Control: public, max-age=31536000, immutable
 

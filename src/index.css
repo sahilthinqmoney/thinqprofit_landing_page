@@ -780,3 +780,86 @@
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
 }
+
+/* ---------------------------------------------------------------------------
+   The hero's opening settle.
+
+   This is the page's one authored motion moment: the headline damps DOWNWARD
+   into place a line at a time, and nothing rises — motion-brief §7 reads
+   upward motion on a broker page as a claim about returns.
+
+   It lives in CSS rather than in React, and that is load-bearing rather than
+   tidiness. It used to be a state flip in `Hero.tsx`: render settled, unset it
+   in an effect, set it again two frames later. That worked only while the page
+   was built in the browser. Once the HTML began arriving prerendered the
+   headline was already on screen and finished, so the effect dragged it back to
+   opacity 0 and replayed the intro seconds after the reader had started
+   reading — and only on some engines, because WebKit painted the collapse where
+   Chromium batched it into a single frame. One animation, three or four
+   different experiences depending on browser and connection.
+
+   As an animation on the element the HTML delivers, it starts when that element
+   is parsed — before any script — runs exactly once, and hydration cannot
+   restart it, because React attaches to the node without touching the property.
+
+   `both` fill is what holds the from-state during the delay; without it each
+   line would flash at full opacity before its turn came.
+   --------------------------------------------------------------------------- */
+
+@keyframes hero-settle-line {
+  from {
+    opacity: 0;
+    transform: translateY(-0.14em);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes hero-settle-block {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* The weight and width axes resolve with the lines. Kept on the h1 rather than
+   per line so the whole headline thickens as one. */
+@keyframes hero-settle-axis {
+  from {
+    font-variation-settings: 'wdth' 75, 'wght' 250;
+  }
+  to {
+    font-variation-settings: 'wdth' 82, 'wght' 580;
+  }
+}
+
+.hero-settle-line {
+  animation: hero-settle-line 900ms var(--ease-out-expo) var(--settle-delay, 90ms) both;
+}
+
+.hero-settle-block {
+  animation: hero-settle-block 700ms var(--ease-out-expo) var(--settle-delay, 90ms) both;
+}
+
+.hero-settle-axis {
+  /* Also the resting value, so Reduce Motion — which drops the animation
+     entirely below — still gets the settled weight rather than the from-state. */
+  font-variation-settings: 'wdth' 82, 'wght' 580;
+  animation: hero-settle-axis 900ms var(--ease-out-expo) 90ms both;
+}
+
+/* Reduce Motion gets the finished headline and no movement. Removing the
+   animation is enough: every `to` value above is the element's resting style. */
+@media (prefers-reduced-motion: reduce) {
+  .hero-settle-line,
+  .hero-settle-block,
+  .hero-settle-axis {
+    animation: none;
+  }
+}
