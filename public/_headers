@@ -1,11 +1,14 @@
 /assets/*
   Cache-Control: public, max-age=31536000, immutable
 
+# Safe only because scripts/hash-media.mjs puts the content hash in the
+# filename at build time: a changed file gets a new URL, so nothing cached here
+# can ever be stale.
 /clips/*
-  Cache-Control: public, max-age=604800, stale-while-revalidate=86400
+  Cache-Control: public, max-age=31536000, immutable
 
 /images/*
-  Cache-Control: public, max-age=604800, stale-while-revalidate=86400
+  Cache-Control: public, max-age=31536000, immutable
 
 /*
   X-Content-Type-Options: nosniff

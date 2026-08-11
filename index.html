@@ -9,7 +9,19 @@
          set — they predate the platinum system as well as this one. They are
          assets, not markup, so they are flagged here rather than patched here. -->
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <link rel="preload" href="/clips/hero-backdrop.mp4" as="video" type="video/mp4" />
+    <!-- The hero's still, not its clip. Preloading the video spent the first
+         megabytes of a cold connection on an asset that may never be allowed to
+         play — on a metered or slow link the ladder in src/lib/mediaTier.ts
+         stops at this poster, and on a fast one the clip is fetched on its own
+         once the poster is up. The poster is what the reader sees first either
+         way, so it is the only media worth racing the page for. -->
+    <link
+      rel="preload"
+      href="/clips/hero-backdrop-poster.webp"
+      as="image"
+      type="image/webp"
+      fetchpriority="high"
+    />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <!-- Pre-launch, and now the only restraint on this page other than the URL
          being unadvertised: the deployment is publicly reachable. The canonical

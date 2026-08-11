@@ -3,6 +3,11 @@ import Container from '../ui/Container'
 import Button from '../ui/Button'
 import { hero } from '../../data/hero'
 import MediaBackdrop from '../ui/MediaBackdrop'
+import { lqipFor } from '../../data/lqip'
+import { MEDIA_DEADLINE_MS } from '../../hooks/useMediaGate'
+
+/** Preloaded in index.html — the one piece of media that races the page. */
+const HERO_POSTER = '/clips/hero-backdrop-poster.webp'
 
 
 /**
@@ -38,7 +43,14 @@ export default function Hero() {
       className="relative isolate flex min-h-svh w-full flex-col justify-between overflow-hidden bg-bg pt-12 pb-8 sm:pt-16 sm:pb-12"
     >
       {/* Full-bleed background media layer */}
-      <MediaBackdrop alt={hero.mediaAlt} video="/clips/hero-backdrop.mp4" focus="center" />
+      <MediaBackdrop
+        alt={hero.mediaAlt}
+        lqip={lqipFor(HERO_POSTER)}
+        poster={HERO_POSTER}
+        video="/clips/hero-backdrop.mp4"
+        deadlineMs={MEDIA_DEADLINE_MS.hero}
+        focus="center"
+      />
 
       {/* Top Ambient Keynote Spotlight */}
       <div
@@ -124,8 +136,17 @@ export default function Hero() {
                     <span className="text-white/90 font-mono text-sm font-medium mr-3 border-r border-white/20 pr-3 shrink-0">
                       +91
                     </span>
+                    {/* The placeholder is not a label: it is announced as a value,
+                        not a name, and it is gone the moment the reader types. The
+                        field is named so the number survives a submit, and labelled
+                        so a screen reader says what it wants. */}
                     <input
                       type="tel"
+                      name="phone"
+                      id="hero-phone"
+                      aria-label="Mobile number"
+                      autoComplete="tel-national"
+                      inputMode="numeric"
                       maxLength={10}
                       placeholder="Mobile number"
                       className="w-full bg-transparent text-sm text-white placeholder-white/40 outline-none font-normal"

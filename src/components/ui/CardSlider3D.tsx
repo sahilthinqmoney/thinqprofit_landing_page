@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react'
 import type { CapabilityCard } from '../../data/capabilities'
+import ProgressiveImage from './ProgressiveImage'
 
 interface CardSlider3DProps {
   /** The cards to show, in order. */
@@ -228,10 +229,13 @@ export default function CardSlider3D({
                 {/* Seamless Integrated 3D Feature Asset */}
                 {item.image ? (
                   <div className="relative mt-4 h-40 sm:h-48 w-full flex items-center justify-center overflow-hidden pointer-events-none">
-                    <img
+                    <ProgressiveImage
+                      fill
                       src={item.image}
                       alt={item.title}
-                      className={`h-full w-full object-contain transition-transform duration-500 group-hover:scale-108 ${
+                      width={item.imageWidth}
+                      height={item.imageHeight}
+                      imageClassName={`object-contain transition-transform duration-500 group-hover:scale-108 ${
                         item.image.includes('alerts') || item.image.includes('workspace') || item.image.includes('greeks') ? '' : 'mix-blend-lighten'
                       }`}
                     />

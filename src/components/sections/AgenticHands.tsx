@@ -2,6 +2,7 @@ import { useRef } from 'react'
 import { Bot, Code2, History, ShieldAlert } from 'lucide-react'
 import { gsap, initScrollTrigger, useGSAP } from '../../lib/scrollTrigger'
 import { agenticHands } from '../../data/agenticHands'
+import ProgressiveImage from '../ui/ProgressiveImage'
 
 initScrollTrigger()
 
@@ -12,8 +13,8 @@ const SPEC_ICONS = [Bot, Code2, History, ShieldAlert]
  */
 export default function AgenticHands() {
   const sectionRef = useRef<HTMLDivElement>(null)
-  const robotHandRef = useRef<HTMLImageElement>(null)
-  const humanHandRef = useRef<HTMLImageElement>(null)
+  const robotHandRef = useRef<HTMLDivElement>(null)
+  const humanHandRef = useRef<HTMLDivElement>(null)
   const copyRef = useRef<HTMLDivElement>(null)
 
   useGSAP(
@@ -69,11 +70,14 @@ export default function AgenticHands() {
     >
       {/* Robot Hand — Left side, pointing towards headline */}
       <div className="absolute left-0 sm:left-2 lg:left-6 top-[16%] sm:top-[18%] lg:top-[20%] -translate-y-1/2 z-10 pointer-events-none w-[24%] max-w-[340px] min-w-[140px]">
-        <img
-          ref={robotHandRef}
+        <ProgressiveImage
+          elementRef={robotHandRef}
           src="/images/hands/robot.png"
           alt={agenticHands.robotAlt}
-          className="w-full h-auto object-contain filter drop-shadow-[0_0_35px_rgba(255,255,255,0.22)] origin-right-center"
+          width={405}
+          height={236}
+          className="origin-right-center"
+          imageClassName="object-contain filter drop-shadow-[0_0_35px_rgba(255,255,255,0.22)]"
         />
       </div>
 
@@ -129,11 +133,14 @@ export default function AgenticHands() {
 
       {/* Human Hand — Right side, pointing towards headline */}
       <div className="absolute right-0 sm:right-2 lg:right-6 top-[22%] sm:top-[24%] lg:top-[26%] -translate-y-1/2 z-10 pointer-events-none w-[24%] max-w-[340px] min-w-[140px]">
-        <img
-          ref={humanHandRef}
+        <ProgressiveImage
+          elementRef={humanHandRef}
           src="/images/hands/human.png"
           alt={agenticHands.humanAlt}
-          className="w-full h-auto object-contain filter drop-shadow-[0_0_35px_rgba(255,255,255,0.2)] origin-right-center"
+          width={399}
+          height={230}
+          className="origin-right-center"
+          imageClassName="object-contain filter drop-shadow-[0_0_35px_rgba(255,255,255,0.2)]"
         />
       </div>
     </section>
