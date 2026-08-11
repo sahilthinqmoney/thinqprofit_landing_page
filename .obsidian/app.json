@@ -1,0 +1,14 @@
+{
+  "alwaysUpdateLinks": true,
+  "newLinkFormat": "relative",
+  "useMarkdownLinks": false,
+  "attachmentFolderPath": "docs/attachments",
+  "userIgnoreFilters": [
+    "node_modules",
+    "dist",
+    ".agents",
+    "brag-output",
+    "tools/plates/out",
+    ".browser-sessions"
+  ]
+}
