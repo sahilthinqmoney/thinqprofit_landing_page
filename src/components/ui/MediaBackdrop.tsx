@@ -213,14 +213,18 @@ export default function MediaBackdrop({
       )}
 
       {/* Rung 3 — the clip. Mounted only on a tier that allows it, which is why
-          it can carry `preload="auto"`: the gate, not the attribute, is what
-          decides whether these bytes are ever requested. */}
+          it can carry `preload="auto"` and `autoPlay`: the gate, not the
+          attributes, is what decides whether these bytes are ever requested.
+          `autoPlay` is not decoration — iOS ignores `preload`, so without a
+          declared intent to play it never buffers, never fires `canplay`, and
+          the clip that was waiting on `canplay` to start never starts. */}
       {mountVideo && (
         <video
           ref={clip.ref}
           loop
           muted
           playsInline
+          autoPlay
           preload="auto"
           {...clip.handlers}
           className="absolute inset-0 h-full w-full object-cover scale-[1.08] origin-top"

@@ -11,13 +11,15 @@ const STALL_TIMEOUT_MS = 2_000
 const STALL_POLL_MS = 500
 
 export interface VideoPlayback {
-  ref: React.RefObject<HTMLVideoElement | null>
+  /** Callback ref — attach it to the `<video>`. */
+  ref: (node: HTMLVideoElement | null) => void
   /** True only while frames are actually being presented. */
   playing: boolean
   /** Call when the clip is unmounted, so a remount does not start revealed. */
   reset: () => void
   /** Spread onto the `<video>`. */
   handlers: {
+    onLoadedMetadata: () => void
     onCanPlay: () => void
     onPlaying: () => void
     onPause: () => void
@@ -26,53 +28,76 @@ export interface VideoPlayback {
 }
 
 /**
- * Reveals a clip only while it is genuinely playing.
+ * Starts a clip and reveals it only while it is genuinely playing.
  *
- * The rule this replaces was "reveal on `canplaythrough`, then call `play()`",
- * and it had two failure modes that both look identical to a reader — a still
- * picture where a moving one was promised:
+ * ── Why playback is asked for more than once ───────────────────────────────
  *
- *  1. **It revealed before it knew.** `play()` returns a promise, and on a
- *     phone it is refused often: iOS Low Power Mode blocks autoplay outright,
- *     Android battery savers do the same, and any engine may refuse under its
- *     autoplay policy. The old code showed the clip and faded the poster out
- *     *first*, then swallowed the rejection — leaving the reader looking at a
- *     frozen first frame with the real still already gone.
- *  2. **`canplaythrough` is not reliable on mobile.** iOS Safari treats
- *     `preload="auto"` as a suggestion and frequently never fires it at all, so
- *     the clip was never revealed however well it could have played.
+ * This used to start playback from `canplay` alone, and on a real iPhone that
+ * deadlocks. **iOS ignores `preload`**: it will not buffer media without a
+ * reason to, so `canplay` — which needs buffered data — never fires. We were
+ * waiting for `canplay` before calling `play()`, and iOS was waiting for
+ * `play()` before loading enough to fire `canplay`. Neither moved, and the
+ * reader kept the poster for the whole visit.
  *
- * So playback is now attempted at `canplay` — which mobile does fire — and the
- * clip is revealed only at `playing`, which is the one event that means frames
- * are reaching the screen. Anything that stops them (`pause`, `error`, a
- * refused `play()`, or a watchdog catching a clip stuck on one frame) puts the
- * still back. Every one of those is recoverable: a later `playing` reveals the
- * clip again, so a clip that recovers is not punished for having stalled.
+ * It is invisible in testing, because desktop WebKit (what Playwright drives,
+ * even under an iPhone device profile) honours `preload="auto"`, buffers
+ * happily and fires `canplay`. Only the real phone deadlocks.
  *
- * This is a deliberate departure from the original "reveal on `canplaythrough`
- * only" rule. That rule existed to stop a half-buffered clip being shown, and
- * `playing` plus the watchdog enforces the same thing by observation rather
- * than by prediction — it is evidence that the clip is running, not a forecast
- * that it will.
+ * So playback is now requested the moment the element exists, again at
+ * `loadedmetadata` — which iOS does fire — and again at `canplay`. Asking more
+ * than once is free: `play()` on an already-playing element resolves without
+ * doing anything.
+ *
+ * ── Why the reveal is separate from the request ────────────────────────────
+ *
+ * The clip is revealed only at `playing`, the one event that means frames are
+ * reaching the screen. Before, `videoReady` was set and the poster faded out
+ * *before* `play()` was known to have succeeded, and `play()` is refused often
+ * on phones — iOS Low Power Mode blocks autoplay outright, as do Android
+ * battery savers. That left the reader looking at a frozen first frame with the
+ * real still already gone.
+ *
+ * Anything that stops the frames — `pause`, `error`, a refused `play()`, or the
+ * watchdog catching a clip stuck on one frame — puts the still back. All of it
+ * is recoverable: a later `playing` reveals the clip again.
  */
 export function useVideoPlayback(onPlay?: () => void): VideoPlayback {
-  const ref = useRef<HTMLVideoElement>(null)
+  const node = useRef<HTMLVideoElement | null>(null)
   const [playing, setPlaying] = useState(false)
 
   const onPlayRef = useRef(onPlay)
   onPlayRef.current = onPlay
 
-  // Ask to play as soon as there are frames to show. Never reveal here: this
-  // only starts the attempt, and the attempt is allowed to fail.
-  const onCanPlay = useCallback(() => {
-    const video = ref.current
+  /** Ask to play. Never reveals — the attempt is allowed to fail. */
+  const request = useCallback(() => {
+    const video = node.current
     if (!video || !video.paused) return
     void video.play().catch(() => {
-      // Refused. `playing` never fires, so the still simply stays up — which
-      // is a complete picture, and the only honest thing to show.
+      // Refused. `playing` never fires, so the still simply stays up — which is
+      // a complete picture, and the only honest thing to show.
       setPlaying(false)
     })
   }, [])
+
+  const ref = useCallback(
+    (el: HTMLVideoElement | null) => {
+      node.current = el
+      if (!el) return
+      /*
+       * iOS decides whether an inline clip may autoplay by looking at the
+       * ATTRIBUTES, and React sets `muted` as a DOM property only. A video that
+       * is muted by property but not by attribute is treated as unmuted, and an
+       * unmuted autoplay is refused outright.
+       */
+      el.setAttribute('muted', '')
+      el.setAttribute('playsinline', '')
+      el.muted = true
+      // The first request, before any event has had to fire. This is what
+      // breaks the iOS deadlock: it gives the phone the reason to load.
+      request()
+    },
+    [request],
+  )
 
   const onPlaying = useCallback(() => {
     setPlaying(true)
@@ -81,12 +106,12 @@ export function useVideoPlayback(onPlay?: () => void): VideoPlayback {
 
   const stop = useCallback(() => setPlaying(false), [])
 
-  // A clip can be `playing` by the engine's account and still not advance —
-  // a decode that quietly gives up, a tab throttled to nothing. That reads as
-  // a still image, so it is treated as one.
+  // A clip can be `playing` by the engine's account and still not advance — a
+  // decode that quietly gives up, a tab throttled to nothing. That reads as a
+  // still image, so it is treated as one.
   useEffect(() => {
     if (!playing) return
-    const video = ref.current
+    const video = node.current
     if (!video) return
 
     let last = video.currentTime
@@ -115,8 +140,14 @@ export function useVideoPlayback(onPlay?: () => void): VideoPlayback {
       // Unmounting the clip must clear this, or a remount starts out claiming
       // to be playing and reveals an element with nothing decoded in it yet.
       reset: stop,
-      handlers: { onCanPlay, onPlaying, onPause: stop, onError: stop },
+      handlers: {
+        onLoadedMetadata: request,
+        onCanPlay: request,
+        onPlaying,
+        onPause: stop,
+        onError: stop,
+      },
     }),
-    [playing, stop, onCanPlay, onPlaying],
+    [ref, playing, stop, request, onPlaying],
   )
 }

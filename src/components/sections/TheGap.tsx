@@ -184,6 +184,7 @@ function FlipClock() {
             loop
             muted
             playsInline
+            autoPlay
             preload="auto"
             aria-hidden="true"
             {...video.handlers}
