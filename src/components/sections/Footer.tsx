@@ -33,9 +33,17 @@ export default function Footer() {
             <dl className="grid gap-x-12 gap-y-5 md:grid-cols-2 lg:gap-x-16">
               {registrationDetails.map((line) => (
                 <div key={line.label}>
-                  <dt className="text-xs font-medium text-fg-subtle">{line.label}</dt>
-                  <dd className="mt-1 text-xs leading-relaxed text-fg-muted font-normal">
-                    {line.value}
+                  <dt className="text-xs font-semibold text-fg">{line.label}</dt>
+                  <dd
+                    className={`mt-1 text-xs leading-relaxed font-normal ${
+                      line.isPlaceholder ? 'text-white/40 italic font-mono' : 'text-fg-muted'
+                    }`}
+                  >
+                    {line.value.split('\n').map((str, idx) => (
+                      <span key={idx} className="block">
+                        {str}
+                      </span>
+                    ))}
                   </dd>
                 </div>
               ))}
@@ -217,7 +225,7 @@ export default function Footer() {
               © <span className="tabular">{year}</span> {copyrightEntity}. {copyrightSuffix}
             </p>
             <p className="text-fg-subtle text-[11px]">
-              Money Logix Private Ltd | CIN: U64990MH2006PTC165522 | SEBI Reg: INZ000235531
+              Money Logix Private Limited | CIN: U64990MH2006PTC165522 | SEBI Reg: INZ000235531
             </p>
           </div>
         </Container>

@@ -1,19 +1,8 @@
-import { Compass, Languages, Layers, Zap } from 'lucide-react'
+import { Bell, Compass, Languages, Layers, LayoutGrid } from 'lucide-react'
 import type { ElementType } from 'react'
 
 /**
  * §4 copy — "What else is in it".
- *
- * §3 spends a full screen on one feature; this is the rest of the terminal at
- * one card each. The asymmetry is the design: a reader convinced by §3 needs to
- * know the product is not a single trick, and a reader who was not is unlikely
- * to be convinced by a longer list.
- *
- * No figures anywhere in here, latency in particular. "Orders routed in
- * milliseconds" is a claim the reader can weigh; a specific number costs the
- * vendor nothing and cannot be checked. DESIGN.md §9 makes any unverified figure
- * a `[BRACKETED]` placeholder or nothing, and a latency number is the easiest
- * thing on a broker page to print and the hardest to audit.
  */
 
 export interface CapabilityCard {
@@ -33,46 +22,50 @@ export const capabilityCards: CapabilityCard[] = [
     id: 'position-compass',
     title: 'Position Compass',
     description:
-      'Tracks whether open positions are moving with or against the market, not just whether they are up.',
+      "Whether your open positions are going with the market or against it. Not the same as whether they're up.",
     icon: Compass,
-    badge: 'AI Analytics',
+    badge: 'Analysis',
     image: '/images/capabilities/compass.png',
   },
   {
-    id: 'option-chain-builder',
-    title: 'Option Chain Builder',
+    id: 'build-from-chain',
+    title: 'Build from the Chain',
     description:
-      'Build multi-leg structures by tapping bids & asks, previewing complete payoff curves before execution.',
+      'Tap bids and asks to assemble a multi-leg position. See the payoff before you send it.',
     icon: Layers,
-    badge: 'Options F&O',
+    badge: 'Options',
     image: '/images/capabilities/option_chain.png',
   },
   {
     id: 'greeks-in-plain-english',
     title: 'Greeks, in Plain English',
     description:
-      'Delta, theta and vega translated into real-time plain English sentences about P&L drivers.',
+      'What delta, theta and vega are actually doing to your P&L, in words.',
     icon: Languages,
-    badge: 'Risk Engine',
+    badge: 'Risk',
     image: '/images/capabilities/greeks_prism.png',
   },
   {
-    id: 'low-latency-execution',
-    title: 'Low-Latency Execution',
+    id: 'your-workspace',
+    title: 'Your Workspace',
     description:
-      'Orders routed in milliseconds to minimize slippage between what you see and what you get.',
-    icon: Zap,
-    badge: 'Ultra Fast',
-    image: '/images/capabilities/low_latency.png',
+      'Dock and snap widgets. Link them so one symbol change moves all of them. Save layouts and switch in a click.',
+    icon: LayoutGrid,
+    badge: 'Workspace',
+    image: '/images/capabilities/workspace.png',
+  },
+  {
+    id: 'alerts-that-hold',
+    title: 'Alerts That Hold',
+    description:
+      'Set a condition once. It watches for you.',
+    icon: Bell,
+    badge: 'Alerts',
+    image: '/images/capabilities/alerts.png',
   },
 ]
 
-/**
- * The section's deck. It names what is NOT here, which is the move a pre-launch
- * page has to make and almost never does — and it carries no date, because a
- * date on an unshipped capability is a promise the page cannot keep.
- */
 export const capabilitiesIntro = {
   heading: 'What else is in it',
-  subheading: 'Everything you need to analyze, decide, and execute—with precision.',
+  subheading: '',
 }

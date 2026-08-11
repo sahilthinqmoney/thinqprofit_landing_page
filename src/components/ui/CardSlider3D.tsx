@@ -231,7 +231,9 @@ export default function CardSlider3D({
                     <img
                       src={item.image}
                       alt={item.title}
-                      className="h-full w-full object-contain mix-blend-lighten transition-transform duration-500 group-hover:scale-108"
+                      className={`h-full w-full object-contain transition-transform duration-500 group-hover:scale-108 ${
+                        item.image.includes('alerts') || item.image.includes('workspace') || item.image.includes('greeks') ? '' : 'mix-blend-lighten'
+                      }`}
                     />
                   </div>
                 ) : null}

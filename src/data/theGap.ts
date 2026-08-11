@@ -19,13 +19,12 @@
 
 export interface GapContent {
   heading: string
-  solution: string
-  finePrint: string
+  lead: string
+  closer: string
 }
 
 export const theGap: GapContent = {
-  heading: 'It happened at 11:40. You saw it at 12:15.',
-  solution:
-    'You were on another instrument. There are forty of them and the session is six hours long.',
-  finePrint: '',
+  heading: 'It happened at 11:40.\nYou saw it at 12:15.',
+  lead: 'The market throws off signals all day. Institutions have machines reading every one of them. You have two eyes.',
+  closer: 'Thinq is that machine, running for you.',
 }

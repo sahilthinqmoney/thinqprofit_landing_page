@@ -24,12 +24,15 @@ export default function TheGap() {
       scrim={0}
       measure="13em"
       headline={theGap.heading}
-      body={theGap.solution}
-      finePrint={theGap.finePrint}
+      body={theGap.lead}
       bgAmbient={<AmbientWash />}
       aside={<FlipClock />}
       media={{ alt: 'Feature Focus' }}
-    />
+    >
+      <p className="mt-8 text-lg sm:text-xl font-medium text-fg tracking-tight">
+        {theGap.closer}
+      </p>
+    </MediaSection>
   )
 }
 
@@ -57,6 +60,13 @@ function AmbientWash() {
  * assistive tech and carries no controls.
  */
 function FlipClock() {
+  const handleTimeUpdate = (e: React.SyntheticEvent<HTMLVideoElement>) => {
+    const video = e.currentTarget
+    if (video.currentTime < 1.0) {
+      video.currentTime = 1.1
+    }
+  }
+
   return (
     <div className="relative group flex items-center justify-center md:justify-end w-full mx-auto md:ml-auto">
       <video
@@ -65,7 +75,9 @@ function FlipClock() {
         muted
         playsInline
         aria-hidden="true"
-        className="w-full h-auto max-h-[520px] sm:max-h-[680px] md:max-h-[850px] lg:max-h-[960px] object-contain opacity-95 scale-125 sm:scale-130 md:scale-110 translate-x-0 md:translate-x-3 [mask-image:radial-gradient(ellipse_85%_85%_at_center,black_45%,transparent_100%)] drop-shadow-[0_24px_48px_rgba(0,0,0,0.95)] transition-all duration-700 group-hover:scale-135 pointer-events-none"
+        onLoadedMetadata={handleTimeUpdate}
+        onTimeUpdate={handleTimeUpdate}
+        className="w-full h-auto max-h-[520px] sm:max-h-[680px] md:max-h-[850px] lg:max-h-[960px] object-contain opacity-95 scale-125 sm:scale-130 md:scale-110 translate-x-0 md:translate-x-3 mix-blend-screen transition-all duration-700 group-hover:scale-135 pointer-events-none"
       >
         <source src="/clips/flip-clock.webm" type="video/webm" />
       </video>

@@ -14,6 +14,10 @@ import type { HeroContent } from '../types'
  */
 export const hero: HeroContent = {
   headline: 'Trading that talks back.',
+  sub: "Thinq reads price action back to you — what's in play, what's changed, what's noise.",
+  offerBold: '6 months, ₹0 Thinq brokerage*',
+  offerNote: 'for everyone on the waitlist. Statutory charges apply.',
+  trust: 'SEBI-registered broker · Member NSE & BSE · CDSL depository participant',
 
   /**
    * Describes the machined form that actually ships behind the copy, not a

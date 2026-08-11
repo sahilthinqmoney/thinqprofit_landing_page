@@ -7,6 +7,10 @@
 /** §2 — src/data/hero.ts */
 export interface HeroContent {
   headline: string
+  sub: string
+  offerBold: string
+  offerNote: string
+  trust: string
   mediaAlt: string
   riskDisclosure: string
 }

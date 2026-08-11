@@ -1,22 +1,14 @@
 import { useRef } from 'react'
+import { Bot, Code2, History, ShieldAlert } from 'lucide-react'
 import { gsap, initScrollTrigger, useGSAP } from '../../lib/scrollTrigger'
 import { agenticHands } from '../../data/agenticHands'
 
 initScrollTrigger()
 
+const SPEC_ICONS = [Bot, Code2, History, ShieldAlert]
+
 /**
- * §3.5 — two hands closing in on the headline as the section scrolls through.
- *
- * A robot hand enters from the left and a human one from the right, both
- * settling as the copy scales up. The gesture is the argument: the section says
- * agentic trading is coming, and what the reader sees is a machine hand and a
- * person's hand arriving at the same sentence.
- *
- * `scrub: 1.2` ties the whole thing to scroll position rather than playing it
- * once, so it runs backwards on the way up. Everything sits inside a
- * `matchMedia` on `prefers-reduced-motion: no-preference` — under reduced motion
- * the timeline is never built, so the hands and copy render at their final
- * values instead of at a start state that never animates away.
+ * §3.5 — Agentic trading section with hands animation and rectangular glass feature cards.
  */
 export default function AgenticHands() {
   const sectionRef = useRef<HTMLDivElement>(null)
@@ -38,13 +30,12 @@ export default function AgenticHands() {
         const tl = gsap.timeline({
           scrollTrigger: {
             trigger: section,
-            start: 'top 85%',
-            end: 'bottom 35%',
+            start: 'top 80%',
+            end: 'bottom 40%',
             scrub: 1.2,
           },
         })
 
-        // All three start at position 0 — they arrive together, not in sequence.
         tl.fromTo(
           robotHand,
           { xPercent: -100, opacity: 0.15, rotate: -24 },
@@ -59,7 +50,7 @@ export default function AgenticHands() {
         )
         tl.fromTo(
           copy,
-          { scale: 0.92, opacity: 0.3, y: 20 },
+          { scale: 0.94, opacity: 0.3, y: 20 },
           { scale: 1, opacity: 1, y: 0, ease: 'power2.out' },
           0
         )
@@ -74,10 +65,10 @@ export default function AgenticHands() {
     <section
       ref={sectionRef}
       id="agentic"
-      className="relative scroll-mt-24 py-24 sm:py-36 lg:py-44 overflow-hidden bg-transparent select-none"
+      className="relative scroll-mt-24 py-24 sm:py-32 lg:py-40 overflow-hidden bg-transparent select-none"
     >
-      {/* Left, pointing at the "A" of "Agentic". */}
-      <div className="absolute left-0 sm:left-2 lg:left-6 top-[44%] sm:top-[46%] lg:top-[48%] -translate-y-1/2 z-10 pointer-events-none w-[32%] max-w-[440px] min-w-[180px]">
+      {/* Robot Hand — Left side, pointing towards headline */}
+      <div className="absolute left-0 sm:left-2 lg:left-6 top-[16%] sm:top-[18%] lg:top-[20%] -translate-y-1/2 z-10 pointer-events-none w-[24%] max-w-[340px] min-w-[140px]">
         <img
           ref={robotHandRef}
           src="/images/hands/robot.png"
@@ -86,20 +77,58 @@ export default function AgenticHands() {
         />
       </div>
 
-      <div
-        ref={copyRef}
-        className="relative z-20 mx-auto max-w-[42em] px-4 text-center space-y-4"
-      >
-        <h2 className="display whitespace-normal text-fg md:whitespace-pre-line text-[clamp(2.35rem,4.8vw,4.25rem)] font-bold leading-[1.08] tracking-tight">
-          {agenticHands.headline}
-        </h2>
-        <p className="text-[1.0625rem] sm:text-lg leading-[1.65] text-fg-muted max-w-[32em] mx-auto">
-          {agenticHands.subheading}
+      {/* Main Copy & Feature Cards Container - Aligned to 84rem Rail */}
+      <div className="relative z-20 mx-auto max-w-[84rem] px-4 sm:px-6 lg:px-8">
+        {/* Animated Header Block */}
+        <div ref={copyRef} className="text-center space-y-4 max-w-3xl mx-auto">
+          <h2 className="display whitespace-normal text-fg text-[clamp(2.2rem,4.5vw,3.75rem)] font-bold leading-[1.1] tracking-tight">
+            {agenticHands.headline}
+          </h2>
+          <p className="text-base sm:text-lg leading-relaxed text-fg-muted max-w-xl mx-auto">
+            {agenticHands.subheading}
+          </p>
+        </div>
+
+        {/* 4 Thin Cards Grid - Full Rail Width with Generous Gap & Slim Height */}
+        <div className="mt-10 sm:mt-12 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 lg:gap-6 items-stretch">
+          {agenticHands.specs.map((item, index) => {
+            const Icon = SPEC_ICONS[index % SPEC_ICONS.length]
+            return (
+              <div
+                key={item.title}
+                className="group relative flex flex-col justify-between rounded-xl bg-white/[0.035] p-4 sm:p-4.5 backdrop-blur-xl transition-all duration-300 hover:bg-white/[0.06] hover:shadow-[0_8px_24px_rgba(0,0,0,0.5)]"
+              >
+                <div className="space-y-2.5 flex-1 flex flex-col justify-between">
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center justify-center text-fg-muted transition-colors duration-300 group-hover:text-white">
+                        <Icon className="h-5 w-5" />
+                      </div>
+                      <span className="font-mono text-[11px] font-medium text-white/30">
+                        0{index + 1}
+                      </span>
+                    </div>
+                    <h3 className="text-sm font-semibold text-fg tracking-tight group-hover:text-white transition-colors">
+                      {item.title}
+                    </h3>
+                  </div>
+                  <p className="text-xs leading-relaxed text-fg-muted font-normal">
+                    {item.description}
+                  </p>
+                </div>
+              </div>
+            )
+          })}
+        </div>
+
+        {/* Fine Print Disclosure */}
+        <p className="mt-10 sm:mt-12 text-xs leading-relaxed text-fg-subtle text-center max-w-none whitespace-normal sm:whitespace-nowrap mx-auto">
+          {agenticHands.finePrint}
         </p>
       </div>
 
-      {/* Right, and lower — pointing at the "y." of "shortly." */}
-      <div className="absolute right-0 sm:right-2 lg:right-6 top-[62%] sm:top-[65%] lg:top-[67%] -translate-y-1/2 z-10 pointer-events-none w-[32%] max-w-[440px] min-w-[180px]">
+      {/* Human Hand — Right side, pointing towards headline */}
+      <div className="absolute right-0 sm:right-2 lg:right-6 top-[22%] sm:top-[24%] lg:top-[26%] -translate-y-1/2 z-10 pointer-events-none w-[24%] max-w-[340px] min-w-[140px]">
         <img
           ref={humanHandRef}
           src="/images/hands/human.png"

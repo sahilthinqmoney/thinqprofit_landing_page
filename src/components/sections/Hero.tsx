@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react'
 import Container from '../ui/Container'
 import Button from '../ui/Button'
-import { SCALE } from '../../lib/layout'
 import { hero } from '../../data/hero'
 import MediaBackdrop from '../ui/MediaBackdrop'
 
@@ -36,13 +35,10 @@ export default function Hero() {
   return (
     <section
       id="hero"
-      className="relative isolate flex min-h-svh w-full flex-col justify-between overflow-hidden bg-bg pt-0 pb-0"
+      className="relative isolate flex min-h-svh w-full flex-col justify-between overflow-hidden bg-bg pt-12 pb-8 sm:pt-16 sm:pb-12"
     >
-
       {/* Full-bleed background media layer */}
       <MediaBackdrop alt={hero.mediaAlt} video="/clips/hero-backdrop.mp4" focus="center" />
-
-
 
       {/* Top Ambient Keynote Spotlight */}
       <div
@@ -50,21 +46,18 @@ export default function Hero() {
         className="pointer-events-none absolute inset-x-0 top-0 h-[480px] -z-10 bg-[radial-gradient(ellipse_70%_50%_at_50%_-10%,rgba(255,255,255,0.12),rgba(255,255,255,0))]"
       />
 
-      {/* Dark overlay with balanced opacity to enhance background visibility */}
+      {/* Balanced dark overlay scrim to ensure background video visibility while keeping text readable */}
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute inset-0 -z-10 bg-black/20 bg-[radial-gradient(ellipse_80%_80%_at_50%_45%,rgba(0,0,0,0.2)_0%,rgba(0,0,0,0.5)_100%)]"
+        className="pointer-events-none absolute inset-0 -z-10 bg-black/25 bg-[radial-gradient(ellipse_85%_85%_at_50%_45%,rgba(0,0,0,0.25)_0%,rgba(0,0,0,0.65)_100%)]"
       />
 
-
-      <div className="flex flex-1 flex-col items-center justify-center my-auto py-0">
-
-
+      <div className="flex flex-1 flex-col items-center justify-center my-auto py-6 sm:py-10">
         <Container>
-          <div className="mx-auto max-w-[52em] text-center">
+          <div className="mx-auto max-w-[56em] text-center flex flex-col items-center">
             {/* Display H1 Headline with Metallic Depth */}
             <h1
-              className={`display-lead mt-4 font-display tracking-tight text-balance drop-shadow-[0_4px_30px_rgba(0,0,0,0.9)] ${SCALE.hero}`}
+              className="display-lead font-display tracking-tight text-balance drop-shadow-[0_4px_30px_rgba(0,0,0,0.9)] text-[clamp(2.75rem,5.9vw,5.75rem)] leading-[1.12]"
               style={{
                 fontVariationSettings: settled
                   ? '"wdth" 82, "wght" 580'
@@ -72,9 +65,14 @@ export default function Hero() {
               }}
             >
               {lines.map((line: string, index: number) => (
-                <span key={line} className="block overflow-hidden pb-[0.12em]">
+                <span
+                  key={line}
+                  className={`block py-1 ${
+                    settled ? 'overflow-visible' : 'overflow-hidden'
+                  }`}
+                >
                   <span
-                    className="block bg-gradient-to-b from-white via-white/95 to-white/80 bg-clip-text text-transparent transition-[opacity,transform] duration-[900ms]"
+                    className="block bg-gradient-to-b from-white via-white/95 to-white/80 bg-clip-text text-transparent transition-[opacity,transform] duration-[900ms] py-2 leading-[1.15]"
                     style={{
                       transitionTimingFunction: 'var(--ease-out-expo)',
                       transitionDelay: `${90 + index * 110}ms`,
@@ -88,9 +86,9 @@ export default function Hero() {
               ))}
             </h1>
 
-            {/* Subheadline & Value Proposition */}
+            {/* Subheadline & Value Proposition Container */}
             <div
-              className="transition-[opacity,transform] duration-700"
+              className="mt-6 sm:mt-8 flex flex-col items-center transition-[opacity,transform] duration-700 w-full"
               style={{
                 transitionTimingFunction: 'var(--ease-out-expo)',
                 transitionDelay: `${90 + lines.length * 110}ms`,
@@ -98,15 +96,22 @@ export default function Hero() {
                 transform: settled ? 'translateY(0)' : 'translateY(8px)',
               }}
             >
-              <p className="mt-6 max-w-[34em] mx-auto text-[1.0625rem] sm:text-[1.1875rem] leading-[1.65] text-white/80 drop-shadow-[0_2px_16px_rgba(0,0,0,0.9)] text-balance font-normal">
-                <span className="font-semibold text-white drop-shadow-[0_0_12px_rgba(255,255,255,0.6)]">6 Months</span> at{' '}
-                <span className="font-semibold text-white drop-shadow-[0_0_12px_rgba(255,255,255,0.6)]">₹0 brokerage*</span> on equity.
+              {/* Subheadline Paragraph */}
+              <p className="max-w-[36em] mx-auto text-base sm:text-lg lg:text-xl leading-relaxed text-white/85 drop-shadow-[0_2px_16px_rgba(0,0,0,0.9)] text-balance font-normal">
+                <span className="text-white font-semibold">
+                  Thinq reads price action back to you
+                </span>{' '}
+                — what's in play, what's changed, what's noise.
               </p>
 
+              {/* Offer Line */}
+              <p className="mt-5 sm:mt-6 max-w-[46em] mx-auto text-sm sm:text-base leading-relaxed text-white/80 drop-shadow-[0_2px_16px_rgba(0,0,0,0.9)] text-balance">
+                <span className="font-semibold text-white">{hero.offerBold}</span>{' '}
+                <span className="text-white/70">{hero.offerNote}</span>
+              </p>
 
-
-              {/* High-End Mobile Number Input + Join the waitlist CTA Lockup */}
-              <div className="mt-8 flex flex-col items-center justify-center max-w-lg mx-auto w-full">
+              {/* Waitlist Mobile Input Form */}
+              <div className="mt-8 sm:mt-10 flex flex-col items-center justify-center max-w-md mx-auto w-full">
                 <form
                   onSubmit={(e) => {
                     e.preventDefault()
@@ -115,8 +120,8 @@ export default function Hero() {
                   }}
                   className="w-full flex flex-col sm:flex-row items-stretch sm:items-center gap-3"
                 >
-                  <div className="relative flex-1 w-full flex items-center rounded-full border border-white/20 bg-black/40 backdrop-blur-xl px-5 py-3 text-white transition-all duration-300 focus-within:border-white/50 focus-within:bg-black/60 shadow-[0_0_20px_rgba(0,0,0,0.5)]">
-                    <span className="text-white/80 font-mono text-sm font-medium mr-3 border-r border-white/20 pr-3 shrink-0">
+                  <div className="relative flex-1 w-full flex items-center rounded-full border border-white/25 bg-black/60 backdrop-blur-2xl px-5 py-3.5 text-white transition-all duration-300 focus-within:border-white/60 focus-within:bg-black/80 shadow-[0_4px_24px_rgba(0,0,0,0.6)]">
+                    <span className="text-white/90 font-mono text-sm font-medium mr-3 border-r border-white/20 pr-3 shrink-0">
                       +91
                     </span>
                     <input
@@ -130,14 +135,19 @@ export default function Hero() {
                     type="submit"
                     size="lg"
                     fullWidth
-                    className="sm:w-auto shrink-0 shadow-[0_0_24px_rgba(255,255,255,0.15)] hover:shadow-[0_0_32px_rgba(255,255,255,0.25)] transition-all duration-300"
+                    className="sm:w-auto shrink-0 shadow-[0_0_24px_rgba(255,255,255,0.2)] hover:shadow-[0_0_32px_rgba(255,255,255,0.35)] transition-all duration-300"
                   >
                     Join the waitlist
                   </Button>
                 </form>
               </div>
 
-
+              {/* Trust Badge & Disclosures */}
+              <div className="mt-8 max-w-lg text-center">
+                <p className="text-xs font-medium text-white/65 tracking-wide">
+                  {hero.trust}
+                </p>
+              </div>
             </div>
           </div>
         </Container>
