@@ -10,6 +10,7 @@
     "lint": "oxlint",
     "preview": "vite preview",
     "lqip": "node scripts/gen-lqip.mjs",
+    "favicons": "node scripts/gen-favicons.mjs",
     "hash-media": "node scripts/hash-media.mjs"
   },
   "dependencies": {
