@@ -912,35 +912,50 @@
 
 
 /* ---------------------------------------------------------------------------
-   The headline, on one line at every width.
+   The headline: two lines on a phone, one from tablet up.
 
-   Measured, "Trading that talks back." is 10.317em wide. Holding it to a single
-   line therefore fixes the type size to the viewport: at 7.8vw it occupies
-   about 80% of the screen, which leaves headroom for the fallback face to be a
-   few per cent wider than the webfont before it lands — a wrap or a clip in
-   that moment would be worse than the gap it avoids.
+   Holding one line at every width ties the type size to the screen, because
+   "Trading that talks back." is a measured 10.317em wide. On a 320px phone that
+   worked out at 25px — technically one line, and too small to be the first
+   thing anyone reads. Twenty-four characters cannot be both one line and large
+   on a narrow screen, so the phone takes the other side of that trade: it wraps
+   to two balanced lines and keeps the type big.
 
-   The consequence is worth stating plainly: on a 320px phone this is about
-   25px, where the wrapping headline was 44px. Twenty-four characters cannot be
-   both one line and large on a narrow screen, and one line is what was asked
-   for.
+   From 640px there is room for one line and it takes it: 7.8vw puts the string
+   at 79% of the screen, which leaves headroom for the fallback face to be wider
+   than the webfont before it lands. The cap engages at about 1120px, so laptops
+   and televisions sit at 5.75rem exactly as they did before any of this.
 
-   Capped at 5.75rem so it stops growing once there is room — the cap engages at
-   about 1120px, which is where the old clamp topped out too, so nothing changes
-   on a laptop.
-
-   The uncapped rule comes first for televisions: `min()` needs Chromium 79 and
-   these sets are older, so an engine that cannot parse the capped rule keeps the
-   plain `vw` one and still gets a single line.
+   Both sizing rules are stated twice, plain value first and modern function
+   second. `clamp()` and `min()` need Chromium 79, and the televisions this page
+   has to survive are older than that — an engine that cannot parse the second
+   rule keeps the first and still gets a readable headline rather than an
+   inherited default.
    --------------------------------------------------------------------------- */
 
-.headline-oneline {
-  white-space: nowrap;
-  font-size: 7.8vw;
+.headline-fit {
+  white-space: normal;
+  text-wrap: balance;
+  font-size: 2.75rem;
+}
+
+@supports (font-size: clamp(1px, 1vw, 2px)) {
+  .headline-fit {
+    font-size: clamp(2.75rem, 5.9vw, 5.75rem);
+  }
+}
+
+@media (min-width: 640px) {
+  .headline-fit {
+    white-space: nowrap;
+    font-size: 7.8vw;
+  }
 }
 
 @supports (font-size: min(1px, 1vw)) {
-  .headline-oneline {
-    font-size: min(7.8vw, 5.75rem);
+  @media (min-width: 640px) {
+    .headline-fit {
+      font-size: min(7.8vw, 5.75rem);
+    }
   }
 }
