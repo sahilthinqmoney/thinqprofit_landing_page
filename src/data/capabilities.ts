@@ -47,7 +47,7 @@ export const capabilityCards: CapabilityCard[] = [
     badge: 'Options',
     image: '/images/capabilities/option_chain.webp',
     imageWidth: 512,
-    imageHeight: 340,
+    imageHeight: 341,
   },
   {
     id: 'greeks-in-plain-english',
