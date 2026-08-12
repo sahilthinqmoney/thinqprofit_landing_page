@@ -39,11 +39,28 @@ const GROUND = { r: 5, g: 5, b: 5, alpha: 1 }
 /**
  * Fraction of the tile the mark occupies.
  *
- * The mark nearly fills its own 24-unit viewBox, so rendered edge to edge it
- * touches the tile's sides and reads as a crop rather than a logo. 0.78 leaves
- * an even margin at every size.
+ * Nearly all of it, and that took two corrections. The mark was drawn at 0.78
+ * of the tile, but its own artwork carries padding too — the ring and both dots
+ * occupy 1.85 to 22.25 inside a 0-24 viewBox — so the two margins compounded
+ * and the ink ended up covering 12.5% of the icon inside a bounding box 66%
+ * wide. At 16px on Safari's light tab strip that does not read as a logo, it
+ * reads as a dark plate with something small floating in it, which is what a
+ * reader described as a border around the icon.
+ *
+ * TIGHT_VIEWBOX crops the artwork's own padding first, so this figure is the
+ * only margin that applies rather than the second of two.
  */
-const MARK_SCALE = 0.78
+const MARK_SCALE = 0.92
+
+/**
+ * The mark's true content bounds inside its 0-24 viewBox.
+ *
+ * Ring: cx/cy 8.8, r 5.8, stroke 2.3 -> 1.85 to 15.75. Dots: 14.35 to 18.05 and
+ * 19.75 to 22.25. So the content spans 1.85 to 22.25 on both axes, and the
+ * viewBox has 1.85 units of dead space on every side. Rasterising the file as
+ * drawn bakes that padding into every icon.
+ */
+const TIGHT_VIEWBOX = '1.85 1.85 20.4 20.4'
 
 /**
  * Why these tiles are square, and must stay square.
@@ -84,7 +101,10 @@ async function tile(svg, size) {
   // Rasterise from the SVG at the final size rather than downscaling one big
   // bitmap: at 16px the ring is barely two pixels thick and a resample turns it
   // to grey mush.
-  const mark = await sharp(svg, { density: 384 })
+  const cropped = Buffer.from(
+    svg.toString().replace(/viewBox="[^"]*"/, `viewBox="${TIGHT_VIEWBOX}"`),
+  )
+  const mark = await sharp(cropped, { density: 384 })
     .resize(inner, inner, { fit: 'contain', background: { r: 0, g: 0, b: 0, alpha: 0 } })
     .png()
     .toBuffer()
@@ -145,14 +165,17 @@ function tileSvg(markSvg) {
     .replace(/^[\s\S]*?<svg[^>]*>/, '')
     .replace(/<\/svg>\s*$/, '')
     .trim()
-  const pad = ((1 - MARK_SCALE) / 2) * 24
-  const scale = MARK_SCALE
+  // Same two corrections as the rasters: crop to the artwork's own bounds, then
+  // scale that to MARK_SCALE of the tile — so the vector and the PNGs agree.
+  const [vx, vy, vw] = TIGHT_VIEWBOX.split(' ').map(Number)
+  const scale = (MARK_SCALE * 24) / vw
+  const pad = (24 - vw * scale) / 2
   // Rounded to match the PNGs. This is the copy Chrome and Firefox actually
   // draw, so if it stayed square those two would show the sharp tile and only
   // Safari and the .ico fallback would get the corners.
   return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="512" height="512">
   <rect width="24" height="24" fill="#050505" />
-  <g transform="translate(${pad.toFixed(3)} ${pad.toFixed(3)}) scale(${scale})">
+  <g transform="translate(${(pad - vx * scale).toFixed(3)} ${(pad - vy * scale).toFixed(3)}) scale(${scale.toFixed(4)})">
 ${inner
   .split('\n')
   .map((line) => (line.trim() ? '    ' + line.trim() : line))
