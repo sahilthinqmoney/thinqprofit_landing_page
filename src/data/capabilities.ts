@@ -58,7 +58,7 @@ export const capabilityCards: CapabilityCard[] = [
     badge: 'Risk',
     image: '/images/capabilities/greeks_prism.webp',
     imageWidth: 512,
-    imageHeight: 351,
+    imageHeight: 354,
   },
   {
     id: 'your-workspace',
