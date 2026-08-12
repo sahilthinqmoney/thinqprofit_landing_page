@@ -112,7 +112,7 @@ export default function Hero() {
               {lines.map((line: string, index: number) => (
                 <span key={line} className="block py-1">
                   <span
-                    className="hero-settle-line block bg-gradient-to-b from-white via-white/95 to-white/80 bg-clip-text text-transparent py-2 leading-[1.15]"
+                    className="hero-settle-line headline-metal block py-2 leading-[1.15]"
                     style={
                       {
                         '--settle-delay': `${SETTLE_LEAD_MS + index * SETTLE_STAGGER_MS}ms`,

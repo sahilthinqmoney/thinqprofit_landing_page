@@ -555,10 +555,23 @@
     );
     background-size: 200% 100%;
     background-position: 0% 50%;
-    background-clip: text;
-    -webkit-background-clip: text;
-    color: transparent;
     animation: chromatic-sweep 11s linear infinite;
+    /*
+     * Readable first. `color: transparent` used to be unconditional, so any
+     * engine without `background-clip: text` — which is most television
+     * browsers — painted nothing at all where the wordmark should be. The
+     * gradient is an enhancement; the glyphs are the content, and content does
+     * not get to depend on a decorative property being supported.
+     */
+    color: var(--color-fg);
+  }
+
+  @supports ((-webkit-background-clip: text) or (background-clip: text)) {
+    .chromatic-text {
+      background-clip: text;
+      -webkit-background-clip: text;
+      color: transparent;
+    }
   }
 
   /*
@@ -861,5 +874,38 @@
   .hero-settle-block,
   .hero-settle-axis {
     animation: none;
+  }
+}
+
+
+/* ---------------------------------------------------------------------------
+   The hero headline's metal.
+
+   Was four Tailwind utilities on the element — `bg-gradient-to-b`, two stops,
+   `bg-clip-text` and `text-transparent`. That reads fine until an engine does
+   not implement `background-clip: text`, and then `text-transparent` still
+   applies and the headline is invisible: the page's first and largest words,
+   gone, with no way to tell from the markup that it could happen.
+
+   Here the colour is the default and the gradient is what needs support, which
+   is the direction that fails safely. A browser that cannot clip a background
+   to glyphs shows solid white type instead of nothing at all.
+   --------------------------------------------------------------------------- */
+
+.headline-metal {
+  color: var(--color-fg);
+}
+
+@supports ((-webkit-background-clip: text) or (background-clip: text)) {
+  .headline-metal {
+    background-image: linear-gradient(
+      180deg,
+      #ffffff 0%,
+      rgba(255, 255, 255, 0.95) 50%,
+      rgba(255, 255, 255, 0.8) 100%
+    );
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
   }
 }

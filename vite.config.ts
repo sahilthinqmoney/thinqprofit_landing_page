@@ -145,6 +145,25 @@ function inlineStyles(): Plugin {
 export default defineConfig({
   plugins: [react(), tailwindcss(), prerender(), inlineStyles()],
   define: DEFINE,
+  build: {
+    /*
+     * Older than Vite's default, for televisions.
+     *
+     * The default target assumes a browser from the last couple of years. A TV
+     * browser is usually a Chromium fork several years behind — Tizen 4 is
+     * Chromium 56, webOS 4 is 53 — and the bundle shipped `?.`, `??`, `??=` and
+     * class fields, none of which those engines parse. A parse error is total:
+     * React never mounts, and since the `<video>` is mounted by React rather
+     * than present in the prerendered HTML, the reader gets the page but never
+     * the clip. That is exactly what a 55-inch television showed.
+     *
+     * es2018 is the floor that keeps the syntax inside what those engines
+     * accept. It is syntax only — esbuild adds no polyfills — so an engine
+     * missing a runtime API can still fail; the prerendered page remains
+     * readable either way, which is the point of prerendering it.
+     */
+    target: ['es2018', 'chrome63', 'safari12', 'firefox67'],
+  },
   resolve: {
     // Mirror of the `paths` entry in tsconfig.app.json. TypeScript's copy only
     // type-checks; this one is what actually resolves the import at build time.
