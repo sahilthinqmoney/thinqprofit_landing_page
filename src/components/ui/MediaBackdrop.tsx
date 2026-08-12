@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { MEDIA_DEADLINE_MS, useMediaGate } from '../../hooks/useMediaGate'
 import { useImageReveal } from '../../hooks/useImageReveal'
 import { useVideoPlayback } from '../../hooks/useVideoPlayback'
@@ -31,6 +31,14 @@ export interface VideoSources {
    * produced this ladder in the first place.
    */
   light?: string
+  /**
+   * An HLS master playlist — the adaptive path, and the preferred one.
+   *
+   * The fixed encodes below stay as the fallback. They are not dead weight:
+   * they are what plays if the playlist or the player cannot be loaded, and
+   * they are what a browser with no MSE and no native HLS gets.
+   */
+  hls?: string
   webm?: string
   mp4: string
 }
@@ -77,6 +85,28 @@ const CROSS_FADE_MS = 300
  */
 const COMPACT_VIEWPORT = '(max-width: 768px)'
 
+/** Safari plays this without help; everything else needs hls.js. */
+const HLS_MIME = 'application/vnd.apple.mpegurl'
+
+/**
+ * Whether this engine plays HLS with no library at all.
+ *
+ * Checked because it changes what a slow connection should be sent. Where HLS
+ * is native it is free, so even a weak link is better served by an adaptive
+ * playlist than by a fixed small file. Where it needs hls.js it costs ~104 KB
+ * before a single frame, which is not a fair trade on a 3g link.
+ *
+ * Read in an effect, never during render — the prerendered HTML has no browser
+ * to ask, and disagreeing with it would cost the page its hydration.
+ */
+function useNativeHls(): boolean {
+  const [native, setNative] = useState(false)
+  useEffect(() => {
+    setNative(Boolean(document.createElement('video').canPlayType(HLS_MIME)))
+  }, [])
+  return native
+}
+
 /** Tracks a media query without reading `window` during render. */
 function useMediaQuery(query: string): boolean {
   const [matches, setMatches] = useState(false)
@@ -122,8 +152,17 @@ export default function MediaBackdrop({
 }: MediaBackdropProps) {
   const gate = useMediaGate(deadlineMs, Boolean(video))
   const posterRef = useRef<HTMLImageElement>(null)
-  const clip = useVideoPlayback(gate.settle)
   const compact = useMediaQuery(COMPACT_VIEWPORT)
+  const nativeHls = useNativeHls()
+
+  /*
+   * HLS is tried first and the fixed encodes are the fallback, so this starts
+   * true and only ever goes false. Rendering no `<source>` children while HLS
+   * is in play is deliberate — a child source would be fetched before the
+   * playlist could take over, and the reader would pay for the clip twice.
+   */
+  const [hlsFailed, setHlsFailed] = useState(false)
+  const onHlsUnavailable = useCallback(() => setHlsFailed(true), [])
 
   /*
    * One encode, chosen before the element mounts — the gate has not started on
@@ -135,8 +174,26 @@ export default function MediaBackdrop({
    * not be punished with the smallest one.
    */
   const sources = typeof video === 'string' ? null : video
+
+  /*
+   * Adaptive when we can be. The tier still decides whether a clip is loaded at
+   * all — a reader on Save-Data or a 2g link is asking for no video, and no
+   * amount of adapting answers that — but once video is allowed, HLS picks the
+   * rendition per segment from measured throughput instead of us guessing from
+   * `effectiveType`, and revises it as the connection changes.
+   */
+  const hlsSrc =
+    !hlsFailed && sources?.hls && (nativeHls || !gate.lightMedia) ? sources.hls : undefined
+
+  /** The fallback ladder, used when HLS is unavailable or refused. */
   const chosenMp4 =
     (gate.lightMedia && sources?.light) || (compact && sources?.mobile) || sources?.mp4
+
+  const clip = useVideoPlayback({
+    onPlay: gate.settle,
+    hls: hlsSrc,
+    onHlsUnavailable,
+  })
 
   /** The still to show: an explicit poster, else the plain image prop. */
   const still = poster ?? (typeof image === 'string' ? image : image?.desktop)
@@ -257,7 +314,7 @@ export default function MediaBackdrop({
           ) : (
             <>
               {sources?.webm && <source src={sources.webm} type="video/webm" />}
-              {chosenMp4 && <source src={chosenMp4} type="video/mp4" />}
+              {!hlsSrc && chosenMp4 && <source src={chosenMp4} type="video/mp4" />}
             </>
           )}
         </video>

@@ -74,6 +74,15 @@ export default function Hero() {
            * made when start time was the problem being solved. The master was
            * always 1080p at 6.4 Mbps; the quality had been thrown away upstream.
            */
+          /*
+           * Adaptive first: three renditions in two-second segments, switched
+           * per segment on measured throughput and buffer health. Safari plays
+           * it natively; everything else lazy-loads hls.js only after the gate
+           * has decided this reader gets video, because the library is ~106 KB
+           * compressed and must never delay a reader who will see only the
+           * poster. The fixed files below remain the fallback.
+           */
+          hls: '/hls/hero.m3u8',
           mp4: '/clips/hero-backdrop.mp4',
           mobile: '/clips/hero-backdrop-mobile.mp4',
           light: '/clips/hero-backdrop-light.mp4',

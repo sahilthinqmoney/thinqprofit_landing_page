@@ -124,7 +124,7 @@ function FlipClock() {
 
   // A clip already playing survives a network dip — those bytes are spent — but
   // not a Reduce Motion request, which is about the motion rather than the data.
-  const video = useVideoPlayback(gate.settle)
+  const video = useVideoPlayback({ onPlay: gate.settle })
   const keepPlaying = video.playing && !gate.motionRefused
   const mountVideo = !gate.motionRefused && (keepPlaying || (gate.videoAllowed && gate.started))
 
