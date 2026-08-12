@@ -6,6 +6,7 @@ import {
   type ViteDevServer,
 } from 'vite'
 import react from '@vitejs/plugin-react'
+import legacy from '@vitejs/plugin-legacy'
 import tailwindcss from '@tailwindcss/vite'
 
 const ROOT = import.meta.dirname
@@ -143,26 +144,50 @@ function inlineStyles(): Plugin {
 
 // https://vite.dev/config/
 export default defineConfig({
-  plugins: [react(), tailwindcss(), prerender(), inlineStyles()],
+  plugins: [
+    react(),
+    tailwindcss(),
+    /*
+     * A second bundle for televisions.
+     *
+     * Lowering `build.target` was not enough on its own. The modern output is an
+     * ES module — it uses `import.meta`, which cannot be downlevelled in that
+     * format, and it is loaded with `<script type="module">`, which needs
+     * Chromium 61 at minimum. A television running Tizen 4 (Chromium 56) or
+     * webOS 4 (53) therefore never executed a line of it, React never mounted,
+     * and since the `<video>` is created by React rather than sitting in the
+     * prerendered HTML, the set showed the page and never the clip.
+     *
+     * This emits a `nomodule` SystemJS build alongside, with the polyfills those
+     * engines are missing. Modern browsers ignore it entirely — they take the
+     * module build and never request these files — so the cost falls only on the
+     * devices that would otherwise get nothing.
+     */
+    legacy({
+      targets: ['chrome >= 53', 'safari >= 10.1', 'firefox >= 55', 'edge >= 15'],
+      // Not every gap is syntax. These engines are missing runtime APIs that
+      // React and hls.js both reach for.
+      additionalLegacyPolyfills: ['regenerator-runtime/runtime'],
+      /*
+       * Off deliberately. It adds ~18 KB gzip of polyfills to the MODERN
+       * bundle — paid by every reader on a current browser, to fix engines that
+       * support modules but lag on APIs. The televisions this is for do not
+       * support modules at all, so they take the legacy build and its own
+       * polyfills; taxing everyone else buys nothing here.
+       */
+      modernPolyfills: false,
+    }),
+    prerender(),
+    inlineStyles(),
+  ],
   define: DEFINE,
   build: {
     /*
-     * Older than Vite's default, for televisions.
-     *
-     * The default target assumes a browser from the last couple of years. A TV
-     * browser is usually a Chromium fork several years behind — Tizen 4 is
-     * Chromium 56, webOS 4 is 53 — and the bundle shipped `?.`, `??`, `??=` and
-     * class fields, none of which those engines parse. A parse error is total:
-     * React never mounts, and since the `<video>` is mounted by React rather
-     * than present in the prerendered HTML, the reader gets the page but never
-     * the clip. That is exactly what a 55-inch television showed.
-     *
-     * es2018 is the floor that keeps the syntax inside what those engines
-     * accept. It is syntax only — esbuild adds no polyfills — so an engine
-     * missing a runtime API can still fail; the prerendered page remains
-     * readable either way, which is the point of prerendering it.
+     * No `target` here on purpose. `@vitejs/plugin-legacy` owns it — it sets the
+     * modern target itself and warns if this is also specified, and having two
+     * places decide it is how they end up disagreeing. The modern build targets
+     * module-capable browsers; everything older is served the legacy bundle.
      */
-    target: ['es2018', 'chrome63', 'safari12', 'firefox67'],
   },
   resolve: {
     // Mirror of the `paths` entry in tsconfig.app.json. TypeScript's copy only

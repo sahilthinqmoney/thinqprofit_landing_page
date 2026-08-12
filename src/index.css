@@ -909,3 +909,38 @@
     color: transparent;
   }
 }
+
+
+/* ---------------------------------------------------------------------------
+   The headline, on one line at every width.
+
+   Measured, "Trading that talks back." is 10.317em wide. Holding it to a single
+   line therefore fixes the type size to the viewport: at 7.8vw it occupies
+   about 80% of the screen, which leaves headroom for the fallback face to be a
+   few per cent wider than the webfont before it lands — a wrap or a clip in
+   that moment would be worse than the gap it avoids.
+
+   The consequence is worth stating plainly: on a 320px phone this is about
+   25px, where the wrapping headline was 44px. Twenty-four characters cannot be
+   both one line and large on a narrow screen, and one line is what was asked
+   for.
+
+   Capped at 5.75rem so it stops growing once there is room — the cap engages at
+   about 1120px, which is where the old clamp topped out too, so nothing changes
+   on a laptop.
+
+   The uncapped rule comes first for televisions: `min()` needs Chromium 79 and
+   these sets are older, so an engine that cannot parse the capped rule keeps the
+   plain `vw` one and still gets a single line.
+   --------------------------------------------------------------------------- */
+
+.headline-oneline {
+  white-space: nowrap;
+  font-size: 7.8vw;
+}
+
+@supports (font-size: min(1px, 1vw)) {
+  .headline-oneline {
+    font-size: min(7.8vw, 5.75rem);
+  }
+}

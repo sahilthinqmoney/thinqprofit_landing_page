@@ -108,7 +108,7 @@ export default function Hero() {
         <Container>
           <div className="mx-auto max-w-[56em] text-center flex flex-col items-center">
             {/* Display H1 Headline with Metallic Depth */}
-            <h1 className="hero-settle-axis display-lead font-display tracking-tight text-balance drop-shadow-[0_4px_30px_rgba(0,0,0,0.9)] text-[clamp(2.75rem,5.9vw,5.75rem)] leading-[1.12]">
+            <h1 className="hero-settle-axis headline-oneline display-lead font-display tracking-tight drop-shadow-[0_4px_30px_rgba(0,0,0,0.9)] leading-[1.12]">
               {lines.map((line: string, index: number) => (
                 <span key={line} className="block py-1">
                   <span
