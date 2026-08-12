@@ -16,6 +16,32 @@ import {
   copyrightSuffix,
 } from '../../data/footer'
 
+/**
+ * Prints text, drawing any `[ ... ]` span in warning amber.
+ *
+ * The bracket is the convention this footer uses for a value compliance has
+ * not supplied yet, and go-live-checklist.md asks for exactly this treatment:
+ * an unfilled registration or contact must be impossible to miss, so it cannot
+ * ship because nobody looked. Previously only the registration block honoured
+ * it, so a blank anywhere else — a fraud-reporting contact, say — would have
+ * read as ordinary body copy.
+ */
+function WithBlanks({ text }: { text: string }) {
+  return (
+    <>
+      {text.split(/(\[[^\]]*\])/g).map((part, i) =>
+        part.startsWith('[') && part.endsWith(']') ? (
+          <span key={i} className="text-warning font-mono not-italic">
+            {part}
+          </span>
+        ) : (
+          <span key={i}>{part}</span>
+        ),
+      )}
+    </>
+  )
+}
+
 export default function Footer() {
   const year = useCopyrightYear()
 
@@ -42,7 +68,7 @@ export default function Footer() {
                   >
                     {line.value.split('\n').map((str, idx) => (
                       <span key={idx} className="block">
-                        {str}
+                        <WithBlanks text={str} />
                       </span>
                     ))}
                   </dd>
@@ -75,7 +101,16 @@ export default function Footer() {
               {investorAwarenessNotes.map((note) => (
                 <div key={note.title} className="space-y-1.5">
                   <h3 className="text-xs font-semibold text-fg">{note.title}</h3>
-                  <p className="text-xs leading-relaxed text-fg-muted">{note.content}</p>
+                  <p className="text-xs leading-relaxed text-fg-muted">
+                    <WithBlanks text={note.content} />
+                  </p>
+                  {note.bullets ? (
+                    <ol className="mt-1.5 space-y-1 text-xs leading-relaxed text-fg-muted list-decimal pl-4 marker:text-fg-subtle">
+                      {note.bullets.map((item) => (
+                        <li key={item}>{item}</li>
+                      ))}
+                    </ol>
+                  ) : null}
                 </div>
               ))}
             </div>
