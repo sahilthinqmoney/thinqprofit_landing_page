@@ -13,8 +13,9 @@ interface CardSlider3DProps {
 }
 
 /**
- * A horizontal loop of cards on a 3D focal curve: cards scale and lift as they
- * pass the container's centre, and fall back as they leave it.
+ * A horizontal loop of cards on a 3D focal curve: cards scale, lift and resolve
+ * from grey to their own colour as they pass the container's centre, and fall
+ * back as they leave it.
  *
  * The track holds three copies of `items` so the wrap is seamless — the offset
  * resets by exactly one set width, which is invisible because the neighbouring
@@ -50,6 +51,13 @@ export default function CardSlider3D({
     if (!container || !track) return
 
     let animationFrameId: number
+
+    /*
+     * The picture inside each card, looked up once. This loop runs every frame
+     * for fifteen cards, and the image is mounted late by the media gate — so
+     * only a found element is cached, and the lookup keeps retrying until then.
+     */
+    const pictures = new WeakMap<HTMLElement, HTMLImageElement>()
 
     // Base auto scroll speed in px per frame
     const baseSpeed = direction === 'right' ? 0.75 : -0.75
@@ -110,6 +118,39 @@ export default function CardSlider3D({
         card.style.transform = `perspective(1200px) translateZ(${translateZ}px) scale(${scale})`
         card.style.opacity = `${opacity}`
         card.style.zIndex = `${zIndex}`
+
+        /*
+         * The picture resolves as the card reaches the centre: fully desaturated
+         * and dimmed out at the edge of the focal radius, its own colour and a
+         * touch brighter at the middle.
+         *
+         * Set on the `<img>` and not on its wrapper, deliberately. `filter`
+         * creates a stacking context, and several of these images composite with
+         * `mix-blend-lighten` — filtering the wrapper would leave them blending
+         * against that new context instead of the card, which changes how they
+         * look. On the element itself the filter is applied first and the result
+         * is blended, which is the order that leaves the design alone.
+         *
+         * Written only when it actually changes: this runs every frame for
+         * fifteen cards, and a redundant style write is a redundant repaint.
+         */
+        let picture = pictures.get(card)
+        if (!picture) {
+          const found = card.querySelector<HTMLImageElement>('[data-slider-media] img')
+          if (found) {
+            pictures.set(card, found)
+            picture = found
+          }
+        }
+        if (picture) {
+          const grey = (1 - centerFactor).toFixed(2)
+          const lift = (0.75 + centerFactor * 0.3).toFixed(2)
+          const filter = `grayscale(${grey}) brightness(${lift})`
+          if (picture.dataset.focus !== filter) {
+            picture.style.filter = filter
+            picture.dataset.focus = filter
+          }
+        }
 
         const glowAlpha = centerFactor * 0.75
         card.style.boxShadow = centerFactor > 0.08
@@ -228,7 +269,10 @@ export default function CardSlider3D({
 
                 {/* Seamless Integrated 3D Feature Asset */}
                 {item.image ? (
-                  <div className="relative mt-4 h-40 sm:h-48 w-full flex items-center justify-center overflow-hidden pointer-events-none">
+                  <div
+                    data-slider-media
+                    className="relative mt-4 h-40 sm:h-48 w-full flex items-center justify-center overflow-hidden pointer-events-none"
+                  >
                     <ProgressiveImage
                       fill
                       src={item.image}
