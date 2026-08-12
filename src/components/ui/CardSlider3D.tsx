@@ -120,15 +120,19 @@ export default function CardSlider3D({
 
         /*
          * The picture resolves as the card reaches the centre: fully desaturated
-         * and dimmed out at the edge of the focal radius, its own colour and a
-         * touch brighter at the middle.
+         * at the edge of the focal radius, its own colour at the middle, a touch
+         * brighter and haloed as it arrives.
          *
-         * Set on the `<img>` and not on its wrapper, deliberately. `filter`
-         * creates a stacking context, and several of these images composite with
-         * `mix-blend-lighten` — filtering the wrapper would leave them blending
-         * against that new context instead of the card, which changes how they
-         * look. On the element itself the filter is applied first and the result
-         * is blended, which is the order that leaves the design alone.
+         * `grayscale` comes first in the filter list on purpose. Filters apply
+         * left to right, so desaturating before the drop-shadow leaves the cyan
+         * halo its colour; the other order would drain it to grey along with the
+         * artwork.
+         *
+         * Set on the `<img>` and not on its wrapper, deliberately: the glow
+         * flare is a sibling behind the image inside that same wrapper, so
+         * filtering the wrapper would desaturate and dim the flare too — the
+         * halo would fade out exactly as the card left the centre, which is the
+         * opposite of what it is for.
          *
          * Written only when it actually changes: this runs every frame for
          * fifteen cards, and a redundant style write is a redundant repaint.
@@ -142,10 +146,11 @@ export default function CardSlider3D({
           }
         }
         if (picture) {
+          const grey = (1 - centerFactor).toFixed(2)
           const lift = (0.95 + centerFactor * 0.15).toFixed(2)
           const glowRadius = Math.round(centerFactor * 16)
           const glowAlpha = (centerFactor * 0.45).toFixed(2)
-          const filter = `brightness(${lift}) drop-shadow(0px 2px ${glowRadius}px rgba(56, 189, 248, ${glowAlpha}))`
+          const filter = `grayscale(${grey}) brightness(${lift}) drop-shadow(0px 2px ${glowRadius}px rgba(56, 189, 248, ${glowAlpha}))`
           if (picture.dataset.focus !== filter) {
             picture.style.filter = filter
             picture.dataset.focus = filter
