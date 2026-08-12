@@ -85,28 +85,6 @@ const CROSS_FADE_MS = 300
  */
 const COMPACT_VIEWPORT = '(max-width: 768px)'
 
-/** Safari plays this without help; everything else needs hls.js. */
-const HLS_MIME = 'application/vnd.apple.mpegurl'
-
-/**
- * Whether this engine plays HLS with no library at all.
- *
- * Checked because it changes what a slow connection should be sent. Where HLS
- * is native it is free, so even a weak link is better served by an adaptive
- * playlist than by a fixed small file. Where it needs hls.js it costs ~104 KB
- * before a single frame, which is not a fair trade on a 3g link.
- *
- * Read in an effect, never during render — the prerendered HTML has no browser
- * to ask, and disagreeing with it would cost the page its hydration.
- */
-function useNativeHls(): boolean {
-  const [native, setNative] = useState(false)
-  useEffect(() => {
-    setNative(Boolean(document.createElement('video').canPlayType(HLS_MIME)))
-  }, [])
-  return native
-}
-
 /** Tracks a media query without reading `window` during render. */
 function useMediaQuery(query: string): boolean {
   const [matches, setMatches] = useState(false)
@@ -153,7 +131,6 @@ export default function MediaBackdrop({
   const gate = useMediaGate(deadlineMs, Boolean(video))
   const posterRef = useRef<HTMLImageElement>(null)
   const compact = useMediaQuery(COMPACT_VIEWPORT)
-  const nativeHls = useNativeHls()
 
   /*
    * HLS is tried first and the fixed encodes are the fallback, so this starts
@@ -182,8 +159,14 @@ export default function MediaBackdrop({
    * rendition per segment from measured throughput instead of us guessing from
    * `effectiveType`, and revises it as the connection changes.
    */
-  const hlsSrc =
-    !hlsFailed && sources?.hls && (nativeHls || !gate.lightMedia) ? sources.hls : undefined
+  /*
+   * Slow links stay off the adaptive path entirely and take the fixed light
+   * encode. The adaptive ladder's floor is 720p — the 540p rung was removed
+   * because a loop resets the ladder to its lowest rung every 17.8s, so the
+   * floor is what a reader mostly sees — and 720p at ~1.2 Mbps is more than a
+   * 3g link can hold. A guaranteed 0.9 MB file beats a stream that stalls.
+   */
+  const hlsSrc = !hlsFailed && !gate.lightMedia ? sources?.hls : undefined
 
   /** The fallback ladder, used when HLS is unavailable or refused. */
   const chosenMp4 =
