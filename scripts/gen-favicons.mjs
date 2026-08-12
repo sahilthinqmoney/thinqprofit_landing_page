@@ -1,22 +1,28 @@
 // Generates every favicon — .ico, PNGs and the SVG — from one source:
 // scripts/assets/thinq-mark.svg.
 //
-// ── Why the icons are an opaque tile and not a transparent mark ────────────
+// ── Ground: transparent in the tab, opaque on a home screen ────────────────
 //
-// The mark is pure white — measured, the ink was 255/255 luminance over an 80%
-// transparent field. On a dark tab strip that reads beautifully. On a LIGHT tab
-// strip, which is the default in Chrome, Safari and Firefox, it is white on
-// white: the tab shows nothing at all, and a reader who sees nothing concludes
-// the favicon never updated. That was the bug.
+// The tab icons are the bare mark on transparency. That is a deliberate choice
+// with a known cost, so the cost is written down rather than rediscovered:
 //
-// So the brand ground is baked in. #050505 is `--color-bg` from src/index.css
-// and the same value as the document's `theme-color`, so the tab, the address
-// bar and the page agree. A dark tile with a white mark is legible on every tab
-// strip in either theme, which a transparent mark cannot be.
+//   - The mark is a silver-to-white gradient. On a dark tab strip it reads
+//     beautifully. On a LIGHT tab strip — the default in Chrome, Safari and
+//     Firefox — only the #a0a0a5 and #b0b0b5 stops carry, so the ring reads as
+//     partial rather than solid.
+//   - Safari composites favicon transparency onto WHITE rather than onto the
+//     tab, so in Safari specifically the light-strip case above is the only
+//     case: it is white ground there even in dark mode.
 //
-// Apple additionally requires an opaque apple-touch-icon — iOS applies its own
-// mask and composites transparency onto black, so a transparent one is a
-// guess about the result rather than a decision.
+// This was previously an opaque #050505 tile for exactly those reasons. It is
+// transparent now because the plate around the mark was the more visible
+// problem of the two. If the tab icon ever looks washed out on a light strip,
+// this is why, and the fix is a darker mark — not a plate behind it.
+//
+// The launcher icons stay OPAQUE #050505 (= `--color-bg` in src/index.css and
+// the document's `theme-color`). iOS applies its own mask and composites
+// transparency onto black, and Android launchers mask too, so a transparent
+// icon there produces a black plate we did not choose instead of one we did.
 //
 // Run: npm run favicons
 import sharp from 'sharp'
@@ -26,15 +32,18 @@ import path from 'node:path'
 
 const PUBLIC = path.resolve(import.meta.dirname, '../public')
 
-// The bare mark, white on transparency. It lives OUTSIDE public/ because it must
-// never be served: white on transparency is invisible on a light tab strip, and
-// while it sat at public/favicon.svg any browser that preferred an SVG favicon —
-// Chrome and Firefox both do — was handed the invisible one no matter how good
-// the PNGs were. public/favicon.svg is now generated, opaque, and safe to link.
+// The bare mark, at its drawn size on transparency. It lives OUTSIDE public/
+// because it must never be served directly: it carries 1.85 units of dead space
+// on every side of its viewBox, so a browser handed this file draws a mark two
+// thirds the size of the one every other icon shows. public/favicon.svg is
+// generated from it, cropped and scaled to match the PNGs.
 const SOURCE = path.resolve(import.meta.dirname, 'assets/thinq-mark.svg')
 
 /** `--color-bg`. Must track src/index.css and the `theme-color` meta. */
-const GROUND = { r: 5, g: 5, b: 5, alpha: 1 }
+const BRAND_GROUND = { r: 5, g: 5, b: 5, alpha: 1 }
+
+/** No ground at all — the tab icons composite onto whatever the browser draws. */
+const NO_GROUND = { r: 0, g: 0, b: 0, alpha: 0 }
 
 /**
  * Fraction of the tile the mark occupies.
@@ -63,40 +72,24 @@ const MARK_SCALE = 0.92
 const TIGHT_VIEWBOX = '1.85 1.85 20.4 20.4'
 
 /**
- * Why these tiles are square, and must stay square.
- *
- * They were rounded, which reads better on a tab strip — a hard square is the
- * one shape no platform draws by itself. But a rounded tile means transparent
- * corners, and **Safari composites a favicon's transparency onto WHITE** rather
- * than onto the tab. At 16px, four white corners around a dark tile read as a
- * white border, which is exactly what a reader reported seeing. Chrome
- * composites onto the tab background instead, so the same file looks correct
- * there and wrong in Safari.
- *
- * There is no version of this that keeps both: any pixel we leave transparent
- * is a pixel Safari paints white. Fully opaque is the only shape that is right
- * in every browser, so the corners go and the tile is square everywhere —
- * which is also what apple-touch-icon and the android pair already needed,
- * since those platforms apply their own mask.
- */
-/**
  * PNG outputs. `ico` marks the sizes that also go into favicon.ico.
  *
- * All square and fully opaque — see the note above on Safari. iOS and Android
- * launchers apply their own mask to apple-touch-icon and the android pair, so
- * a square tile is the input those platforms ask for anyway.
+ * The launcher icons keep the brand ground and stay square: iOS and Android
+ * apply their own mask and their own composite, so an opaque square tile is
+ * the input those platforms actually ask for. The tab icons have no ground —
+ * see the note at the top of this file for what that costs on a light strip.
  */
 const TARGETS = [
-  { file: 'favicon-16x16.png', size: 16, ico: true },
-  { file: 'favicon-32x32.png', size: 32, ico: true },
-  { file: 'favicon-48x48.png', size: 48, ico: true },
-  { file: 'apple-touch-icon.png', size: 180 },
-  { file: 'android-chrome-192x192.png', size: 192 },
-  { file: 'android-chrome-512x512.png', size: 512 },
+  { file: 'favicon-16x16.png', size: 16, ico: true, ground: NO_GROUND },
+  { file: 'favicon-32x32.png', size: 32, ico: true, ground: NO_GROUND },
+  { file: 'favicon-48x48.png', size: 48, ico: true, ground: NO_GROUND },
+  { file: 'apple-touch-icon.png', size: 180, ground: BRAND_GROUND },
+  { file: 'android-chrome-192x192.png', size: 192, ground: BRAND_GROUND },
+  { file: 'android-chrome-512x512.png', size: 512, ground: BRAND_GROUND },
 ]
 
-/** One tile: the mark, centred at MARK_SCALE, on an opaque ground. */
-async function tile(svg, size) {
+/** One tile: the mark, centred at MARK_SCALE, on the given ground. */
+async function tile(svg, size, ground) {
   const inner = Math.round(size * MARK_SCALE)
   // Rasterise from the SVG at the final size rather than downscaling one big
   // bitmap: at 16px the ring is barely two pixels thick and a resample turns it
@@ -110,7 +103,7 @@ async function tile(svg, size) {
     .toBuffer()
 
   return sharp({
-    create: { width: size, height: size, channels: 4, background: GROUND },
+    create: { width: size, height: size, channels: 4, background: ground },
   })
     .composite([{ input: mark, gravity: 'center' }])
     .png({ compressionLevel: 9 })
@@ -152,12 +145,13 @@ function ico(images) {
 const svg = await readFile(SOURCE)
 
 /**
- * The shipped SVG: the same tile as the rasters, as a vector.
+ * The shipped SVG: the same composition as the raster tab icons, as a vector.
  *
  * Chrome and Firefox prefer `type="image/svg+xml"` when it is offered, so this
- * is what those two actually draw — it has to carry the ground itself. The mark
- * is nested at MARK_SCALE inside a full-bleed ground rect, which is the exact
- * composition `tile()` builds for the PNGs, so every browser gets one design.
+ * is what those two actually draw, and it has to match favicon-32x32.png
+ * exactly or the icon changes identity between browsers. No ground rect: the
+ * mark is scaled to MARK_SCALE inside a transparent 24x24 box, which is what
+ * `tile()` now builds for 16/32/48.
  */
 function tileSvg(markSvg) {
   const inner = markSvg
@@ -170,11 +164,7 @@ function tileSvg(markSvg) {
   const [vx, vy, vw] = TIGHT_VIEWBOX.split(' ').map(Number)
   const scale = (MARK_SCALE * 24) / vw
   const pad = (24 - vw * scale) / 2
-  // Rounded to match the PNGs. This is the copy Chrome and Firefox actually
-  // draw, so if it stayed square those two would show the sharp tile and only
-  // Safari and the .ico fallback would get the corners.
   return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="512" height="512">
-  <rect width="24" height="24" fill="#050505" />
   <g transform="translate(${(pad - vx * scale).toFixed(3)} ${(pad - vy * scale).toFixed(3)}) scale(${scale.toFixed(4)})">
 ${inner
   .split('\n')
@@ -188,7 +178,7 @@ ${inner
 const forIco = []
 
 for (const target of TARGETS) {
-  const data = await tile(svg, target.size)
+  const data = await tile(svg, target.size, target.ground)
   await writeFile(path.join(PUBLIC, target.file), data)
   if (target.ico) forIco.push({ size: target.size, data })
   console.log(`favicons: ${target.file.padEnd(28)} ${String(data.length).padStart(6)} bytes`)
@@ -203,4 +193,4 @@ console.log(`favicons: favicon.ico                  ${ico(forIco).length} bytes 
 await rm(path.join(PUBLIC, 'favicon_io-2'), { recursive: true, force: true })
 
 await writeFile(path.join(PUBLIC, 'favicon.svg'), tileSvg(svg))
-console.log('favicons: favicon.svg                  (opaque tile, vector)')
+console.log('favicons: favicon.svg                  (transparent mark, vector)')

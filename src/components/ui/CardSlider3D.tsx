@@ -1,6 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react'
 import type { CapabilityCard } from '../../data/capabilities'
-import ProgressiveImage from './ProgressiveImage'
 
 interface CardSlider3DProps {
   /** The cards to show, in order. */
@@ -143,18 +142,32 @@ export default function CardSlider3D({
           }
         }
         if (picture) {
-          const grey = (1 - centerFactor).toFixed(2)
-          const lift = (0.75 + centerFactor * 0.3).toFixed(2)
-          const filter = `grayscale(${grey}) brightness(${lift})`
+          const lift = (0.95 + centerFactor * 0.15).toFixed(2)
+          const glowRadius = Math.round(centerFactor * 16)
+          const glowAlpha = (centerFactor * 0.45).toFixed(2)
+          const filter = `brightness(${lift}) drop-shadow(0px 2px ${glowRadius}px rgba(56, 189, 248, ${glowAlpha}))`
           if (picture.dataset.focus !== filter) {
             picture.style.filter = filter
             picture.dataset.focus = filter
           }
         }
 
-        const glowAlpha = centerFactor * 0.75
+        /*
+         * Dynamic inside bottom border glow animation as card reaches center
+         */
+        const bottomGlow = card.querySelector<HTMLDivElement>('[data-bottom-inner-glow]')
+        const bottomLine = card.querySelector<HTMLDivElement>('[data-bottom-glow-line]')
+        if (bottomGlow && bottomLine) {
+          const glowOp = (Math.pow(centerFactor, 1.3) * 0.95).toFixed(2)
+          if (bottomGlow.dataset.glowOp !== glowOp) {
+            bottomGlow.style.opacity = glowOp
+            bottomLine.style.opacity = glowOp
+            bottomGlow.dataset.glowOp = glowOp
+          }
+        }
+
         card.style.boxShadow = centerFactor > 0.08
-          ? `0 ${18 * centerFactor}px ${36 * centerFactor}px rgba(0, 0, 0, ${0.4 + centerFactor * 0.3}), 0 0 ${35 * centerFactor}px rgba(8, 45, 54, ${glowAlpha}), 0 0 ${18 * centerFactor}px rgba(12, 70, 84, ${glowAlpha * 0.8})`
+          ? `0 ${18 * centerFactor}px ${36 * centerFactor}px rgba(0, 0, 0, ${0.4 + centerFactor * 0.3})`
           : '0 8px 20px rgba(0, 0, 0, 0.4)'
       })
 
@@ -223,9 +236,8 @@ export default function CardSlider3D({
       onPointerMove={handlePointerMove}
       onPointerUp={handlePointerUp}
       onPointerCancel={handlePointerUp}
-      className={`relative w-full overflow-hidden py-6 sm:py-12 md:py-16 select-none touch-pan-y ${
-        isDraggingState ? 'cursor-grabbing' : 'cursor-grab'
-      } ${className}`}
+      className={`relative w-full overflow-hidden py-6 sm:py-12 md:py-16 select-none touch-pan-y ${isDraggingState ? 'cursor-grabbing' : 'cursor-grab'
+        } ${className}`}
       style={{ perspective: '1200px' }}
     >
       {/* Edge gradient fade masks for seamless full-width immersion */}
@@ -243,15 +255,42 @@ export default function CardSlider3D({
             <div
               key={`${item.id}-${idx}`}
               data-slider-card
-              className="group relative flex shrink-0 flex-col justify-between rounded-2xl border border-white/15 bg-[#09090b] p-5 sm:p-6 backdrop-blur-xl transition-shadow duration-300 ease-out overflow-hidden min-h-[380px] sm:min-h-[420px]"
+              className="group relative flex shrink-0 flex-col justify-between rounded-2xl bg-[#09090b] p-5 sm:p-6 backdrop-blur-xl transition-shadow duration-300 ease-out overflow-hidden min-h-[380px] sm:min-h-[420px]"
               style={{
                 width: cardWidth,
                 willChange: 'transform, opacity',
                 transformStyle: 'preserve-3d',
               }}
             >
+              {/* Inner border overlay layer */}
+              <div className="pointer-events-none absolute inset-0 rounded-2xl ring-1 ring-inset ring-white/20 group-hover:ring-white/40 transition-all duration-300 z-20" />
+
               {/* Top edge specular highlight */}
               <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/30 to-transparent z-10" />
+
+              {/* Bottom gradient fade overlay */}
+              <div className="pointer-events-none absolute inset-x-0 bottom-0 h-2/5 rounded-b-2xl bg-gradient-to-t from-black via-black/70 to-transparent z-[5]" />
+
+              {/* Inside Bottom Border Glow (inside bottom edge only) */}
+              <div
+                data-bottom-inner-glow
+                className="pointer-events-none absolute inset-x-0 bottom-0 h-20 rounded-b-2xl transition-opacity duration-300 z-15"
+                style={{
+                  background: 'linear-gradient(to top, rgba(0, 207, 255, 0.35) 0%, rgba(0, 207, 255, 0.12) 45%, rgba(0, 0, 0, 0) 100%)',
+                  opacity: 0,
+                }}
+              />
+              <div
+                data-bottom-glow-line
+                className="pointer-events-none absolute inset-x-0 bottom-0 h-[2px] rounded-b-2xl bg-gradient-to-r from-transparent via-cyan-400 to-transparent transition-opacity duration-300 z-20"
+                style={{
+                  opacity: 0,
+                  boxShadow: '0 0 12px rgba(0, 207, 255, 0.8)',
+                }}
+              />
+
+              {/* Bottom edge specular highlight */}
+              <div className="pointer-events-none absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent z-10" />
 
               <div className="flex flex-col justify-between h-full">
                 {/* Header row: Badge + Icon */}
@@ -271,17 +310,16 @@ export default function CardSlider3D({
                 {item.image ? (
                   <div
                     data-slider-media
-                    className="relative mt-4 h-40 sm:h-48 w-full flex items-center justify-center overflow-hidden pointer-events-none"
+                    className="relative mt-4 -mx-5 sm:-mx-6 w-[calc(100%+2.5rem)] sm:w-[calc(100%+3rem)] h-44 sm:h-52 flex items-center justify-center overflow-visible pointer-events-none px-2"
                   >
-                    <ProgressiveImage
-                      fill
+                    <img
                       src={item.image}
                       alt={item.title}
                       width={item.imageWidth}
                       height={item.imageHeight}
-                      imageClassName={`object-contain transition-transform duration-500 group-hover:scale-108 ${
-                        item.image.includes('alerts') || item.image.includes('workspace') || item.image.includes('greeks') ? '' : 'mix-blend-lighten'
-                      }`}
+                      loading="eager"
+                      decoding="async"
+                      className="max-h-full w-full object-contain transition-transform duration-500 group-hover:scale-105 relative z-10"
                     />
                   </div>
                 ) : null}
