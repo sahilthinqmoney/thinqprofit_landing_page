@@ -1,5 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="512" height="512">
-  <rect width="24" height="24" rx="4.50" ry="4.50" fill="#050505" />
+  <rect width="24" height="24" fill="#050505" />
   <g transform="translate(2.640 2.640) scale(0.78)">
     <defs>
     <linearGradient id="r" gradientUnits="userSpaceOnUse" x1="3" y1="3" x2="14.6" y2="12.86">
