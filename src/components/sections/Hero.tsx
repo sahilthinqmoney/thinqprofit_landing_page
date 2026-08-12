@@ -61,13 +61,22 @@ export default function Hero() {
         lqip={lqipFor(HERO_POSTER)}
         poster={HERO_POSTER}
         video={{
-          // The light encode first for phones and 3g-class links: 960x540 at
-          // 450kbps, 0.93 MB against the full clip's 2.71 MB. Measured at the
-          // size a phone actually renders it, that is 34.3 dB — the backdrop is
-          // dark, slow and sits under a scrim, so the bytes buy far more than
-          // the resolution does.
-          mobile: '/clips/hero-backdrop-mobile.mp4',
+          /*
+           * Three encodes off one 1920x1080 master, measured against it at the
+           * size each device actually renders:
+           *
+           *   mp4     1920x1080 @2600k  5.2 MB  39.4 dB on a 2880x1800 desktop
+           *   mobile  1280x720  @1300k  2.6 MB  36.5 dB in a 1264x2151 phone box
+           *   light    960x540   @450k  0.9 MB  for 3g-class links only
+           *
+           * What shipped before was a 1280x720 @1220k desktop clip (37.5 dB)
+           * and a 960x540 phone clip (32.2 dB) — both re-encodes of the master
+           * made when start time was the problem being solved. The master was
+           * always 1080p at 6.4 Mbps; the quality had been thrown away upstream.
+           */
           mp4: '/clips/hero-backdrop.mp4',
+          mobile: '/clips/hero-backdrop-mobile.mp4',
+          light: '/clips/hero-backdrop-light.mp4',
         }}
         deadlineMs={MEDIA_DEADLINE_MS.hero}
         focus="center"

@@ -12,13 +12,25 @@ export interface ImageSources {
 
 export interface VideoSources {
   /**
-   * A smaller encode of the same clip, for phones and modest connections.
+   * For phones. Smaller than `mp4`, but not by so much that it looks it.
    *
-   * This field existed and was never read, so every phone was sent the full
-   * 2.7 MB hero — on a link the tier then judged too weak to use it on at all.
-   * A modest connection deserves a smaller file, not a still photograph.
+   * A phone shows this clip in a PORTRAIT box against a 16:9 source, so
+   * `object-cover` scales it up about twice over — resolution matters more here
+   * than the viewport size suggests, not less. An earlier 960x540 encode
+   * measured 32.2 dB at the size a phone actually renders, against 36.5 dB for
+   * 1280x720; that 4.3 dB is the difference between "soft" and "fine".
    */
   mobile?: string
+  /**
+   * For links that cannot afford either of the above.
+   *
+   * Kept as a third rung rather than folded into `mobile`, because those two
+   * answer different questions. `mobile` is about screen size, this is about
+   * bandwidth, and collapsing them means either phones get a soft clip or weak
+   * links get one that never finishes arriving — the two complaints that
+   * produced this ladder in the first place.
+   */
+  light?: string
   webm?: string
   mp4: string
 }
@@ -113,11 +125,18 @@ export default function MediaBackdrop({
   const clip = useVideoPlayback(gate.settle)
   const compact = useMediaQuery(COMPACT_VIEWPORT)
 
-  // Prefer the light encode on a phone-sized viewport or a 3g-class link. The
-  // choice is made before the element mounts — the gate has not started yet on
-  // the first render — so no `<source>` is ever swapped under a live video,
-  // which would not reload it anyway.
-  const preferLight = compact || gate.lightMedia
+  /*
+   * One encode, chosen before the element mounts — the gate has not started on
+   * the first render — so no `<source>` is ever swapped under a live video,
+   * which would not reload it anyway.
+   *
+   * Bandwidth is asked first and screen size second: a 3g-class link on a
+   * laptop still cannot afford the full clip, and a phone on good WiFi should
+   * not be punished with the smallest one.
+   */
+  const sources = typeof video === 'string' ? null : video
+  const chosenMp4 =
+    (gate.lightMedia && sources?.light) || (compact && sources?.mobile) || sources?.mp4
 
   /** The still to show: an explicit poster, else the plain image prop. */
   const still = poster ?? (typeof image === 'string' ? image : image?.desktop)
@@ -237,9 +256,8 @@ export default function MediaBackdrop({
             <source src={video} type="video/mp4" />
           ) : (
             <>
-              {video?.webm && <source src={video.webm} type="video/webm" />}
-              {preferLight && video?.mobile && <source src={video.mobile} type="video/mp4" />}
-              {video?.mp4 && <source src={video.mp4} type="video/mp4" />}
+              {sources?.webm && <source src={sources.webm} type="video/webm" />}
+              {chosenMp4 && <source src={chosenMp4} type="video/mp4" />}
             </>
           )}
         </video>
