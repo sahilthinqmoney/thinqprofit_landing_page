@@ -64,17 +64,28 @@
       property="og:description"
       content="A trading terminal for Indian markets, not yet open. Six months of zero Thinq brokerage for everyone on the waitlist; statutory charges apply."
     />
-    <!-- TODO (blocking, docs/go-live-checklist.md): og-image.png is the OLD
-         share card. It is a blue-black plate on #863BFF / #7E14FF / #47BFFF —
-         hues that exist nowhere in this token set — and it renders a fabricated
-         Nifty chart with an order ticket, which docs/art-direction.md §2.1
-         refuses outright. It also advertises a product that has not opened. -->
-    <meta property="og:image" content="/og-image.png" />
+    <!-- Regenerate with `node scripts/gen-og.mjs` after changing hero copy; it
+         reads every word from src/data/hero.ts so the card cannot claim what
+         the page does not. The card this replaced was the old ThinqProfit
+         artwork — purple, wrong brand name, selling a product that is not open,
+         and asserting an MCX registration the page never claims.
+
+         ABSOLUTE, and versioned. Scrapers are required to resolve og:image
+         against the document, but several of the ones that matter — WhatsApp
+         among them — are unreliable with a relative path, and every one of them
+         caches the result hard. Bump ?v= whenever the card changes or the old
+         one keeps being served for weeks. -->
+    <meta property="og:url" content="https://thinq.co/" />
+    <meta property="og:image" content="https://thinq.co/og-image.png?v=2" />
+    <meta property="og:image:type" content="image/png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
     <meta
       property="og:image:alt"
       content="Thinq — a trading terminal for Indian markets"
     />
     <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:image" content="https://thinq.co/og-image.png?v=2" />
 
     <!-- TODO (blocking): replace the bracketed values once the legal entity
          details are confirmed. These are structured data a search engine reads
