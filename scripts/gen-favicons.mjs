@@ -3,21 +3,23 @@
 //
 // ── Ground: transparent in the tab, opaque on a home screen ────────────────
 //
-// The tab icons are the bare mark on transparency. That is a deliberate choice
-// with a known cost, so the cost is written down rather than rediscovered:
+// The tab icons are the bare mark on transparency. Two problems followed from
+// that, both now fixed, recorded so neither is reintroduced:
 //
 //   - The mark is a silver-to-white gradient. On a dark tab strip it reads
 //     beautifully. On a LIGHT tab strip — the default in Chrome, Safari and
-//     Firefox — only the #a0a0a5 and #b0b0b5 stops carry, so the ring reads as
+//     Firefox — only the #a0a0a5 and #b0b0b5 stops carried, so the ring read as
 //     partial rather than solid.
 //   - Safari composites favicon transparency onto WHITE rather than onto the
 //     tab, so in Safari specifically the light-strip case above is the only
 //     case: it is white ground there even in dark mode.
 //
-// This was previously an opaque #050505 tile for exactly those reasons. It is
-// transparent now because the plate around the mark was the more visible
-// problem of the two. If the tab icon ever looks washed out on a light strip,
-// this is why, and the fix is a darker mark — not a plate behind it.
+// This was previously an opaque #050505 tile for exactly those reasons. The
+// plate around the mark was the more visible problem, so the ground went; the
+// washout was then fixed the way the note here always said it should be — with
+// a darker mark, not a plate behind it. The vector answers
+// `prefers-color-scheme` and inks itself near-black on a light strip; the
+// rasters, which cannot, are painted near-black outright. See LIGHT_INK.
 //
 // The launcher icons stay OPAQUE #050505 (= `--color-bg` in src/index.css and
 // the document's `theme-color`). iOS applies its own mask and composites
@@ -44,6 +46,24 @@ const BRAND_GROUND = { r: 5, g: 5, b: 5, alpha: 1 }
 
 /** No ground at all — the tab icons composite onto whatever the browser draws. */
 const NO_GROUND = { r: 0, g: 0, b: 0, alpha: 0 }
+
+/**
+ * The mark's colour on a light tab strip.
+ *
+ * `--color-bg`, so the light-mode icon is the same near-black the site paints
+ * itself, rather than a flat #000 that reads harsher than the brand.
+ */
+const LIGHT_INK = '#050505'
+
+/**
+ * Repaints the mark a single flat colour.
+ *
+ * The mark is drawn with two `linearGradient`s referenced as `url(#r)` and
+ * `url(#t)`. Swapping the references rather than editing the gradients keeps
+ * one source of truth for the geometry: the shapes are untouched, only what
+ * they are painted with changes.
+ */
+const inked = (svg, colour) => svg.toString().replace(/url\(#[rt]\)/g, colour)
 
 /**
  * Fraction of the tile the mark occupies.
@@ -80,22 +100,36 @@ const TIGHT_VIEWBOX = '1.85 1.85 20.4 20.4'
  * see the note at the top of this file for what that costs on a light strip.
  */
 const TARGETS = [
-  { file: 'favicon-16x16.png', size: 16, ico: true, ground: NO_GROUND },
-  { file: 'favicon-32x32.png', size: 32, ico: true, ground: NO_GROUND },
-  { file: 'favicon-48x48.png', size: 48, ico: true, ground: NO_GROUND },
+  { file: 'favicon-16x16.png', size: 16, ico: true, ground: NO_GROUND, ink: LIGHT_INK },
+  { file: 'favicon-32x32.png', size: 32, ico: true, ground: NO_GROUND, ink: LIGHT_INK },
+  { file: 'favicon-48x48.png', size: 48, ico: true, ground: NO_GROUND, ink: LIGHT_INK },
   { file: 'apple-touch-icon.png', size: 180, ground: BRAND_GROUND },
   { file: 'android-chrome-192x192.png', size: 192, ground: BRAND_GROUND },
   { file: 'android-chrome-512x512.png', size: 512, ground: BRAND_GROUND },
 ]
 
-/** One tile: the mark, centred at MARK_SCALE, on the given ground. */
-async function tile(svg, size, ground) {
+/**
+ * One tile: the mark, centred at MARK_SCALE, on the given ground.
+ *
+ * `ink` repaints the mark flat. A raster cannot answer `prefers-color-scheme` —
+ * there is one file and the browser picks its own strip colour — so the tab
+ * PNGs are painted for the light case rather than left to gamble. That is the
+ * right constant because Safari, which is what actually draws these (Chrome and
+ * Firefox take the SVG), composites favicon transparency onto WHITE regardless
+ * of the system theme. Black-on-white reads in both of Safari's modes; the
+ * silver gradient read in neither.
+ *
+ * The launcher icons pass no `ink` and keep the gradient: they sit on an opaque
+ * #050505 plate, where a near-black mark would vanish.
+ */
+async function tile(svg, size, ground, ink) {
   const inner = Math.round(size * MARK_SCALE)
   // Rasterise from the SVG at the final size rather than downscaling one big
   // bitmap: at 16px the ring is barely two pixels thick and a resample turns it
   // to grey mush.
+  const source = ink ? inked(svg, ink) : svg.toString()
   const cropped = Buffer.from(
-    svg.toString().replace(/viewBox="[^"]*"/, `viewBox="${TIGHT_VIEWBOX}"`),
+    source.replace(/viewBox="[^"]*"/, `viewBox="${TIGHT_VIEWBOX}"`),
   )
   const mark = await sharp(cropped, { density: 384 })
     .resize(inner, inner, { fit: 'contain', background: { r: 0, g: 0, b: 0, alpha: 0 } })
@@ -152,6 +186,21 @@ const svg = await readFile(SOURCE)
  * exactly or the icon changes identity between browsers. No ground rect: the
  * mark is scaled to MARK_SCALE inside a transparent 24x24 box, which is what
  * `tile()` now builds for 16/32/48.
+ *
+ * ── Why this one adapts and the PNGs cannot ────────────────────────────────
+ *
+ * Being a vector, this file carries its own stylesheet, and Chrome and Firefox
+ * evaluate `prefers-color-scheme` inside a favicon against the system theme.
+ * So the mark keeps its silver gradient on a dark tab strip and turns near-
+ * black on a light one — the two cases the old single-colour file could not
+ * both serve. A PNG has no such escape hatch, which is why the raster tab
+ * icons above are painted for the light case outright.
+ *
+ * The rules match on presentation attributes rather than added classes, so the
+ * source mark needs no markup for this. `[fill]:not([fill="none"])` matters:
+ * the ring is `fill="none"` and stroked, and a blanket `fill` would fill the
+ * ring solid and turn the logo into a disc. CSS beats presentation attributes,
+ * so no `!important` is needed.
  */
 function tileSvg(markSvg) {
   const inner = markSvg
@@ -165,6 +214,12 @@ function tileSvg(markSvg) {
   const scale = (MARK_SCALE * 24) / vw
   const pad = (24 - vw * scale) / 2
   return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="512" height="512">
+  <style>
+    @media (prefers-color-scheme: light) {
+      [stroke] { stroke: ${LIGHT_INK} }
+      [fill]:not([fill="none"]) { fill: ${LIGHT_INK} }
+    }
+  </style>
   <g transform="translate(${(pad - vx * scale).toFixed(3)} ${(pad - vy * scale).toFixed(3)}) scale(${scale.toFixed(4)})">
 ${inner
   .split('\n')
@@ -178,7 +233,7 @@ ${inner
 const forIco = []
 
 for (const target of TARGETS) {
-  const data = await tile(svg, target.size, target.ground)
+  const data = await tile(svg, target.size, target.ground, target.ink)
   await writeFile(path.join(PUBLIC, target.file), data)
   if (target.ico) forIco.push({ size: target.size, data })
   console.log(`favicons: ${target.file.padEnd(28)} ${String(data.length).padStart(6)} bytes`)
@@ -193,4 +248,4 @@ console.log(`favicons: favicon.ico                  ${ico(forIco).length} bytes 
 await rm(path.join(PUBLIC, 'favicon_io-2'), { recursive: true, force: true })
 
 await writeFile(path.join(PUBLIC, 'favicon.svg'), tileSvg(svg))
-console.log('favicons: favicon.svg                  (transparent mark, vector)')
+console.log(`favicons: favicon.svg                  (vector, ${LIGHT_INK} on a light strip)`)

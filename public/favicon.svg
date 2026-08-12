@@ -1,4 +1,10 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="512" height="512">
+  <style>
+    @media (prefers-color-scheme: light) {
+      [stroke] { stroke: #050505 }
+      [fill]:not([fill="none"]) { fill: #050505 }
+    }
+  </style>
   <g transform="translate(-1.042 -1.042) scale(1.0824)">
     <defs>
     <linearGradient id="r" gradientUnits="userSpaceOnUse" x1="3" y1="3" x2="14.6" y2="12.86">
