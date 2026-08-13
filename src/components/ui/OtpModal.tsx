@@ -244,8 +244,7 @@ export default function OtpModal({
               )}
 
               {/* Timer / Resend Row */}
-              <div className="mt-5 flex items-center justify-between text-xs text-white/60">
-                <span>Didn't receive OTP?</span>
+              <div className="mt-5 flex items-center justify-end text-xs text-white/60">
                 {canResend ? (
                   <button
                     type="button"
