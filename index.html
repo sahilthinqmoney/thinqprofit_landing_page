@@ -9,19 +9,22 @@
          and there are two of each: the silver-to-white gradient for a dark tab
          strip, the mark inked near-black #050505 for a light one.
 
-         The `media` attributes below are what pick between them, and that is
-         load-bearing rather than stylistic. The previous version shipped ONE
-         self-inking SVG carrying `@media (prefers-color-scheme: light)` inside
-         it. Chrome rasterises a favicon in a context that always reports the
-         light scheme, so that rule fired in dark mode too and the tab showed a
-         near-black mark on a black strip. Chrome and Firefox both evaluate
-         `media` on `<link rel="icon">` against the real system theme and swap
-         the icon when it changes, so the choice is made out here where it works.
+         The `media` attributes below pick between them. Measured, not assumed:
+         real Chrome under a dark system theme fetches favicon-dark.svg and no
+         light variant, and under a light theme fetches favicon-light.svg — so
+         `media` on `<link rel="icon">` is evaluated against the real theme.
 
-         favicon.ico carries no `media` and is the unconditional fallback for
-         anything that ignores it. It is the near-black copy, because Safari
-         composites favicon transparency onto WHITE rather than onto the tab —
-         so Safari is the light case in both of its modes.
+         favicon.ico is deliberately NOT linked here, and that is the whole fix.
+         It was linked, unconditionally and first, and Chrome painted IT — a
+         black ring on a black tab strip in dark mode. `media` decides which
+         files Chrome DOWNLOADS, not which one wins the tab: with the .ico
+         declared, Chrome fetched favicon-dark.svg and favicon.ico and drew the
+         .ico; with it gone, favicon-dark.svg is the only candidate it fetches,
+         so it is the only thing it can draw. Measured both ways in real Chrome.
+
+         The file still ships at /favicon.ico — browsers fall back to that path
+         on their own without a <link>, which is what legacy clients use. Do not
+         re-add the tag to "be safe": that is the bug.
 
          apple-touch-icon and the android pair stay OPAQUE #050505 (= --color-bg
          and theme-color below): iOS and Android mask and composite those
@@ -30,49 +33,48 @@
 
          Bump ?v= when the icon changes: browsers cache favicons far harder
          than they cache anything else, and a plain reload will not refresh one. -->
-    <link rel="icon" type="image/x-icon" href="/favicon.ico?v=12" sizes="16x16 32x32 48x48" />
     <link
       rel="icon"
       type="image/svg+xml"
-      href="/favicon-dark.svg?v=12"
+      href="/favicon-dark.svg?v=13"
       media="(prefers-color-scheme: dark)"
     />
     <link
       rel="icon"
       type="image/svg+xml"
-      href="/favicon-light.svg?v=12"
+      href="/favicon-light.svg?v=13"
       media="(prefers-color-scheme: light)"
     />
     <link
       rel="icon"
       type="image/png"
       sizes="32x32"
-      href="/favicon-32x32-dark.png?v=12"
+      href="/favicon-32x32-dark.png?v=13"
       media="(prefers-color-scheme: dark)"
     />
     <link
       rel="icon"
       type="image/png"
       sizes="32x32"
-      href="/favicon-32x32.png?v=12"
+      href="/favicon-32x32.png?v=13"
       media="(prefers-color-scheme: light)"
     />
     <link
       rel="icon"
       type="image/png"
       sizes="16x16"
-      href="/favicon-16x16-dark.png?v=12"
+      href="/favicon-16x16-dark.png?v=13"
       media="(prefers-color-scheme: dark)"
     />
     <link
       rel="icon"
       type="image/png"
       sizes="16x16"
-      href="/favicon-16x16.png?v=12"
+      href="/favicon-16x16.png?v=13"
       media="(prefers-color-scheme: light)"
     />
-    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png?v=12" />
-    <link rel="manifest" href="/site.webmanifest?v=12" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png?v=13" />
+    <link rel="manifest" href="/site.webmanifest?v=13" />
     <!-- The hero's still, not its clip. Preloading the video spent the first
          megabytes of a cold connection on an asset that may never be allowed to
          play — on a metered or slow link the ladder in src/lib/mediaTier.ts
