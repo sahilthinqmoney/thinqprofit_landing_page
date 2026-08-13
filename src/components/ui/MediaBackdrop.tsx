@@ -239,7 +239,17 @@ export default function MediaBackdrop({
             filter: 'blur(24px)',
             transform: 'scale(1.12)',
             opacity: posterReady || videoActive ? 0 : 1,
-            transition: `opacity ${CROSS_FADE_MS}ms ease-out`,
+            // Held, then cut — the same asymmetry as the still above, for the
+            // same reason. A non-priority still fades 0->1 while this fades
+            // 1->0, and those two do not add up to a covered frame; the ground
+            // shows through the middle of the crossfade. Nothing is lost by
+            // leaving the placeholder lit underneath an opaque layer for one
+            // more fade, and it costs a composite for 300ms rather than for
+            // the life of the page.
+            transition:
+              posterReady || videoActive
+                ? `opacity 0ms linear ${CROSS_FADE_MS}ms`
+                : `opacity ${CROSS_FADE_MS}ms ease-out`,
           }}
         />
       )}
@@ -266,7 +276,26 @@ export default function MediaBackdrop({
             // paint a half-decoded image anyway, so nothing is lost by letting
             // it arrive on its own; the placeholder beneath still fades out.
             opacity: videoActive ? 0 : priority || posterReady ? 1 : 0,
-            transition: `opacity ${CROSS_FADE_MS}ms ease-out`,
+            // Asymmetric on purpose, and this is the fix for a dark flash on
+            // load that was worst on iPhone.
+            //
+            // Fading this out over the same window the clip fades in does NOT
+            // hold the frame covered. Stacked alpha does not sum to 1:
+            // `cover = 1 - (1-still)(1-clip)`, which at the midpoint is
+            // 1 - 0.5*0.5 = 0.75 — a quarter of the #070709 ground behind both
+            // layers showing through for the length of the crossfade. Measured
+            // in WebKit at iPhone width: coverage fell to 0.751 between 492ms
+            // and 681ms, which reads as the backdrop blinking dark mid-load.
+            //
+            // So the still does not cross-fade at all. It holds at full opacity
+            // beneath the clip for the whole fade-in and is cut afterwards, by
+            // which point the clip is opaque and covering it — a 0ms change
+            // behind an opaque layer is invisible. Coming back (the clip was
+            // dropped) still fades normally, because there the still IS the
+            // thing being revealed.
+            transition: videoActive
+              ? `opacity 0ms linear ${CROSS_FADE_MS}ms`
+              : `opacity ${CROSS_FADE_MS}ms ease-out`,
           }}
         />
       )}
