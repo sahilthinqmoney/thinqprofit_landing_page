@@ -65,3 +65,11 @@ brag-output/
 !.obsidian/core-plugins.json
 !.obsidian/community-plugins.json
 docs/.obsidian/
+
+# Internal planning documents. These carry the Decision Log, Open Items with
+# their owners, and compliance constraints — none of which belong on a public
+# GitHub repo or, if ever placed in public/, on thinq.co. The rendered viewers
+# live in docs/ precisely so Vite does not copy them into the deploy.
+THINQ_TNC_PRD*.md
+docs/prd.html
+docs/thinq-tnc-prd-preview.html
