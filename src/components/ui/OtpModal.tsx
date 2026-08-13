@@ -2,62 +2,152 @@ import React, { useState, useRef, useEffect } from 'react'
 import { Check, ShieldCheck, X, RefreshCw } from 'lucide-react'
 import Button from './Button'
 import ThinqMark from './ThinqMark'
+import CandlestickLoader from './CandlestickLoader'
+import {
+  AuthError,
+  loadCatalogue,
+  renderMessage,
+  sendOtp,
+  verifyOtp,
+  type SendOtpResult,
+} from '../../lib/authService'
+
+/** How often the two deadlines are re-read. */
+const TICK_MS = 500
 
 interface OtpModalProps {
   isOpen: boolean
   phone: string
+  /** The journey this modal belongs to, from the send that opened it. */
+  attempt: SendOtpResult | null
+  /** A resend replaces the attempt, so the parent holds it. */
+  onAttempt: (attempt: SendOtpResult) => void
   onClose: () => void
-  onSuccess: () => void
+  onSuccess: (outcome: 'SIGNED_IN' | 'REGISTERED') => void
   onEditPhone?: () => void
+}
+
+/** Seconds from now until an absolute instant, floored at zero. */
+function secondsUntil(instant: string | undefined, now: number): number {
+  if (!instant) return 0
+  return Math.max(0, Math.ceil((new Date(instant).getTime() - now) / 1000))
 }
 
 export default function OtpModal({
   isOpen,
   phone,
+  attempt,
+  onAttempt,
   onClose,
   onSuccess,
   onEditPhone,
 }: OtpModalProps) {
   const [otp, setOtp] = useState<string[]>(['', '', '', '', '', ''])
   const [isVerifying, setIsVerifying] = useState(false)
+  const [isResending, setIsResending] = useState(false)
   const [isVerified, setIsVerified] = useState(false)
-  const [timer, setTimer] = useState(30)
-  const [canResend, setCanResend] = useState(false)
+  const [outcome, setOutcome] = useState<'SIGNED_IN' | 'REGISTERED' | null>(null)
   const [error, setError] = useState('')
+  /** Set by ACCOUNT_LOCKED, and by the resend limits. Absolute instants. */
+  const [lockedUntil, setLockedUntil] = useState<string | undefined>()
+  const [resendBlockedUntil, setResendBlockedUntil] = useState<string | undefined>()
+  const [now, setNow] = useState(() => Date.now())
 
   const inputRefs = useRef<(HTMLInputElement | null)[]>([])
 
-  // Countdown timer for Resend OTP
+  /*
+   * One clock for every deadline.
+   *
+   * The countdowns are derived from the absolute instants the server sent, not
+   * decremented from a starting number — a slow request would otherwise push
+   * the deadline out by however long it spent in flight, and a backgrounded tab
+   * would drift by however long it was throttled.
+   */
   useEffect(() => {
-    let interval: ReturnType<typeof setInterval>
-    if (isOpen && timer > 0 && !canResend) {
-      interval = setInterval(() => {
-        setTimer((prev) => {
-          if (prev <= 1) {
-            setCanResend(true)
-            return 0
-          }
-          return prev - 1
-        })
-      }, 1000)
+    if (!isOpen) return
+    const id = setInterval(() => setNow(Date.now()), TICK_MS)
+    return () => clearInterval(id)
+  }, [isOpen])
+
+  // The copy for every server message id comes from here.
+  const [catalogue, setCatalogue] = useState<Awaited<ReturnType<typeof loadCatalogue>>>(null)
+  useEffect(() => {
+    if (!isOpen) return
+    let live = true
+    void loadCatalogue().then((c) => {
+      if (live) setCatalogue(c)
+    })
+    return () => {
+      live = false
     }
-    return () => clearInterval(interval)
-  }, [isOpen, timer, canResend])
+  }, [isOpen])
 
   // Reset state on open
   useEffect(() => {
     if (isOpen) {
       setOtp(['', '', '', '', '', ''])
       setIsVerifying(false)
+      setIsResending(false)
       setIsVerified(false)
-      setTimer(30)
-      setCanResend(false)
+      setOutcome(null)
       setError('')
+      setLockedUntil(undefined)
+      setResendBlockedUntil(undefined)
+      setNow(Date.now())
       setTimeout(() => {
         inputRefs.current[0]?.focus()
       }, 100)
     }
   }, [isOpen])
+
+  const codeExpiresIn = secondsUntil(attempt?.expiresAt, now)
+  const cooldownEndsIn = secondsUntil(
+    resendBlockedUntil ?? attempt?.resendAvailableAt,
+    now,
+  )
+  const lockedFor = secondsUntil(lockedUntil, now)
+  const isLocked = lockedFor > 0
+
+  /*
+   * Resend opens either when the cooldown lapses OR once the code has expired.
+   *
+   * The second half matters: past `expiresAt` the server accepts a resend even
+   * inside the 30s window, so watching only the cooldown would grey out a
+   * button the server would have honoured — leaving a reader with a dead code
+   * and no way to ask for another.
+   */
+  const canResend = !isLocked && !isResending && (cooldownEndsIn === 0 || codeExpiresIn === 0)
+
+  /** Turns a failure into copy, and into whatever state it implies. */
+  const applyError = (err: unknown, fallback: string) => {
+    if (!(err instanceof AuthError)) {
+      setError(fallback)
+      return
+    }
+    switch (err.code) {
+      case 'ACCOUNT_LOCKED':
+        setLockedUntil(err.retryExpiresAt)
+        break
+      case 'RESEND_COOLDOWN':
+      case 'RESEND_LIMIT':
+      case 'DISPATCH_CAP':
+        setResendBlockedUntil(err.retryExpiresAt)
+        break
+      default:
+        break
+    }
+    setError(
+      renderMessage(
+        catalogue,
+        { id: err.messageId, params: err.params },
+        // INTERNAL and UPSTREAM_UNAVAILABLE carry no message id at all, so
+        // these are the words for "the catalogue has nothing to say".
+        err.code === 'NETWORK'
+          ? "Couldn't reach the server. Check your connection and try again."
+          : fallback,
+      ),
+    )
+  }
 
   if (!isOpen) return null
 
@@ -94,39 +184,71 @@ export default function OtpModal({
     }
   }
 
-  const handleResend = () => {
-    if (!canResend) return
-    setTimer(30)
-    setCanResend(false)
-    setOtp(['', '', '', '', '', ''])
+  const handleResend = async () => {
+    if (!canResend || !attempt) return
+    setIsResending(true)
     setError('')
-    inputRefs.current[0]?.focus()
+    try {
+      // Same endpoint, carrying the attempt — that makes it a resend against
+      // this journey rather than the start of a new one.
+      const next = await sendOtp({ value: phone, attemptId: attempt.attemptId })
+      onAttempt(next)
+      setResendBlockedUntil(undefined)
+      setOtp(['', '', '', '', '', ''])
+      inputRefs.current[0]?.focus()
+    } catch (err) {
+      applyError(err, "Couldn't send a new code. Try again in a moment.")
+    } finally {
+      setIsResending(false)
+    }
   }
 
-  const handleVerify = (e: React.FormEvent) => {
+  const handleVerify = async (e: React.FormEvent) => {
     e.preventDefault()
+    if (isLocked) return
     const enteredOtp = otp.join('')
     if (enteredOtp.length < 6) {
       setError('Please enter complete 6-digit OTP')
+      return
+    }
+    if (!attempt) {
+      setError('That request expired. Start again from your number.')
       return
     }
 
     setIsVerifying(true)
     setError('')
 
-    // Simulate OTP verification delay
-    setTimeout(() => {
-      setIsVerifying(false)
+    try {
+      const result = await verifyOtp({ attemptId: attempt.attemptId, code: enteredOtp })
+      // Allow 1.5s for the candlestick chart loader to play out smoothly
+      await new Promise((resolve) => setTimeout(resolve, 1500))
+      setOutcome(result.outcome)
       setIsVerified(true)
-      setTimeout(() => {
-        onSuccess()
-      }, 1800)
-    }, 1200)
+      setTimeout(() => onSuccess(result.outcome), 1800)
+    } catch (err) {
+      /*
+       * Wrong, expired and already-used all arrive as OTP_INVALID, and the
+       * client genuinely cannot tell them apart — telling them apart would
+       * leak whether a given code ever existed. So the copy comes from the
+       * catalogue and never guesses which of the three happened.
+       */
+      applyError(err, 'That code was not accepted. Check it and try again.')
+      setOtp(['', '', '', '', '', ''])
+      inputRefs.current[0]?.focus()
+    } finally {
+      setIsVerifying(false)
+    }
   }
 
-  const formattedPhone = phone.length === 10 
-    ? `+91 ${phone.slice(0, 5)} ${phone.slice(5)}`
-    : `+91 ${phone}`
+  /*
+   * Prefer the server's mask over anything derived from what was typed. It is
+   * the number the code actually went to, after normalisation, so it is the
+   * only version that can confirm the message went where the reader meant.
+   */
+  const formattedPhone =
+    attempt?.maskedTo ??
+    (phone.length === 10 ? `+91 ${phone.slice(0, 5)} ${phone.slice(5)}` : `+91 ${phone}`)
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 isolate">
@@ -181,16 +303,21 @@ export default function OtpModal({
             <div className="flex h-16 w-16 items-center justify-center rounded-full bg-emerald-500/20 border border-emerald-500/40 text-emerald-400 mb-4 shadow-[0_0_30px_rgba(16,185,129,0.3)]">
               <Check className="h-8 w-8 stroke-[2.5]" />
             </div>
+            {/* The two outcomes mean different things and deserve different
+                words: one number was new to us, the other was already ours. */}
             <h3 className="text-xl sm:text-2xl font-bold tracking-tight text-white">
-              You're on the waitlist!
+              {outcome === 'SIGNED_IN' ? "You're signed in" : "You're on the waitlist!"}
             </h3>
             <p className="mt-2 text-sm text-white/70 max-w-xs leading-relaxed">
-              Mobile <span className="font-mono font-medium text-white">{formattedPhone}</span> verified. We'll invite you as seats open.
+              Mobile <span className="font-mono font-medium text-white">{formattedPhone}</span>{' '}
+              {outcome === 'SIGNED_IN'
+                ? 'verified. Welcome back.'
+                : "verified. We'll invite you as seats open."}
             </p>
-            <div className="mt-6 rounded-full bg-white/10 px-4 py-2 text-xs font-semibold text-white/90 border border-white/15">
-              Priority Pass #1,429 Reserved
-            </div>
           </div>
+        ) : isVerifying ? (
+          /* Premium Fintech Candlestick Verification Loading Screen */
+          <CandlestickLoader />
         ) : (
           /* OTP Entry State */
           <div className="relative z-10">
@@ -230,9 +357,12 @@ export default function OtpModal({
                     inputMode="numeric"
                     maxLength={6}
                     value={digit}
+                    // Five wrong codes locks the account; the contract asks for
+                    // the input to be dead until the lock lifts.
+                    disabled={isLocked}
                     onChange={(e) => handleInputChange(idx, e.target.value)}
                     onKeyDown={(e) => handleKeyDown(idx, e)}
-                    className="h-12 w-11 sm:h-14 sm:w-12 rounded-xl border border-white/20 bg-white/5 text-center font-mono text-lg font-bold text-white outline-none transition-all focus:border-white/60 focus:bg-white/10 focus:ring-2 focus:ring-white/20"
+                    className="h-12 w-11 sm:h-14 sm:w-12 rounded-xl border border-white/20 bg-white/5 text-center font-mono text-lg font-bold text-white outline-none transition-all focus:border-white/60 focus:bg-white/10 focus:ring-2 focus:ring-white/20 disabled:opacity-40 disabled:cursor-not-allowed"
                   />
                 ))}
               </div>
@@ -243,19 +373,32 @@ export default function OtpModal({
                 </p>
               )}
 
-              {/* Timer / Resend Row */}
-              <div className="mt-5 flex items-center justify-end text-xs text-white/60">
+              {/* Timer / Resend Row. Every number here is derived from an
+                  absolute instant the server sent, so it cannot drift. */}
+              <div className="mt-5 flex items-center justify-between text-xs text-white/60">
+                {isLocked ? (
+                  <span className="font-mono text-rose-400/80">
+                    Locked · try again in {lockedFor}s
+                  </span>
+                ) : codeExpiresIn > 0 ? (
+                  <span className="font-mono text-white/40">
+                    Code expires in {codeExpiresIn}s
+                  </span>
+                ) : (
+                  <span className="font-mono text-white/40">Code expired</span>
+                )}
+
                 {canResend ? (
                   <button
                     type="button"
-                    onClick={handleResend}
+                    onClick={() => void handleResend()}
                     className="flex items-center gap-1 font-semibold text-white hover:text-white/80 transition-colors"
                   >
                     <RefreshCw className="h-3 w-3" /> Resend OTP
                   </button>
                 ) : (
                   <span className="font-mono text-white/40">
-                    Resend in {timer}s
+                    {isResending ? 'Sending…' : `Resend in ${cooldownEndsIn}s`}
                   </span>
                 )}
               </div>
@@ -265,7 +408,7 @@ export default function OtpModal({
                 type="submit"
                 size="lg"
                 fullWidth
-                disabled={isVerifying}
+                disabled={isVerifying || isLocked}
                 className="mt-6 shadow-[0_0_24px_rgba(255,255,255,0.2)] hover:shadow-[0_0_32px_rgba(255,255,255,0.35)]"
               >
                 {isVerifying ? 'Verifying OTP...' : 'Verify & Join Waitlist'}
@@ -280,6 +423,16 @@ export default function OtpModal({
                     sessionStorage.setItem('return_to_otp', 'true')
                     if (phone) {
                       sessionStorage.setItem('otp_phone', phone)
+                    }
+                    /*
+                     * The journey has to survive the trip too. Without it the
+                     * modal reopens with no attemptId, and the first verify
+                     * fails on a code that was perfectly good. sessionStorage
+                     * is per-tab, so this keeps two tabs as two journeys — a
+                     * cookie would not.
+                     */
+                    if (attempt) {
+                      sessionStorage.setItem('otp_attempt', JSON.stringify(attempt))
                     }
                   }}
                   className="font-semibold text-white underline hover:text-white/80 transition-colors inline-block"

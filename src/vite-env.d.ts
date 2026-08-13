@@ -1,6 +1,23 @@
 /// <reference types="vite/client" />
 
 /**
+ * Build-time configuration.
+ *
+ * `VITE_AUTH_BASE_URL` points at authService. The default in src/lib/
+ * authService.ts is a developer's own machine, so every environment but local
+ * development has to set this, and its origin has to be on the service's CORS
+ * allowlist — the calls send credentials, which a wildcard origin cannot
+ * satisfy.
+ */
+interface ImportMetaEnv {
+  readonly VITE_AUTH_BASE_URL?: string
+}
+
+interface ImportMeta {
+  readonly env: ImportMetaEnv
+}
+
+/**
  * The year the bundle was built, substituted by `define` in vite.config.ts.
  * Constant across the prerender and the browser, which is the point of it.
  */

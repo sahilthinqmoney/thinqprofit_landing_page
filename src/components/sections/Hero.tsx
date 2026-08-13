@@ -2,6 +2,13 @@ import { useState, useEffect } from 'react'
 import Container from '../ui/Container'
 import Button from '../ui/Button'
 import OtpModal from '../ui/OtpModal'
+import {
+  AuthError,
+  loadCatalogue,
+  renderMessage,
+  sendOtp,
+  type SendOtpResult,
+} from '../../lib/authService'
 import { hero } from '../../data/hero'
 import MediaBackdrop from '../ui/MediaBackdrop'
 import { lqipFor } from '../../data/lqip'
@@ -54,6 +61,16 @@ export default function Hero() {
   const [phone, setPhone] = useState('')
   const [isOtpOpen, setIsOtpOpen] = useState(false)
   const [formError, setFormError] = useState('')
+  const [isSending, setIsSending] = useState(false)
+  /*
+   * The live journey.
+   *
+   * Held in component state rather than anywhere shared, because two tabs are
+   * two journeys — an attempt in a cookie would let one tab's resend or verify
+   * land against the other's code. It survives the T&C round trip below via
+   * sessionStorage, which is per-tab and so keeps that property.
+   */
+  const [attempt, setAttempt] = useState<SendOtpResult | null>(null)
 
   useEffect(() => {
     /*
@@ -77,14 +94,32 @@ export default function Hero() {
       if (savedPhone) {
         setPhone(savedPhone)
       }
-      // The number is the reason this round trip exists; drop it once it is
-      // back in the field rather than leaving it in storage for the tab.
+
+      /*
+       * Restore the journey, not just the number. The deadlines inside it are
+       * absolute, so a code that expired while the terms were being read comes
+       * back already expired — which is the truth, and which the modal turns
+       * into an immediately available resend rather than a dead cooldown.
+       */
+      const savedAttempt = sessionStorage.getItem('otp_attempt')
+      if (savedAttempt) {
+        try {
+          setAttempt(JSON.parse(savedAttempt) as SendOtpResult)
+        } catch {
+          // Corrupt or hand-edited. Better to reopen without it and let the
+          // reader resend than to restore something that cannot verify.
+        }
+      }
+
+      // The number and the journey are the reason this round trip exists; drop
+      // both once they are back rather than leaving them for the tab's life.
       sessionStorage.removeItem('otp_phone')
+      sessionStorage.removeItem('otp_attempt')
       setIsOtpOpen(true)
     }
   }, [])
 
-  const handleWaitlistSubmit = (e: React.FormEvent) => {
+  const handleWaitlistSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     const cleaned = phone.replace(/\D/g, '')
     if (!cleaned) {
@@ -96,7 +131,36 @@ export default function Hero() {
       return
     }
     setFormError('')
-    setIsOtpOpen(true)
+    setIsSending(true)
+    try {
+      /*
+       * The value goes as typed — the server normalises, so "+91 94517 40121"
+       * and "9451740121" are one number.
+       *
+       * The modal only opens once this succeeds. Opening first and sending
+       * behind it would show a code entry screen for a message that was never
+       * accepted, and DISPATCH_CAP or UPSTREAM_UNAVAILABLE would arrive with
+       * the reader already staring at six empty boxes.
+       */
+      const started = await sendOtp({ value: phone })
+      setAttempt(started)
+      setIsOtpOpen(true)
+    } catch (err) {
+      const catalogue = await loadCatalogue()
+      setFormError(
+        err instanceof AuthError
+          ? renderMessage(
+              catalogue,
+              { id: err.messageId, params: err.params },
+              err.code === 'NETWORK'
+                ? "Couldn't reach the server. Check your connection and try again."
+                : "Couldn't send a code just now. Please try again.",
+            )
+          : "Couldn't send a code just now. Please try again.",
+      )
+    } finally {
+      setIsSending(false)
+    }
   }
 
   return (
@@ -108,10 +172,18 @@ export default function Hero() {
       <OtpModal
         isOpen={isOtpOpen}
         phone={phone}
+        attempt={attempt}
+        // A resend replaces the journey's deadlines, so the new attempt comes
+        // back up here rather than being held inside the modal.
+        onAttempt={setAttempt}
         onClose={() => setIsOtpOpen(false)}
-        onSuccess={() => setIsOtpOpen(false)}
+        onSuccess={() => {
+          setIsOtpOpen(false)
+          setAttempt(null)
+        }}
         onEditPhone={() => {
           setIsOtpOpen(false)
+          setAttempt(null)
           document.getElementById('hero-phone')?.focus()
         }}
       />
@@ -239,9 +311,13 @@ export default function Hero() {
                     type="submit"
                     size="lg"
                     fullWidth
+                    // A second tap while the first send is in flight would
+                    // start a second journey and burn a dispatch against the
+                    // number's hourly cap.
+                    disabled={isSending}
                     className="sm:w-auto shrink-0 shadow-[0_0_24px_rgba(255,255,255,0.2)] hover:shadow-[0_0_32px_rgba(255,255,255,0.35)] transition-all duration-300"
                   >
-                    Join the waitlist
+                    {isSending ? 'Sending code…' : 'Join the waitlist'}
                   </Button>
                 </form>
                 {formError && (
