@@ -5,11 +5,6 @@
  * written from inference, from a competitor's footer, or from an older draft:
  * docs/go-live-checklist.md is explicit that an invented registration number is
  * a regulatory offence rather than a typo.
- *
- * Anything still outstanding is written as `[ ... ]`. The renderer picks those
- * brackets out and prints them in warning amber, so an unfilled value cannot
- * ship by inattention — it has to be looked at. Do not remove a bracket by
- * guessing what belongs in it.
  */
 
 export interface RegistrationDetail {
@@ -19,7 +14,7 @@ export interface RegistrationDetail {
 }
 
 export const entityInfo = {
-  name: 'Money Logix Private Limited',
+  name: 'Money Logix Securities Pvt Ltd',
   cin: 'U64990MH2006PTC165522',
   sebiStockBroking: 'INZ000235531',
   sebiDP: 'IN-DP-22-2015',
@@ -27,19 +22,35 @@ export const entityInfo = {
   bseMember: '3246',
   address: 'Vrindavan Annexe, 32 Mount Mary Road, Bandra (W), Mumbai 400050',
   phone: '+91 22 67827171 / 7172',
-  email: 'moneylogixs@gmail.com',
-  complianceOfficer: '[ Name ] · [ officer@moneylogix.in ] · [ +91 22 XXXXXXXX ]',
+  email: 'support@moneylogix.in',
+  complianceOfficer: 'Manoj Mahamunkar — Compliance Officer · mahamunkarmanoj@moneylogix.in',
   brokingGrievance: 'complaints@moneylogix.in',
   dpGrievance: 'bogrievances@moneylogix.in',
-  derivativesRiskDisclosure:
-    '[ Paste SEBI / exchange-approved derivatives risk disclosure verbatim, including the prescribed loss statistic. Do not paraphrase. ]',
+  uscnbAccountName: 'MONEY LOGIX SECURITIES PVT LTD - USCNB A/C',
+  uscnbBankName: 'HDFC BANK LTD',
+  uscnbAccountNo: '00600340039678',
+  uscnbIfscCode: 'HDFC0000060',
+  brokingUpi: 'moneylogix.brk@validhdfc',
+  dpUpi: 'moneylogix.dp@validhdfc',
+}
+
+export const derivativesRiskDisclosure = {
+  title: 'RISK DISCLOSURES ON DERIVATIVES',
+  bullets: [
+    '9 out of 10 individual traders in equity Futures and Options Segment, incurred net losses.',
+    'On an average, loss makers registered net trading loss close to ₹ 50,000.',
+    'Over and above the net trading losses incurred, loss makers expended an additional 28% of net trading losses as transaction costs.',
+    'Those making net trading profits, incurred between 15% to 50% of such profits as transaction cost.',
+  ],
+  source:
+    '1. SEBI study dated January 25, 2023 on "Analysis of Profit and Loss of Individual Traders dealing in equity Futures and Options (F&O) Segment", wherein Aggregate Level findings are based on annual Profit/Loss incurred by individual traders in equity F&O during FY 2021-22.',
 }
 
 export const registrationDetails: RegistrationDetail[] = [
   {
     label: 'Legal Entity',
     value:
-      'Money Logix Private Limited (CIN: U64990MH2006PTC165522)\nThinq is a brand owned by Money Logix Private Limited. All Thinq products are registered under Money Logix Private Limited.\nClients are advised to refer to our company as Money Logix Pvt. Ltd. when communicating with regulatory authorities.',
+      'Money Logix Securities Pvt Ltd (CIN: U64990MH2006PTC165522)\nThinq is a brand owned by Money Logix Securities Pvt Ltd. All Thinq products are registered under Money Logix Securities Pvt Ltd.\nClients are advised to refer to our company as Money Logix Securities Pvt Ltd when communicating with regulatory authorities.',
   },
   {
     label: 'SEBI Registration',
@@ -49,12 +60,22 @@ export const registrationDetails: RegistrationDetail[] = [
   {
     label: 'Registered & Corporate Office',
     value:
-      'Vrindavan Annexe, 32 Mount Mary Road, Bandra (W), Mumbai 400050\nPhone: +91 22 67827171 / 7172\nEmail: moneylogixs@gmail.com',
+      'Vrindavan Annexe, 32 Mount Mary Road, Bandra (W), Mumbai 400050\nPhone: +91 22 67827171 / 7172\nEmail: support@moneylogix.in',
   },
   {
     label: 'Compliance Officer',
-    value: '[ Name ] · [ officer@moneylogix.in ] · [ +91 22 XXXXXXXX ]',
-    isPlaceholder: true,
+    value: 'Manoj Mahamunkar — Compliance Officer\nEmail: mahamunkarmanoj@moneylogix.in',
+    isPlaceholder: false,
+  },
+  {
+    label: 'Upstreaming Client Bank Nodal Account (USCNB)',
+    value:
+      'ACCOUNT NAME: MONEY LOGIX SECURITIES PVT LTD - USCNB A/C\nBANK NAME: HDFC BANK LTD\nA/C NO: 00600340039678 | IFSC CODE: HDFC0000060',
+  },
+  {
+    label: 'UPI Handles for Payments',
+    value:
+      'Broking UPI: moneylogix.brk@validhdfc\nDP UPI: moneylogix.dp@validhdfc',
   },
   {
     label: 'Grievance Redressal',
@@ -64,8 +85,8 @@ export const registrationDetails: RegistrationDetail[] = [
   {
     label: 'Risk Disclosure — Equity Derivatives',
     value:
-      '[ Paste SEBI / exchange-approved derivatives risk disclosure verbatim, including the prescribed loss statistic. Do not paraphrase. ]',
-    isPlaceholder: true,
+      'RISK DISCLOSURES ON DERIVATIVES:\n• 9 out of 10 individual traders in equity Futures and Options Segment, incurred net losses.\n• On an average, loss makers registered net trading loss close to ₹ 50,000.\n• Over and above the net trading losses incurred, loss makers expended an additional 28% of net trading losses as transaction costs.\n• Those making net trading profits, incurred between 15% to 50% of such profits as transaction cost.\n\nSource: SEBI study dated January 25, 2023 on "Analysis of Profit and Loss of Individual Traders dealing in equity Futures and Options (F&O) Segment".',
+    isPlaceholder: false,
   },
 ]
 
@@ -91,12 +112,12 @@ export const investorAwarenessNotes: InvestorAwarenessSection[] = [
   {
     title: 'Warning on Fraudulent Schemes',
     content:
-      'Valued clients and investors, please be warned about fraudulent investment schemes being circulated. These scams often promise high returns with little to no risk. If they falsely claim to be from Money Logix or our partners, please report to us on [ reporting contact not supplied ].',
+      'Valued clients and investors, please be warned about fraudulent investment schemes being circulated. These scams often promise high returns with little to no risk. If they falsely claim to be from Money Logix Securities Pvt Ltd or our partners, please report to us on complaints@moneylogix.in.',
   },
   {
     title: 'We Do Not Give Stock Tips',
     content:
-      'We do not give stock tips or recommendations and have not authorized anyone to give this on behalf of us. If you know anyone claiming to be a part of Money Logix or our associate companies or partners and offering such services, please report to us on [ reporting contact not supplied ].',
+      'We do not give stock tips or recommendations and have not authorized anyone to give this on behalf of us. If you know anyone claiming to be a part of Money Logix Securities Pvt Ltd or our associate companies or partners and offering such services, please report to us on complaints@moneylogix.in.',
   },
   {
     title: 'Protect Your Account',
@@ -152,8 +173,10 @@ export const advisoryGuidelines = {
 }
 
 export const importantLinks = [
-  { name: 'Privacy Policy', url: '#' },
-  { name: 'Terms', url: '#' },
+  { name: 'Privacy Policy', url: '/terms#privacy' },
+  { name: 'Terms', url: '/terms' },
+  { name: 'Risk Disclosure', url: '/terms#risk' },
+  { name: 'Investor Complaints Data', url: '/terms#complaints' },
   { name: 'Investor Charter — Broking', url: 'https://www.nseindia.com' },
   { name: 'Investor Charter — DP', url: 'https://www.cdslindia.com' },
   { name: 'Advisory for Investors', url: 'https://www.nseindia.com' },
@@ -178,14 +201,14 @@ export const disclaimers = [
   {
     title: 'No Warranty',
     content:
-      'Money Logix Private Limited makes no warranties or representation, express or implied, on products offered through the platform. It accepts no liability for any damages or losses, however caused, with the use of, or on the reliance of, its product or related services. Unless otherwise specified, all returns, expense ratio, NAV, etc. are historical and for illustrative purposes only. Future results will vary greatly and depend on personal and market circumstances. The information provided by our blog is educational only and is not investment or tax advice.',
+      'Money Logix Securities Pvt Ltd makes no warranties or representation, express or implied, on products offered through the platform. It accepts no liability for any damages or losses, however caused, with the use of, or on the reliance of, its product or related services. Unless otherwise specified, all returns, expense ratio, NAV, etc. are historical and for illustrative purposes only. Future results will vary greatly and depend on personal and market circumstances. The information provided by our blog is educational only and is not investment or tax advice.',
   },
   {
     title: 'Order Collection Platform',
     content:
-      'Money Logix Private Limited, also known as Thinq, is only an order collection platform that collects orders on behalf of clients and places them on BSE StarMF for execution. The client expressly agrees that Thinq is not liable or responsible and does not represent or warrant any damages regarding non-execution of orders, or any incorrect execution of orders with regard to the funds chosen by the client, or due to — but not limited to — any link or system failure, delay in transfer of the funds on account of any unforeseen circumstances or issues in the banking system or payment aggregators, or any other problems that may result in a delay in crediting the funds into BSE StarMF.',
+      'Money Logix Securities Pvt Ltd, also known as Thinq, is only an order collection platform that collects orders on behalf of clients and places them on BSE StarMF for execution. The client expressly agrees that Thinq is not liable or responsible and does not represent or warrant any damages regarding non-execution of orders, or any incorrect execution of orders with regard to the funds chosen by the client, or due to — but not limited to — any link or system failure, delay in transfer of the funds on account of any unforeseen circumstances or issues in the banking system or payment aggregators, or any other problems that may result in a delay in crediting the funds into BSE StarMF.',
   },
 ]
 
-export const copyrightEntity = 'Money Logix Private Limited'
+export const copyrightEntity = 'Money Logix Securities Pvt Ltd'
 export const copyrightSuffix = 'All rights reserved.'

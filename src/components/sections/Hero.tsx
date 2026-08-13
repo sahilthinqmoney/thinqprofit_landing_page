@@ -1,5 +1,7 @@
+import { useState } from 'react'
 import Container from '../ui/Container'
 import Button from '../ui/Button'
+import OtpModal from '../ui/OtpModal'
 import { hero } from '../../data/hero'
 import MediaBackdrop from '../ui/MediaBackdrop'
 import { lqipFor } from '../../data/lqip'
@@ -49,12 +51,41 @@ const SETTLE_STAGGER_MS = 110
 
 export default function Hero() {
   const lines = hero.headline.split('\n')
+  const [phone, setPhone] = useState('')
+  const [isOtpOpen, setIsOtpOpen] = useState(false)
+  const [formError, setFormError] = useState('')
+
+  const handleWaitlistSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    const cleaned = phone.replace(/\D/g, '')
+    if (!cleaned) {
+      setFormError('Please enter your 10-digit mobile number')
+      return
+    }
+    if (cleaned.length < 10) {
+      setFormError('Please enter a valid 10-digit mobile number')
+      return
+    }
+    setFormError('')
+    setIsOtpOpen(true)
+  }
 
   return (
     <section
       id="hero"
       className="relative isolate flex min-h-svh w-full flex-col justify-between overflow-hidden bg-bg pt-12 pb-8 sm:pt-16 sm:pb-12"
     >
+      {/* OtpModal Verification Pop-up */}
+      <OtpModal
+        isOpen={isOtpOpen}
+        phone={phone}
+        onClose={() => setIsOtpOpen(false)}
+        onSuccess={() => setIsOtpOpen(false)}
+        onEditPhone={() => {
+          setIsOtpOpen(false)
+          document.getElementById('hero-phone')?.focus()
+        }}
+      />
       {/* Full-bleed background media layer */}
       <MediaBackdrop
         alt={hero.mediaAlt}
@@ -151,21 +182,13 @@ export default function Hero() {
               {/* Waitlist Mobile Input Form */}
               <div className="mt-8 sm:mt-10 flex flex-col items-center justify-center max-w-md mx-auto w-full">
                 <form
-                  onSubmit={(e) => {
-                    e.preventDefault()
-                    const el = document.getElementById('final-cta')
-                    el?.scrollIntoView({ behavior: 'smooth' })
-                  }}
+                  onSubmit={handleWaitlistSubmit}
                   className="w-full flex flex-col sm:flex-row items-stretch sm:items-center gap-3"
                 >
                   <div className="relative flex-1 w-full flex items-center rounded-full border border-white/25 bg-black/60 backdrop-blur-2xl px-5 py-3.5 text-white transition-all duration-300 focus-within:border-white/60 focus-within:bg-black/80 shadow-[0_4px_24px_rgba(0,0,0,0.6)]">
                     <span className="text-white/90 font-mono text-sm font-medium mr-3 border-r border-white/20 pr-3 shrink-0">
                       +91
                     </span>
-                    {/* The placeholder is not a label: it is announced as a value,
-                        not a name, and it is gone the moment the reader types. The
-                        field is named so the number survives a submit, and labelled
-                        so a screen reader says what it wants. */}
                     <input
                       type="tel"
                       name="phone"
@@ -174,7 +197,12 @@ export default function Hero() {
                       autoComplete="tel-national"
                       inputMode="numeric"
                       maxLength={10}
-                      placeholder="Mobile number"
+                      value={phone}
+                      onChange={(e) => {
+                        setPhone(e.target.value)
+                        setFormError('')
+                      }}
+                      placeholder="Enter 10-digit mobile number"
                       className="w-full bg-transparent text-sm text-white placeholder-white/40 outline-none font-normal"
                     />
                   </div>
@@ -187,6 +215,11 @@ export default function Hero() {
                     Join the waitlist
                   </Button>
                 </form>
+                {formError && (
+                  <p className="mt-2.5 text-xs font-medium text-rose-400">
+                    {formError}
+                  </p>
+                )}
               </div>
 
               {/* Trust Badge & Disclosures */}

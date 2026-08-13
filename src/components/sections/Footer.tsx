@@ -44,6 +44,7 @@ function WithBlanks({ text }: { text: string }) {
 
 export default function Footer() {
   const year = useCopyrightYear()
+  const [showQrModal, setShowQrModal] = useState(false)
 
   return (
     <footer id="footer" className="border-t border-border-soft bg-transparent text-fg-muted">
@@ -71,6 +72,15 @@ export default function Footer() {
                         <WithBlanks text={str} />
                       </span>
                     ))}
+                    {line.label.includes('UPI Handles') && (
+                      <button
+                        type="button"
+                        onClick={() => setShowQrModal(true)}
+                        className="mt-2 inline-flex items-center gap-1.5 rounded-lg bg-white/10 px-3 py-1.5 text-xs font-semibold text-white hover:bg-white/20 transition-all border border-white/15"
+                      >
+                        Click here to view UPI QR code ↗
+                      </button>
+                    )}
                   </dd>
                 </div>
               ))}
@@ -83,6 +93,50 @@ export default function Footer() {
           </div>
         </Container>
       </div>
+
+      {/* UPI QR Code Modal Dialog */}
+      {showQrModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 isolate">
+          {/* Backdrop */}
+          <div
+            className="absolute inset-0 bg-black/80 backdrop-blur-md"
+            onClick={() => setShowQrModal(false)}
+          />
+          {/* Modal Container */}
+          <div className="relative w-full max-w-sm overflow-hidden rounded-3xl border border-white/20 bg-[#0c0c0e] p-6 text-center shadow-2xl z-10 animate-in zoom-in-95 duration-200">
+            <button
+              type="button"
+              onClick={() => setShowQrModal(false)}
+              className="absolute right-4 top-4 rounded-full p-1.5 text-white/60 hover:bg-white/10 hover:text-white transition-colors"
+            >
+              ✕
+            </button>
+            <h3 className="font-display text-lg font-bold text-white mb-1">
+              Official UPI QR Code
+            </h3>
+            <p className="text-xs text-white/60 mb-4">
+              Money Logix Securities Pvt Ltd
+            </p>
+            <div className="rounded-2xl border border-white/15 bg-white p-3 inline-block shadow-lg">
+              <img
+                src="/upi-qr.jpg"
+                alt="Money Logix Securities Pvt Ltd UPI QR Code"
+                className="w-56 h-56 object-contain rounded-xl"
+              />
+            </div>
+            <div className="mt-4 font-mono text-xs text-white/80 bg-white/5 p-2 rounded-xl border border-white/10">
+              moneylogix.brk@validhdfc
+            </div>
+            <button
+              type="button"
+              onClick={() => setShowQrModal(false)}
+              className="mt-5 w-full rounded-xl bg-white text-black py-2.5 text-xs font-bold hover:bg-white/90 transition-colors"
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* ------------------------------------------------------------------ */}
       {/* 2. Attention Investors & Safeguards                                */}
@@ -229,14 +283,38 @@ export default function Footer() {
       </div>
 
       {/* ------------------------------------------------------------------ */}
-      {/* 4. Statutory Disclaimers                                           */}
+      {/* 4. Statutory Disclaimers & SEBI Risk Disclosure                    */}
       {/* ------------------------------------------------------------------ */}
       <div className="border-t border-border-soft">
         <Container>
           <div className={`py-10 lg:py-14 ${RAIL} space-y-6 text-xs leading-relaxed`}>
             <h2 className="text-sm font-semibold text-fg tracking-tight">
-              Statutory Disclaimers
+              Statutory Disclaimers & Risk Disclosures
             </h2>
+
+            {/* SEBI Annexure-I Risk Disclosures on Derivatives Box */}
+            <div className="rounded-2xl border border-white/20 bg-white/[0.03] p-5 space-y-3">
+              <div className="flex items-center gap-3 border-b border-white/10 pb-3">
+                <span className="font-mono font-bold text-white tracking-wider text-xs uppercase bg-white/10 px-2.5 py-1 rounded">
+                  SEBI Annexure-I
+                </span>
+                <span className="font-bold text-white text-xs sm:text-sm">
+                  RISK DISCLOSURES ON DERIVATIVES
+                </span>
+              </div>
+
+              <ul className="space-y-2 text-xs text-white/80 list-disc pl-4 leading-relaxed">
+                <li>9 out of 10 individual traders in equity Futures and Options Segment, incurred net losses.</li>
+                <li>On an average, loss makers registered net trading loss close to ₹ 50,000.</li>
+                <li>Over and above the net trading losses incurred, loss makers expended an additional 28% of net trading losses as transaction costs.</li>
+                <li>Those making net trading profits, incurred between 15% to 50% of such profits as transaction cost.</li>
+              </ul>
+
+              <div className="pt-2 text-[11px] text-white/60 border-t border-white/10">
+                <span className="font-semibold text-white/80">Source:</span> 1. SEBI study dated January 25, 2023 on "Analysis of Profit and Loss of Individual Traders dealing in equity Futures and Options (F&O) Segment", wherein Aggregate Level findings are based on annual Profit/Loss incurred by individual traders in equity F&O during FY 2021-22.
+              </div>
+            </div>
+
             {disclaimers.map((d) => (
               <div key={d.title} className="space-y-1">
                 <h3 className="font-semibold text-fg">{d.title}</h3>
@@ -261,7 +339,7 @@ export default function Footer() {
               © <span className="tabular">{year}</span> {copyrightEntity}. {copyrightSuffix}
             </p>
             <p className="text-fg-subtle text-[11px]">
-              Money Logix Private Limited | CIN: U64990MH2006PTC165522 | SEBI Reg: INZ000235531
+              Money Logix Securities Pvt Ltd | CIN: U64990MH2006PTC165522 | SEBI Reg: INZ000235531
             </p>
           </div>
         </Container>

@@ -1,21 +1,39 @@
+import { useState, useEffect } from 'react'
 import Navbar from './components/sections/Navbar'
 import Hero from './components/sections/Hero'
 import TheGap from './components/sections/TheGap'
 import AgenticHands from './components/sections/AgenticHands'
 import Capabilities from './components/sections/Capabilities'
 import Footer from './components/sections/Footer'
+import TermsPage from './components/pages/TermsPage'
 
-/**
- * A waitlist page, in the order a visitor meets it:
- *
- *   Navbar        the mark, and the ask once the hero scrolls away
- *   Hero          the ask itself — headline, offer, phone field
- *   TheGap        the problem, in two timestamps
- *   AgenticHands  what is coming next
- *   Capabilities  the rest of the terminal, one card each
- *   Footer        the legal block a SEBI-registered broker has to carry
- */
 export default function App() {
+  const [route, setRoute] = useState('home')
+
+  useEffect(() => {
+    const handleLocationChange = () => {
+      if (typeof window !== 'undefined') {
+        if (window.location.pathname === '/terms' || window.location.hash === '#terms') {
+          setRoute('terms')
+        } else {
+          setRoute('home')
+        }
+      }
+    }
+
+    handleLocationChange()
+    window.addEventListener('popstate', handleLocationChange)
+    window.addEventListener('hashchange', handleLocationChange)
+    return () => {
+      window.removeEventListener('popstate', handleLocationChange)
+      window.removeEventListener('hashchange', handleLocationChange)
+    }
+  }, [])
+
+  if (route === 'terms') {
+    return <TermsPage />
+  }
+
   return (
     <div className="grain relative min-h-screen overflow-x-clip bg-bg text-fg">
       <AmbientBackground />

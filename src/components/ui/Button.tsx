@@ -13,6 +13,7 @@ interface ButtonProps {
   className?: string
   type?: 'button' | 'submit'
   onClick?: (e?: MouseEvent<HTMLElement>) => void
+  disabled?: boolean
 
   fullWidth?: boolean
   /**
@@ -129,6 +130,7 @@ export default function Button({
   className = '',
   type = 'button',
   onClick,
+  disabled = false,
   fullWidth = false,
   trailing,
   metal,
@@ -275,7 +277,8 @@ export default function Button({
     <button
       type={type}
       onClick={onClick}
-      className={classes}
+      disabled={disabled}
+      className={`${classes} ${disabled ? 'opacity-50 pointer-events-none' : ''}`}
       aria-label={ariaLabel}
       {...pointerHandlers}
     >
