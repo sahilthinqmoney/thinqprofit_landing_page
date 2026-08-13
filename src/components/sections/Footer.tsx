@@ -1,3 +1,4 @@
+import { Copy, Check } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import ChromaticWordmark from '../ui/ChromaticWordmark'
 import Container from '../ui/Container'
@@ -45,6 +46,15 @@ function WithBlanks({ text }: { text: string }) {
 export default function Footer() {
   const year = useCopyrightYear()
   const [showQrModal, setShowQrModal] = useState(false)
+  const [copiedUpi, setCopiedUpi] = useState<string | null>(null)
+
+  const handleCopyUpi = (upiId: string) => {
+    navigator.clipboard.writeText(upiId)
+    setCopiedUpi(upiId)
+    setTimeout(() => {
+      setCopiedUpi(null)
+    }, 2000)
+  }
 
   return (
     <footer id="footer" className="border-t border-border-soft bg-transparent text-fg-muted">
@@ -67,11 +77,42 @@ export default function Footer() {
                       line.isPlaceholder ? 'text-white/40 italic font-mono' : 'text-fg-muted'
                     }`}
                   >
-                    {line.value.split('\n').map((str, idx) => (
-                      <span key={idx} className="block">
-                        <WithBlanks text={str} />
-                      </span>
-                    ))}
+                    {line.value.split('\n').map((str, idx) => {
+                      const isBroking = str.includes('moneylogix.brk@validhdfc')
+                      const isDp = str.includes('moneylogix.dp@validhdfc')
+                      const upiId = isBroking
+                        ? 'moneylogix.brk@validhdfc'
+                        : isDp
+                        ? 'moneylogix.dp@validhdfc'
+                        : null
+
+                      return (
+                        <div key={idx} className="flex items-center justify-between gap-2 my-0.5">
+                          <span>
+                            <WithBlanks text={str} />
+                          </span>
+                          {upiId && (
+                            <button
+                              type="button"
+                              onClick={() => handleCopyUpi(upiId)}
+                              className="inline-flex items-center gap-1 text-[10px] font-semibold text-white/80 hover:text-white transition-all shrink-0"
+                            >
+                              {copiedUpi === upiId ? (
+                                <>
+                                  <Check className="h-3 w-3 text-emerald-400" />
+                                  <span className="text-emerald-400">Copied!</span>
+                                </>
+                              ) : (
+                                <>
+                                  <Copy className="h-3 w-3" />
+                                  <span>Copy</span>
+                                </>
+                              )}
+                            </button>
+                          )}
+                        </div>
+                      )
+                    })}
                     {line.label.includes('UPI Handles') && (
                       <button
                         type="button"
@@ -124,9 +165,31 @@ export default function Footer() {
                 className="w-56 h-56 object-contain rounded-xl"
               />
             </div>
-            <div className="mt-4 font-mono text-xs text-white/80 bg-white/5 p-2 rounded-xl border border-white/10">
-              moneylogix.brk@validhdfc
+            
+            {/* Copyable UPI Handle Pill in Footer Modal */}
+            <div className="mt-4 flex items-center justify-between gap-2 rounded-xl border border-white/15 bg-white/5 p-2.5 text-xs text-white">
+              <span className="font-mono font-medium text-white/90 truncate pl-1">
+                moneylogix.brk@validhdfc
+              </span>
+              <button
+                type="button"
+                onClick={() => handleCopyUpi('moneylogix.brk@validhdfc')}
+                className="inline-flex items-center gap-1.5 text-xs font-semibold text-white/80 hover:text-white transition-all shrink-0"
+              >
+                {copiedUpi === 'moneylogix.brk@validhdfc' ? (
+                  <>
+                    <Check className="h-3.5 w-3.5 text-emerald-400" />
+                    <span className="text-emerald-400 font-bold">Copied!</span>
+                  </>
+                ) : (
+                  <>
+                    <Copy className="h-3.5 w-3.5" />
+                    <span>Copy</span>
+                  </>
+                )}
+              </button>
             </div>
+
             <button
               type="button"
               onClick={() => setShowQrModal(false)}

@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { FileText, Lock, DollarSign, ArrowLeft, AlertTriangle, LifeBuoy, Scale, Building2, QrCode, FileSpreadsheet, Layers, Tag, ShieldCheck } from 'lucide-react'
+import { FileText, Lock, DollarSign, ArrowLeft, AlertTriangle, LifeBuoy, Scale, Building2, QrCode, FileSpreadsheet, Layers, Tag, ShieldCheck, Copy, Check } from 'lucide-react'
 import ThinqMark from '../ui/ThinqMark'
 import Container from '../ui/Container'
 
@@ -16,8 +16,17 @@ export default function TermsPage() {
     | 'risk'
     | 'complaints'
     | 'cookies'
-  >('escalation')
+  >('bank')
   const [showQrModal, setShowQrModal] = useState(false)
+  const [copiedUpi, setCopiedUpi] = useState<string | null>(null)
+
+  const handleCopyUpi = (upiId: string) => {
+    navigator.clipboard.writeText(upiId)
+    setCopiedUpi(upiId)
+    setTimeout(() => {
+      setCopiedUpi(null)
+    }, 2000)
+  }
 
   return (
     <div className="min-h-screen bg-[#040405] text-fg font-sans selection:bg-white/20 selection:text-white isolate">
@@ -244,7 +253,104 @@ export default function TermsPage() {
               {/* Top Specular Edge Highlight */}
               <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/30 to-transparent z-10" />
 
-              {/* Tab: Dedicated Escalation Matrix (Verbatim from Image Document) */}
+              {/* Tab 7: USCNB & Bank */}
+              {activeTab === 'bank' && (
+                <div className="space-y-8 animate-in fade-in duration-300">
+                  <div className="border-b border-white/10 pb-6">
+                    <h2 className="text-xl sm:text-2xl font-bold text-white tracking-tight">
+                      Upstreaming Client Bank Nodal Account (USCNB) & UPI Details
+                    </h2>
+                  </div>
+
+                  <div className="rounded-2xl border border-white/15 bg-white/[0.03] p-5 space-y-3 text-xs sm:text-sm">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div>
+                        <span className="text-white/50 text-xs block">ACCOUNT NAME</span>
+                        <span className="font-mono font-bold text-white text-sm sm:text-base">MONEY LOGIX SECURITIES PVT LTD - USCNB A/C</span>
+                      </div>
+                      <div>
+                        <span className="text-white/50 text-xs block">BANK NAME</span>
+                        <span className="font-semibold text-white text-sm sm:text-base">HDFC BANK LTD</span>
+                      </div>
+                      <div>
+                        <span className="text-white/50 text-xs block">ACCOUNT NUMBER</span>
+                        <span className="font-mono font-bold text-white text-sm sm:text-base tracking-wider">00600340039678</span>
+                      </div>
+                      <div>
+                        <span className="text-white/50 text-xs block">IFSC CODE</span>
+                        <span className="font-mono font-bold text-white text-sm sm:text-base">HDFC0000060</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+                    {/* Broking UPI Card with Copy Icon */}
+                    <div className="rounded-2xl border border-white/15 bg-white/[0.03] p-4 flex items-center justify-between gap-3">
+                      <div className="space-y-1">
+                        <span className="text-white/50 text-xs block">BROKING UPI HANDLE</span>
+                        <span className="font-mono font-bold text-white text-sm sm:text-base block">moneylogix.brk@validhdfc</span>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => handleCopyUpi('moneylogix.brk@validhdfc')}
+                        className="inline-flex items-center gap-1.5 text-xs font-semibold text-white/80 hover:text-white transition-all shrink-0"
+                        title="Copy UPI ID"
+                      >
+                        {copiedUpi === 'moneylogix.brk@validhdfc' ? (
+                          <>
+                            <Check className="h-4 w-4 text-emerald-400" />
+                            <span className="text-emerald-400 font-bold">Copied!</span>
+                          </>
+                        ) : (
+                          <>
+                            <Copy className="h-4 w-4" />
+                            <span>Copy</span>
+                          </>
+                        )}
+                      </button>
+                    </div>
+
+                    {/* DP UPI Card with Copy Icon */}
+                    <div className="rounded-2xl border border-white/15 bg-white/[0.03] p-4 flex items-center justify-between gap-3">
+                      <div className="space-y-1">
+                        <span className="text-white/50 text-xs block">DP UPI HANDLE</span>
+                        <span className="font-mono font-bold text-white text-sm sm:text-base block">moneylogix.dp@validhdfc</span>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => handleCopyUpi('moneylogix.dp@validhdfc')}
+                        className="inline-flex items-center gap-1.5 text-xs font-semibold text-white/80 hover:text-white transition-all shrink-0"
+                        title="Copy UPI ID"
+                      >
+                        {copiedUpi === 'moneylogix.dp@validhdfc' ? (
+                          <>
+                            <Check className="h-4 w-4 text-emerald-400" />
+                            <span className="text-emerald-400 font-bold">Copied!</span>
+                          </>
+                        ) : (
+                          <>
+                            <Copy className="h-4 w-4" />
+                            <span>Copy</span>
+                          </>
+                        )}
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="pt-4 text-center">
+                    <button
+                      type="button"
+                      onClick={() => setShowQrModal(true)}
+                      className="inline-flex items-center gap-2 rounded-xl bg-white text-black px-4 py-2.5 text-xs font-bold hover:bg-white/90 transition-all shadow-lg"
+                    >
+                      <QrCode className="h-4 w-4" />
+                      Click here to view UPI QR code
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* Tab: Escalation Matrix */}
               {activeTab === 'escalation' && (
                 <div className="space-y-8 animate-in fade-in duration-300">
                   <div className="border-b border-white/10 pb-6">
@@ -311,7 +417,6 @@ export default function TermsPage() {
                     </table>
                   </div>
 
-                  {/* Verbatim External Regulator Guidance Text */}
                   <div className="rounded-2xl border border-white/15 bg-white/[0.03] p-5 space-y-3 text-xs sm:text-sm text-white/90">
                     <p className="font-semibold text-white">
                       In absence of response/complaint not addressed to your satisfaction, you may lodge a complaint with SEBI at
@@ -1125,60 +1230,6 @@ export default function TermsPage() {
                 </div>
               )}
 
-              {/* Tab 7: USCNB & Bank */}
-              {activeTab === 'bank' && (
-                <div className="space-y-8 animate-in fade-in duration-300">
-                  <div className="border-b border-white/10 pb-6">
-                    <h2 className="text-xl sm:text-2xl font-bold text-white tracking-tight">
-                      Upstreaming Client Bank Nodal Account (USCNB) & UPI Details
-                    </h2>
-                  </div>
-
-                  <div className="rounded-2xl border border-white/15 bg-white/[0.03] p-5 space-y-3 text-xs sm:text-sm">
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      <div>
-                        <span className="text-white/50 text-xs block">ACCOUNT NAME</span>
-                        <span className="font-mono font-bold text-white text-sm sm:text-base">MONEY LOGIX SECURITIES PVT LTD - USCNB A/C</span>
-                      </div>
-                      <div>
-                        <span className="text-white/50 text-xs block">BANK NAME</span>
-                        <span className="font-semibold text-white text-sm sm:text-base">HDFC BANK LTD</span>
-                      </div>
-                      <div>
-                        <span className="text-white/50 text-xs block">ACCOUNT NUMBER</span>
-                        <span className="font-mono font-bold text-white text-sm sm:text-base tracking-wider">00600340039678</span>
-                      </div>
-                      <div>
-                        <span className="text-white/50 text-xs block">IFSC CODE</span>
-                        <span className="font-mono font-bold text-white text-sm sm:text-base">HDFC0000060</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
-                    <div className="rounded-2xl border border-white/15 bg-white/[0.03] p-4 space-y-1">
-                      <span className="text-white/50 text-xs block">BROKING UPI HANDLE</span>
-                      <span className="font-mono font-bold text-white text-sm sm:text-base">moneylogix.brk@validhdfc</span>
-                    </div>
-                    <div className="rounded-2xl border border-white/15 bg-white/[0.03] p-4 space-y-1">
-                      <span className="text-white/50 text-xs block">DP UPI HANDLE</span>
-                      <span className="font-mono font-bold text-white text-sm sm:text-base">moneylogix.dp@validhdfc</span>
-                    </div>
-                  </div>
-
-                  <div className="pt-4 text-center">
-                    <button
-                      type="button"
-                      onClick={() => setShowQrModal(true)}
-                      className="inline-flex items-center gap-2 rounded-xl bg-white text-black px-4 py-2 text-xs font-bold hover:bg-white/90 transition-all shadow-lg"
-                    >
-                      <QrCode className="h-4 w-4" />
-                      Click here to view UPI QR code
-                    </button>
-                  </div>
-                </div>
-              )}
-
               {/* Tab 8: Risk Disclosures & Disclaimers */}
               {activeTab === 'risk' && (
                 <div className="space-y-8 animate-in fade-in duration-300">
@@ -1451,7 +1502,7 @@ export default function TermsPage() {
         </Container>
       </main>
 
-      {/* Standalone QR Code Modal Dialog */}
+      {/* Standalone QR Code Modal Dialog with Copy Button */}
       {showQrModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 isolate">
           <div
@@ -1479,9 +1530,31 @@ export default function TermsPage() {
                 className="w-60 h-60 object-contain rounded-xl"
               />
             </div>
-            <div className="mt-4 font-mono text-xs text-white/80 bg-white/5 p-2 rounded-xl border border-white/10">
-              moneylogix.brk@validhdfc
+
+            {/* UPI ID Pill Box with Copy Icon Button */}
+            <div className="mt-4 flex items-center justify-between gap-2 rounded-xl border border-white/15 bg-white/5 p-2.5 text-xs text-white">
+              <span className="font-mono font-medium text-white/90 truncate pl-1">
+                moneylogix.brk@validhdfc
+              </span>
+              <button
+                type="button"
+                onClick={() => handleCopyUpi('moneylogix.brk@validhdfc')}
+                className="inline-flex items-center gap-1.5 text-xs font-semibold text-white/80 hover:text-white transition-all shrink-0"
+              >
+                {copiedUpi === 'moneylogix.brk@validhdfc' ? (
+                  <>
+                    <Check className="h-3.5 w-3.5 text-emerald-400" />
+                    <span className="text-emerald-400 font-bold">Copied!</span>
+                  </>
+                ) : (
+                  <>
+                    <Copy className="h-3.5 w-3.5" />
+                    <span>Copy</span>
+                  </>
+                )}
+              </button>
             </div>
+
             <button
               type="button"
               onClick={() => setShowQrModal(false)}
