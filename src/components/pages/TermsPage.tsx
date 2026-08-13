@@ -28,6 +28,15 @@ export default function TermsPage() {
     }, 2000)
   }
 
+  const handleBackToHome = (e: React.MouseEvent) => {
+    e.preventDefault()
+    if (typeof window !== 'undefined' && window.history.length > 1) {
+      window.history.back()
+    } else {
+      window.location.href = '/'
+    }
+  }
+
   return (
     <div className="min-h-screen bg-[#040405] text-fg font-sans selection:bg-white/20 selection:text-white isolate">
       {/* Signature Thinq Ambient Teal Background Glow */}
@@ -49,7 +58,7 @@ export default function TermsPage() {
         <Container>
           <div className="flex h-16 sm:h-20 items-center justify-between">
             {/* Brand Logo Lockup */}
-            <a href="/" className="flex items-center gap-3 group">
+            <a href="/" onClick={handleBackToHome} className="flex items-center gap-3 group">
               <ThinqMark size={32} tone="steel" />
               <span className="font-display font-bold text-xl sm:text-2xl tracking-tight text-white group-hover:text-white/80 transition-colors">
                 Thinq
@@ -59,6 +68,7 @@ export default function TermsPage() {
             {/* Back to Home Button */}
             <a
               href="/"
+              onClick={handleBackToHome}
               className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-4.5 py-2 text-xs font-semibold text-white/90 hover:border-white/35 hover:bg-white/10 transition-all shadow-sm"
             >
               <ArrowLeft className="h-4 w-4" />

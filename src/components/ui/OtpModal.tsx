@@ -276,6 +276,12 @@ export default function OtpModal({
                 By proceeding, you agree to all{' '}
                 <a
                   href="/terms"
+                  onClick={() => {
+                    sessionStorage.setItem('return_to_otp', 'true')
+                    if (phone) {
+                      sessionStorage.setItem('otp_phone', phone)
+                    }
+                  }}
                   className="font-semibold text-white underline hover:text-white/80 transition-colors inline-block"
                 >
                   T&C

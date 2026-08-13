@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Container from '../ui/Container'
 import Button from '../ui/Button'
 import OtpModal from '../ui/OtpModal'
@@ -54,6 +54,35 @@ export default function Hero() {
   const [phone, setPhone] = useState('')
   const [isOtpOpen, setIsOtpOpen] = useState(false)
   const [formError, setFormError] = useState('')
+
+  useEffect(() => {
+    /*
+     * Ignore the flag while the terms page is what the reader asked for.
+     *
+     * App has to start at route 'home' so its first render matches the
+     * prerendered HTML — computing the route from the URL up front would
+     * mismatch on /terms, and in React 19 a mismatch discards the whole tree.
+     * So Hero mounts for one commit even on /terms, and child effects run
+     * before parent effects, which means this ran and cleared the flag before
+     * App had switched away. The reader came back to no modal and no number.
+     * Measured: the flag was gone ~50ms into the terms page load.
+     */
+    const path = window.location.pathname
+    if (path === '/terms' || window.location.hash === '#terms') return
+
+    const shouldReturnToOtp = sessionStorage.getItem('return_to_otp')
+    if (shouldReturnToOtp === 'true') {
+      sessionStorage.removeItem('return_to_otp')
+      const savedPhone = sessionStorage.getItem('otp_phone')
+      if (savedPhone) {
+        setPhone(savedPhone)
+      }
+      // The number is the reason this round trip exists; drop it once it is
+      // back in the field rather than leaving it in storage for the tab.
+      sessionStorage.removeItem('otp_phone')
+      setIsOtpOpen(true)
+    }
+  }, [])
 
   const handleWaitlistSubmit = (e: React.FormEvent) => {
     e.preventDefault()
