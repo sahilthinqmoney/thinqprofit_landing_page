@@ -28,17 +28,16 @@
  * Set-Cookie lands on this domain where script can read it and where
  * SameSite=Strict is satisfied by every same-site call the page makes.
  *
- * ── The unencrypted hop, stated plainly ───────────────────────────────────
+ * ── Encrypted the whole way ───────────────────────────────────────────────
  *
- * AUTH_ORIGIN below is http, because the service has no TLS — https on that
- * host does not answer. So the leg between this Worker and the service crosses
- * the public internet in the clear, carrying OTP codes and session cookies.
- * That is a deliberate, temporary acceptance, made explicitly, to get the flow
- * working before TLS exists. It should not stay.
+ * The origin is a Cloudflare Tunnel, so both legs are TLS: the reader's browser
+ * to this Worker, and this Worker to authService.
  *
- * Fixing it needs no change here beyond the scheme and host: put the service
- * behind a Cloudflare Tunnel, or give it a certificate, then point AUTH_ORIGIN
- * at https and delete this note.
+ * It was not always. Before the tunnel this ran over plain HTTP to the origin's
+ * address, which meant OTP codes and session cookies crossed the public
+ * internet in the clear — accepted deliberately, and temporarily, to get the
+ * flow working at all. Anything that points this back at an http origin
+ * reintroduces exactly that, so it should not happen without saying so.
  */
 
 interface Env {
@@ -48,8 +47,8 @@ interface Env {
   AUTH_ORIGIN?: string
 }
 
-/** Where authService listens. See the note above about the scheme. */
-const DEFAULT_AUTH_ORIGIN = 'http://13.201.234.55:8080'
+/** Where authService listens. Overridden by the AUTH_ORIGIN var in wrangler.jsonc. */
+const DEFAULT_AUTH_ORIGIN = 'https://auth.thinq.co'
 
 export default {
   async fetch(request: Request, env: Env): Promise<Response> {
