@@ -22,15 +22,26 @@
  */
 
 /**
- * Where authService lives.
+ * Where authService lives — a RELATIVE path, deliberately.
  *
- * Configurable because the documented base is a developer's own machine, which
- * is reachable from nowhere else. Anything but local development must set
- * `VITE_AUTH_BASE_URL`, and the origin has to be on the service's CORS
- * allowlist — every call sends credentials, which a wildcard cannot satisfy.
+ * Same-origin is not a preference here, it is the only arrangement that works.
+ * The service runs on its own host, and reaching it directly fails three ways
+ * at once: its CORS allowlist admits only https://thinq.co and its www form;
+ * `tq_csrf` is set by that host, so `document.cookie` on any other origin
+ * cannot read the token the client is required to echo; and the deployed site
+ * is HTTPS while the service is plain HTTP, which a browser refuses as mixed
+ * content. All three are measured, not assumed — see the proxy note in
+ * vite.config.ts.
+ *
+ * A relative base sidesteps all of it: the browser talks only to the origin
+ * serving the page, and something in front — the Vite proxy in development, a
+ * Cloudflare route in production — forwards /api to authService.
+ *
+ * `VITE_AUTH_BASE_URL` still overrides it, for pointing at a service on
+ * another host when that host's allowlist and cookies permit it.
  */
 export const AUTH_BASE =
-  import.meta.env.VITE_AUTH_BASE_URL ?? 'http://localhost:8080/api/auth/v1'
+  import.meta.env.VITE_AUTH_BASE_URL ?? '/api/auth/v1'
 
 /** The closed set of error codes. Branch on these, never on the HTTP status. */
 export type AuthErrorCode =
@@ -323,8 +334,37 @@ let cataloguePromise: Promise<Catalogue | null> | null = null
  * Fetches the copy catalogue once per page load.
  */
 export function loadCatalogue(): Promise<Catalogue | null> {
-  cataloguePromise ??= request<Catalogue>('/messages/catalogue').catch(() => null)
+  cataloguePromise ??= fetchCatalogue().catch(() => null)
   return cataloguePromise
+}
+
+/**
+ * Reads the catalogue, which is NOT an envelope.
+ *
+ * Every other JSON route answers `{ ok, data, message }`. This one returns the
+ * catalogue object bare — `{ version, locale, messages, labels }` — with no
+ * wrapper at all, exactly as the integration note shows it.
+ *
+ * Putting it through the envelope reader was silently fatal: `ok` was
+ * undefined, so the reader treated a perfectly good response as a failure,
+ * threw, and the `.catch` above turned that into `null`. The catalogue was
+ * therefore never loaded, and every server message the UI showed fell back to
+ * generic copy while the real strings sat one parse away. Nothing surfaced,
+ * because a missing catalogue is designed to be survivable.
+ *
+ * Measured against the live service: the response's top-level keys are
+ * version, locale, messages, labels — and messages['REG-M01'] is
+ * "Enter a valid 10-digit mobile number."
+ */
+async function fetchCatalogue(): Promise<Catalogue> {
+  const response = await fetch(`${AUTH_BASE}/messages/catalogue`, {
+    // Still credentialed: this GET is also what mints `tq_csrf` for the first
+    // POST, so it has to be allowed to set cookies.
+    credentials: 'include',
+    headers: { 'Content-Type': 'application/json' },
+  })
+  if (!response.ok) throw new AuthError({ code: 'INTERNAL' })
+  return (await response.json()) as Catalogue
 }
 
 /**

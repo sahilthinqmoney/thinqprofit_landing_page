@@ -52,6 +52,7 @@ export default function OtpModal({
   /** Set by ACCOUNT_LOCKED, and by the resend limits. Absolute instants. */
   const [lockedUntil, setLockedUntil] = useState<string | undefined>()
   const [resendBlockedUntil, setResendBlockedUntil] = useState<string | undefined>()
+  const [retriesLeft, setRetriesLeft] = useState(3)
   const [now, setNow] = useState(() => Date.now())
 
   const inputRefs = useRef<(HTMLInputElement | null)[]>([])
@@ -104,6 +105,7 @@ export default function OtpModal({
       setError('')
       setLockedUntil(undefined)
       setResendBlockedUntil(undefined)
+      setRetriesLeft(3)
       setNow(Date.now())
       setTimeout(() => {
         inputRefs.current[0]?.focus()
@@ -122,12 +124,9 @@ export default function OtpModal({
   /*
    * Resend opens either when the cooldown lapses OR once the code has expired.
    *
-   * The second half matters: past `expiresAt` the server accepts a resend even
-   * inside the 30s window, so watching only the cooldown would grey out a
-   * button the server would have honoured — leaving a reader with a dead code
-   * and no way to ask for another.
+   * Maximum 3 retries allowed with 30-second interval between attempts.
    */
-  const canResend = !isLocked && !isResending && (cooldownEndsIn === 0 || codeExpiresIn === 0)
+  const canResend = !isLocked && !isResending && retriesLeft > 0 && (cooldownEndsIn === 0 || codeExpiresIn === 0)
 
   /** Turns a failure into copy, and into whatever state it implies. */
   const applyError = (err: unknown, fallback: string) => {
@@ -196,7 +195,7 @@ export default function OtpModal({
   }
 
   const handleResend = async () => {
-    if (!canResend || !attempt) return
+    if (!canResend || !attempt || retriesLeft <= 0) return
     setIsResending(true)
     setError('')
     try {
@@ -205,6 +204,7 @@ export default function OtpModal({
       const next = await sendOtp({ value: phone, attemptId: attempt.attemptId })
       onAttempt(next)
       setResendBlockedUntil(undefined)
+      setRetriesLeft((prev) => Math.max(0, prev - 1))
       setOtp(['', '', '', '', '', ''])
       inputRefs.current[0]?.focus()
     } catch (err) {
@@ -425,17 +425,21 @@ export default function OtpModal({
                   <span className="font-mono text-white/40">Code expired</span>
                 )}
 
-                {canResend ? (
+                {retriesLeft <= 0 ? (
+                  <span className="font-mono text-rose-400/80 font-medium">
+                    Max 3 retries reached
+                  </span>
+                ) : canResend ? (
                   <button
                     type="button"
                     onClick={() => void handleResend()}
                     className="flex items-center gap-1 font-semibold text-white hover:text-white/80 transition-colors"
                   >
-                    <RefreshCw className="h-3 w-3" /> Resend OTP
+                    <RefreshCw className="h-3 w-3" /> Resend OTP ({retriesLeft} left)
                   </button>
                 ) : (
                   <span className="font-mono text-white/40">
-                    {isResending ? 'Sending…' : `Resend in ${cooldownEndsIn}s`}
+                    {isResending ? 'Sending…' : `Resend in ${cooldownEndsIn}s (${retriesLeft} left)`}
                   </span>
                 )}
               </div>

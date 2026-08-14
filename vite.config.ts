@@ -148,6 +148,40 @@ export default defineConfig({
     host: '0.0.0.0',
     port: 5173,
     cors: true,
+    /*
+     * authService, served from this origin.
+     *
+     * It runs at http://13.201.234.55:8080, and calling it straight from the
+     * browser cannot work — three separate reasons, each fatal on its own:
+     *
+     *   1. Its CORS allowlist holds https://thinq.co and https://www.thinq.co
+     *      and nothing else. Measured: a localhost origin gets no
+     *      Access-Control-Allow-Origin header back at all.
+     *   2. The CSRF scheme cannot survive a cross-origin split. `tq_csrf` is
+     *      set by 13.201.234.55, and `document.cookie` only ever reads cookies
+     *      for the page's OWN origin — so the token the client has to echo in
+     *      X-Tq-Csrf would be permanently invisible to it. Measured:
+     *      `Set-Cookie: tq_csrf=…; Path=/; SameSite=Strict`, host-only, and a
+     *      SameSite=Strict cookie is not sent on cross-site requests anyway.
+     *   3. The deployed site is HTTPS and that origin is plain HTTP, so a
+     *      browser blocks the request outright as mixed content.
+     *
+     * Proxying answers all three at once: the browser only ever talks to its
+     * own origin, so there is no preflight to fail, no mixed content, and
+     * Set-Cookie lands where script can read it.
+     *
+     * Production wants the same shape — a Cloudflare route sending /api/* to
+     * authService — which is why the client's base URL is a relative path.
+     */
+    proxy: {
+      '/api': {
+        target: process.env.AUTH_ORIGIN ?? 'http://13.201.234.55:8080',
+        changeOrigin: true,
+        // The upstream sets a host-only cookie; rewriting the domain lets the
+        // browser keep it against the dev origin rather than discarding it.
+        cookieDomainRewrite: '',
+      },
+    },
   },
   plugins: [
     react(),
