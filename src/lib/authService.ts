@@ -99,6 +99,14 @@ export class AuthError extends Error {
   readonly attemptsRemaining?: number
   /** When the lock or cooldown lifts, as an absolute instant. */
   readonly retryExpiresAt?: string
+  /**
+   * Developer-facing explanation, never shown to a reader.
+   *
+   * Set when the failure is a misconfiguration rather than something the
+   * server said — a base URL pointing at the wrong host, for instance. It goes
+   * to the console so the cause is visible without a debugger.
+   */
+  readonly detail?: string
 
   constructor(init: {
     code: AuthErrorCode
@@ -106,14 +114,17 @@ export class AuthError extends Error {
     params?: Record<string, string | number>
     attemptsRemaining?: number
     retryExpiresAt?: string
+    detail?: string
   }) {
-    super(init.code)
+    super(init.detail ?? init.code)
     this.name = 'AuthError'
     this.code = init.code
     this.messageId = init.messageId
     this.params = init.params
     this.attemptsRemaining = init.attemptsRemaining
     this.retryExpiresAt = init.retryExpiresAt
+    this.detail = init.detail
+    if (init.detail) console.error(`[authService] ${init.detail}`)
   }
 }
 
@@ -156,7 +167,8 @@ function handleMockRequest<T>(path: string, body?: unknown): T {
   if (path === '/otp/send') {
     const b = body as { value?: string }
     const phone = b?.value ?? ''
-    const masked = phone.length === 10 ? `+91 ${phone.slice(0, 5)} ${phone.slice(5)}` : `+91 ${phone}`
+    const cleanDigits = phone.replace(/^\+?91/, '').replace(/\D/g, '')
+    const masked = `+91-${cleanDigits}`
     return {
       attemptId: 'mock-attempt-' + Math.random().toString(36).substring(2, 9),
       maskedTo: masked,
@@ -210,6 +222,25 @@ async function request<T>(
     })
 
     if (response.status === 204) return undefined as T
+
+    /*
+     * Refuse anything that is not JSON, and be specific about why.
+     *
+     * The likeliest cause is a base URL aimed at something that is not
+     * authService — most often this very site, whose Worker answers every
+     * unmatched path with index.html and a 200. Handing that to `json()`
+     * fails with a syntax error about an unexpected "<", which says nothing
+     * about the real mistake. Measured against thinq.co: /api/auth/v1/config
+     * returns 200 text/html, so this is the failure a misconfigured base URL
+     * actually produces.
+     */
+    const contentType = response.headers.get('content-type') ?? ''
+    if (!contentType.includes('json')) {
+      throw new AuthError({
+        code: 'INTERNAL',
+        detail: `${AUTH_BASE}${path} answered ${response.status} ${contentType || 'with no content type'} rather than JSON — check VITE_AUTH_BASE_URL points at authService.`,
+      })
+    }
 
     let envelope: Envelope<T>
     try {
@@ -306,7 +337,7 @@ export function renderMessage(
 ): string {
   const template = message?.id ? catalogue?.messages?.[message.id]?.template : undefined
   if (!template) return fallback
-  return template.replace(/\{(\w+)\ imperium}/g, (whole, key: string) => {
+  return template.replace(/\{(\w+)\}/g, (whole, key: string) => {
     const value = message?.params?.[key]
     return value === undefined ? whole : String(value)
   })

@@ -225,7 +225,6 @@ export default function OtpModal({
       await new Promise((resolve) => setTimeout(resolve, 1500))
       setOutcome(result.outcome)
       setIsVerified(true)
-      setTimeout(() => onSuccess(result.outcome), 1800)
     } catch (err) {
       /*
        * Wrong, expired and already-used all arrive as OTP_INVALID, and the
@@ -246,9 +245,17 @@ export default function OtpModal({
    * the number the code actually went to, after normalisation, so it is the
    * only version that can confirm the message went where the reader meant.
    */
+  /*
+   * The server's mask is used verbatim. It arrives already formatted, as
+   * "+91-XXXXXX0121", and it must not be run through a digit filter: stripping
+   * non-digits removes the X's along with the punctuation and leaves "+91-0121",
+   * which reads as a broken number rather than a masked one.
+   *
+   * Only the local fallback — what the reader typed, used for the instant
+   * between opening and the first response — needs formatting.
+   */
   const formattedPhone =
-    attempt?.maskedTo ??
-    (phone.length === 10 ? `+91 ${phone.slice(0, 5)} ${phone.slice(5)}` : `+91 ${phone}`)
+    attempt?.maskedTo ?? `+91-${phone.replace(/^\+?91/, '').replace(/\D/g, '')}`
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 isolate">
@@ -299,21 +306,41 @@ export default function OtpModal({
 
         {isVerified ? (
           /* Success State */
-          <div className="relative z-10 flex flex-col items-center justify-center py-4 text-center animate-in zoom-in-95 duration-300">
-            <div className="flex h-16 w-16 items-center justify-center rounded-full bg-emerald-500/20 border border-emerald-500/40 text-emerald-400 mb-4 shadow-[0_0_30px_rgba(16,185,129,0.3)]">
-              <Check className="h-8 w-8 stroke-[2.5]" />
+          <div className="relative z-10 flex flex-col items-center justify-center py-4 text-center animate-in zoom-in-95 duration-400">
+            {/* Premium Glowing Checkmark without background or border ring */}
+            <div className="relative flex items-center justify-center mb-5 animate-in zoom-in-50 duration-500">
+              <div className="absolute inset-0 rounded-full blur-xl bg-emerald-500/35 animate-pulse" />
+              <Check className="relative h-14 w-14 text-emerald-400 stroke-[2.5] drop-shadow-[0_0_24px_rgba(16,185,129,0.95)]" />
             </div>
-            {/* The two outcomes mean different things and deserve different
-                words: one number was new to us, the other was already ours. */}
-            <h3 className="text-xl sm:text-2xl font-bold tracking-tight text-white">
+
+            <span className="font-mono text-[10px] uppercase font-bold tracking-widest text-emerald-400/90 bg-emerald-500/10 px-3 py-1 rounded-full border border-emerald-500/20 mb-3">
+              Verification Complete
+            </span>
+
+            <h3 className="text-xl sm:text-2xl font-bold tracking-tight text-white font-display">
               {outcome === 'SIGNED_IN' ? "You're signed in" : "You're on the waitlist!"}
             </h3>
-            <p className="mt-2 text-sm text-white/70 max-w-xs leading-relaxed">
-              Mobile <span className="font-mono font-medium text-white">{formattedPhone}</span>{' '}
+            
+            <p className="mt-2 text-sm text-white/70 max-w-xs leading-relaxed font-sans">
+              Mobile <span className="font-mono font-medium text-white tracking-wide">{formattedPhone}</span>{' '}
               {outcome === 'SIGNED_IN'
                 ? 'verified. Welcome back.'
                 : "verified. We'll invite you as seats open."}
             </p>
+
+            {/* Manual Close / Done Control Button */}
+            <Button
+              type="button"
+              onClick={() => {
+                if (outcome) onSuccess(outcome)
+                onClose()
+              }}
+              size="lg"
+              fullWidth
+              className="mt-6 shadow-[0_0_24px_rgba(16,185,129,0.25)] hover:shadow-[0_0_32px_rgba(16,185,129,0.4)]"
+            >
+              Done
+            </Button>
           </div>
         ) : isVerifying ? (
           /* Premium Fintech Candlestick Verification Loading Screen */

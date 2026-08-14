@@ -39,7 +39,7 @@ export default function CandlestickLoader() {
         }
         return prev
       })
-    }, 120) // ~1.5s to draw all candles
+    }, 110) // ~1.5s to draw all candles
 
     return () => clearInterval(interval)
   }, [])
@@ -73,11 +73,24 @@ export default function CandlestickLoader() {
   const scanX = paddingLeft + latestIndex * candleGap + candleWidth / 2
 
   return (
-    <div className="flex flex-col items-center justify-center py-6 w-full animate-in fade-in zoom-in-95 duration-300">
-      {/* Chart Canvas Card with Subtle Grid & Scanline */}
-      <div className="relative w-full max-w-[360px] h-[150px] rounded-2xl border border-white/10 bg-[#060608]/90 p-3 shadow-[0_12px_40px_rgba(0,0,0,0.85)] overflow-hidden backdrop-blur-xl">
-        {/* Background Grid Lines & Prices */}
-        <div className="absolute inset-0 pointer-events-none flex flex-col justify-between p-3 opacity-20">
+    <div className="flex flex-col items-center justify-center py-2 w-full animate-in fade-in zoom-in-95 duration-300">
+      {/* Verification Loading Status Header */}
+      <div className="text-center space-y-1 mb-4">
+        <div className="inline-flex items-center justify-center gap-1 text-base sm:text-lg font-bold tracking-tight text-white font-display">
+          <span>Verifying</span>
+          <span className="font-mono text-white/90 w-4 text-left">
+            {'.'.repeat(dotsCount)}
+          </span>
+        </div>
+        <p className="text-xs text-white/50 tracking-wide font-sans">
+          Securing your session
+        </p>
+      </div>
+
+      {/* Dynamic Candlestick SVG - Directly inside OTP box without secondary inner container */}
+      <div className="relative w-full max-w-[340px] h-[135px] overflow-visible my-2">
+        {/* Background Grid Lines */}
+        <div className="absolute inset-0 pointer-events-none flex flex-col justify-between opacity-15">
           <div className="w-full border-b border-dashed border-white/40 flex justify-between items-center text-[9px] font-mono text-white/60">
             <span>85.00</span>
             <span>PRO</span>
@@ -192,19 +205,6 @@ export default function CandlestickLoader() {
             </g>
           )}
         </svg>
-      </div>
-
-      {/* Verification Status & Muted Copy */}
-      <div className="mt-5 text-center space-y-1">
-        <div className="inline-flex items-center gap-1 text-sm font-semibold tracking-tight text-white font-display">
-          <span>Verifying</span>
-          <span className="font-mono text-white/90 w-4 text-left">
-            {'.'.repeat(dotsCount)}
-          </span>
-        </div>
-        <p className="text-xs text-white/50 tracking-wide font-sans">
-          Securing your session
-        </p>
       </div>
     </div>
   )
