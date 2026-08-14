@@ -6,6 +6,7 @@ import ThinqMark from './ThinqMark'
 import CandlestickLoader from './CandlestickLoader'
 import {
   AuthError,
+  formatCountdown,
   loadCatalogue,
   renderMessage,
   sendOtp,
@@ -15,6 +16,27 @@ import {
 
 /** How often the two deadlines are re-read. */
 const TICK_MS = 500
+
+/**
+ * How many codes authService will send for one journey before it answers
+ * RESEND_LIMIT.
+ */
+const MAX_SENDS_PER_JOURNEY = 6
+
+/**
+ * How many RESENDS that leaves.
+ *
+ * One fewer than the send budget, because the send that opened this modal
+ * already spent one of the six. Offering six resends would put a seventh code
+ * on a journey that allows six, so the last press would always be refused —
+ * the button would look available and simply fail.
+ *
+ * This is a courtesy limit, not a control. authService counts independently and
+ * refuses past its own ceiling whatever this says, which is what makes the rule
+ * unbypassable: editing this number, or the counter in devtools, buys nothing
+ * but a RESEND_LIMIT response that the modal then displays.
+ */
+const MAX_RESENDS = MAX_SENDS_PER_JOURNEY - 1
 
 interface OtpModalProps {
   isOpen: boolean
@@ -48,11 +70,26 @@ export default function OtpModal({
   const [isResending, setIsResending] = useState(false)
   const [isVerified, setIsVerified] = useState(false)
   const [outcome, setOutcome] = useState<'SIGNED_IN' | 'REGISTERED' | null>(null)
-  const [error, setError] = useState('')
+  /*
+   * The failure, kept as its parts rather than as finished text.
+   *
+   * Several catalogue templates ask for {countdown}, and no response ever
+   * carries that value — the contract sends absolute instants, so the seconds
+   * remaining are ours to compute. Storing a rendered string would freeze the
+   * number at the moment of the error; storing the parts lets it tick down with
+   * the same clock every other deadline here uses.
+   */
+  const [errorInfo, setErrorInfo] = useState<{
+    messageId?: string
+    params?: Record<string, string | number>
+    fallback: string
+    retryExpiresAt?: string
+  } | null>(null)
+  const clearError = () => setErrorInfo(null)
   /** Set by ACCOUNT_LOCKED, and by the resend limits. Absolute instants. */
   const [lockedUntil, setLockedUntil] = useState<string | undefined>()
   const [resendBlockedUntil, setResendBlockedUntil] = useState<string | undefined>()
-  const [retriesLeft, setRetriesLeft] = useState(3)
+  const [retriesLeft, setRetriesLeft] = useState(MAX_RESENDS)
   const [now, setNow] = useState(() => Date.now())
 
   const inputRefs = useRef<(HTMLInputElement | null)[]>([])
@@ -102,10 +139,10 @@ export default function OtpModal({
       setIsResending(false)
       setIsVerified(false)
       setOutcome(null)
-      setError('')
+      clearError()
       setLockedUntil(undefined)
       setResendBlockedUntil(undefined)
-      setRetriesLeft(3)
+      setRetriesLeft(MAX_RESENDS)
       setNow(Date.now())
       setTimeout(() => {
         inputRefs.current[0]?.focus()
@@ -122,16 +159,41 @@ export default function OtpModal({
   const isLocked = lockedFor > 0
 
   /*
+   * The message, rendered fresh every tick.
+   *
+   * `{countdown}` is filled here rather than by the server, from whichever
+   * absolute instant the failure carried — a dispatch cap, a resend limit, a
+   * lock. That is why this is derived during render instead of stored: the
+   * number counts down while the reader is looking at it, instead of freezing
+   * at whatever it was when the request failed.
+   */
+  const error = errorInfo
+    ? renderMessage(
+        catalogue,
+        { id: errorInfo.messageId, params: errorInfo.params },
+        errorInfo.fallback,
+        { countdown: formatCountdown(secondsUntil(errorInfo.retryExpiresAt, now)) },
+      )
+    : ''
+
+  /*
    * Resend opens either when the cooldown lapses OR once the code has expired.
    *
-   * Maximum 3 retries allowed with 30-second interval between attempts.
+   * The second half matters: past `expiresAt` the server accepts a resend even
+   * inside the 30s window, so watching only the cooldown would grey out a button
+   * the server would have honoured — leaving a reader holding a dead code with
+   * no way to ask for another.
+   *
+   * `retriesLeft` is the local budget, MAX_RESENDS. The server's own count is
+   * what actually decides; when it refuses, RESEND_LIMIT arrives and
+   * `resendBlockedUntil` holds the button shut until the instant it names.
    */
   const canResend = !isLocked && !isResending && retriesLeft > 0 && (cooldownEndsIn === 0 || codeExpiresIn === 0)
 
   /** Turns a failure into copy, and into whatever state it implies. */
   const applyError = (err: unknown, fallback: string) => {
     if (!(err instanceof AuthError)) {
-      setError(fallback)
+      setErrorInfo({ fallback })
       return
     }
     switch (err.code) {
@@ -146,17 +208,18 @@ export default function OtpModal({
       default:
         break
     }
-    setError(
-      renderMessage(
-        catalogue,
-        { id: err.messageId, params: err.params },
-        // INTERNAL and UPSTREAM_UNAVAILABLE carry no message id at all, so
-        // these are the words for "the catalogue has nothing to say".
+    setErrorInfo({
+      messageId: err.messageId,
+      params: err.params,
+      // INTERNAL and UPSTREAM_UNAVAILABLE carry no message id at all, so these
+      // are the words for "the catalogue has nothing to say".
+      fallback:
         err.code === 'NETWORK'
           ? "Couldn't reach the server. Check your connection and try again."
           : fallback,
-      ),
-    )
+      // Drives {countdown} in the caps and lock templates.
+      retryExpiresAt: err.retryExpiresAt,
+    })
   }
 
    if (!isOpen || typeof document === 'undefined') return null
@@ -180,7 +243,7 @@ export default function OtpModal({
 
     newOtp[index] = value.slice(-1)
     setOtp(newOtp)
-    setError('')
+    clearError()
 
     // Auto-advance to next input
     if (value && index < 5) {
@@ -197,7 +260,7 @@ export default function OtpModal({
   const handleResend = async () => {
     if (!canResend || !attempt || retriesLeft <= 0) return
     setIsResending(true)
-    setError('')
+    clearError()
     try {
       // Same endpoint, carrying the attempt — that makes it a resend against
       // this journey rather than the start of a new one.
@@ -219,16 +282,16 @@ export default function OtpModal({
     if (isLocked) return
     const enteredOtp = otp.join('')
     if (enteredOtp.length < 6) {
-      setError('Please enter complete 6-digit OTP')
+      setErrorInfo({ fallback: 'Please enter complete 6-digit OTP' })
       return
     }
     if (!attempt) {
-      setError('That request expired. Start again from your number.')
+      setErrorInfo({ fallback: 'That request expired. Start again from your number.' })
       return
     }
 
     setIsVerifying(true)
-    setError('')
+    clearError()
 
     try {
       const result = await verifyOtp({ attemptId: attempt.attemptId, code: enteredOtp })
@@ -427,7 +490,7 @@ export default function OtpModal({
 
                 {retriesLeft <= 0 ? (
                   <span className="font-mono text-rose-400/80 font-medium">
-                    Max 3 retries reached
+                    No resends left for this code
                   </span>
                 ) : canResend ? (
                   <button

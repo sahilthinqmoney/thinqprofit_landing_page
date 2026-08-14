@@ -4,6 +4,7 @@ import Button from '../ui/Button'
 import OtpModal from '../ui/OtpModal'
 import {
   AuthError,
+  formatCountdown,
   loadCatalogue,
   renderMessage,
   sendOtp,
@@ -60,7 +61,23 @@ export default function Hero() {
   const lines = hero.headline.split('\n')
   const [phone, setPhone] = useState('')
   const [isOtpOpen, setIsOtpOpen] = useState(false)
-  const [formError, setFormError] = useState('')
+  /*
+   * The send failure, kept as its parts.
+   *
+   * Same reason as the modal: templates such as OTP-M04 ("Try again in
+   * {countdown}") ask for a duration the server never sends, because deadlines
+   * travel as absolute instants. The seconds have to be computed here, and
+   * recomputed, or the reader is told "{countdown}" verbatim — which is exactly
+   * what shipped before this.
+   */
+  const [formErrorInfo, setFormErrorInfo] = useState<{
+    fallback: string
+    messageId?: string
+    params?: Record<string, string | number>
+    retryExpiresAt?: string
+  } | null>(null)
+  const [catalogue, setCatalogue] = useState<Awaited<ReturnType<typeof loadCatalogue>>>(null)
+  const [nowMs, setNowMs] = useState(() => Date.now())
   const [isSending, setIsSending] = useState(false)
   /*
    * The live journey.
@@ -119,18 +136,49 @@ export default function Hero() {
     }
   }, [])
 
+  /*
+   * A clock, but only while there is a deadline to count down.
+   *
+   * Gated on the error carrying `retryExpiresAt` so the hero is not running a
+   * timer for the entire visit — every other error here is static text, and the
+   * overwhelming majority of visitors never see one at all.
+   */
+  useEffect(() => {
+    if (!formErrorInfo?.retryExpiresAt) return
+    const id = setInterval(() => setNowMs(Date.now()), 500)
+    return () => clearInterval(id)
+  }, [formErrorInfo?.retryExpiresAt])
+
+  const formError = formErrorInfo
+    ? renderMessage(
+        catalogue,
+        { id: formErrorInfo.messageId, params: formErrorInfo.params },
+        formErrorInfo.fallback,
+        {
+          countdown: formatCountdown(
+            formErrorInfo.retryExpiresAt
+              ? Math.max(
+                  0,
+                  Math.ceil((new Date(formErrorInfo.retryExpiresAt).getTime() - nowMs) / 1000),
+                )
+              : 0,
+          ),
+        },
+      )
+    : ''
+
   const handleWaitlistSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     const cleaned = phone.replace(/\D/g, '')
     if (!cleaned) {
-      setFormError('Please enter your 10-digit mobile number')
+      setFormErrorInfo({ fallback: 'Please enter your 10-digit mobile number' })
       return
     }
     if (cleaned.length < 10) {
-      setFormError('Please enter a valid 10-digit mobile number')
+      setFormErrorInfo({ fallback: 'Please enter a valid 10-digit mobile number' })
       return
     }
-    setFormError('')
+    setFormErrorInfo(null)
     setIsSending(true)
     try {
       /*
@@ -146,18 +194,22 @@ export default function Hero() {
       setAttempt(started)
       setIsOtpOpen(true)
     } catch (err) {
-      const catalogue = await loadCatalogue()
-      setFormError(
+      setCatalogue(await loadCatalogue())
+      setFormErrorInfo(
         err instanceof AuthError
-          ? renderMessage(
-              catalogue,
-              { id: err.messageId, params: err.params },
-              err.code === 'NETWORK'
-                ? "Couldn't reach the server. Check your connection and try again."
-                : "Couldn't send a code just now. Please try again.",
-            )
-          : "Couldn't send a code just now. Please try again.",
+          ? {
+              messageId: err.messageId,
+              params: err.params,
+              fallback:
+                err.code === 'NETWORK'
+                  ? "Couldn't reach the server. Check your connection and try again."
+                  : "Couldn't send a code just now. Please try again.",
+              // Fills {countdown} on the dispatch-cap and resend-limit messages.
+              retryExpiresAt: err.retryExpiresAt,
+            }
+          : { fallback: "Couldn't send a code just now. Please try again." },
       )
+      setNowMs(Date.now())
     } finally {
       setIsSending(false)
     }
@@ -301,7 +353,7 @@ export default function Hero() {
                       value={phone}
                       onChange={(e) => {
                         setPhone(e.target.value)
-                        setFormError('')
+                        setFormErrorInfo(null)
                       }}
                       placeholder="Enter 10-digit mobile number"
                       className="w-full bg-transparent text-sm text-white placeholder-white/40 outline-none font-normal"

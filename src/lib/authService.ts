@@ -374,13 +374,43 @@ export function renderMessage(
   catalogue: Catalogue | null,
   message: { id?: string; params?: Record<string, string | number> } | undefined,
   fallback: string,
+  /**
+   * Values the client supplies rather than the server.
+   *
+   * `countdown` is the reason this exists. Several templates ask for it —
+   * "Try again in {countdown}", "Expires in {countdown}" — and no response ever
+   * carries it, because the contract sends deadlines as absolute instants and
+   * never as durations. A duration would be wrong the moment it was written:
+   * stale by however long the response spent in flight. So the server sends
+   * `retry.expiresAt` and the seconds remaining are the caller's to compute,
+   * which also lets the number tick while the message is on screen.
+   *
+   * Without this the placeholder leaked to the reader verbatim, as
+   * "Try again in {countdown}".
+   */
+  extraParams?: Record<string, string | number>,
 ): string {
   const template = message?.id ? catalogue?.messages?.[message.id]?.template : undefined
   if (!template) return fallback
   return template.replace(/\{(\w+)\}/g, (whole, key: string) => {
-    const value = message?.params?.[key]
+    const value = message?.params?.[key] ?? extraParams?.[key]
     return value === undefined ? whole : String(value)
   })
+}
+
+/**
+ * Seconds as words a reader can act on.
+ *
+ * Minutes appear once there are any, because "Try again in 847s" asks someone
+ * to do arithmetic to find out whether it is worth waiting.
+ */
+export function formatCountdown(totalSeconds: number): string {
+  if (totalSeconds <= 0) return 'a moment'
+  const minutes = Math.floor(totalSeconds / 60)
+  const seconds = totalSeconds % 60
+  if (minutes === 0) return `${seconds}s`
+  if (seconds === 0) return `${minutes}m`
+  return `${minutes}m ${seconds}s`
 }
 
 /** Which contact channels this deployment accepts. Currently always MOBILE. */

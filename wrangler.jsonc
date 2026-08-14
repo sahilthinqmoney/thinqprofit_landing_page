@@ -4,12 +4,46 @@
   // Pinned to what the installed wrangler's bundled runtime supports, so
   // `wrangler dev` serves the same thing locally that gets deployed.
   "compatibility_date": "2026-08-08",
-  // No `main`: there is no script in front of the assets, so this deploys as a
-  // pure static-asset Worker and the edge serves `dist/` directly.
+  // A script now sits in front of the assets, because /api/ has to reach
+  // authService and everything else must still be the static bundle. See
+  // worker/index.ts for why the API cannot simply be called from the browser.
+  "main": "worker/index.ts",
   "assets": {
     "directory": "./dist",
+    // Bound so the script can serve the bundle itself. Without a binding the
+    // assets would be served ahead of the script and /api/ would never reach it.
+    "binding": "ASSETS",
     // Every unmatched path renders index.html so client-side routing works,
     // which is what vercel.json's rewrite did.
     "not_found_handling": "single-page-application"
+  },
+  "vars": {
+    /*
+     * Where authService listens.
+     *
+     * A HOSTNAME, not the bare IP, and not by preference: a Worker cannot fetch
+     * a raw address. Pointing this at http://13.201.234.55:8080 deployed
+     * cleanly and then answered every /api/ request with Cloudflare error 1003,
+     * "Direct IP access not allowed" — the fetch never left the edge.
+     *
+     * nip.io resolves any IP embedded in its name straight back to that IP, so
+     * this is the same host reached by a name Cloudflare will accept. It is a
+     * STOPGAP, and it carries two costs worth being honest about: the hop is
+     * plain HTTP, so OTP codes and session cookies cross the internet in the
+     * clear, and resolution now depends on a third party nobody here operates.
+     *
+     * The proper fix is a record on this zone — `origin.thinq.co` A
+     * 13.201.234.55, proxy status DNS ONLY so it does not loop back through
+     * Cloudflare — or better, a Cloudflare Tunnel, which supplies a hostname
+     * and TLS at once and closes port 8080 to the public. Either way only this
+     * line changes.
+     */
+    "AUTH_ORIGIN": "http://13.201.234.55.nip.io:8080"
+  },
+  "observability": {
+    // Worth having now that a script handles authentication traffic: without
+    // logs, a failure in the proxy is invisible and indistinguishable from a
+    // failure in the service behind it.
+    "enabled": true
   }
 }
