@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react'
+import { createPortal } from 'react-dom'
 import { Check, ShieldCheck, X, RefreshCw } from 'lucide-react'
 import Button from './Button'
 import ThinqMark from './ThinqMark'
@@ -82,6 +83,16 @@ export default function OtpModal({
     }
   }, [isOpen])
 
+  // Lock background body scroll while modal is open
+  useEffect(() => {
+    if (!isOpen) return
+    const originalStyle = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    return () => {
+      document.body.style.overflow = originalStyle
+    }
+  }, [isOpen])
+
   // Reset state on open
   useEffect(() => {
     if (isOpen) {
@@ -149,7 +160,7 @@ export default function OtpModal({
     )
   }
 
-  if (!isOpen) return null
+   if (!isOpen || typeof document === 'undefined') return null
 
   const handleInputChange = (index: number, value: string) => {
     // Only numeric input
@@ -244,9 +255,8 @@ export default function OtpModal({
    * Prefer the server's mask over anything derived from what was typed. It is
    * the number the code actually went to, after normalisation, so it is the
    * only version that can confirm the message went where the reader meant.
-   */
-  /*
-   * The server's mask is used verbatim. It arrives already formatted, as
+   *
+   * `attempt?.maskedTo` comes from the server and is already masked, e.g.
    * "+91-XXXXXX0121", and it must not be run through a digit filter: stripping
    * non-digits removes the X's along with the punctuation and leaves "+91-0121",
    * which reads as a broken number rather than a masked one.
@@ -257,16 +267,16 @@ export default function OtpModal({
   const formattedPhone =
     attempt?.maskedTo ?? `+91-${phone.replace(/^\+?91/, '').replace(/\D/g, '')}`
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 isolate">
+  return createPortal(
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 sm:p-6 isolate">
       {/* Backdrop Dimmer Overlay */}
       <div
-        className="absolute inset-0 bg-black/80 backdrop-blur-md transition-opacity duration-300 animate-in fade-in"
+        className="fixed inset-0 bg-black/80 backdrop-blur-md transition-opacity duration-300 animate-in fade-in z-0"
         onClick={onClose}
       />
 
       {/* Modal Dialog Card */}
-      <div className="relative w-full max-w-md overflow-hidden rounded-3xl border border-white/20 bg-[#0a0a0c]/95 p-6 sm:p-8 backdrop-blur-2xl shadow-[0_24px_80px_rgba(0,0,0,0.95)] transition-all animate-in zoom-in-95 duration-200">
+      <div className="relative z-10 w-full max-w-md rounded-3xl border border-white/20 bg-[#0a0a0c]/98 p-6 sm:p-8 backdrop-blur-2xl shadow-[0_24px_80px_rgba(0,0,0,0.95)] transition-all animate-in zoom-in-95 duration-200">
         {/* Subtle Light Radial & Linear Gradient Ambient Background Overlay */}
         <div
           className="pointer-events-none absolute inset-0 rounded-3xl z-0"
@@ -472,6 +482,7 @@ export default function OtpModal({
           </div>
         )}
       </div>
-    </div>
+    </div>,
+    document.body,
   )
 }
