@@ -959,3 +959,16 @@
     }
   }
 }
+
+/* ---------------------------------------------------------------------------
+   Browser Autofill Override — Prevent white/light-blue background on inputs
+   --------------------------------------------------------------------------- */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0 1000px #0a0a0c inset !important;
+  -webkit-text-fill-color: #ffffff !important;
+  transition: background-color 50000s ease-in-out 0s;
+  caret-color: #ffffff !important;
+}
