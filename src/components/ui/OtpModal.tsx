@@ -245,6 +245,11 @@ export default function OtpModal({
       setOtp(newOtp)
       const nextFocus = Math.min(pastedDigits.length, 5)
       inputRefs.current[nextFocus]?.focus()
+
+      const fullPastedCode = newOtp.join('')
+      if (fullPastedCode.length === 6) {
+        void executeVerification(fullPastedCode)
+      }
       return
     }
 
@@ -252,8 +257,11 @@ export default function OtpModal({
     setOtp(newOtp)
     clearError()
 
-    // Auto-advance to next input
-    if (value && index < 5) {
+    const fullTypedCode = newOtp.join('')
+    if (fullTypedCode.length === 6) {
+      void executeVerification(fullTypedCode)
+    } else if (value && index < 5) {
+      // Auto-advance to next input
       inputRefs.current[index + 1]?.focus()
     }
   }
@@ -261,6 +269,33 @@ export default function OtpModal({
   const handleKeyDown = (index: number, e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Backspace' && !otp[index] && index > 0) {
       inputRefs.current[index - 1]?.focus()
+    }
+  }
+
+  const executeVerification = async (codeToVerify: string) => {
+    if (isLocked || isVerifying || isVerified) return
+    if (!attempt) {
+      setErrorInfo({ fallback: 'That request expired. Start again from your number.' })
+      return
+    }
+
+    setIsVerifying(true)
+    clearError()
+
+    try {
+      const result = await verifyOtp({ attemptId: attempt.attemptId, code: codeToVerify })
+      // Allow 1.5s for the candlestick chart loader to play out smoothly
+      await new Promise((resolve) => setTimeout(resolve, 1500))
+      setOutcome(result.outcome)
+      setIsVerified(true)
+    } catch (err) {
+      applyError(err, 'That code was not accepted. Check it and try again.')
+      setOtp(['', '', '', '', '', ''])
+      setTimeout(() => {
+        inputRefs.current[0]?.focus()
+      }, 50)
+    } finally {
+      setIsVerifying(false)
     }
   }
 
@@ -284,40 +319,11 @@ export default function OtpModal({
     }
   }
 
-  const handleVerify = async (e: React.FormEvent) => {
+  const handleVerify = (e: React.FormEvent) => {
     e.preventDefault()
-    if (isLocked) return
     const enteredOtp = otp.join('')
-    if (enteredOtp.length < 6) {
-      setErrorInfo({ fallback: 'Please enter complete 6-digit OTP' })
-      return
-    }
-    if (!attempt) {
-      setErrorInfo({ fallback: 'That request expired. Start again from your number.' })
-      return
-    }
-
-    setIsVerifying(true)
-    clearError()
-
-    try {
-      const result = await verifyOtp({ attemptId: attempt.attemptId, code: enteredOtp })
-      // Allow 1.5s for the candlestick chart loader to play out smoothly
-      await new Promise((resolve) => setTimeout(resolve, 1500))
-      setOutcome(result.outcome)
-      setIsVerified(true)
-    } catch (err) {
-      /*
-       * Wrong, expired and already-used all arrive as OTP_INVALID, and the
-       * client genuinely cannot tell them apart — telling them apart would
-       * leak whether a given code ever existed. So the copy comes from the
-       * catalogue and never guesses which of the three happened.
-       */
-      applyError(err, 'That code was not accepted. Check it and try again.')
-      setOtp(['', '', '', '', '', ''])
-      inputRefs.current[0]?.focus()
-    } finally {
-      setIsVerifying(false)
+    if (enteredOtp.length === 6) {
+      void executeVerification(enteredOtp)
     }
   }
 
@@ -388,10 +394,9 @@ export default function OtpModal({
         {isVerified ? (
           /* Success State */
           <div className="relative z-10 flex flex-col items-center justify-center py-4 text-center animate-in zoom-in-95 duration-400">
-            {/* Premium Glowing Checkmark without background or border ring */}
-            <div className="relative flex items-center justify-center mb-4 animate-in zoom-in-50 duration-500">
-              <div className="absolute inset-0 rounded-full blur-xl bg-emerald-500/35 animate-pulse" />
-              <Check className="relative h-14 w-14 text-emerald-400 stroke-[2.5] drop-shadow-[0_0_24px_rgba(16,185,129,0.95)]" />
+            {/* Clean Checkmark in Brand Theme Color without backdrop glow */}
+            <div className="flex items-center justify-center mb-4 animate-in zoom-in-50 duration-500">
+              <Check className="h-14 w-14 text-[#FF9E7A] stroke-[2.5]" />
             </div>
 
             {/*
@@ -433,7 +438,7 @@ export default function OtpModal({
               }}
               size="lg"
               fullWidth
-              className="mt-6 shadow-[0_0_24px_rgba(16,185,129,0.25)] hover:shadow-[0_0_32px_rgba(16,185,129,0.4)]"
+              className="mt-6 shadow-[0_0_24px_rgba(255,158,122,0.2)] hover:shadow-[0_0_32px_rgba(255,158,122,0.35)]"
             >
               Done
             </Button>
@@ -544,17 +549,6 @@ export default function OtpModal({
                   </div>
                 )}
               </div>
-
-              {/* Submit CTA Button */}
-              <Button
-                type="submit"
-                size="lg"
-                fullWidth
-                disabled={isVerifying || isLocked}
-                className="mt-6 shadow-[0_0_24px_rgba(255,255,255,0.2)] hover:shadow-[0_0_32px_rgba(255,255,255,0.35)]"
-              >
-                {isVerifying ? 'Verifying OTP...' : 'Verify & Join Waitlist'}
-              </Button>
 
               {/* By continuing consent line */}
               <p className="mt-4 text-center text-xs text-white/60 font-normal font-sans">
