@@ -111,13 +111,14 @@ export default function CandlestickLoader() {
           className="w-full h-full relative z-10 overflow-visible"
         >
           <defs>
-            {/* Soft Emerald Glow Filter for Active Bullish Candle */}
-            <filter id="emeraldGlow" x="-50%" y="-50%" width="200%" height="200%">
+            {/* Soft glow on the newest candle. One filter per direction so the
+                blur radius can differ later if it needs to. */}
+            <filter id="candleGlowUp" x="-50%" y="-50%" width="200%" height="200%">
               <feGaussianBlur stdDeviation="3.5" result="blur" />
               <feComposite in="SourceGraphic" in2="blur" operator="over" />
             </filter>
-            {/* Soft Rose Glow Filter for Active Bearish Candle */}
-            <filter id="roseGlow" x="-50%" y="-50%" width="200%" height="200%">
+            
+            <filter id="candleGlowDown" x="-50%" y="-50%" width="200%" height="200%">
               <feGaussianBlur stdDeviation="3.5" result="blur" />
               <feComposite in="SourceGraphic" in2="blur" operator="over" />
             </filter>
@@ -143,8 +144,21 @@ export default function CandlestickLoader() {
             const bodyTop = Math.min(openY, closeY)
             const bodyHeight = Math.max(Math.abs(closeY - openY), 2)
 
-            const colorClass = isBullish ? '#10b981' : '#f43f5e'
-            const strokeColor = isBullish ? 'rgba(16, 185, 129, 0.85)' : 'rgba(244, 63, 94, 0.85)'
+            /*
+             * The steel scale, not red and green.
+             *
+             * Nothing else on this page is either colour — the palette is white
+             * through #8a909d on near-black, and the mark itself is a silver
+             * gradient — so an emerald and rose chart read as borrowed from
+             * some other product every time the modal opened.
+             *
+             * Direction survives the change: rising candles take --color-fg,
+             * falling ones --color-accent-soft, so the shape is still legible
+             * as a chart rather than flattening to one tone. It is decorative
+             * either way; these are not real prices.
+             */
+            const colorClass = isBullish ? '#ffffff' : '#8a909d'
+            const strokeColor = isBullish ? 'rgba(255, 255, 255, 0.85)' : 'rgba(138, 144, 157, 0.85)'
 
             return (
               <g
@@ -171,7 +185,7 @@ export default function CandlestickLoader() {
                   height={bodyHeight}
                   rx={2}
                   fill={colorClass}
-                  filter={isLatest ? (isBullish ? 'url(#emeraldGlow)' : 'url(#roseGlow)') : undefined}
+                  filter={isLatest ? (isBullish ? 'url(#candleGlowUp)' : 'url(#candleGlowDown)') : undefined}
                   className={isLatest ? 'animate-pulse' : ''}
                 />
               </g>

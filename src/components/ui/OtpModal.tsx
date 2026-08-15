@@ -345,8 +345,22 @@ export default function OtpModal({
         onClick={onClose}
       />
 
-      {/* Modal Dialog Card */}
-      <div className="relative z-10 w-full max-w-md rounded-3xl border border-white/15 bg-[#0a0a0c] p-6 sm:p-8 shadow-[0_32px_96px_rgba(0,0,0,0.95)] transition-all animate-in zoom-in-95 duration-200">
+      {/*
+        * Modal Dialog Card.
+        *
+        * Height is capped and allowed to scroll inside itself. A phone in
+        * landscape is about 390px tall and the card wanted 391, so it sat a
+        * pixel past the fold with nothing able to reach the rest of it — the
+        * page behind is scroll-locked while this is open, so an overflowing
+        * card is simply unreachable rather than merely awkward.
+        *
+        * `100dvh` rather than `100vh`: on mobile Safari and Chrome the visual
+        * viewport shrinks as the browser chrome and the keyboard appear, and
+        * `vh` keeps reporting the taller figure — which is precisely the
+        * moment this needs to be right, since the keyboard is open for the
+        * whole of the code entry.
+        */}
+      <div className="relative z-10 w-full max-w-md max-h-[calc(100dvh-2rem)] overflow-y-auto overscroll-contain rounded-3xl border border-white/15 bg-[#0a0a0c] p-6 sm:p-8 shadow-[0_32px_96px_rgba(0,0,0,0.95)] transition-all animate-in zoom-in-95 duration-200">
         {/* Subtle Edge Specular Highlight */}
         <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/30 to-transparent z-10" />
         <div className="pointer-events-none absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent z-10" />
@@ -375,14 +389,10 @@ export default function OtpModal({
           /* Success State */
           <div className="relative z-10 flex flex-col items-center justify-center py-4 text-center animate-in zoom-in-95 duration-400">
             {/* Premium Glowing Checkmark without background or border ring */}
-            <div className="relative flex items-center justify-center mb-5 animate-in zoom-in-50 duration-500">
+            <div className="relative flex items-center justify-center mb-4 animate-in zoom-in-50 duration-500">
               <div className="absolute inset-0 rounded-full blur-xl bg-emerald-500/35 animate-pulse" />
               <Check className="relative h-14 w-14 text-emerald-400 stroke-[2.5] drop-shadow-[0_0_24px_rgba(16,185,129,0.95)]" />
             </div>
-
-            <span className="font-mono text-[10px] uppercase font-bold tracking-widest text-emerald-400/90 bg-emerald-500/10 px-3 py-1 rounded-full border border-emerald-500/20 mb-3">
-              Verification Complete
-            </span>
 
             {/*
               * SIGNED_IN means the number was already registered — it is the
@@ -398,15 +408,20 @@ export default function OtpModal({
               */}
             <h3 className="text-xl sm:text-2xl font-bold tracking-tight text-white font-display">
               {outcome === 'SIGNED_IN'
-                ? "You're already on the waitlist"
+                ? "Spot already reserved!"
                 : "You're on the waitlist!"}
             </h3>
 
             <p className="mt-2 text-sm text-white/70 max-w-xs leading-relaxed font-sans">
-              Mobile <span className="font-mono font-medium text-white tracking-wide">{formattedPhone}</span>{' '}
-              {outcome === 'SIGNED_IN'
-                ? "verified. You joined earlier — we'll invite you as seats open."
-                : "verified. We'll invite you as seats open."}
+              {outcome === 'SIGNED_IN' ? (
+                <>
+                  Mobile <span className="font-mono font-medium text-white tracking-wide">{formattedPhone}</span> is registered. We'll notify you as early access opens.
+                </>
+              ) : (
+                <>
+                  Your spot is confirmed for <span className="font-mono font-medium text-white tracking-wide">{formattedPhone}</span>. We'll notify you as early access opens.
+                </>
+              )}
             </p>
 
             {/* Manual Close / Done Control Button */}
@@ -454,7 +469,16 @@ export default function OtpModal({
 
             {/* OTP Input Boxes Form */}
             <form onSubmit={handleVerify} className="mt-6">
-              <div className="flex items-center justify-between gap-2 sm:gap-3">
+              {/*
+                * The boxes share the row rather than each claiming a fixed
+                * width. At 44px apiece plus the gaps they needed 304px, which
+                * is wider than the card's interior on a small phone — measured,
+                * the sixth box was cut off at 320, 344 and 360 CSS pixels, so
+                * an iPhone SE or a compact Android could not see the digit it
+                * had just typed. They now flex down to fit and cap at 48px so
+                * they stop growing on a large screen.
+                */}
+              <div className="flex items-center justify-center gap-1.5 sm:gap-3">
                 {otp.map((digit, idx) => (
                   <input
                     key={idx}
@@ -470,7 +494,7 @@ export default function OtpModal({
                     disabled={isLocked}
                     onChange={(e) => handleInputChange(idx, e.target.value)}
                     onKeyDown={(e) => handleKeyDown(idx, e)}
-                    className="h-12 w-11 sm:h-14 sm:w-12 rounded-xl border border-white/20 bg-white/5 text-center font-mono text-lg font-bold text-white outline-none transition-all focus:border-white/60 focus:bg-white/10 focus:ring-2 focus:ring-white/20 disabled:opacity-40 disabled:cursor-not-allowed"
+                    className="h-12 sm:h-14 min-w-0 flex-1 max-w-[3rem] rounded-xl border border-white/20 bg-white/5 text-center font-mono text-lg font-bold text-white outline-none transition-all focus:border-white/60 focus:bg-white/10 focus:ring-2 focus:ring-white/20 disabled:opacity-40 disabled:cursor-not-allowed"
                   />
                 ))}
               </div>
