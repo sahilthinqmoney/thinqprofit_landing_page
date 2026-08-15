@@ -339,30 +339,17 @@ export default function OtpModal({
 
   return createPortal(
     <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 sm:p-6 isolate">
-      {/* Backdrop Dimmer Overlay */}
+      {/* Backdrop Dimmer Overlay — Solid dark backdrop without blur distortion */}
       <div
-        className="fixed inset-0 bg-black/80 backdrop-blur-md transition-opacity duration-300 animate-in fade-in z-0"
+        className="fixed inset-0 bg-black/90 transition-opacity duration-300 animate-in fade-in z-0"
         onClick={onClose}
       />
 
       {/* Modal Dialog Card */}
-      <div className="relative z-10 w-full max-w-md rounded-3xl border border-white/20 bg-[#0a0a0c]/98 p-6 sm:p-8 backdrop-blur-2xl shadow-[0_24px_80px_rgba(0,0,0,0.95)] transition-all animate-in zoom-in-95 duration-200">
-        {/* Subtle Light Radial & Linear Gradient Ambient Background Overlay */}
-        <div
-          className="pointer-events-none absolute inset-0 rounded-3xl z-0"
-          style={{
-            background: 'radial-gradient(120% 120% at 50% 0%, rgba(255, 255, 255, 0.08) 0%, rgba(40, 40, 50, 0.2) 45%, rgba(10, 10, 12, 0.98) 100%)',
-          }}
-        />
-
-        {/* Bottom Gradient Fade */}
-        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-1/3 rounded-b-3xl bg-gradient-to-t from-black/60 via-black/20 to-transparent z-0" />
-
-        {/* Top Edge Specular Highlight */}
-        <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/40 to-transparent z-10" />
-
-        {/* Bottom Edge Specular Highlight */}
-        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent z-10" />
+      <div className="relative z-10 w-full max-w-md rounded-3xl border border-white/15 bg-[#0a0a0c] p-6 sm:p-8 shadow-[0_32px_96px_rgba(0,0,0,0.95)] transition-all animate-in zoom-in-95 duration-200">
+        {/* Subtle Edge Specular Highlight */}
+        <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/30 to-transparent z-10" />
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent z-10" />
 
         {/* Close Button */}
         <button
@@ -397,14 +384,28 @@ export default function OtpModal({
               Verification Complete
             </span>
 
+            {/*
+              * SIGNED_IN means the number was already registered — it is the
+              * server's way of saying "we have seen this one before". So it
+              * gets told it is already on the list rather than being
+              * congratulated on joining, which would read as a second signup
+              * and leave someone wondering whether they are now on it twice.
+              *
+              * The two outcomes are indistinguishable until this moment: the
+              * send that started the journey is identical in shape and timing
+              * either way, by design, so this is the first and only point at
+              * which the screen can know which of the two happened.
+              */}
             <h3 className="text-xl sm:text-2xl font-bold tracking-tight text-white font-display">
-              {outcome === 'SIGNED_IN' ? "You're signed in" : "You're on the waitlist!"}
+              {outcome === 'SIGNED_IN'
+                ? "You're already on the waitlist"
+                : "You're on the waitlist!"}
             </h3>
-            
+
             <p className="mt-2 text-sm text-white/70 max-w-xs leading-relaxed font-sans">
               Mobile <span className="font-mono font-medium text-white tracking-wide">{formattedPhone}</span>{' '}
               {outcome === 'SIGNED_IN'
-                ? 'verified. Welcome back.'
+                ? "verified. You joined earlier — we'll invite you as seats open."
                 : "verified. We'll invite you as seats open."}
             </p>
 
