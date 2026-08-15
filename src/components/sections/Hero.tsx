@@ -334,12 +334,22 @@ export default function Hero() {
 
               {/* Waitlist Mobile Input Form */}
               <div className="mt-8 sm:mt-10 flex flex-col items-center justify-center max-w-md mx-auto w-full">
+                {/*
+                  * Field and CTA share one row at every width.
+                  *
+                  * The two were stacked below 640px. Side by side they have to
+                  * survive a 320px phone, so the field takes the remaining
+                  * space with min-w-0 — without it a flex child refuses to
+                  * shrink past its content and pushes the button off the edge —
+                  * and the button holds its natural width with shrink-0.
+                  * Padding and the gap tighten on small screens to buy the room.
+                  */}
                 <form
                   onSubmit={handleWaitlistSubmit}
-                  className="w-full flex flex-col sm:flex-row items-stretch sm:items-center gap-3"
+                  className="w-full flex flex-row items-center gap-2 sm:gap-3"
                 >
-                  <div className="relative flex-1 w-full flex items-center rounded-full border border-white/25 bg-black/60 backdrop-blur-2xl px-5 py-3.5 text-white transition-all duration-300 focus-within:border-white/60 focus-within:bg-black/80 shadow-[0_4px_24px_rgba(0,0,0,0.6)]">
-                    <span className="text-white/90 font-mono text-sm font-medium mr-3 border-r border-white/20 pr-3 shrink-0">
+                  <div className="relative flex-1 min-w-0 flex items-center rounded-full border border-white/25 bg-black/60 backdrop-blur-2xl px-3.5 sm:px-5 py-3.5 text-white transition-all duration-300 focus-within:border-white/60 focus-within:bg-black/80 shadow-[0_4px_24px_rgba(0,0,0,0.6)]">
+                    <span className="text-white/90 font-mono text-sm font-medium mr-2 sm:mr-3 border-r border-white/20 pr-2 sm:pr-3 shrink-0">
                       +91
                     </span>
                     <input
@@ -355,21 +365,39 @@ export default function Hero() {
                         setPhone(e.target.value)
                         setFormErrorInfo(null)
                       }}
-                      placeholder="Enter 10-digit mobile number"
-                      className="w-full bg-transparent text-sm text-white placeholder-white/40 outline-none font-normal"
+                      // Short enough to survive the narrow field a shared row
+                      // leaves on a small phone. The +91 prefix and the label
+                      // already say what belongs here; a longer string only
+                      // clips mid-word.
+                      placeholder="Mobile number"
+                      className="w-full min-w-0 bg-transparent text-sm text-white placeholder-white/40 outline-none font-normal"
                     />
                   </div>
                   <Button
                     type="submit"
                     size="lg"
-                    fullWidth
                     // A second tap while the first send is in flight would
                     // start a second journey and burn a dispatch against the
                     // number's hourly cap.
                     disabled={isSending}
-                    className="sm:w-auto shrink-0 shadow-[0_0_24px_rgba(255,255,255,0.2)] hover:shadow-[0_0_32px_rgba(255,255,255,0.35)] transition-all duration-300"
+                    className="w-auto shrink-0 shadow-[0_0_24px_rgba(255,255,255,0.2)] hover:shadow-[0_0_32px_rgba(255,255,255,0.35)] transition-all duration-300"
                   >
-                    {isSending ? 'Sending code…' : 'Join the waitlist'}
+                    {/*
+                      * Two labels rather than one measured at runtime: this
+                      * page is prerendered and hydrated, and a label chosen
+                      * from viewport width would differ between the server
+                      * render and the browser's first pass. In React 19 that
+                      * mismatch discards the whole tree, so the choice is made
+                      * in CSS where it cannot disagree.
+                      */}
+                    {isSending ? (
+                      'Sending…'
+                    ) : (
+                      <>
+                        <span className="sm:hidden">Join</span>
+                        <span className="hidden sm:inline">Join the waitlist</span>
+                      </>
+                    )}
                   </Button>
                 </form>
                 {formError && (
