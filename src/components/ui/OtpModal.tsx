@@ -56,6 +56,13 @@ function secondsUntil(instant: string | undefined, now: number): number {
   return Math.max(0, Math.ceil((new Date(instant).getTime() - now) / 1000))
 }
 
+/** Formats seconds into mm:ss string (e.g. 24 -> 0:24, 83 -> 1:23) */
+function formatTime(seconds: number): string {
+  const m = Math.floor(seconds / 60)
+  const s = seconds % 60
+  return `${m}:${s < 10 ? '0' : ''}${s}`
+}
+
 export default function OtpModal({
   isOpen,
   phone,
@@ -473,37 +480,43 @@ export default function OtpModal({
                 </p>
               )}
 
-              {/* Timer / Resend Row. Every number here is derived from an
-                  absolute instant the server sent, so it cannot drift. */}
-              <div className="mt-5 flex items-center justify-between text-xs text-white/60">
-                {isLocked ? (
-                  <span className="font-mono text-rose-400/80">
-                    Locked · try again in {lockedFor}s
-                  </span>
-                ) : codeExpiresIn > 0 ? (
-                  <span className="font-mono text-white/40">
-                    Code expires in {codeExpiresIn}s
-                  </span>
-                ) : (
-                  <span className="font-mono text-white/40">Code expired</span>
-                )}
-
+              {/* Status / Resend Row — Single countdown at a time, sans-serif typography, no internal retry budgets exposed */}
+              <div className="mt-5 flex items-center justify-between text-xs text-white/60 font-sans">
                 {retriesLeft <= 0 ? (
-                  <span className="font-mono text-rose-400/80 font-medium">
-                    No resends left for this code
+                  <span className="text-rose-400 font-medium font-sans">
+                    Too many attempts. Try again in 15 minutes.
                   </span>
+                ) : isLocked ? (
+                  <span className="text-rose-400/80 font-medium font-sans">
+                    Locked · try again in {formatTime(lockedFor)}
+                  </span>
+                ) : codeExpiresIn === 0 ? (
+                  <div className="flex items-center justify-between w-full font-sans">
+                    <span className="text-rose-400 font-medium font-sans">Code expired</span>
+                    <button
+                      type="button"
+                      onClick={() => void handleResend()}
+                      className="flex items-center gap-1.5 font-semibold text-white hover:text-white/80 transition-colors font-sans"
+                    >
+                      <RefreshCw className="h-3 w-3" /> Resend OTP
+                    </button>
+                  </div>
                 ) : canResend ? (
-                  <button
-                    type="button"
-                    onClick={() => void handleResend()}
-                    className="flex items-center gap-1 font-semibold text-white hover:text-white/80 transition-colors"
-                  >
-                    <RefreshCw className="h-3 w-3" /> Resend OTP ({retriesLeft} left)
-                  </button>
+                  <div className="flex items-center justify-end w-full font-sans">
+                    <button
+                      type="button"
+                      onClick={() => void handleResend()}
+                      className="flex items-center gap-1.5 font-semibold text-white hover:text-white/80 transition-colors font-sans"
+                    >
+                      <RefreshCw className="h-3 w-3" /> Resend OTP
+                    </button>
+                  </div>
                 ) : (
-                  <span className="font-mono text-white/40">
-                    {isResending ? 'Sending…' : `Resend in ${cooldownEndsIn}s (${retriesLeft} left)`}
-                  </span>
+                  <div className="flex items-center justify-end w-full font-sans">
+                    <span className="text-white/50 font-normal font-sans">
+                      {isResending ? 'Sending…' : `Resend in ${formatTime(cooldownEndsIn)}`}
+                    </span>
+                  </div>
                 )}
               </div>
 
@@ -518,9 +531,9 @@ export default function OtpModal({
                 {isVerifying ? 'Verifying OTP...' : 'Verify & Join Waitlist'}
               </Button>
 
-              {/* By proceeding consent line */}
-              <p className="mt-4 text-center text-xs text-white/60 font-normal">
-                By proceeding, you agree to all{' '}
+              {/* By continuing consent line */}
+              <p className="mt-4 text-center text-xs text-white/60 font-normal font-sans">
+                By continuing you agree to our{' '}
                 <a
                   href="/terms"
                   onClick={() => {
@@ -528,20 +541,13 @@ export default function OtpModal({
                     if (phone) {
                       sessionStorage.setItem('otp_phone', phone)
                     }
-                    /*
-                     * The journey has to survive the trip too. Without it the
-                     * modal reopens with no attemptId, and the first verify
-                     * fails on a code that was perfectly good. sessionStorage
-                     * is per-tab, so this keeps two tabs as two journeys — a
-                     * cookie would not.
-                     */
                     if (attempt) {
                       sessionStorage.setItem('otp_attempt', JSON.stringify(attempt))
                     }
                   }}
-                  className="font-semibold text-white underline hover:text-white/80 transition-colors inline-block"
+                  className="font-semibold text-white underline hover:text-white/80 transition-colors inline-block font-sans"
                 >
-                  T&C
+                  Terms &amp; Privacy Policy
                 </a>
                 .
               </p>
