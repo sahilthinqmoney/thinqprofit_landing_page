@@ -394,9 +394,9 @@ export default function OtpModal({
         {isVerified ? (
           /* Success State */
           <div className="relative z-10 flex flex-col items-center justify-center py-4 text-center animate-in zoom-in-95 duration-400">
-            {/* Clean Checkmark in Brand Theme Color without backdrop glow */}
+            {/* Clean Checkmark in Silver / White Theme Color */}
             <div className="flex items-center justify-center mb-4 animate-in zoom-in-50 duration-500">
-              <Check className="h-14 w-14 text-[#FF9E7A] stroke-[2.5]" />
+              <Check className="h-14 w-14 text-white stroke-[2.5]" />
             </div>
 
             {/*
@@ -413,7 +413,7 @@ export default function OtpModal({
               */}
             <h3 className="text-xl sm:text-2xl font-bold tracking-tight text-white font-display">
               {outcome === 'SIGNED_IN'
-                ? "Spot already reserved!"
+                ? "Already on the waitlist!"
                 : "You're on the waitlist!"}
             </h3>
 
