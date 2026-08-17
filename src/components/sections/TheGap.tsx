@@ -204,8 +204,17 @@ function FlipClock() {
                 blend on the box are what dissolve this clip into the page, and
                 they were put there precisely because WebKit ignores both the
                 alpha and the blend on a video. */}
-            <source src="/clips/flip-clock.webm" type="video/webm" />
+            {/* MP4 first, deliberately. A browser takes the FIRST source it
+                believes it can play, and Safari 17.4+ claims WebM — so on iOS
+                it was choosing the 863 KB VP9 file over the smaller H.264 one
+                and decoding VP9 in software, which costs both memory and
+                battery on a device already close to its per-tab ceiling.
+                Measured on an iOS profile: flip-clock.webm was fetched.
+                Chrome and Firefox reach the WebM below and still get alpha;
+                WebKit ignores the alpha and the blend on a video anyway, which
+                is why the mask exists, so it loses nothing by taking H.264. */}
             <source src="/clips/flip-clock.mp4" type="video/mp4" />
+            <source src="/clips/flip-clock.webm" type="video/webm" />
           </video>
         )}
       </div>

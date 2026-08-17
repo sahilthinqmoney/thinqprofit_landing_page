@@ -166,9 +166,29 @@ export default function MediaBackdrop({
    * floor is what a reader mostly sees — and 720p at ~1.2 Mbps is more than a
    * 3g link can hold. A guaranteed 0.9 MB file beats a stream that stalls.
    */
-  const hlsSrc = !hlsFailed && !gate.lightMedia ? sources?.hls : undefined
+  /*
+   * Phones take the fixed mobile encode, not the adaptive ladder.
+   *
+   * The ladder is capped to the player's size by `capLevelToPlayerSize` — but
+   * that is hls.js configuration, and Safari plays HLS NATIVELY, so on an
+   * iPhone it never runs. Measured on an iOS profile: the phone pulled
+   * hero-1080-init.mp4 and nine 1080 segments, 1.7 MB, and decoded 1920x1080
+   * on a 390px screen. Video decode buffers are several frames of
+   * width x height x 4 bytes, so 1080p costs tens of megabytes of memory that
+   * a 390px viewport cannot use — on top of the page's decoded images. That is
+   * what pushes mobile Safari past its per-tab limit, and a tab over the limit
+   * is killed and reloaded, which is exactly the reported symptom.
+   *
+   * `chosenMp4` already knew the right answer for a small screen; it was only
+   * ever consulted when HLS was unavailable, so on any phone with a working
+   * connection the branch was dead. HLS now stands down for compact viewports
+   * and the mobile encode is used directly.
+   */
+  const preferMobileEncode = compact && Boolean(sources?.mobile)
+  const hlsSrc =
+    !hlsFailed && !gate.lightMedia && !preferMobileEncode ? sources?.hls : undefined
 
-  /** The fallback ladder, used when HLS is unavailable or refused. */
+  /** The fallback ladder, used when HLS is unavailable, refused, or stood down. */
   const chosenMp4 =
     (gate.lightMedia && sources?.light) || (compact && sources?.mobile) || sources?.mp4
 

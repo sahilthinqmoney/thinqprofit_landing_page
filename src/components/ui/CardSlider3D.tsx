@@ -234,6 +234,46 @@ export default function CardSlider3D({
     }
   }
 
+  /*
+   * Whether the rail is close enough to be worth loading pictures for.
+   *
+   * `loading="lazy"` is not enough on its own here. It is a hint with a
+   * browser-chosen threshold, and Chromium's is generous — measured, this
+   * section sits 697px below the fold on a phone and Chromium fetched three
+   * card images 84ms into the first paint without any scrolling. WebKit's
+   * threshold is tighter and withheld them, which is why this looked fixed
+   * from one engine only.
+   *
+   * An observer sets the distance explicitly, so both engines agree. The
+   * pictures are the whole reason this matters: the rail triplicates its items
+   * for the infinite loop, so fifteen elements hang off five files, and on a
+   * phone they were decoding while Safari was still carrying the hero's video.
+   *
+   * Starts false on both sides of hydration and is only ever turned on by an
+   * effect, so the prerendered markup and the browser's first pass agree.
+   */
+  const [nearViewport, setNearViewport] = useState(false)
+  useEffect(() => {
+    const element = containerRef.current
+    if (!element) return
+    // No IntersectionObserver: show the pictures rather than withhold them
+    // forever. A missing API should not cost the reader the content.
+    if (typeof IntersectionObserver === 'undefined') {
+      setNearViewport(true)
+      return
+    }
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (!entries.some((entry) => entry.isIntersecting)) return
+        setNearViewport(true)
+        observer.disconnect()
+      },
+      { rootMargin: '300px' },
+    )
+    observer.observe(element)
+    return () => observer.disconnect()
+  }, [])
+
   return (
     <div
       ref={containerRef}
@@ -315,17 +355,34 @@ export default function CardSlider3D({
                 {item.image ? (
                   <div
                     data-slider-media
+                    /* Fixed height, so the box holds its place whether or not
+                       the picture inside it has been loaded yet. Nothing moves
+                       when the observer opens the gate. */
                     className="relative mt-4 -mx-5 sm:-mx-6 w-[calc(100%+2.5rem)] sm:w-[calc(100%+3rem)] h-44 sm:h-52 flex items-center justify-center overflow-visible pointer-events-none px-2"
                   >
+                    {nearViewport ? (
                     <img
                       src={item.image}
                       alt={item.title}
                       width={item.imageWidth}
                       height={item.imageHeight}
-                      loading="eager"
+                      /*
+                       * Lazy, and it matters more here than the usual byte
+                       * saving suggests. The rail triplicates its items for the
+                       * infinite loop, so this renders fifteen <img> elements
+                       * for five pictures, all of them far below the fold on a
+                       * phone. Eager made every one of them fetch and decode
+                       * during the first paint — measured on an iOS profile,
+                       * the page held 19 MB of decoded bitmaps — while mobile
+                       * Safari was already carrying the hero's video buffers.
+                       * A tab past its memory ceiling is killed and reloaded,
+                       * which is what a reader sees as the page "glitching".
+                       */
+                      loading="lazy"
                       decoding="async"
                       className="max-h-full w-full object-contain transition-transform duration-500 group-hover:scale-105 relative z-10"
                     />
+                    ) : null}
                   </div>
                 ) : null}
 
