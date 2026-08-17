@@ -3,7 +3,6 @@ import { createPortal } from 'react-dom'
 import { Check, ShieldCheck, X, RefreshCw } from 'lucide-react'
 import Button from './Button'
 import ThinqMark from './ThinqMark'
-import CandlestickLoader from './CandlestickLoader'
 import {
   AuthError,
   formatCountdown,
@@ -44,7 +43,8 @@ interface OtpModalProps {
   /** The journey this modal belongs to, from the send that opened it. */
   attempt: SendOtpResult | null
   /** A resend replaces the attempt, so the parent holds it. */
-  onAttempt: (attempt: SendOtpResult) => void
+  onAttempt: (attempt: SendOtpResult | null) => void
+  onPhoneChange?: (phone: string) => void
   onClose: () => void
   onSuccess: (outcome: 'SIGNED_IN' | 'REGISTERED') => void
   onEditPhone?: () => void
@@ -68,6 +68,7 @@ export default function OtpModal({
   phone,
   attempt,
   onAttempt,
+  onPhoneChange,
   onClose,
   onSuccess,
   onEditPhone,
@@ -75,6 +76,8 @@ export default function OtpModal({
   const [otp, setOtp] = useState<string[]>(['', '', '', '', '', ''])
   const [isVerifying, setIsVerifying] = useState(false)
   const [isResending, setIsResending] = useState(false)
+  const [isSendingPhone, setIsSendingPhone] = useState(false)
+  const [phoneError, setPhoneError] = useState('')
   const [isVerified, setIsVerified] = useState(false)
   const [outcome, setOutcome] = useState<'SIGNED_IN' | 'REGISTERED' | null>(null)
   /*
@@ -284,8 +287,6 @@ export default function OtpModal({
 
     try {
       const result = await verifyOtp({ attemptId: attempt.attemptId, code: codeToVerify })
-      // Allow 1.5s for the candlestick chart loader to play out smoothly
-      await new Promise((resolve) => setTimeout(resolve, 1500))
       setOutcome(result.outcome)
       setIsVerified(true)
     } catch (err) {
@@ -296,6 +297,33 @@ export default function OtpModal({
       }, 50)
     } finally {
       setIsVerifying(false)
+    }
+  }
+
+  const handlePhoneSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    const cleaned = phone.replace(/\D/g, '')
+    if (!cleaned || cleaned.length < 10) {
+      setPhoneError('Please enter a valid 10-digit mobile number')
+      return
+    }
+    setPhoneError('')
+    setIsSendingPhone(true)
+    try {
+      const started = await sendOtp({ value: phone })
+      onAttempt(started)
+      setOtp(['', '', '', '', '', ''])
+      setTimeout(() => {
+        inputRefs.current[0]?.focus()
+      }, 100)
+    } catch (err) {
+      if (err instanceof AuthError) {
+        applyError(err, "Couldn't send a code just now. Please try again.")
+      } else {
+        setPhoneError("Couldn't send a code just now. Please try again.")
+      }
+    } finally {
+      setIsSendingPhone(false)
     }
   }
 
@@ -443,11 +471,76 @@ export default function OtpModal({
               Done
             </Button>
           </div>
-        ) : isVerifying ? (
-          /* Premium Fintech Candlestick Verification Loading Screen */
-          <CandlestickLoader />
+        ) : !attempt ? (
+          /* Mobile Number Entry State (Step 1) */
+          <div className="relative z-10">
+            <div className="flex items-center gap-3">
+              <ShieldCheck className="h-5 w-5 text-white/80 shrink-0" strokeWidth={1.75} />
+              <p className="text-xs sm:text-sm text-white/80 leading-relaxed font-sans">
+                Enter your 10-digit mobile number to join the waitlist.
+              </p>
+            </div>
+
+            <form onSubmit={handlePhoneSubmit} className="mt-6 space-y-4">
+              <div className="relative flex-1 w-full flex items-center rounded-full border border-white/25 bg-black/60 backdrop-blur-2xl px-4 py-3.5 text-white transition-all duration-300 focus-within:border-white/60 focus-within:bg-black/80 shadow-[0_4px_24px_rgba(0,0,0,0.6)]">
+                <span className="text-white/90 font-mono text-sm font-medium mr-3 border-r border-white/20 pr-3 shrink-0">
+                  +91
+                </span>
+                <input
+                  type="tel"
+                  name="phone"
+                  id="modal-phone"
+                  aria-label="Mobile number"
+                  autoComplete="tel-national"
+                  inputMode="numeric"
+                  maxLength={10}
+                  value={phone}
+                  onChange={(e) => {
+                    onPhoneChange?.(e.target.value)
+                    setPhoneError('')
+                  }}
+                  placeholder="Enter 10-digit mobile number"
+                  className="w-full bg-transparent text-sm text-white placeholder-white/40 outline-none font-normal"
+                />
+              </div>
+
+              {phoneError && (
+                <p className="text-center text-xs font-medium text-rose-400 font-sans">
+                  {phoneError}
+                </p>
+              )}
+
+              <Button
+                type="submit"
+                size="lg"
+                fullWidth
+                disabled={isSendingPhone}
+                className="shadow-[0_0_24px_rgba(255,255,255,0.2)] hover:shadow-[0_0_32px_rgba(255,255,255,0.35)]"
+              >
+                {isSendingPhone ? 'Sending OTP...' : 'Get OTP'}
+              </Button>
+
+              {/* By continuing consent line */}
+              <p className="mt-4 text-center text-xs text-white/60 font-normal font-sans">
+                By continuing you agree to our{' '}
+                <a
+                  href="/terms"
+                  onClick={() => {
+                    sessionStorage.setItem('return_to_otp', 'true')
+                    if (phone) {
+                      sessionStorage.setItem('otp_phone', phone)
+                    }
+                  }}
+                  className="font-semibold text-white underline hover:text-white/80 transition-colors inline-block font-sans"
+                >
+                  Terms &amp; Privacy Policy
+                </a>
+                .
+              </p>
+            </form>
+          </div>
         ) : (
-          /* OTP Entry State */
+          /* OTP Entry State (Step 2) */
           <div className="relative z-10">
             {/* Header Subtitle with Target Phone */}
             <div className="flex items-center gap-3">
@@ -457,32 +550,24 @@ export default function OtpModal({
                 <span className="font-mono font-semibold text-white tracking-wide">
                   {formattedPhone}
                 </span>
-                {onEditPhone && (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      onClose()
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (onEditPhone) {
                       onEditPhone()
-                    }}
-                    className="ml-2 font-medium text-white/90 hover:text-white underline transition-colors"
-                  >
-                    Edit
-                  </button>
-                )}
+                    } else {
+                      onAttempt(null)
+                    }
+                  }}
+                  className="ml-2 font-medium text-white/90 hover:text-white underline transition-colors font-sans"
+                >
+                  Edit
+                </button>
               </p>
             </div>
 
             {/* OTP Input Boxes Form */}
             <form onSubmit={handleVerify} className="mt-6">
-              {/*
-                * The boxes share the row rather than each claiming a fixed
-                * width. At 44px apiece plus the gaps they needed 304px, which
-                * is wider than the card's interior on a small phone — measured,
-                * the sixth box was cut off at 320, 344 and 360 CSS pixels, so
-                * an iPhone SE or a compact Android could not see the digit it
-                * had just typed. They now flex down to fit and cap at 48px so
-                * they stop growing on a large screen.
-                */}
               <div className="flex items-center justify-center gap-1.5 sm:gap-3">
                 {otp.map((digit, idx) => (
                   <input
@@ -494,8 +579,6 @@ export default function OtpModal({
                     inputMode="numeric"
                     maxLength={6}
                     value={digit}
-                    // Five wrong codes locks the account; the contract asks for
-                    // the input to be dead until the lock lifts.
                     disabled={isLocked}
                     onChange={(e) => handleInputChange(idx, e.target.value)}
                     onKeyDown={(e) => handleKeyDown(idx, e)}

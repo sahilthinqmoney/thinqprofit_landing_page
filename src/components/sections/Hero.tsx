@@ -2,14 +2,7 @@ import { useState, useEffect } from 'react'
 import Container from '../ui/Container'
 import Button from '../ui/Button'
 import OtpModal from '../ui/OtpModal'
-import {
-  AuthError,
-  formatCountdown,
-  loadCatalogue,
-  renderMessage,
-  sendOtp,
-  type SendOtpResult,
-} from '../../lib/authService'
+import type { SendOtpResult } from '../../lib/authService'
 import { hero } from '../../data/hero'
 import MediaBackdrop from '../ui/MediaBackdrop'
 import { lqipFor } from '../../data/lqip'
@@ -70,15 +63,6 @@ export default function Hero() {
    * recomputed, or the reader is told "{countdown}" verbatim — which is exactly
    * what shipped before this.
    */
-  const [formErrorInfo, setFormErrorInfo] = useState<{
-    fallback: string
-    messageId?: string
-    params?: Record<string, string | number>
-    retryExpiresAt?: string
-  } | null>(null)
-  const [catalogue, setCatalogue] = useState<Awaited<ReturnType<typeof loadCatalogue>>>(null)
-  const [nowMs, setNowMs] = useState(() => Date.now())
-  const [isSending, setIsSending] = useState(false)
   /*
    * The live journey.
    *
@@ -136,85 +120,6 @@ export default function Hero() {
     }
   }, [])
 
-  /*
-   * A clock, but only while there is a deadline to count down.
-   *
-   * Gated on the error carrying `retryExpiresAt` so the hero is not running a
-   * timer for the entire visit — every other error here is static text, and the
-   * overwhelming majority of visitors never see one at all.
-   */
-  useEffect(() => {
-    if (!formErrorInfo?.retryExpiresAt) return
-    const id = setInterval(() => setNowMs(Date.now()), 500)
-    return () => clearInterval(id)
-  }, [formErrorInfo?.retryExpiresAt])
-
-  const formError = formErrorInfo
-    ? renderMessage(
-        catalogue,
-        { id: formErrorInfo.messageId, params: formErrorInfo.params },
-        formErrorInfo.fallback,
-        {
-          countdown: formatCountdown(
-            formErrorInfo.retryExpiresAt
-              ? Math.max(
-                  0,
-                  Math.ceil((new Date(formErrorInfo.retryExpiresAt).getTime() - nowMs) / 1000),
-                )
-              : 0,
-          ),
-        },
-      )
-    : ''
-
-  const handleWaitlistSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    const cleaned = phone.replace(/\D/g, '')
-    if (!cleaned) {
-      setFormErrorInfo({ fallback: 'Please enter your 10-digit mobile number' })
-      return
-    }
-    if (cleaned.length < 10) {
-      setFormErrorInfo({ fallback: 'Please enter a valid 10-digit mobile number' })
-      return
-    }
-    setFormErrorInfo(null)
-    setIsSending(true)
-    try {
-      /*
-       * The value goes as typed — the server normalises, so "+91 94517 40121"
-       * and "9451740121" are one number.
-       *
-       * The modal only opens once this succeeds. Opening first and sending
-       * behind it would show a code entry screen for a message that was never
-       * accepted, and DISPATCH_CAP or UPSTREAM_UNAVAILABLE would arrive with
-       * the reader already staring at six empty boxes.
-       */
-      const started = await sendOtp({ value: phone })
-      setAttempt(started)
-      setIsOtpOpen(true)
-    } catch (err) {
-      setCatalogue(await loadCatalogue())
-      setFormErrorInfo(
-        err instanceof AuthError
-          ? {
-              messageId: err.messageId,
-              params: err.params,
-              fallback:
-                err.code === 'NETWORK'
-                  ? "Couldn't reach the server. Check your connection and try again."
-                  : "Couldn't send a code just now. Please try again.",
-              // Fills {countdown} on the dispatch-cap and resend-limit messages.
-              retryExpiresAt: err.retryExpiresAt,
-            }
-          : { fallback: "Couldn't send a code just now. Please try again." },
-      )
-      setNowMs(Date.now())
-    } finally {
-      setIsSending(false)
-    }
-  }
-
   return (
     <section
       id="hero"
@@ -225,18 +130,15 @@ export default function Hero() {
         isOpen={isOtpOpen}
         phone={phone}
         attempt={attempt}
-        // A resend replaces the journey's deadlines, so the new attempt comes
-        // back up here rather than being held inside the modal.
         onAttempt={setAttempt}
+        onPhoneChange={setPhone}
         onClose={() => setIsOtpOpen(false)}
         onSuccess={() => {
           setIsOtpOpen(false)
           setAttempt(null)
         }}
         onEditPhone={() => {
-          setIsOtpOpen(false)
           setAttempt(null)
-          document.getElementById('hero-phone')?.focus()
         }}
       />
       {/* Full-bleed background media layer */}
@@ -332,79 +234,19 @@ export default function Hero() {
                 <span className="text-white/70">{hero.offerNote}</span>
               </p>
 
-              {/* Waitlist Mobile Input Form */}
-              <div className="mt-8 sm:mt-10 flex flex-col items-center justify-center max-w-md mx-auto w-full">
-                {/*
-                  * Field and CTA share one row at every width.
-                  *
-                  * The two were stacked below 640px. Side by side they have to
-                  * survive a 320px phone, so the field takes the remaining
-                  * space with min-w-0 — without it a flex child refuses to
-                  * shrink past its content and pushes the button off the edge —
-                  * and the button holds its natural width with shrink-0.
-                  * Padding and the gap tighten on small screens to buy the room.
-                  */}
-                <form
-                  onSubmit={handleWaitlistSubmit}
-                  className="w-full flex flex-row items-center gap-2 sm:gap-3"
+              {/* Hero Waitlist Primary CTA Button */}
+              <div className="mt-8 sm:mt-10 flex items-center justify-center w-full mx-auto text-center">
+                <Button
+                  type="button"
+                  onClick={() => {
+                    setAttempt(null)
+                    setIsOtpOpen(true)
+                  }}
+                  size="lg"
+                  className="w-auto shrink-0 shadow-[0_0_24px_rgba(255,255,255,0.2)] hover:shadow-[0_0_32px_rgba(255,255,255,0.35)] transition-all duration-300"
                 >
-                  <div className="relative flex-1 min-w-0 flex items-center rounded-full border border-white/25 bg-black/60 backdrop-blur-2xl px-3.5 sm:px-5 py-3.5 text-white transition-all duration-300 focus-within:border-white/60 focus-within:bg-black/80 shadow-[0_4px_24px_rgba(0,0,0,0.6)]">
-                    <span className="text-white/90 font-mono text-sm font-medium mr-2 sm:mr-3 border-r border-white/20 pr-2 sm:pr-3 shrink-0">
-                      +91
-                    </span>
-                    <input
-                      type="tel"
-                      name="phone"
-                      id="hero-phone"
-                      aria-label="Mobile number"
-                      autoComplete="tel-national"
-                      inputMode="numeric"
-                      maxLength={10}
-                      value={phone}
-                      onChange={(e) => {
-                        setPhone(e.target.value)
-                        setFormErrorInfo(null)
-                      }}
-                      // Short enough to survive the narrow field a shared row
-                      // leaves on a small phone. The +91 prefix and the label
-                      // already say what belongs here; a longer string only
-                      // clips mid-word.
-                      placeholder="Mobile number"
-                      className="w-full min-w-0 bg-transparent text-sm text-white placeholder-white/40 outline-none font-normal"
-                    />
-                  </div>
-                  <Button
-                    type="submit"
-                    size="lg"
-                    // A second tap while the first send is in flight would
-                    // start a second journey and burn a dispatch against the
-                    // number's hourly cap.
-                    disabled={isSending}
-                    className="w-auto shrink-0 shadow-[0_0_24px_rgba(255,255,255,0.2)] hover:shadow-[0_0_32px_rgba(255,255,255,0.35)] transition-all duration-300"
-                  >
-                    {/*
-                      * Two labels rather than one measured at runtime: this
-                      * page is prerendered and hydrated, and a label chosen
-                      * from viewport width would differ between the server
-                      * render and the browser's first pass. In React 19 that
-                      * mismatch discards the whole tree, so the choice is made
-                      * in CSS where it cannot disagree.
-                      */}
-                    {isSending ? (
-                      'Sending…'
-                    ) : (
-                      <>
-                        <span className="sm:hidden">Join</span>
-                        <span className="hidden sm:inline">Join the waitlist</span>
-                      </>
-                    )}
-                  </Button>
-                </form>
-                {formError && (
-                  <p className="mt-2.5 text-xs font-medium text-rose-400">
-                    {formError}
-                  </p>
-                )}
+                  Join the waitlist
+                </Button>
               </div>
 
               {/* Trust Badge & Disclosures */}
