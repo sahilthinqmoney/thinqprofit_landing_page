@@ -500,7 +500,21 @@ export default function OtpModal({
                     setPhoneError('')
                   }}
                   placeholder="Enter 10-digit mobile number"
-                  className="w-full bg-transparent text-sm text-white placeholder-white/40 outline-none font-normal"
+                  /*
+                   * 16px, and not for looks: iOS Safari zooms the page in when
+                   * it focuses a field whose font is under 16px, and leaves the
+                   * reader zoomed afterwards. This was text-sm — 14px — so
+                   * tapping it jumped the whole layout.
+                   *
+                   * The other way to stop that is `maximum-scale=1` on the
+                   * viewport meta, which is worse: it disables pinch-zoom for
+                   * the entire site and fails WCAG 1.4.4. Clearing the
+                   * threshold costs two pixels of type instead.
+                   *
+                   * The code boxes below are already text-lg, so they never had
+                   * the problem. Any field added here needs 16px or more.
+                   */
+                  className="w-full bg-transparent text-base text-white placeholder-white/40 outline-none font-normal"
                 />
               </div>
 
