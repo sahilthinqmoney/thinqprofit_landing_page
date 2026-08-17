@@ -533,7 +533,7 @@ export default function OtpModal({
                   }}
                   className="font-semibold text-white underline hover:text-white/80 transition-colors inline-block font-sans"
                 >
-                  Terms &amp; Privacy
+                  T&amp;C
                 </a>
                 .
               </p>
@@ -649,7 +649,7 @@ export default function OtpModal({
                   }}
                   className="font-semibold text-white underline hover:text-white/80 transition-colors inline-block font-sans"
                 >
-                  Terms &amp; Privacy
+                  T&amp;C
                 </a>
                 .
               </p>
