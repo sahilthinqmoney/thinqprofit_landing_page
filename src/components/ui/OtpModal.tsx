@@ -591,6 +591,30 @@ export default function OtpModal({
                     }}
                     type="text"
                     inputMode="numeric"
+                    /*
+                     * This is what makes iOS offer the code.
+                     *
+                     * When a field declares `one-time-code`, iOS reads the
+                     * arriving SMS and puts the code on the QuickType bar above
+                     * the keyboard; Android's autofill and Safari on macOS use
+                     * the same signal. Without it the reader has to leave the
+                     * page, open Messages, memorise six digits and come back —
+                     * which is where a waitlist signup gets abandoned.
+                     *
+                     * It sits on all six boxes rather than only the first,
+                     * because the reader can focus any of them and iOS offers
+                     * the suggestion for whichever has focus.
+                     *
+                     * Filling it puts the WHOLE code into one field, not one
+                     * digit per box. That already works: maxLength is 6, not 1,
+                     * and handleInputChange spreads a multi-character value
+                     * across the boxes and then verifies. A maxLength of 1 here
+                     * would silently truncate the fill to a single digit, which
+                     * is the usual way this feature appears to do nothing.
+                     */
+                    autoComplete="one-time-code"
+                    autoCorrect="off"
+                    spellCheck={false}
                     maxLength={6}
                     value={digit}
                     disabled={isLocked}
