@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { FileText, Lock, DollarSign, ArrowLeft, AlertTriangle, LifeBuoy, Scale, Building2, QrCode, FileSpreadsheet, Layers, Tag, ShieldCheck, Copy, Check } from 'lucide-react'
+import { FileText, Lock, DollarSign, ArrowLeft, AlertTriangle, LifeBuoy, Scale, Building2, FileSpreadsheet, Layers, Tag, ShieldCheck } from 'lucide-react'
 import ThinqMark from '../ui/ThinqMark'
 import Container from '../ui/Container'
 
@@ -17,16 +17,7 @@ export default function TermsPage() {
     | 'complaints'
     | 'cookies'
   >('bank')
-  const [showQrModal, setShowQrModal] = useState(false)
-  const [copiedUpi, setCopiedUpi] = useState<string | null>(null)
 
-  const handleCopyUpi = (upiId: string) => {
-    navigator.clipboard.writeText(upiId)
-    setCopiedUpi(upiId)
-    setTimeout(() => {
-      setCopiedUpi(null)
-    }, 2000)
-  }
 
   const handleBackToHome = (e: React.MouseEvent) => {
     e.preventDefault()
@@ -268,7 +259,7 @@ export default function TermsPage() {
                 <div className="space-y-8 animate-in fade-in duration-300">
                   <div className="border-b border-white/10 pb-6">
                     <h2 className="text-xl sm:text-2xl font-bold text-white tracking-tight">
-                      Upstreaming Client Bank Nodal Account (USCNB) & UPI Details
+                      Upstreaming Client Bank Nodal Account (USCNB)
                     </h2>
                   </div>
 
@@ -291,71 +282,6 @@ export default function TermsPage() {
                         <span className="font-mono font-bold text-white text-sm sm:text-base">HDFC0000060</span>
                       </div>
                     </div>
-                  </div>
-
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
-                    {/* Broking UPI Card with Copy Icon */}
-                    <div className="rounded-2xl border border-white/15 bg-white/[0.03] p-4 flex items-center justify-between gap-3">
-                      <div className="space-y-1">
-                        <span className="text-white/50 text-xs block">BROKING UPI HANDLE</span>
-                        <span className="font-mono font-bold text-white text-sm sm:text-base block">moneylogix.brk@validhdfc</span>
-                      </div>
-                      <button
-                        type="button"
-                        onClick={() => handleCopyUpi('moneylogix.brk@validhdfc')}
-                        className="inline-flex items-center gap-1.5 text-xs font-semibold text-white/80 hover:text-white transition-all shrink-0"
-                        title="Copy UPI ID"
-                      >
-                        {copiedUpi === 'moneylogix.brk@validhdfc' ? (
-                          <>
-                            <Check className="h-4 w-4 text-emerald-400" />
-                            <span className="text-emerald-400 font-bold">Copied!</span>
-                          </>
-                        ) : (
-                          <>
-                            <Copy className="h-4 w-4" />
-                            <span>Copy</span>
-                          </>
-                        )}
-                      </button>
-                    </div>
-
-                    {/* DP UPI Card with Copy Icon */}
-                    <div className="rounded-2xl border border-white/15 bg-white/[0.03] p-4 flex items-center justify-between gap-3">
-                      <div className="space-y-1">
-                        <span className="text-white/50 text-xs block">DP UPI HANDLE</span>
-                        <span className="font-mono font-bold text-white text-sm sm:text-base block">moneylogix.dp@validhdfc</span>
-                      </div>
-                      <button
-                        type="button"
-                        onClick={() => handleCopyUpi('moneylogix.dp@validhdfc')}
-                        className="inline-flex items-center gap-1.5 text-xs font-semibold text-white/80 hover:text-white transition-all shrink-0"
-                        title="Copy UPI ID"
-                      >
-                        {copiedUpi === 'moneylogix.dp@validhdfc' ? (
-                          <>
-                            <Check className="h-4 w-4 text-emerald-400" />
-                            <span className="text-emerald-400 font-bold">Copied!</span>
-                          </>
-                        ) : (
-                          <>
-                            <Copy className="h-4 w-4" />
-                            <span>Copy</span>
-                          </>
-                        )}
-                      </button>
-                    </div>
-                  </div>
-
-                  <div className="pt-4 text-center">
-                    <button
-                      type="button"
-                      onClick={() => setShowQrModal(true)}
-                      className="inline-flex items-center gap-2 rounded-xl bg-white text-black px-4 py-2.5 text-xs font-bold hover:bg-white/90 transition-all shadow-lg"
-                    >
-                      <QrCode className="h-4 w-4" />
-                      Click here to view UPI QR code
-                    </button>
                   </div>
                 </div>
               )}
@@ -1513,69 +1439,6 @@ export default function TermsPage() {
       </main>
 
       {/* Standalone QR Code Modal Dialog with Copy Button */}
-      {showQrModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 isolate">
-          <div
-            className="absolute inset-0 bg-black/80 backdrop-blur-md"
-            onClick={() => setShowQrModal(false)}
-          />
-          <div className="relative w-full max-w-sm overflow-hidden rounded-3xl border border-white/20 bg-[#0c0c0e] p-6 text-center shadow-2xl z-10 animate-in zoom-in-95 duration-200">
-            <button
-              type="button"
-              onClick={() => setShowQrModal(false)}
-              className="absolute right-4 top-4 rounded-full p-1.5 text-white/60 hover:bg-white/10 hover:text-white transition-colors"
-            >
-              ✕
-            </button>
-            <h3 className="font-display text-lg font-bold text-white mb-1">
-              Official UPI QR Code
-            </h3>
-            <p className="text-xs text-white/60 mb-4">
-              Money Logix Securities Pvt Ltd
-            </p>
-            <div className="rounded-2xl border border-white/15 bg-white p-3 inline-block shadow-lg">
-              <img
-                src="/upi-qr.jpg"
-                alt="Money Logix Securities Pvt Ltd UPI QR Code"
-                className="w-60 h-60 object-contain rounded-xl"
-              />
-            </div>
-
-            {/* UPI ID Pill Box with Copy Icon Button */}
-            <div className="mt-4 flex items-center justify-between gap-2 rounded-xl border border-white/15 bg-white/5 p-2.5 text-xs text-white">
-              <span className="font-mono font-medium text-white/90 truncate pl-1">
-                moneylogix.brk@validhdfc
-              </span>
-              <button
-                type="button"
-                onClick={() => handleCopyUpi('moneylogix.brk@validhdfc')}
-                className="inline-flex items-center gap-1.5 text-xs font-semibold text-white/80 hover:text-white transition-all shrink-0"
-              >
-                {copiedUpi === 'moneylogix.brk@validhdfc' ? (
-                  <>
-                    <Check className="h-3.5 w-3.5 text-emerald-400" />
-                    <span className="text-emerald-400 font-bold">Copied!</span>
-                  </>
-                ) : (
-                  <>
-                    <Copy className="h-3.5 w-3.5" />
-                    <span>Copy</span>
-                  </>
-                )}
-              </button>
-            </div>
-
-            <button
-              type="button"
-              onClick={() => setShowQrModal(false)}
-              className="mt-5 w-full rounded-xl bg-white text-black py-2.5 text-xs font-bold hover:bg-white/90 transition-colors"
-            >
-              Close
-            </button>
-          </div>
-        </div>
-      )}
-
       {/* Footer */}
       <footer className="border-t border-white/10 py-8 bg-[#040405] text-xs text-white/50">
         <Container>

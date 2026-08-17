@@ -1,4 +1,3 @@
-import { Copy, Check } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import ChromaticWordmark from '../ui/ChromaticWordmark'
 import Container from '../ui/Container'
@@ -45,16 +44,7 @@ function WithBlanks({ text }: { text: string }) {
 
 export default function Footer() {
   const year = useCopyrightYear()
-  const [showQrModal, setShowQrModal] = useState(false)
-  const [copiedUpi, setCopiedUpi] = useState<string | null>(null)
 
-  const handleCopyUpi = (upiId: string) => {
-    navigator.clipboard.writeText(upiId)
-    setCopiedUpi(upiId)
-    setTimeout(() => {
-      setCopiedUpi(null)
-    }, 2000)
-  }
 
   return (
     <footer id="footer" className="border-t border-border-soft bg-transparent text-fg-muted">
@@ -77,51 +67,11 @@ export default function Footer() {
                       line.isPlaceholder ? 'text-white/40 italic font-mono' : 'text-fg-muted'
                     }`}
                   >
-                    {line.value.split('\n').map((str, idx) => {
-                      const isBroking = str.includes('moneylogix.brk@validhdfc')
-                      const isDp = str.includes('moneylogix.dp@validhdfc')
-                      const upiId = isBroking
-                        ? 'moneylogix.brk@validhdfc'
-                        : isDp
-                        ? 'moneylogix.dp@validhdfc'
-                        : null
-
-                      return (
-                        <div key={idx} className="flex items-center justify-between gap-2 my-0.5">
-                          <span>
-                            <WithBlanks text={str} />
-                          </span>
-                          {upiId && (
-                            <button
-                              type="button"
-                              onClick={() => handleCopyUpi(upiId)}
-                              className="inline-flex items-center gap-1 text-[10px] font-semibold text-white/80 hover:text-white transition-all shrink-0"
-                            >
-                              {copiedUpi === upiId ? (
-                                <>
-                                  <Check className="h-3 w-3 text-emerald-400" />
-                                  <span className="text-emerald-400">Copied!</span>
-                                </>
-                              ) : (
-                                <>
-                                  <Copy className="h-3 w-3" />
-                                  <span>Copy</span>
-                                </>
-                              )}
-                            </button>
-                          )}
-                        </div>
-                      )
-                    })}
-                    {line.label.includes('UPI Handles') && (
-                      <button
-                        type="button"
-                        onClick={() => setShowQrModal(true)}
-                        className="mt-2 inline-flex items-center gap-1.5 rounded-lg bg-white/10 px-3 py-1.5 text-xs font-semibold text-white hover:bg-white/20 transition-all border border-white/15"
-                      >
-                        Click here to view UPI QR code ↗
-                      </button>
-                    )}
+                    {line.value.split('\n').map((str, idx) => (
+                      <span key={idx} className="block my-0.5">
+                        <WithBlanks text={str} />
+                      </span>
+                    ))}
                   </dd>
                 </div>
               ))}
@@ -134,72 +84,6 @@ export default function Footer() {
           </div>
         </Container>
       </div>
-
-      {/* UPI QR Code Modal Dialog */}
-      {showQrModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 isolate">
-          {/* Backdrop */}
-          <div
-            className="absolute inset-0 bg-black/80 backdrop-blur-md"
-            onClick={() => setShowQrModal(false)}
-          />
-          {/* Modal Container */}
-          <div className="relative w-full max-w-sm overflow-hidden rounded-3xl border border-white/20 bg-[#0c0c0e] p-6 text-center shadow-2xl z-10 animate-in zoom-in-95 duration-200">
-            <button
-              type="button"
-              onClick={() => setShowQrModal(false)}
-              className="absolute right-4 top-4 rounded-full p-1.5 text-white/60 hover:bg-white/10 hover:text-white transition-colors"
-            >
-              ✕
-            </button>
-            <h3 className="font-display text-lg font-bold text-white mb-1">
-              Official UPI QR Code
-            </h3>
-            <p className="text-xs text-white/60 mb-4">
-              Money Logix Securities Pvt Ltd
-            </p>
-            <div className="rounded-2xl border border-white/15 bg-white p-3 inline-block shadow-lg">
-              <img
-                src="/upi-qr.jpg"
-                alt="Money Logix Securities Pvt Ltd UPI QR Code"
-                className="w-56 h-56 object-contain rounded-xl"
-              />
-            </div>
-            
-            {/* Copyable UPI Handle Pill in Footer Modal */}
-            <div className="mt-4 flex items-center justify-between gap-2 rounded-xl border border-white/15 bg-white/5 p-2.5 text-xs text-white">
-              <span className="font-mono font-medium text-white/90 truncate pl-1">
-                moneylogix.brk@validhdfc
-              </span>
-              <button
-                type="button"
-                onClick={() => handleCopyUpi('moneylogix.brk@validhdfc')}
-                className="inline-flex items-center gap-1.5 text-xs font-semibold text-white/80 hover:text-white transition-all shrink-0"
-              >
-                {copiedUpi === 'moneylogix.brk@validhdfc' ? (
-                  <>
-                    <Check className="h-3.5 w-3.5 text-emerald-400" />
-                    <span className="text-emerald-400 font-bold">Copied!</span>
-                  </>
-                ) : (
-                  <>
-                    <Copy className="h-3.5 w-3.5" />
-                    <span>Copy</span>
-                  </>
-                )}
-              </button>
-            </div>
-
-            <button
-              type="button"
-              onClick={() => setShowQrModal(false)}
-              className="mt-5 w-full rounded-xl bg-white text-black py-2.5 text-xs font-bold hover:bg-white/90 transition-colors"
-            >
-              Close
-            </button>
-          </div>
-        </div>
-      )}
 
       {/* ------------------------------------------------------------------ */}
       {/* 2. Attention Investors & Safeguards                                */}

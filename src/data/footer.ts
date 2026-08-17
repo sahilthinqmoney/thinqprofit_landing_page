@@ -30,8 +30,6 @@ export const entityInfo = {
   uscnbBankName: 'HDFC BANK LTD',
   uscnbAccountNo: '00600340039678',
   uscnbIfscCode: 'HDFC0000060',
-  brokingUpi: 'moneylogix.brk@validhdfc',
-  dpUpi: 'moneylogix.dp@validhdfc',
 }
 
 export const derivativesRiskDisclosure = {
@@ -71,11 +69,6 @@ export const registrationDetails: RegistrationDetail[] = [
     label: 'Upstreaming Client Bank Nodal Account (USCNB)',
     value:
       'ACCOUNT NAME: MONEY LOGIX SECURITIES PVT LTD - USCNB A/C\nBANK NAME: HDFC BANK LTD\nA/C NO: 00600340039678 | IFSC CODE: HDFC0000060',
-  },
-  {
-    label: 'UPI Handles for Payments',
-    value:
-      'Broking UPI: moneylogix.brk@validhdfc\nDP UPI: moneylogix.dp@validhdfc',
   },
   {
     label: 'Grievance Redressal',
