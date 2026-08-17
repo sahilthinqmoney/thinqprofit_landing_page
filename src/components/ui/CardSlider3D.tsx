@@ -44,10 +44,66 @@ export default function CardSlider3D({
   // Repeat items 3 times for seamless infinite looping
   const triplicatedItems = [...items, ...items, ...items]
 
+  /*
+   * Whether the rail is close enough to be worth loading pictures for.
+   *
+   * `loading="lazy"` is not enough on its own here. It is a hint with a
+   * browser-chosen threshold, and Chromium's is generous — measured, this
+   * section sits 697px below the fold on a phone and Chromium fetched three
+   * card images 84ms into the first paint without any scrolling. WebKit's
+   * threshold is tighter and withheld them, which is why this looked fixed
+   * from one engine only.
+   *
+   * An observer sets the distance explicitly, so both engines agree. The
+   * pictures are the whole reason this matters: the rail triplicates its items
+   * for the infinite loop, so fifteen elements hang off five files, and on a
+   * phone they were decoding while Safari was still carrying the hero's video.
+   *
+   * Starts false on both sides of hydration and is only ever turned on by an
+   * effect, so the prerendered markup and the browser's first pass agree.
+   */
+  const [nearViewport, setNearViewport] = useState(false)
+  useEffect(() => {
+    const element = containerRef.current
+    if (!element) return
+    // No IntersectionObserver: show the pictures rather than withhold them
+    // forever. A missing API should not cost the reader the content.
+    if (typeof IntersectionObserver === 'undefined') {
+      setNearViewport(true)
+      return
+    }
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (!entries.some((entry) => entry.isIntersecting)) return
+        setNearViewport(true)
+        observer.disconnect()
+      },
+      { rootMargin: '300px' },
+    )
+    observer.observe(element)
+    return () => observer.disconnect()
+  }, [])
+
   useEffect(() => {
     const container = containerRef.current
     const track = trackRef.current
     if (!container || !track) return
+
+    /*
+     * Only animate while the rail is actually on screen.
+     *
+     * This loop measures fifteen cards and writes transform, opacity, z-index,
+     * box-shadow and a filter on each, every frame, for as long as the page is
+     * open — including the whole time the reader is up in the hero and this is
+     * nowhere near the viewport. On a phone that is continuous main-thread and
+     * compositor work competing with video decode, and mobile Safari kills a
+     * web process that will not leave it alone.
+     *
+     * `nearViewport` already gates the pictures; the same signal stops the
+     * frames. Position is held in refs, so the rail resumes exactly where it
+     * left off rather than jumping.
+     */
+    if (!nearViewport) return
 
     let animationFrameId: number
 
@@ -184,7 +240,7 @@ export default function CardSlider3D({
     return () => {
       cancelAnimationFrame(animationFrameId)
     }
-  }, [direction])
+  }, [direction, nearViewport])
 
   // Drag Handlers
   const handlePointerDown = (e: React.PointerEvent) => {
@@ -234,45 +290,6 @@ export default function CardSlider3D({
     }
   }
 
-  /*
-   * Whether the rail is close enough to be worth loading pictures for.
-   *
-   * `loading="lazy"` is not enough on its own here. It is a hint with a
-   * browser-chosen threshold, and Chromium's is generous — measured, this
-   * section sits 697px below the fold on a phone and Chromium fetched three
-   * card images 84ms into the first paint without any scrolling. WebKit's
-   * threshold is tighter and withheld them, which is why this looked fixed
-   * from one engine only.
-   *
-   * An observer sets the distance explicitly, so both engines agree. The
-   * pictures are the whole reason this matters: the rail triplicates its items
-   * for the infinite loop, so fifteen elements hang off five files, and on a
-   * phone they were decoding while Safari was still carrying the hero's video.
-   *
-   * Starts false on both sides of hydration and is only ever turned on by an
-   * effect, so the prerendered markup and the browser's first pass agree.
-   */
-  const [nearViewport, setNearViewport] = useState(false)
-  useEffect(() => {
-    const element = containerRef.current
-    if (!element) return
-    // No IntersectionObserver: show the pictures rather than withhold them
-    // forever. A missing API should not cost the reader the content.
-    if (typeof IntersectionObserver === 'undefined') {
-      setNearViewport(true)
-      return
-    }
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (!entries.some((entry) => entry.isIntersecting)) return
-        setNearViewport(true)
-        observer.disconnect()
-      },
-      { rootMargin: '300px' },
-    )
-    observer.observe(element)
-    return () => observer.disconnect()
-  }, [])
 
   return (
     <div

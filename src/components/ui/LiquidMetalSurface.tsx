@@ -110,6 +110,29 @@ export default function LiquidMetalSurface({
     const host = hostRef.current
     if (!host) return
 
+    /*
+     * No shader on a phone.
+     *
+     * Every one of these is a live WebGL context driving its own animation
+     * frame for as long as the page is open, and there are two on this page at
+     * rest. On a desktop that is a decorative rim. On iOS it is sustained GPU
+     * work alongside the hero's video decode, and mobile Safari answers by
+     * killing the web process — the reader sees "a problem repeatedly occurred"
+     * and a reload loop, which is what was reported on iOS 26.6.
+     *
+     * The fallback here is not a hole. `.surface-copper` sits underneath, so
+     * the button keeps a static polished edge: exactly the state this component
+     * already degrades to when a context is refused or the engine is too old,
+     * which is documented in Button as the designed outcome rather than a
+     * failure. A phone gets the still version of the same ring.
+     *
+     * Checked at mount rather than tracked live: a viewport crossing 768px
+     * mid-session is a rotation or a desktop window drag, and remounting a GL
+     * context on a resize is a worse trade than leaving whichever version is
+     * already drawn.
+     */
+    if (window.matchMedia('(max-width: 768px)').matches) return
+
     const motion = window.matchMedia('(prefers-reduced-motion: reduce)')
     reducedRef.current = motion.matches
 
