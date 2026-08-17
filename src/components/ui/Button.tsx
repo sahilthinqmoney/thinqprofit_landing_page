@@ -267,7 +267,7 @@ export default function Button({
 
   if (href) {
     return (
-      <a href={href} className={classes} aria-label={ariaLabel} {...pointerHandlers}>
+      <a href={href} onClick={onClick} className={classes} aria-label={ariaLabel} {...pointerHandlers}>
         {content}
       </a>
     )

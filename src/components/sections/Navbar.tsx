@@ -129,10 +129,10 @@ export default function Navbar() {
               }`}
             >
               <Button
-                href="#hero"
-                onClick={(e) => {
-                  e?.preventDefault()
+                type="button"
+                onClick={() => {
                   window.scrollTo({ top: 0, behavior: 'smooth' })
+                  window.dispatchEvent(new CustomEvent('open-waitlist-modal'))
                 }}
                 variant="primary"
                 size="sm"

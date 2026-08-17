@@ -120,6 +120,17 @@ export default function Hero() {
     }
   }, [])
 
+  useEffect(() => {
+    const handleOpenModal = () => {
+      setAttempt(null)
+      setIsOtpOpen(true)
+    }
+    window.addEventListener('open-waitlist-modal', handleOpenModal)
+    return () => {
+      window.removeEventListener('open-waitlist-modal', handleOpenModal)
+    }
+  }, [])
+
   return (
     <section
       id="hero"
