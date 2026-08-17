@@ -167,10 +167,25 @@ export default function CardSlider3D({
         const baseOpacity = isMobile ? 0.82 : 0.65
         const scale = baseScale + centerFactor * (1 - baseScale)
         const opacity = baseOpacity + centerFactor * (1 - baseOpacity)
-        const translateZ = centerFactor * (isMobile ? 35 : 80)
+        const translateZ = centerFactor * (isMobile ? 0 : 80)
         const zIndex = Math.round(centerFactor * 100)
 
-        card.style.transform = `perspective(1200px) translateZ(${translateZ}px) scale(${scale})`
+        /*
+         * 2D on phones, 3D above them.
+         *
+         * A 3D transform gives every card its own compositing layer, and at
+         * DPR 3 a card's backing store is about 4 MB — fifteen of those, plus
+         * the filters below, is over a hundred megabytes of GPU memory built up
+         * as the reader scrolls toward this section. That is what was crashing
+         * mobile Safari mid-scroll rather than at load.
+         *
+         * The depth it buys on a phone was 35px of translateZ against a 1200px
+         * perspective: about 3% of scale, which the scale factor already
+         * applies directly. So the look survives and the layers do not.
+         */
+        card.style.transform = isMobile
+          ? `scale(${scale})`
+          : `perspective(1200px) translateZ(${translateZ}px) scale(${scale})`
         card.style.opacity = `${opacity}`
         card.style.zIndex = `${zIndex}`
 
@@ -206,7 +221,17 @@ export default function CardSlider3D({
           const lift = (0.95 + centerFactor * 0.15).toFixed(2)
           const glowRadius = Math.round(centerFactor * 16)
           const glowAlpha = (centerFactor * 0.45).toFixed(2)
-          const filter = `grayscale(${grey}) brightness(${lift}) drop-shadow(0px 2px ${glowRadius}px rgba(56, 189, 248, ${glowAlpha}))`
+          /*
+           * The halo is desktop-only. `drop-shadow` is a filter, so it promotes
+           * the image to its own layer on top of the card's — a second few
+           * megabytes per card at DPR 3, rewritten every frame. The cards keep
+           * their grey-to-colour resolve on a phone, which is the part that
+           * carries meaning; the glow is decoration bought at the price of the
+           * page staying up.
+           */
+          const filter = isMobile
+            ? `grayscale(${grey}) brightness(${lift})`
+            : `grayscale(${grey}) brightness(${lift}) drop-shadow(0px 2px ${glowRadius}px rgba(56, 189, 248, ${glowAlpha}))`
           if (picture.dataset.focus !== filter) {
             picture.style.filter = filter
             picture.dataset.focus = filter
@@ -317,12 +342,28 @@ export default function CardSlider3D({
             <div
               key={`${item.id}-${idx}`}
               data-slider-card
-              className="group relative flex shrink-0 flex-col justify-between rounded-2xl bg-[#09090b] p-5 sm:p-6 backdrop-blur-xl transition-shadow duration-300 ease-out overflow-hidden min-h-[380px] sm:min-h-[420px]"
-              style={{
-                width: cardWidth,
-                willChange: 'transform, opacity',
-                transformStyle: 'preserve-3d',
-              }}
+              className="group relative flex shrink-0 flex-col justify-between rounded-2xl bg-[#09090b] p-5 sm:p-6 transition-shadow duration-300 ease-out overflow-hidden min-h-[380px] sm:min-h-[420px]"
+              /*
+               * No `will-change`, and no `preserve-3d`.
+               *
+               * `will-change: transform, opacity` is not a free hint — it tells
+               * the browser to promote the element to its own compositing layer
+               * and KEEP it there. On fifteen cards that guaranteed fifteen
+               * permanent layers, each roughly 4 MB of backing store at DPR 3.
+               * It also bought nothing: this transform is rewritten every frame
+               * while the rail is on screen, so the browser promotes it on its
+               * own merits anyway, and a standing hint only removes its ability
+               * to release the layer again.
+               *
+               * `preserve-3d` governs whether a card's CHILDREN share its 3D
+               * space, and none of them use a 3D transform. The card's own depth
+               * comes from the container's `perspective`, so this established a
+               * 3D rendering context for nothing.
+               *
+               * With the 2D transform on phones, this is what stops mobile
+               * Safari dying as the reader scrolls into the rail.
+               */
+              style={{ width: cardWidth }}
             >
               {/* Inner border overlay layer */}
               <div className="pointer-events-none absolute inset-0 rounded-2xl ring-1 ring-inset ring-white/20 group-hover:ring-white/40 transition-all duration-300 z-20" />
