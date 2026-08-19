@@ -3,11 +3,20 @@
 /**
  * Build-time configuration.
  *
- * `VITE_AUTH_BASE_URL` points at authService. The default in src/lib/
- * authService.ts is a developer's own machine, so every environment but local
- * development has to set this, and its origin has to be on the service's CORS
- * allowlist — the calls send credentials, which a wildcard origin cannot
- * satisfy.
+ * `VITE_AUTH_BASE_URL` overrides where authService is reached, and PRODUCTION
+ * MUST LEAVE IT UNSET. The default in src/lib/authService.ts is the relative
+ * `/api/auth/v1`, which is the only arrangement that works: `tq_csrf` is set
+ * host-only, so a page can read the token it has to echo in `X-Tq-Csrf` only
+ * when the service answers on the origin serving that page.
+ *
+ * This comment previously said the opposite — that every environment but local
+ * development had to set it. Following that produced a build pointing at
+ * https://api.thinq.co, a token the page could not read, and a waitlist where
+ * every submission was refused. See DEPLOY.md.
+ *
+ * Use it to aim a LOCAL build at a remote service, from `.env.local`, and only
+ * where that service's CORS allowlist admits the origin — the calls send
+ * credentials, which a wildcard origin cannot satisfy.
  */
 interface ImportMetaEnv {
   readonly VITE_AUTH_BASE_URL?: string
