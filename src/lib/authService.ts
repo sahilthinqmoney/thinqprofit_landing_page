@@ -220,7 +220,32 @@ async function request<T>(
   if (method === 'POST') {
     await ensureCsrfToken()
     const csrf = readCsrfToken()
-    if (csrf) headers['X-Tq-Csrf'] = csrf
+    /*
+     * REFUSED HERE, not at the server.
+     *
+     * This used to be `if (csrf)`, which silently omitted the header when the
+     * token could not be read. The write then failed at authService with
+     * VALIDATION_FAILED and no message id, which the reader sees as nothing at
+     * all — and the cause is not in the request that failed, it is in the base
+     * URL used to make it.
+     *
+     * `tq_csrf` is host-only, so `document.cookie` can only see it when the API
+     * answers on the origin serving this page. An absolute AUTH_BASE pointing at
+     * another host makes the token permanently invisible and every POST
+     * permanently refused. Naming that here costs one branch and turns a
+     * server-side mystery into a console line that says which setting is wrong.
+     */
+    if (!csrf) {
+      throw new AuthError({
+        code: 'INTERNAL',
+        detail:
+          `tq_csrf is unreadable from this origin, so X-Tq-Csrf cannot be sent. ` +
+          `AUTH_BASE is "${AUTH_BASE}" — the cookie is host-only, so authService has to ` +
+          `answer on the origin serving this page. In production that means leaving ` +
+          `VITE_AUTH_BASE_URL unset so the relative default is used.`,
+      })
+    }
+    headers['X-Tq-Csrf'] = csrf
     if (init.idempotencyKey) headers['Idempotency-Key'] = init.idempotencyKey
   }
 
@@ -275,7 +300,27 @@ async function request<T>(
     if (err instanceof AuthError && err.code !== 'NETWORK') {
       throw err
     }
-    // Fallback gracefully to mock backend mode if API server is not running
+    /*
+     * THE MOCK IS A DEVELOPMENT AFFORDANCE AND MUST NOT REACH A BUILD.
+     *
+     * Everything below answers an unreachable service with an invented success:
+     * /otp/send returns a mock attempt id, /otp/verify returns REGISTERED. In
+     * development, against no backend, that is the point. In production it means
+     * a visitor whose request never arrived — CORS refusal, DNS failure, origin
+     * down — is told they have joined the waitlist. No code was sent, no account
+     * exists, and nothing anywhere records that it happened.
+     *
+     * import.meta.env.DEV is true under `vite dev` and false in every build, so
+     * the branch is also removed from the bundle rather than merely skipped.
+     */
+    if (!import.meta.env.DEV) {
+      throw err instanceof AuthError
+        ? err
+        : new AuthError({
+            code: 'NETWORK',
+            detail: `${AUTH_BASE}${path} could not be reached.`,
+          })
+    }
     return handleMockRequest<T>(path, init.body)
   }
 }
