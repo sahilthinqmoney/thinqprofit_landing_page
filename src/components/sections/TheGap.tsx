@@ -49,10 +49,17 @@ function AmbientWash() {
       className="pointer-events-none absolute inset-0 z-[-1] overflow-hidden"
     >
       <div
-        className="h-full w-[65vw] max-w-[950px] opacity-85 blur-[130px]"
+        /*
+         * No blur filter — see the note in App.tsx's AmbientBackground.
+         * Measured at 390x844 DPR 3 this element's blur(130px) produced a
+         * 3102 x 4236 device-pixel layer, 50 MB and past the 4096px texture
+         * limit on iOS GPUs. The radial gradient already fades to transparent,
+         * so the extra stops below carry the same falloff without a filter.
+         */
+        className="h-full w-[65vw] max-w-[950px] opacity-85"
         style={{
           background:
-            'radial-gradient(ellipse at 0% 50%, rgba(8, 45, 54, 0.85) 0%, rgba(8, 45, 54, 0.4) 45%, rgba(8, 45, 54, 0.1) 75%, transparent 100%)',
+            'radial-gradient(ellipse at 0% 50%, rgba(8, 45, 54, 0.40) 0%, rgba(8, 45, 54, 0.34) 34%, rgba(8, 45, 54, 0.17) 60%, rgba(8, 45, 54, 0.06) 82%, transparent 100%)',
         }}
       />
     </div>

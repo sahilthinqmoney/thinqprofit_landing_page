@@ -36,10 +36,13 @@ export default function TermsPage() {
         className="pointer-events-none fixed inset-x-0 top-0 h-[520px] z-0 overflow-hidden"
       >
         <div
-          className="mx-auto h-full w-[90vw] max-w-[1100px] opacity-60 blur-[140px]"
+          /* No blur filter — see AmbientBackground in App.tsx. At blur(140px) this
+             fixed layer measured ~5820x4080 device px at DPR 3, past the 4096px
+             iOS texture limit. The gradient carries the falloff instead. */
+          className="mx-auto h-full w-[90vw] max-w-[1100px] opacity-60"
           style={{
             background:
-              'radial-gradient(ellipse at 50% 0%, rgba(8, 45, 54, 0.85) 0%, rgba(8, 45, 54, 0.3) 55%, transparent 85%)',
+              'radial-gradient(ellipse at 50% 0%, rgba(8, 45, 54, 0.44) 0%, rgba(8, 45, 54, 0.30) 34%, rgba(8, 45, 54, 0.15) 62%, transparent 90%)',
           }}
         />
       </div>

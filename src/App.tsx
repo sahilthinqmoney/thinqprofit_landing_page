@@ -63,6 +63,34 @@ export default function App() {
  * Two teal glows bleeding in from the left, fixed behind the whole page so the
  * scroll moves over one continuous field rather than through a series of
  * separately-lit bands.
+ *
+ * ── Why there is no blur filter here ───────────────────────────────────────
+ *
+ * These carried `blur(130px)` and `blur(140px)`, and that was the cause of the
+ * white screens and mid-scroll glitching on iOS.
+ *
+ * A `filter` puts an element on its own composited layer, and a Gaussian blur
+ * expands that layer's backing store by roughly three times the radius on every
+ * side so the falloff has somewhere to land. Measured on the reported devices:
+ *
+ *   390x844 @DPR3   332x1182 css  ->  3336 x 5886 device px   74.9 MB
+ *   414x896 @DPR3   352x1254 css  ->  3396 x 6102 device px   79.0 MB
+ *
+ * Both dimensions run past 4096px, the maximum texture size on many iOS GPUs.
+ * A filtered layer cannot be tiled the way a plain one can — the filter needs
+ * its whole source — so past that limit WebKit cannot allocate the backing
+ * store and drops the layer. These are `position: fixed`, which iOS
+ * re-composites continuously while the page scrolls, so the failure surfaces
+ * as scrolling rather than at load: a glitch, then blank or white content.
+ *
+ * It also explains why only SOME devices were affected. At 375x667 on DPR 2 the
+ * same elements come out 2198x3428 — under the limit, and fine.
+ *
+ * The blur was doing almost nothing anyway. Its subject is a radial-gradient
+ * that already fades to `transparent`, which is smooth by construction; blurring
+ * it bought a slightly wider falloff at the price of a 75 MB layer. The stops
+ * below carry that falloff directly, so the glow looks the same and no filter,
+ * no extra layer and no texture limit are involved.
  */
 function AmbientBackground() {
   return (
@@ -71,17 +99,17 @@ function AmbientBackground() {
       className="pointer-events-none fixed inset-0 z-0 overflow-hidden"
     >
       <div
-        className="absolute -left-[20%] top-0 h-[140vh] w-[85vw] max-w-[1100px] opacity-45 blur-[130px]"
+        className="absolute -left-[20%] top-0 h-[140vh] w-[85vw] max-w-[1100px] opacity-45"
         style={{
           background:
-            'radial-gradient(ellipse at center, rgba(8, 45, 54, 0.7) 0%, rgba(8, 45, 54, 0.3) 50%, transparent 80%)',
+            'radial-gradient(ellipse at center, rgba(8, 45, 54, 0.476) 0%, rgba(8, 45, 54, 0.286) 34%, rgba(8, 45, 54, 0.122) 62%, transparent 88%)',
         }}
       />
       <div
-        className="absolute -left-[15%] top-[50%] h-[130vh] w-[75vw] max-w-[950px] opacity-35 blur-[140px]"
+        className="absolute -left-[15%] top-[50%] h-[130vh] w-[75vw] max-w-[950px] opacity-35"
         style={{
           background:
-            'radial-gradient(ellipse at center, rgba(8, 45, 54, 0.6) 0%, rgba(8, 45, 54, 0.2) 55%, transparent 85%)',
+            'radial-gradient(ellipse at center, rgba(8, 45, 54, 0.408) 0%, rgba(8, 45, 54, 0.231) 36%, rgba(8, 45, 54, 0.088) 66%, transparent 92%)',
         }}
       />
     </div>
