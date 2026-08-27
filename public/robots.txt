@@ -1,10 +1,16 @@
-# Pre-launch. The page behind this carries unfilled compliance placeholders and
-# a waitlist form that stores nothing — see docs/go-live-checklist.md.
+# Thinq — https://thinq.co/
 #
-# The deployment is publicly reachable by anyone with the URL; this file and the
-# `noindex` meta in index.html are the only thing keeping the draft out of search
-# results, and they work only for crawlers that choose to honour them.
+# This replaced a pre-launch `Disallow: /`. Nothing is disallowed now: the two
+# public routes are the homepage and /terms, and both are meant to be found.
 #
-# Replace with a real robots.txt and a sitemap at launch.
+# Nothing under /api/ is listed either. Those endpoints are POST-only or require
+# a session, they are never linked from a page, and a Disallow line would do
+# nothing but publish the paths to anyone who reads this file.
+#
+# CSS, JavaScript, images and video are deliberately left crawlable — blocking
+# them stops a crawler rendering the page it is trying to judge.
+
 User-agent: *
-Disallow: /
+Allow: /
+
+Sitemap: https://thinq.co/sitemap.xml

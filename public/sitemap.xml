@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  The complete set of public routes. App.tsx resolves exactly two: the homepage,
+  and /terms (which it also accepts as the #terms hash — the same page, so it is
+  not listed twice). Everything else the site answers is either an asset or a
+  path under /api/, and neither belongs in a sitemap.
+
+  No <lastmod>. Google ignores the field unless a site keeps it consistently
+  accurate, and a date hardcoded here would start rotting the day it was
+  written; a wrong lastmod is worse than an absent one.
+
+  <changefreq> and <priority> are likewise omitted — Google has not used either
+  for years, and stating them would only add noise.
+-->
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url>
+    <loc>https://thinq.co/</loc>
+  </url>
+  <url>
+    <loc>https://thinq.co/terms</loc>
+  </url>
+</urlset>

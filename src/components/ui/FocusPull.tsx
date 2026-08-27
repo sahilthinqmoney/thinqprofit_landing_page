@@ -1,9 +1,7 @@
 import { useRef } from 'react'
 import type { ElementType, ReactNode } from 'react'
-import { gsap, initScrollTrigger, useGSAP } from '../../lib/scrollTrigger'
+import { useScrollAnimation } from '../../lib/useScrollAnimation'
 
-// Registers the plugins and schedules the post-font ScrollTrigger refresh. Idempotent.
-initScrollTrigger()
 
 /**
  * The page's scroll language: a **focus pull**.
@@ -48,8 +46,8 @@ export default function FocusPull({
 }: FocusPullProps) {
   const ref = useRef<HTMLElement>(null)
 
-  useGSAP(
-    () => {
+  useScrollAnimation(
+    (gsap) => {
       const el = ref.current
       if (!el) return
 
@@ -90,7 +88,7 @@ export default function FocusPull({
 
       return () => mm.revert()
     },
-    { scope: ref },
+    ref,
   )
 
   return (

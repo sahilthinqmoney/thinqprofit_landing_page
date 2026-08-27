@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useAfterCriticalLoad } from './useAfterCriticalLoad'
 import { IN_VIEW_MARGIN, useInView } from './useInView'
 import { useMediaTier } from './useMediaTier'
 
@@ -76,6 +77,18 @@ export function useMediaGate(
   // re-entries (to justify another attempt).
   const { ref, inView } = useInView<HTMLDivElement>(rootMargin, false)
   const tier = useMediaTier()
+  /*
+   * Video waits for the critical path; stills do not.
+   *
+   * This deliberately gates `videoAllowed` alone rather than `started`. The
+   * still rungs — placeholder and poster — are what the first viewport is made
+   * of and they stay exactly as eager as they were; only the clip, which is two
+   * orders of magnitude larger and cross-fades in whenever it is ready, is held
+   * back until the page has finished loading. Deferring `started` instead would
+   * have delayed the posters too, which is the one thing that would have been
+   * visible.
+   */
+  const afterCriticalLoad = useAfterCriticalLoad()
   const [status, setStatus] = useState<Status>('waiting')
   const attemptsRef = useRef(0)
 
@@ -128,11 +141,20 @@ export function useMediaGate(
       ref,
       started: status === 'loading' || status === 'settled',
       stopped: status === 'stopped',
-      videoAllowed: tier.allowVideo && wantsVideo,
+      videoAllowed: tier.allowVideo && wantsVideo && afterCriticalLoad,
       motionRefused: tier.motionRefused,
       lightMedia: tier.lightMedia,
       settle,
     }),
-    [ref, status, tier.allowVideo, tier.motionRefused, tier.lightMedia, wantsVideo, settle],
+    [
+      ref,
+      status,
+      tier.allowVideo,
+      tier.motionRefused,
+      tier.lightMedia,
+      wantsVideo,
+      afterCriticalLoad,
+      settle,
+    ],
   )
 }

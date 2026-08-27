@@ -89,14 +89,19 @@
       fetchpriority="high"
     />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <!-- Pre-launch, and now the only restraint on this page other than the URL
-         being unadvertised: the deployment is publicly reachable. The canonical
-         below is still a placeholder domain and the footer still renders
-         bracketed SEBI registrations, so an indexed copy of this page would
-         outlive the draft it was taken from. `noarchive` is here because
-         `noindex` alone does not stop a cached copy being served. Paired with
-         public/robots.txt; remove both at launch. -->
-    <meta name="robots" content="noindex, nofollow, noarchive" />
+    <!-- Open to search engines. This replaced a pre-launch block that existed
+         because the page carried a placeholder canonical and placeholder legal
+         identity in the JSON-LD below, and an indexed copy would have outlived
+         the draft it was taken from. Both now hold the registered entity's real
+         details, taken from src/data/footer.ts, so the reason for the block is
+         gone.
+
+         The old value also suppressed the cached copy. That is deliberately not
+         carried over: it existed to keep a cached draft out of results, and
+         withholding the cached copy of a live page helps nobody.
+
+         Paired with public/robots.txt, which has to agree with this line. -->
+    <meta name="robots" content="index, follow" />
     <!-- Must track --color-bg in src/index.css (#050505) -->
     <meta name="theme-color" content="#050505" />
     <!-- The head now describes a waitlist, not a brokerage account, and every
@@ -139,29 +144,44 @@
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:image" content="https://thinq.co/og-image.png?v=2" />
 
-    <!-- TODO (blocking): replace the bracketed values once the legal entity
-         details are confirmed. These are structured data a search engine reads
-         as fact, so an invented legal name here is the same offence as an
-         invented registration number in the footer. -->
-    <link rel="canonical" href="https://[thinq-domain.example]/" />
+    <!-- The homepage's canonical. `/terms` is served this same file by the
+         SPA fallback, so it would otherwise inherit this value and tell a
+         crawler it is a duplicate of the homepage; App.tsx rewrites the href
+         per route to stop that. -->
+    <link rel="canonical" href="https://thinq.co/" />
+    <!-- Every value below is the registered entity's, taken from
+         src/data/footer.ts, which is the same source the footer and the Terms
+         page render from. A search engine reads structured data as fact, so
+         nothing here is inferred or filled in for completeness:
+
+           · `telephone` is omitted. footer.ts holds "+91 22 67827171 / 7172",
+             which is two numbers on one line rather than the single value this
+             field takes, and picking one of them would be a guess.
+           · `sameAs` is omitted. No social accounts are recorded anywhere in
+             the repository, and an empty array asserts nothing.
+           · `addressRegion` is the one value not written literally in
+             footer.ts. It is not a guess: the CIN there
+             (U64990MH2006PTC165522) carries the MH state code and the GSTIN on
+             the Terms page (27AAECM8621N1Z0) opens with 27, both of which are
+             Maharashtra.
+           · "Bandra (W)" sits in `streetAddress` rather than
+             `addressLocality`, because schema.org reads locality as the city. -->
     <script type="application/ld+json">
       {
         "@context": "https://schema.org",
         "@type": ["Organization", "FinancialService"],
         "name": "Thinq",
-        "legalName": "[Legal entity name Private Limited]",
-        "url": "https://[thinq-domain.example]/",
-        "email": "[support@thinq.example]",
-        "telephone": "[+91 XXXXX XXXXX]",
+        "legalName": "Money Logix Securities Pvt Ltd",
+        "url": "https://thinq.co/",
+        "email": "support@moneylogix.in",
         "address": {
           "@type": "PostalAddress",
-          "streetAddress": "[Full address]",
-          "addressLocality": "[City]",
-          "addressRegion": "[State]",
-          "postalCode": "[PIN]",
+          "streetAddress": "Vrindavan Annexe, 32 Mount Mary Road, Bandra (W)",
+          "addressLocality": "Mumbai",
+          "addressRegion": "Maharashtra",
+          "postalCode": "400050",
           "addressCountry": "IN"
-        },
-        "sameAs": []
+        }
       }
     </script>
 

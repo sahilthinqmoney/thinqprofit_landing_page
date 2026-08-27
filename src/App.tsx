@@ -1,11 +1,27 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, lazy, Suspense } from 'react'
 import Navbar from './components/sections/Navbar'
 import Hero from './components/sections/Hero'
 import TheGap from './components/sections/TheGap'
 import AgenticHands from './components/sections/AgenticHands'
 import Capabilities from './components/sections/Capabilities'
 import Footer from './components/sections/Footer'
-import TermsPage from './components/pages/TermsPage'
+/*
+ * Split out of the initial download.
+ *
+ * TermsPage is the largest single component on the page — 104 KB of source,
+ * almost all of it the SEBI/CDSL disclosure copy — and none of it is reachable
+ * from the homepage. Statically imported it sat in the entry chunk, where
+ * Lighthouse measured 48% of that chunk as unused on first load: bytes the
+ * reader downloads, parses and evaluates before the hero can hydrate, to render
+ * a page they may never open.
+ *
+ * A dynamic import is safe here specifically because this route is NOT in the
+ * prerendered HTML. `route` starts at 'home' and only becomes 'terms' inside an
+ * effect, so the first client render still matches the markup on disk and
+ * hydration is untouched. Lazy-loading anything the prerender DID emit would
+ * mismatch and make React 19 discard the whole tree.
+ */
+const TermsPage = lazy(() => import('./components/pages/TermsPage'))
 
 export default function App() {
   const [route, setRoute] = useState('home')
@@ -30,8 +46,43 @@ export default function App() {
     }
   }, [])
 
+  /*
+   * Keeps <link rel="canonical"> pointing at the route actually being read.
+   *
+   * The host serves this SPA with `not_found_handling: single-page-application`
+   * (wrangler.jsonc), so /terms is answered with index.html — the same file,
+   * carrying the same canonical. Left alone, /terms would tell a crawler it is
+   * a duplicate of the homepage, and a crawler that believes it drops /terms
+   * from the index. That would make the sitemap entry for /terms
+   * self-defeating: one file asking for it to be indexed, another saying it is
+   * really some other page.
+   *
+   * This is a client-side correction, and it is worth being clear about what
+   * that buys. Google renders JavaScript before settling a canonical, so it
+   * sees this; a crawler that does not render JS sees the static homepage
+   * canonical — which is exactly what it would have seen without this code. It
+   * can only improve matters, never worsen them. The robust fix is prerendering
+   * /terms to its own HTML file with its own canonical and title, which is a
+   * build change rather than a tag change.
+   */
+  useEffect(() => {
+    const link = document.querySelector<HTMLLinkElement>('link[rel="canonical"]')
+    if (!link) return
+    link.href = route === 'terms' ? 'https://thinq.co/terms' : 'https://thinq.co/'
+  }, [route])
+
   if (route === 'terms') {
-    return <TermsPage />
+    /*
+     * `null` rather than a spinner. The chunk is one request against a page
+     * whose background is already painted by <body>, so the gap reads as the
+     * page still being on its way rather than as a flash of loading UI — and a
+     * spinner that appears for 20ms is worse than nothing appearing at all.
+     */
+    return (
+      <Suspense fallback={null}>
+        <TermsPage />
+      </Suspense>
+    )
   }
 
   return (

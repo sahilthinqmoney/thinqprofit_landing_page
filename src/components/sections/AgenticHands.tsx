@@ -1,10 +1,9 @@
 import { useRef } from 'react'
 import { Bot, Code2, History, ShieldAlert } from 'lucide-react'
-import { gsap, initScrollTrigger, useGSAP } from '../../lib/scrollTrigger'
+import { useScrollAnimation } from '../../lib/useScrollAnimation'
 import { agenticHands } from '../../data/agenticHands'
 import ProgressiveImage from '../ui/ProgressiveImage'
 
-initScrollTrigger()
 
 const SPEC_ICONS = [Bot, Code2, History, ShieldAlert]
 
@@ -17,8 +16,8 @@ export default function AgenticHands() {
   const humanHandRef = useRef<HTMLDivElement>(null)
   const copyRef = useRef<HTMLDivElement>(null)
 
-  useGSAP(
-    () => {
+  useScrollAnimation(
+    (gsap) => {
       const section = sectionRef.current
       const robotHand = robotHandRef.current
       const humanHand = humanHandRef.current
@@ -59,7 +58,7 @@ export default function AgenticHands() {
 
       return () => mm.revert()
     },
-    { scope: sectionRef }
+    sectionRef
   )
 
   return (
