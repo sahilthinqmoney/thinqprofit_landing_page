@@ -2,6 +2,15 @@ import { StrictMode } from 'react'
 import { createRoot, hydrateRoot } from 'react-dom/client'
 import './index.css'
 import App from './App.tsx'
+import { initAnalytics } from './lib/analytics'
+
+/*
+ * Analytics starts here rather than inside the tree: this is the browser entry,
+ * so it runs exactly once per page load and never during the prerender, which
+ * loads entry-server.tsx and never this file. The page view itself is reported
+ * from App.tsx, where the route is known.
+ */
+initAnalytics()
 
 const rootElement = document.getElementById('root')
 

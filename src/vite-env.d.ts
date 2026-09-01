@@ -20,6 +20,12 @@
  */
 interface ImportMetaEnv {
   readonly VITE_AUTH_BASE_URL?: string
+  /**
+   * Overrides the GA4 property this page reports to. Optional: src/lib/analytics.ts
+   * defaults to the production measurement ID, so an unconfigured build still
+   * measures. Not a secret — it is readable in the page's own network requests.
+   */
+  readonly VITE_GA_MEASUREMENT_ID?: string
 }
 
 interface ImportMeta {

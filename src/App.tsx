@@ -1,4 +1,5 @@
 import { useState, useEffect, lazy, Suspense } from 'react'
+import { trackPageView } from './lib/analytics'
 import Navbar from './components/sections/Navbar'
 import Hero from './components/sections/Hero'
 import TheGap from './components/sections/TheGap'
@@ -69,6 +70,24 @@ export default function App() {
     const link = document.querySelector<HTMLLinkElement>('link[rel="canonical"]')
     if (!link) return
     link.href = route === 'terms' ? 'https://thinq.co/terms' : 'https://thinq.co/'
+  }, [route])
+
+  /*
+   * Reports the page view for whichever route is being read.
+   *
+   * It hangs off `route` rather than off a navigation event because this app has
+   * no router to ask: the effect above resolves the path itself and holds the
+   * answer in state, so a change to that state IS the page change. Following a
+   * link to /terms loads a new document and gtag.js would see it unaided, but
+   * pressing Back afterwards fires `popstate` and swaps the page with no
+   * navigation at all — invisible to the tag, and the reason this exists.
+   *
+   * Arriving directly on /terms runs this twice against one URL, because `route`
+   * starts at 'home' on every path to keep the first render matching the
+   * prerendered markup. trackPageView drops the immediate repeat.
+   */
+  useEffect(() => {
+    trackPageView()
   }, [route])
 
   if (route === 'terms') {
