@@ -66,9 +66,29 @@ let initialised = false
  */
 let lastTrackedUrl: string | undefined
 
-function gtag(...args: GtagArgs): void {
-  window.dataLayer?.push(args)
-}
+/**
+ * Queues one gtag command.
+ *
+ * `arguments`, not an array — and that is not a stylistic preference, it is the
+ * whole contract. gtag.js treats a dataLayer entry as a COMMAND only when it is
+ * an `arguments` object; everything else it takes for ordinary tag-manager data
+ * and ignores. The check is `Hb()` in the tag itself:
+ *
+ *   Object.prototype.toString.call(a) === "[object Arguments]"
+ *     || Object.prototype.hasOwnProperty.call(a, "callee")
+ *
+ * A rest parameter produces a real Array, which fails both branches. The
+ * failure is silent and looks like success from every angle short of the
+ * network: the script loads, `window.gtag` is a function, the queue fills with
+ * correct-looking payloads — and gtag.js registers no destination and sends no
+ * hit, because it never saw a `config`. That was live for one deploy.
+ *
+ * The cast is what lets the body use `arguments` while call sites stay typed:
+ * a function that declares no parameters can reference `arguments` freely.
+ */
+const gtag = function (): void {
+  window.dataLayer?.push(arguments)
+} as (...args: GtagArgs) => void
 
 /**
  * The URL to report, with the query string removed.
